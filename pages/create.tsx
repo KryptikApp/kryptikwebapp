@@ -98,7 +98,7 @@ const Create: NextPage = () => {
     <div className="h-screen">
       <Head>
         <title>Art</title>
-        <meta name="description" content="Spread the crypto love!" />
+        <meta name="description" content="Crypto made simple." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       

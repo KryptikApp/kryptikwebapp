@@ -16,7 +16,7 @@ const Home: NextPage = () => {
     <div className="h-screen">
       <Head>
         <title>Kryptik</title>
-        <meta name="description" content="Spread the crypto love!" />
+        <meta name="description" content="Crypto made simple." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       
