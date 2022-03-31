@@ -1,0 +1,14 @@
+.mainView {
+  min-height: 100vh;
+  padding: 4rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.description {
+  margin-top: 1rem;
+  font-size: 1.5rem;
+}
