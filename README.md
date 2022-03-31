@@ -1,5 +1,5 @@
 Key pairs can do wonderful things, but existing wallets like Metamask confine their magic to a single blockchain. 
-The Kryptik wallet is built to break through the borders of Ethereum and streamline digital ownership across the internet. One secure wallet. One simple API. One magical future.
+The Kryptik wallet is built to break through the borders of Ethereum and streamline digital ownership across the internet. One secure wallet. One simple interface. One magical future.
 
 ## Getting Started
 
