@@ -1,4 +1,4 @@
-import { defaultUploadFileResult, IUploadResult, uploadJsonToIpfs, uploadStreamToIpfs } from "../../helpers/ipfs";
+import { defaultUploadFileResult, IUploadResult, uploadJsonToIpfs, uploadStreamToIpfs } from "../../src/helpers/ipfs";
 
 
 export default function handler(req:any, res:any) {

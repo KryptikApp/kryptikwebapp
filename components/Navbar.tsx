@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useAuthContext } from "./AuthProvider";
 
 // wallet SDK helpers
-import * as walletMetamask from "../helpers/walletMetamask";
+import * as walletMetamask from "../src/helpers/walletMetamask";
 import { defaultWallet } from "../models/defaultWallet";
 
 

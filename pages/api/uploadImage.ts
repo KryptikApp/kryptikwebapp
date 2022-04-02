@@ -1,6 +1,6 @@
 import { createReadStream } from "fs"
 import multer from "multer";
-import { defaultUploadFileResult, IUploadResult, uploadStreamToIpfs } from "../../helpers/ipfs";
+import { defaultUploadFileResult, IUploadResult, uploadStreamToIpfs } from "../../src/helpers/ipfs";
 
 
 const ALLOWED_FORMATS = ['image/jpeg', 'image/png', 'image/jpg'];

@@ -5,10 +5,10 @@ import styles from '../styles/Splash.module.css'
 import Link from 'next/link'
 import Navbar from '../../components/Navbar'
 import { useAuthContext } from '../../components/AuthProvider'
-import * as utils from "../../helpers/utils"
+import * as utils from "../../src/helpers/utils"
 
 // wallet SDK helpers
-import * as walletMetamask from "../../helpers/walletMetamask";
+import * as walletMetamask from "../../src/helpers/walletMetamask";
 import { IWallet } from '../../models/IWallet'
 
 

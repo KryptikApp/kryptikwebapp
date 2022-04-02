@@ -1,6 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { defaultUploadFileResult, IUploadResult, uploadJsonToIpfs, uploadStreamToIpfs } from "../../helpers/ipfs";
+import { defaultUploadFileResult, IUploadResult, uploadJsonToIpfs, uploadStreamToIpfs } from "../../src/helpers/ipfs";
 
 type Data = {
   name: string
