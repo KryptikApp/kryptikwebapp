@@ -3,8 +3,8 @@
 
 import { ethers } from "ethers"; // npm install ethers
 
-import { IWallet} from "../models/IWallet"
-import {defaultWallet} from "../models/defaultWallet"
+import { IWallet} from "../../models/IWallet"
+import {defaultWallet} from "../../models/defaultWallet"
 
 import * as utils from "./utils"
 import * as config from "./config"
