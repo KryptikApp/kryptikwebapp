@@ -33,7 +33,7 @@ const Home: NextPage = () => {
               Crypto Made <span className="text-transparent bg-clip-text bg-gradient-to-br from-cyan-500 to-green-500">Easy</span>
           </h1>
           <h1 className={styles.description}>Send crypto to anyone, anywhere, anytime.</h1>
-          <button onClick={()=>handleGetStarted()} className="bg-transparent hover:bg-blue-500 text-blue-500 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded my-5">
+          <button onClick={()=>handleGetStarted()} className="bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded my-5">
                             Get Started
           </button>
         </div>
