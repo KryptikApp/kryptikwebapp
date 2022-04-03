@@ -37,11 +37,11 @@ const Navbar:NextPage = () => {
             <div id="menu" className={menuWrapperClassName}>
                 <Link href="../about"><span className="p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 transition-colors duration-300">About</span></Link>
                 <Link href="../explore"><span className="p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 transition-colors duration-300">Explore</span></Link>
-                <Link href="../create"><span className="p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-transparent rounded hover:bg-indigo-100 hover:cursor-pointer hover:text-green-500 transition-colors duration-300">Create</span></Link> 
+                <Link href="../createNft"><span className="p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-transparent rounded hover:bg-indigo-100 hover:cursor-pointer hover:text-green-500 transition-colors duration-300">Create</span></Link> 
                 {/* show disconnect button if connected and vise versa */}
                 {authContext.wallet.connected ? 
-                <Link href="../profile/connect"><span className="p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1">Wallet</span></Link>
-                :<Link href="../profile/connect"><span className="p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1">Connect</span></Link>}
+                <Link href="../profile/"><span className="p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1">Wallet</span></Link>
+                :<Link href="../profile/createWallet"><span className="p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1">Connect</span></Link>}
                 
             </div>
             </div>
