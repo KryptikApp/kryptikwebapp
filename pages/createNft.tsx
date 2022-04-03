@@ -9,7 +9,7 @@ import { storage } from '../src/helpers/firebase'
 import { getDownloadURL, ref, StorageReference, uploadBytes } from 'firebase/storage'
 
 
-const Create: NextPage = () => {
+const CreateNft: NextPage = () => {
 
  
   const [name, setName] = useState("");
@@ -221,4 +221,5 @@ const Create: NextPage = () => {
   )
 }
 
-export default Create
+
+export default CreateNft
