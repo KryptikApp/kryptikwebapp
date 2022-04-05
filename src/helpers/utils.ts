@@ -1,5 +1,9 @@
-import { ethers } from "ethers"; 
+import { BigNumber, ethers } from "ethers"; 
 import { Web3Provider } from "@ethersproject/providers";
+import HDSeedLoop, { HDKeyring } from "hdseedloop";
+import Web3Service from "./../services/Web3Service";
+import { Network } from "hdseedloop";
+import {} from "hdseedloop"
 
 
 export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -10,20 +14,36 @@ export const hexToInt = (s: string) => {
     return parseInt(bn.toString());
   };
 
+// reloads app window
 export const reloadApp = () => {
   window.location.reload();
 };
 
-// Get balance on current chain for address
-export const getCurrentChainBalance = async (
-    web3Provider: Web3Provider,
-    address: string
-  ): Promise<number> => {
-    const balance = await web3Provider.getBalance(address);
-    // Balance is rounded at 2 decimals instead of 18, to simplify the UI
-    return (
-      ethers.BigNumber.from(balance)
-        .div(ethers.BigNumber.from("10000000000000000"))
-        .toNumber() / 100
-    );
-  };
+
+
+export const getSeedLoopBalanceAllNetworks = async(seedLoop:HDSeedLoop):Promise<{ [ticker: string]: number }> =>{
+  let web3Service = await new Web3Service().StartSevice();
+  let networksFromDb = (await web3Service).getSupportedNetworks();
+  let balance:number = 0;
+  // initialize return dict.
+  let balanceDict: { [ticker: string]: number } = {};
+  networksFromDb.forEach(async nw => {
+    let network:Network = new Network(nw.fullName, nw.ticker);
+    let keyring:HDKeyring = await seedLoop.getKeyRing(network);
+    // gets all addresses for network
+    let allAddys:string[] = await keyring.getAddressesSync();
+    // gets first address for network
+    let firstAddy:string = allAddys[0];
+    // get provider for network
+    let networkProvider = await web3Service.getProviderForNetwork(nw);
+    let networkBalance = await networkProvider.getBalance(firstAddy);
+    // add network balance to dict. with network ticker as key
+    balanceDict[network.ticker] = networkBalance.toNumber();
+  });
+  // return (
+  //   ethers.BigNumber.from(balance)
+  //     .div(ethers.BigNumber.from("10000000000000000"))
+  //     .toNumber() / 100
+  // );
+  return balanceDict;
+}
