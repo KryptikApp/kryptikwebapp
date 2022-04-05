@@ -5,7 +5,7 @@ import styles from '../styles/Splash.module.css'
 import Link from 'next/link'
 import Navbar from '../components/Navbar'
 import { useState } from 'react'
-import { storage } from '../src/helpers/firebase'
+import { storage } from '../src/helpers/firebaseHelper'
 import { getDownloadURL, ref, StorageReference, uploadBytes } from 'firebase/storage'
 
 
