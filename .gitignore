@@ -37,5 +37,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 
+/kryptik-seedloop
 #secrets
 secrets.ts
+firebaseServiceKey.json
