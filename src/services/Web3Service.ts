@@ -2,26 +2,51 @@ import {firestore} from "../helpers/firebaseHelper"
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { ServiceState, Status } from './types';
 import BaseService from './BaseService';
-import {Network} from './models/network'
+import {NetworkDb} from './models/network'
 import {
+    JsonRpcProvider,
     StaticJsonRpcProvider,
 } from '@ethersproject/providers';
-import { stringify } from '@firebase/util';
-import { chain } from "lodash";
+import {
+    clusterApiUrl,
+    Connection,
+  } from '@solana/web3.js';
+import HDSeedLoop, { Network, NetworkFamily, NetworkFromTicker } from "hdseedloop";
 
-const networksRef = collection(firestore, "networks")
+const NetworkDbsRef = collection(firestore, "networks")
 
+
+class KryptikProvider{
+    public ethProvider: StaticJsonRpcProvider|undefined;
+    public solProvider: Connection|undefined;
+    public network:Network;
+    constructor(rpcEndpoint:string, network:Network){
+        this.network = network;
+        if(network.getNetworkfamily() == NetworkFamily.EVM){
+            if(network.ticker == "bnb"){
+                this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: 'binance', chainId: 56 });
+            }
+            else{
+                this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint);
+            }    
+        }
+        if(network.getNetworkfamily()==NetworkFamily.Solana){
+            this.solProvider = new Connection(rpcEndpoint);
+        }
+    }
+}
 
 class Web3Service extends BaseService{
-    public networks:Network[] = []
-    public networksSupported:Network[] = []
-    // network is referenced by its BIP44 chain id
-    public rpcEndpoints: { [networkId:number]: string } = {};
-    // providers for each network
-    public providers: {[networkId:number]: any} = {};
-
+    getProviderForNetwork(nw: NetworkDb) {
+        throw new Error("Method not implemented.");
+    }
+    public NetworkDbs:NetworkDb[] = []
+    public NetworkDbsSupported:NetworkDb[] = []
+    // NetworkDb is referenced by its BIP44 chain id
+    public rpcEndpoints: { [ticker:string]: string } = {};
     public web3Provider: StaticJsonRpcProvider = (null as unknown) as StaticJsonRpcProvider;
-    public networkProviders: { [networkId:number]: StaticJsonRpcProvider } = {};
+    //providers for each network
+    public networkProviders: { [ticker:string]: KryptikProvider } = {};
    
     constructor() {
         super();
@@ -29,82 +54,91 @@ class Web3Service extends BaseService{
 
     async InternalStartService(){
         try{
-            await this.populateNetworksAsync();
+            let networkDbs = await this.populateNetworkDbsAsync();
         }
         catch{
-            throw(Error("Error: Unable to populate networks when starting web3 service."))
+            throw(Error("Error: Unable to populate NetworkDbs when starting web3 service."))
         }
         this.setRpcEndpoints();
-        this.setProviders();
-        console.log("internal start service search assets");
+        this.setSupportedProviders();
+        console.log("Internal start service: KryptiK Web3");
         return this;
     }
 
-    // sets rpc endpoints for each supported network
+    // sets rpc endpoints for each supported NetworkDb
     private setRpcEndpoints(){
-        this.networks.forEach((network:Network)=>{
-            let chainId:number = network.chainId
-            if(network.isSupported){
+        this.NetworkDbs.forEach((NetworkDb:NetworkDb)=>{
+            let ticker:string = NetworkDb.ticker;
+            if(NetworkDb.isSupported){
                 try{
-                    this.rpcEndpoints[chainId] = network.provider;
+                    this.rpcEndpoints[ticker] = NetworkDb.provider;
                 }
                 // TODO: add better handler 
                 catch{
-                    console.warn("Network is specified as supported, but there was an error adding rpc endpoint. Check rpc config.")
+                    console.warn("NetworkDb is specified as supported, but there was an error adding rpc endpoint. Check rpc config.")
                 }               
             }
         });
     }
 
-    // sets providers for each supported network
-    private setProviders(){
-        for (let chainId in this.rpcEndpoints) {
-            let newProvider = new StaticJsonRpcProvider(this.rpcEndpoints[chainId]);
-            this.providers[chainId] = newProvider;
+    // sets providers for each supported NetworkDb
+    private setSupportedProviders(){
+        for (let ticker in this.rpcEndpoints) {
+            this.setProviderFromTicker(ticker);
         }
     }
 
-    private async populateNetworksAsync() :Promise<Status>{
-        const q = query(networksRef);
+    private setProviderFromTicker(ticker:string):KryptikProvider{
+        let network:Network = NetworkFromTicker(ticker);
+        let rpcEndpoint:string = this.rpcEndpoints[ticker];
+        let newKryptikProvider = new KryptikProvider(rpcEndpoint, network);
+        this.networkProviders[ticker] = newKryptikProvider;
+        return newKryptikProvider;
+    }
+
+    private async populateNetworkDbsAsync() :Promise<NetworkDb[]>{
+        console.log("POPULATING Networkksdb");
+        const q = query(NetworkDbsRef);
         const querySnapshot = await getDocs(q);
-        let networksResult:Network[] = []
+        console.log(querySnapshot);
+        let NetworkDbsResult:NetworkDb[] = [];
         querySnapshot.forEach((doc) => {
-        // doc.data() is never undefined for query doc snapshots
-        let docData = doc.data();
-        let providerFromDb:string = "";
-        if(docData.provider) providerFromDb = docData.provider;
-        let networkToAdd:Network = {
-            fullName: docData.fullName,
-            ticker: docData.ticker,
-            chainId: docData.chainId,
-            hexColor: docData.hexColor,
-            about: docData.about,
-            dateCreated: docData.dateCreated,
-            iconPath: docData.iconPath,
-            whitePaperPath: docData.whitePaperPath,
-            isSupported: docData.isSupported,
-            provider: providerFromDb
-        }
-        networksResult.push(networkToAdd);
+            // doc.data() is never undefined for query doc snapshots
+            let docData = doc.data();
+            let providerFromDb:string = "";
+            if(docData.provider) providerFromDb = docData.provider;
+            let NetworkDbToAdd:NetworkDb = {
+                fullName: docData.fullName,
+                ticker: docData.ticker,
+                chainId: docData.chainId,
+                hexColor: docData.hexColor,
+                about: docData.about,
+                dateCreated: docData.dateCreated,
+                iconPath: docData.iconPath,
+                whitePaperPath: docData.whitePaperPath,
+                isSupported: docData.isSupported,
+                provider: providerFromDb
+            }
+            NetworkDbsResult.push(NetworkDbToAdd);
         });
-        this.networks = networksResult;
-        return Status.Success;
+        this.NetworkDbs = NetworkDbsResult;
+        return NetworkDbsResult;
     }
 
-    getSupportedNetworks():Network[]{
-        let networksResult:Network[] = []
-        this.networks.forEach((network) => {
+    getSupportedNetworkDbs():NetworkDb[]{
+        let NetworkDbsResult:NetworkDb[] = []
+        this.NetworkDbs.forEach((NetworkDb) => {
             // filter results based on searchquery
-            if(network.isSupported){
-                // build network object from doc result     
-                networksResult.push(network);
+            if(NetworkDb.isSupported){
+                // build NetworkDb object from doc result     
+                NetworkDbsResult.push(NetworkDb);
                 // console.log(doc.id, " => ", doc.data());
             }
-            });
-        return networksResult;
+        });
+        return NetworkDbsResult;
     }
 
-    async searchNetworksAsync(searchQuery:string, onlySupported?:boolean) :Promise<Network[]>{
+    async searchNetworkDbsAsync(searchQuery:string, onlySupported?:boolean) :Promise<NetworkDb[]>{
         console.log("Searching....");
         console.log("Only supported:")
         console.log(onlySupported);
@@ -115,55 +149,54 @@ class Web3Service extends BaseService{
         // TODO: update to be if null or empty
         if(searchQuery == ""){
             if(onlySupported){
-                return this.getSupportedNetworks();
+                return this.getSupportedNetworkDbs();
             }
             else{
-                return this.networks;
+                return this.NetworkDbs;
             }
         }
         // standardize search query 
         searchQuery = searchQuery.toUpperCase();
-        // initialize networks list
-        let networksResult:Network[] = []
+        // initialize NetworkDbs list
+        let NetworkDbsResult:NetworkDb[] = []
         if(onlySupported){
-            console.log("entered")
-            this.networks.forEach((network) => {
+            this.NetworkDbs.forEach((NetworkDb) => {
                 // filter results based on searchquery
-                if((network.ticker.toUpperCase().includes(searchQuery) || network.fullName.toUpperCase().includes(searchQuery)) && network.isSupported){
-                    // build network object from doc result     
-                    networksResult.push(network);
+                if((NetworkDb.ticker.toUpperCase().includes(searchQuery) || NetworkDb.fullName.toUpperCase().includes(searchQuery)) && NetworkDb.isSupported){
+                    // build NetworkDb object from doc result     
+                    NetworkDbsResult.push(NetworkDb);
                     // console.log(doc.id, " => ", doc.data());
                 }
                 });
         }
         else{
-            this.networks.forEach((network) => {
+            this.NetworkDbs.forEach((NetworkDb) => {
                 // filter results based on searchquery
-                if(network.ticker.toUpperCase().includes(searchQuery) || network.fullName.toUpperCase().includes(searchQuery)){
-                    // build network object from doc result     
-                    networksResult.push(network);
+                if(NetworkDb.ticker.toUpperCase().includes(searchQuery) || NetworkDb.fullName.toUpperCase().includes(searchQuery)){
+                    // build NetworkDb object from doc result     
+                    NetworkDbsResult.push(NetworkDb);
                     // console.log(doc.id, " => ", doc.data());
                 }
                 });
         }
-        return networksResult;
+        return NetworkDbsResult;
     }
 
-    getAllNetworks(onlySupported?:boolean){
-        if(this.serviceState != ServiceState.started) throw("Service is not running. Network data has not been populated.")
+    getAllNetworkDbs(onlySupported?:boolean){
+        if(this.serviceState != ServiceState.started) throw("Service is not running. NetworkDb data has not been populated.")
         // set default to false if 
         if(onlySupported == undefined){
             onlySupported = false
         }
         if(onlySupported){
-            return this.getSupportedNetworks();
+            return this.getSupportedNetworkDbs();
         }
         else{
-            return this.networks;
+            return this.NetworkDbs;
         }
     }
 
-    // send rpc call given a network
+    // send rpc call given a NetworkDb
     async sendRpcCall(
         payload: {
           method: string;
@@ -177,24 +210,62 @@ class Web3Service extends BaseService{
 
       // helper functions!!
 
-      async getProviderForNetwork (
-        network: Network
-      ): Promise<StaticJsonRpcProvider>{
-        let chainId:number = network.chainId;
-        return this.getProviderForChainId(chainId);
-        }
-
-        async getProviderForChainId (
-            chainId:number
-        ): Promise<StaticJsonRpcProvider>{
-            // try to get existing provider (set on construction)... else, make provider and add to dict.
-            if(this.networkProviders[chainId]!=null) return this.networkProviders[chainId];
-            // 2x check to ensure provider class accepts chain id as number
-            let newProvider = new StaticJsonRpcProvider(this.rpcEndpoints[chainId], chainId);
-            this.networkProviders[chainId] = newProvider;
-            await newProvider.ready;
-            return newProvider;
-        }
+    async getKryptikProviderForNetworkDb (
+      networkDb: NetworkDb
+      ): Promise<KryptikProvider>{
+          return this.getKryptikProviderFromTicker(networkDb.ticker);
+      }
+      private async getKryptikProviderFromTicker (
+          ticker:string
+      ): Promise<KryptikProvider>{
+          // try to get existing provider (set on construction)... else, make provider and add to dict.
+          if(this.networkProviders[ticker]!=null) return this.networkProviders[ticker];
+          let newKryptikProvider:KryptikProvider = this.setProviderFromTicker(ticker);
+          return newKryptikProvider;
+      }
+      networkDbtoKryptikNetwork(networkFromDb:NetworkDb):Network{
+          return new Network(networkFromDb.fullName, networkFromDb.ticker);
+    }
+    
+    // TODO: Update to support tx. based networks
+    getSeedLoopBalanceAllNetworks = async(seedLoop:HDSeedLoop):Promise<{ [ticker: string]: number }> =>{
+        let networksFromDb = this.getSupportedNetworkDbs();
+        // initialize return dict.
+        let balanceDict: { [ticker: string]: number } = {};
+        console.log("Supported networks:");
+        console.log(networksFromDb);
+        networksFromDb.forEach(async nw => {
+            let network:Network = new Network(nw.fullName, nw.ticker);
+            let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
+            if(network.getNetworkfamily()==NetworkFamily.EVM && seedLoop.networkOnSeedloop(network)){
+                if(!kryptikProvider.ethProvider) throw Error("No ethereum provider set up.");
+                let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
+                console.log("Processing Network:")
+                console.log(nw);
+                // gets all addresses for network
+                let allAddys:string[] = await seedLoop.getAddresses(network);
+                // gets first address for network
+                let firstAddy:string = allAddys[0];
+                console.log(`${nw.fullName} Addy:`);
+                console.log(firstAddy);
+                // get provider for network
+                let networkBalance = await ethNetworkProvider.getBalance(firstAddy);
+                // add network balance to dict. with network ticker as key
+                balanceDict[network.ticker] = networkBalance.toNumber();
+                console.log(`${nw.fullName} Balance:`);
+                console.log(balanceDict[network.ticker]);
+            }
+        });
+        // return (
+        //   ethers.BigNumber.from(balance)
+        //     .div(ethers.BigNumber.from("10000000000000000"))
+        //     .toNumber() / 100
+        // );
+        console.log("Returning balance dict:");
+        console.log(balanceDict);
+        return balanceDict;
+    }
+        
 }
 
 

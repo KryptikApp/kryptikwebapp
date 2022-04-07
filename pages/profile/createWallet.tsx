@@ -4,28 +4,28 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Navbar from '../../components/Navbar'
 import { useAuthContext } from '../../components/AuthProvider'
-import * as utils from "../../src/helpers/utils"
 
 // wallet SDK helpers
 import * as walletMetamask from "../../src/helpers/walletMetamask";
 import { IWallet } from '../../models/IWallet'
 import { useState } from 'react'
 import { connectKryptikWallet } from '../../src/helpers/walletKrypt'
+import Web3Service from '../../src/services/Web3Service'
 
 const CreateWallet: NextPage = () => {
-
   const authContext = useAuthContext();
   const [isLoading, setisLoading] = useState(false);
   
 
   const handleConnect = async () => {
     setisLoading(true);
+    let web3Kryptik = await new Web3Service().StartSevice();
     let newWallet:IWallet;
     newWallet = await connectKryptikWallet();
-    console.log("Created wallet:");
-    console.log(newWallet);
+    console.log("Created NEW KRYPTIK WALLET:");
     if(newWallet.connected){
-      let walletBalanceDict:{[ticker: string]: number} = await utils.getSeedLoopBalanceAllNetworks(newWallet.seedLoop);
+      console.log("Wallet connected. Pulling balances...");
+      let walletBalanceDict:{[ticker: string]: number} = await web3Kryptik.getSeedLoopBalanceAllNetworks(newWallet.seedLoop);
       // set wallet balance to eth balance for now
       newWallet.balance = walletBalanceDict["eth"];
       console.log("Ethereum balance");
