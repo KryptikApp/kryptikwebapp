@@ -1,6 +1,6 @@
 // data model for cryptocurrency networks (blockchains) pulled from firebase
 
-export interface Network {
+export interface NetworkDb {
     fullName: string,
     ticker: string,
     iconPath: string,
