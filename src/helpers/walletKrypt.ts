@@ -25,9 +25,8 @@ export const connectKryptikWallet = async (seed?:string): Promise<IWallet> => {
           
       }
       let ethNetwork = NetworkFromTicker("eth");
-      let ethKeyring = await seedloopKryptik.getKeyRing(ethNetwork);
       // get all ethereum addreses for wallet
-      let etheAddysAll = await seedloopKryptik.addAddresses(ethNetwork, 1);
+      let etheAddysAll = await seedloopKryptik.getAddresses(ethNetwork);
       let ethAddyFirst = etheAddysAll[0];
       let newKryptikWallet:IWallet = {
           ...defaultWallet,
@@ -41,8 +40,9 @@ export const connectKryptikWallet = async (seed?:string): Promise<IWallet> => {
       // serialize seed loop for storage
       let hdseedloopSerialized:SerializedSeedLoop =  await newKryptikWallet.seedLoop.serialize();
       // save seed loop in local storage
-      window.localStorage.setItem("kryptikWallet", JSON.stringify(hdseedloopSerialized));
+      // window.localStorage.setItem("kryptikWallet", JSON.stringify(hdseedloopSerialized));
       // returns new kryptik wallet that adheres to wallet interface
       return newKryptikWallet;
-    
   };
+
+  
