@@ -13,15 +13,7 @@ const Send: NextPage = () => {
   }
 
   return (
-    <div className="h-screen">
-      <Head>
-        <title>Kryptik</title>
-        <meta name="description" content="Crypto made simple." />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      
-    <main className="container px-4 mx-auto ">
-     <Navbar></Navbar>
+    <div>
 
         <div className="h-[10rem]">
           {/* padding div for space between top and main elements */}
@@ -37,10 +29,6 @@ const Send: NextPage = () => {
                             Get Started
           </button>
         </div>
-
-
-
-      </main>
 
     </div>
  

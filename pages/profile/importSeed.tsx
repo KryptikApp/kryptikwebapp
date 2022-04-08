@@ -35,14 +35,6 @@ const ImportSeed: NextPage = () => {
 
   return (
     <div className="h-screen w-full">
-      <Head>
-        <title>Art</title>
-        <meta name="description" content="Crypto made simple." />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      
-    <main className="mx-auto">
-     <Navbar></Navbar>
         <div className="h-[7rem]">
           {/* padding div for space between top and main elements */}
         </div>
@@ -76,7 +68,6 @@ const ImportSeed: NextPage = () => {
             </button>
           </div>
         </div>
-      </main>
 
     </div>
  

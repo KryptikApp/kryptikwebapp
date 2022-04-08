@@ -7,15 +7,7 @@ import Navbar from '../components/Navbar'
 
 const Explore: NextPage = () => {
   return (
-    <div className="h-screen">
-      <Head>
-        <title>Kryptik</title>
-        <meta name="description" content="Crypto made simple." />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      
-    <main className="container px-4 mx-auto ">
-     <Navbar></Navbar>
+    <div>
 
         <div className="h-[2rem]">
           {/* padding div for space between top and main elements */}
@@ -24,10 +16,6 @@ const Explore: NextPage = () => {
         <div className="text-center max-w-2xl mx-auto content-center">
            <p>Hey, this is an explore page!</p>
         </div>
-
-
-
-      </main>
 
     </div>
  
