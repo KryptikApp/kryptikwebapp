@@ -11,15 +11,19 @@ import { IWallet } from '../../models/IWallet'
 import { useState } from 'react'
 import { connectKryptikWallet } from '../../src/helpers/walletKrypt'
 import Web3Service from '../../src/services/Web3Service'
+import { useKryptikContext } from '../../components/KryptikProvider'
 
 const CreateWallet: NextPage = () => {
   const authContext = useAuthContext();
+  const kryptikContext = useKryptikContext();
   const [isLoading, setisLoading] = useState(false);
   
 
   const handleConnect = async () => {
     setisLoading(true);
-    let web3Kryptik = await new Web3Service().StartSevice();
+    let web3Kryptik = await kryptikContext.kryptikService.StartSevice();
+    console.log("Web 3 service state:");
+    console.log(web3Kryptik.serviceState);
     let newWallet:IWallet;
     newWallet = await connectKryptikWallet();
     console.log("Created NEW KRYPTIK WALLET:");
