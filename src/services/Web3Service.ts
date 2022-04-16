@@ -11,6 +11,7 @@ import {
     clusterApiUrl,
     Connection,
   } from '@solana/web3.js';
+
 import HDSeedLoop, { Network, NetworkFamily, NetworkFromTicker } from "hdseedloop";
 
 const NetworkDbsRef = collection(firestore, "networks")
@@ -34,6 +35,14 @@ class KryptikProvider{
             this.solProvider = new Connection(rpcEndpoint);
         }
     }
+}
+
+interface ITransactionHistory{
+    assetName: string,
+    assetImagePath: string,
+    assetTicker: string,
+    hash: string,
+    amountCrypto: string,
 }
 
 class Web3Service extends BaseService{
@@ -264,6 +273,34 @@ class Web3Service extends BaseService{
         console.log("Returning balance dict:");
         console.log(balanceDict);
         return balanceDict;
+    }
+    
+     // TODO: Update to support tx. based networks
+     getSeedLoopTransactionsAllNetworks = async(seedLoop:HDSeedLoop):Promise<ITransactionHistory[]> =>{
+        throw(Error("Not implemented yet."));
+        let networksFromDb = this.getSupportedNetworkDbs();
+        // initialize return dict.
+        let transactionList:ITransactionHistory[] = [];
+        console.log("Supported networks:");
+        console.log(networksFromDb);
+        networksFromDb.forEach(async nw => {
+            let network:Network = new Network(nw.fullName, nw.ticker);
+            let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
+            if(network.ticker=="eth" && seedLoop.networkOnSeedloop(network)){
+                if(!kryptikProvider.ethProvider) throw Error("No ethereum provider set up.");
+                console.log("Processing Network:")
+                console.log(nw);
+                // gets all addresses for network
+                let allAddys:string[] = await seedLoop.getAddresses(network);
+                // gets first address for network
+                let firstAddy:string = allAddys[0];
+                console.log(`${nw.fullName} Addy:`);
+                console.log(firstAddy);
+                // add network balance to dict. with network ticker as key
+            }
+        });
+        console.log("Returning transaction history:");
+        return transactionList;
     }
         
 }
