@@ -29,3 +29,6 @@ To learn more about Next.js, take a look at the following resources:
 - [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
+## Disclaimer
+The Kryptik web app. has yet to recieve a formal security audit. We welcome feedback on the usability, architecture, and security of this implementation.
+
