@@ -1,0 +1,27 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// code above unchanged
+model User {
+  id          String   @id @default(uuid())
+  avatarPath  String?  @default("https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/avatars%2FavaGreen.jpg?alt=media&token=060afa77-6ca1-4780-ac85-26061f1cacfd")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  email       String?  @unique
+  secretShare String?
+  role        Role     @default(USER)
+}
+
+enum Role {
+  USER
+  ADMIN
+}
