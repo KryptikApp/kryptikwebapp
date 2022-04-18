@@ -8,10 +8,12 @@ import { useAuthContext } from '../../components/AuthProvider'
 // wallet SDK helpers
 import * as walletMetamask from "../../src/helpers/walletMetamask";
 import { IWallet } from '../../models/IWallet'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { connectKryptikWallet } from '../../src/helpers/walletKrypt'
 import Web3Service from '../../src/services/Web3Service'
 import { useKryptikContext } from '../../components/KryptikProvider'
+import { Magic } from 'magic-sdk'
+import router from 'next/router'
 
 const CreateWallet: NextPage = () => {
   const authContext = useAuthContext();
@@ -19,6 +21,34 @@ const CreateWallet: NextPage = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setisLoading] = useState(false);
   
+  const loginUser = async () => {
+
+      /* Step 4.1: Generate a DID token with Magic */
+      let magicKey:string = process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY? process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY : "";
+      const magic = new Magic(magicKey)
+      const didToken = await magic.auth.loginWithMagicLink({ email })
+
+      /* Step 4.4: POST to our /login endpoint */
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${didToken}`
+        },
+        body: JSON.stringify({ email })
+      })
+
+      if (res.status === 200) {
+        // If we reach this line, it means our
+        // authentication succeeded, so we'll
+        // redirect to the home page!
+        router.push('/')
+      } else {
+        throw new Error(await res.text())
+      }
+  }
+
 
   const handleConnect = async () => {
     setisLoading(true);
@@ -63,7 +93,7 @@ const CreateWallet: NextPage = () => {
         :
         <div className="text-center max-w-md mx-auto content-center">
 
-        <div className="rounded border border-solid border-grey-600 py-10 hover:border-grey-800 shadow-md hover:shadow-lg">
+        <div className="rounded-md border border-solid border-grey-600 py-10 hover:border-grey-800 shadow-md hover:shadow-lg">
         <div className="text-center max-w-2xl mx-auto content-center">
 
           <div className="flex flex-wrap justify-center">
@@ -89,6 +119,7 @@ const CreateWallet: NextPage = () => {
             </div>
 
           </div>
+          
         </form>
 
           <div className="text-center max-w-2xl mx-auto content-center">
