@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/parsers/poap.js", "components/Layout.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/parsers/poap.js", "components/Layout.jsx", "pages/api/login.js", "pages/api/login.js"],
   "exclude": ["node_modules"]
 }
