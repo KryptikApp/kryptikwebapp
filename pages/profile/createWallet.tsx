@@ -3,7 +3,7 @@ import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
 import Navbar from '../../components/Navbar'
-import { useAuthContext } from '../../components/AuthProvider'
+import {useKryptikWalletContext} from '../../components/KryptikWalletProvider'
 
 // wallet SDK helpers
 import * as walletMetamask from "../../src/helpers/walletMetamask";
@@ -11,25 +11,28 @@ import { IWallet } from '../../models/IWallet'
 import { useCallback, useState } from 'react'
 import { connectKryptikWallet } from '../../src/helpers/walletKrypt'
 import Web3Service from '../../src/services/Web3Service'
-import { useKryptikContext } from '../../components/KryptikProvider'
+import { useKryptikContext } from '../../components/KryptikServiceProvider'
 import { Magic } from 'magic-sdk'
 import router from 'next/router'
+import { useAuthContext } from '../../components/AuthProvider'
+import { User } from 'firebase/auth'
 
 const CreateWallet: NextPage = () => {
-  const authContext = useAuthContext();
+  const kryptikWalletContext = useKryptikWalletContext();
   const kryptikContext = useKryptikContext();
+  const {signInWithToken} = useAuthContext();
   const [email, setEmail] = useState("");
   const [isLoading, setisLoading] = useState(false);
   
   const loginUser = async () => {
-
       /* Step 4.1: Generate a DID token with Magic */
       let magicKey:string = process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY? process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY : "";
       const magic = new Magic(magicKey)
       const didToken = await magic.auth.loginWithMagicLink({ email })
-
+      console.log("Magic token:")
+      console.log(didToken);
+      
       /* Step 4.4: POST to our /login endpoint */
-
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: {
@@ -38,8 +41,15 @@ const CreateWallet: NextPage = () => {
         },
         body: JSON.stringify({ email })
       })
-
+    
+      
       if (res.status === 200) {
+        console.log(res.body);
+        let resDecoded = await res.json();
+        let customTokenDB:string = resDecoded.dbToken;
+        console.log("token:");
+        console.log(customTokenDB);
+        await signInWithToken(customTokenDB);
         // If we reach this line, it means our
         // authentication succeeded, so we'll
         // redirect to the home page!
@@ -65,7 +75,7 @@ const CreateWallet: NextPage = () => {
       newWallet.balance = walletBalanceDict["eth"];
       console.log("Ethereum balance");
       console.log(newWallet.balance);
-      authContext.setWallet(newWallet);
+      kryptikWalletContext.setWallet(newWallet);
     }
     setisLoading(false);
   }
@@ -78,16 +88,16 @@ const CreateWallet: NextPage = () => {
         </div>
         {
             // INDICATE CONNECTED
-            authContext.wallet.connected ? 
+            kryptikWalletContext.wallet.connected ? 
           <div className="textCenter max-w-md mx-auto content-center">
             <h1 className="text-3xl font-bold sans ">
               Your wallet is connected.
             </h1>
             <p>
-              Eth Address: <span className="bg-clip-text text-green-400">{authContext.wallet.ethAddress}</span>
+              Eth Address: <span className="bg-clip-text text-green-400">{kryptikWalletContext.wallet.ethAddress}</span>
             </p>
             <p>
-              Balance: <span className="bg-clip-text text-green-400">{authContext.wallet.balance}</span>
+              Balance: <span className="bg-clip-text text-green-400">{kryptikWalletContext.wallet.balance}</span>
             </p>
           </div>
         :
@@ -125,7 +135,7 @@ const CreateWallet: NextPage = () => {
           <div className="text-center max-w-2xl mx-auto content-center">
           
               <div className="flex flex-wrap justify-center">
-                <button onClick={()=>handleConnect()} className="bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded-lg my-5" disabled={isLoading}>
+                <button onClick={()=>loginUser()} className="bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded-lg my-5" disabled={isLoading}>
                 {
                   // indicate app is creating wallet
                   isLoading &&  
