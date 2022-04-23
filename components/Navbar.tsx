@@ -2,7 +2,7 @@ import { NextPage } from "next"
 import Link from 'next/link'
 import Script from "next/script"
 import { useState } from "react";
-import { useAuthContext } from "./AuthProvider";
+import { useKryptikWalletContext } from "./KryptikWalletProvider";
 
 // wallet SDK helpers
 import * as walletMetamask from "../src/helpers/walletMetamask";
@@ -12,7 +12,7 @@ import { useRouter } from "next/router";
 
 const Navbar:NextPage = () => {
     const [isMenuMobile, setMenuMobile] = useState(false);
-    const authContext = useAuthContext();
+    const authContext = useKryptikWalletContext();
     const router = useRouter();
     console.log(router.pathname)
 
