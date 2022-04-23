@@ -4,9 +4,20 @@ import Image from 'next/image'
 import styles from '../styles/Splash.module.css'
 import Link from 'next/link'
 import Navbar from '../../components/Navbar'
+import { useEffect } from 'react'
+import { useAuthContext } from '../../components/AuthProvider'
+import { useRouter } from 'next/router'
 
 const Profile: NextPage = () => {
-  
+  const { authUser, loading } = useAuthContext();
+  const router = useRouter();
+
+  // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
+  useEffect(() => {
+    if (!loading && !authUser)
+      router.push('/')
+  }, [authUser, loading])
+
   return (
     <div>
 
