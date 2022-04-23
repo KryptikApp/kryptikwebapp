@@ -1,11 +1,12 @@
-import { signInWithCustomToken } from 'firebase/auth';
+import { signInWithCustomToken, User, UserCredential } from 'firebase/auth';
 import {Magic} from '@magic-sdk/admin'
 import { NextApiRequest, NextApiResponse } from 'next';
 import { firebaseAuth } from '../../src/helpers/firebaseHelper';
 import { createCustomFirebaseToken } from '../../src/helpers/utils';
 
 type Data = {
-  done:boolean
+  done:boolean,
+  dbToken?:string
 }
 
 // basic login routine
@@ -36,9 +37,6 @@ export default async( req: NextApiRequest, res: NextApiResponse<Data> )=>
     }
     // create custom token
     let customToken = await createCustomFirebaseToken(uid);
-    // use token to sign in with firebase
-    let signInCred = await signInWithCustomToken(firebaseAuth, customToken);
-    let dbUser = signInCred.user;
     // return success status
-    res.status(200).json({ done: true })
+    res.status(200).json({ done: true,  dbToken: customToken})
   }
