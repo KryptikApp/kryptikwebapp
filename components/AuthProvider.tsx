@@ -1,41 +1,20 @@
-import { createContext, useContext, useState } from 'react'
-import { defaultWallet } from '../models/defaultWallet';
-import { IWallet } from '../models/IWallet';
+import { User } from 'firebase/auth';
+import { createContext, useContext, Context } from 'react'
+import { useFirebaseAuth } from '../src/helpers/firebaseHelper';
 
-// NOTE: lots of projects use redux to track data updates, but react conext works!
 
-let defaultState = {
-    wallet: defaultWallet,
-    setWallet: (newWallet:IWallet) => {},
+const authUserContext = createContext({
+  // dummy var for auth user
+  authUser: {uid:"not set", email: "not set"},
+  loading: true,
+  signInWithToken: async (token:string) => {},
+  updateCurrentUserKryptik: async(user:User) => {}
+});
+
+export function AuthUserProvider(props:any) {
+  const {value, children} = props
+  const auth = useFirebaseAuth();
+  return <authUserContext.Provider value={auth}>{children}</authUserContext.Provider>;
 }
-
-// Create Context object
-const AuthContext = createContext(defaultState);
-
-// Export Provider
-export function AuthProvider(props:any) {
-	const {value, children} = props
-    const setWallet = (newWallet:IWallet) => {
-        console.log("Auth provider seting wallet....");
-        setWalletState({...walletState, wallet:newWallet})
-    }
-    
-    // this allows us to update wallet from within a child component. Heck yeah!
-    const initState = {
-        wallet: defaultWallet,
-        setWallet: setWallet
-      } 
-    
-    const [walletState, setWalletState] = useState(initState)
-	
-	return (
-	   <AuthContext.Provider value={walletState}>
-		{children}
-	   </AuthContext.Provider>
-	)
-}
-
-// Export useContext Hook.
-export function useAuthContext() {
-	return useContext(AuthContext);
-}
+// custom hook to use the authUserContext and access authUser and loading
+export const useAuthContext = () => useContext(authUserContext);
