@@ -1,20 +1,22 @@
 import '../styles/globals.css'
 import type { AppProps } from 'next/app'
-import { AuthProvider } from '../components/AuthProvider'
+import { KryptikWalletProvider } from '../components/KryptikWalletProvider'
 import Layout from '../components/Layout'
-import { KryptikServiceProvider } from '../components/KryptikProvider'
+import { KryptikServiceProvider } from '../components/KryptikServiceProvider'
+import { AuthUserProvider } from '../components/AuthProvider'
 
 
 function MyApp({ Component, pageProps }: AppProps) {
   return(
+    <AuthUserProvider>
     <KryptikServiceProvider>
-      <AuthProvider>
+      <KryptikWalletProvider>
         <Layout>
           <Component {...pageProps} />
         </Layout>
-      </AuthProvider>
+      </KryptikWalletProvider>
     </KryptikServiceProvider>
-    
+    </AuthUserProvider>   
   )
 }
 
