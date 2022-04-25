@@ -12,7 +12,8 @@ import {
     Connection,
   } from '@solana/web3.js';
 
-import HDSeedLoop, { Network, NetworkFamily, NetworkFromTicker } from "hdseedloop";
+import HDSeedLoop, { Network, NetworkFamily, NetworkFromTicker, SeedLoop } from "hdseedloop";
+import { IWallet } from "../../models/IWallet";
 
 const NetworkDbsRef = collection(firestore, "networks")
 
@@ -49,6 +50,16 @@ class Web3Service extends BaseService{
     getProviderForNetwork(nw: NetworkDb) {
         throw new Error("Method not implemented.");
     }
+    // create dummy seedloop on construction
+    private wallet:IWallet = 
+    {
+        balance: 0,
+        connected: false,
+        ethAddress: "not set",
+        seedLoop: new HDSeedLoop(),
+        walletProviderName: "not set"
+    }
+    public isWalletSet:boolean = false;
     public NetworkDbs:NetworkDb[] = []
     public NetworkDbsSupported:NetworkDb[] = []
     // NetworkDb is referenced by its BIP44 chain id
@@ -59,6 +70,19 @@ class Web3Service extends BaseService{
    
     constructor() {
         super();
+    }
+
+    // set wallet for kryptik web 3 service
+    setWallet(inputWallet:IWallet):IWallet{
+        this.wallet = inputWallet;
+        this.isWalletSet = true;
+        return this.wallet;
+    }
+
+    // get wallet for kryptik web 3 service
+    getWallet():IWallet|null{
+        if(!this.isWalletSet) return null;
+        return this.wallet;
     }
 
     async InternalStartService(){
@@ -237,7 +261,7 @@ class Web3Service extends BaseService{
     }
     
     // TODO: Update to support tx. based networks
-    getSeedLoopBalanceAllNetworks = async(seedLoop:HDSeedLoop):Promise<{ [ticker: string]: number }> =>{
+    getBalanceAllNetworks = async():Promise<{ [ticker: string]: number }> =>{
         let networksFromDb = this.getSupportedNetworkDbs();
         // initialize return dict.
         let balanceDict: { [ticker: string]: number } = {};
@@ -246,13 +270,13 @@ class Web3Service extends BaseService{
         networksFromDb.forEach(async nw => {
             let network:Network = new Network(nw.fullName, nw.ticker);
             let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
-            if(network.getNetworkfamily()==NetworkFamily.EVM && seedLoop.networkOnSeedloop(network)){
+            if(network.getNetworkfamily()==NetworkFamily.EVM && this.wallet.seedLoop.networkOnSeedloop(network)){
                 if(!kryptikProvider.ethProvider) throw Error("No ethereum provider set up.");
                 let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
                 console.log("Processing Network:")
                 console.log(nw);
                 // gets all addresses for network
-                let allAddys:string[] = await seedLoop.getAddresses(network);
+                let allAddys:string[] = await this.wallet.seedLoop.getAddresses(network);
                 // gets first address for network
                 let firstAddy:string = allAddys[0];
                 console.log(`${nw.fullName} Addy:`);
@@ -276,7 +300,7 @@ class Web3Service extends BaseService{
     }
     
      // TODO: Update to support tx. based networks
-     getSeedLoopTransactionsAllNetworks = async(seedLoop:HDSeedLoop):Promise<ITransactionHistory[]> =>{
+     getTransactionsAllNetworks = async():Promise<ITransactionHistory[]> =>{
         throw(Error("Not implemented yet."));
         let networksFromDb = this.getSupportedNetworkDbs();
         // initialize return dict.
@@ -286,12 +310,12 @@ class Web3Service extends BaseService{
         networksFromDb.forEach(async nw => {
             let network:Network = new Network(nw.fullName, nw.ticker);
             let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
-            if(network.ticker=="eth" && seedLoop.networkOnSeedloop(network)){
+            if(network.ticker=="eth" && this.wallet.seedLoop.networkOnSeedloop(network)){
                 if(!kryptikProvider.ethProvider) throw Error("No ethereum provider set up.");
                 console.log("Processing Network:")
                 console.log(nw);
                 // gets all addresses for network
-                let allAddys:string[] = await seedLoop.getAddresses(network);
+                let allAddys:string[] = await this.wallet.seedLoop.getAddresses(network);
                 // gets first address for network
                 let firstAddy:string = allAddys[0];
                 console.log(`${nw.fullName} Addy:`);
