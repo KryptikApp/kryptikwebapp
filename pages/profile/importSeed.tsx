@@ -1,20 +1,12 @@
 import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Splash.module.css'
-import Link from 'next/link'
-import Navbar from '../../components/Navbar'
-import { useAuthContext } from '../../components/AuthProvider'
-import * as utils from "../../src/helpers/utils"
+import { useKryptikWalletContext } from '../../components/KryptikWalletProvider'
 
 // wallet SDK helpers
-import { IWallet } from '../../models/IWallet'
 import { useState } from 'react'
-import { connectKryptikWallet } from '../../src/helpers/walletKrypt'
 
 const ImportSeed: NextPage = () => {
 
-  const authContext = useAuthContext();
+  const authContext = useKryptikWalletContext();
   const [seed, setSeed] = useState("");
   const [email, setEmail] = useState("");
 
@@ -22,16 +14,8 @@ const ImportSeed: NextPage = () => {
     throw new Error('Function not implemented.')
   }
 
-
   const handleClickImport = async () =>{
-    let newWallet:IWallet;
-    newWallet = await connectKryptikWallet(seed);
-    console.log("Created wallet:");
-    console.log(newWallet);
-    if(newWallet.connected){
-      // newWallet.balance = await utils.getSeedLoopBalance(newWallet.seedLoop);
-      authContext.setWallet(newWallet);
-    }
+    console.log("NOT implemented yet!");
   }
 
   return (
