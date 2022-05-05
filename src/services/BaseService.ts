@@ -7,8 +7,10 @@ interface Service{
 
 class BaseService implements Service{
     serviceState:ServiceState
+    serviceId:string
     constructor(){
         this.serviceState = ServiceState.unstarted
+        this.serviceId = Math.random().toString();
     }
     // should be implemented by service classes that extend this base service class
     protected async InternalStartService(){
