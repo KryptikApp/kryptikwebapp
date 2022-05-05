@@ -9,13 +9,11 @@ import { AuthUserProvider } from '../components/AuthProvider'
 function MyApp({ Component, pageProps }: AppProps) {
   return(
     <AuthUserProvider>
-    <KryptikServiceProvider>
-      <KryptikWalletProvider>
+      <KryptikServiceProvider>
         <Layout>
           <Component {...pageProps} />
         </Layout>
-      </KryptikWalletProvider>
-    </KryptikServiceProvider>
+      </KryptikServiceProvider>
     </AuthUserProvider>   
   )
 }
