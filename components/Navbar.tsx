@@ -3,16 +3,16 @@ import Link from 'next/link'
 import Script from "next/script"
 import { useState } from "react";
 import { useKryptikWalletContext } from "./KryptikWalletProvider";
+import { useRouter } from "next/router";
 
 // wallet SDK helpers
-import * as walletMetamask from "../src/helpers/walletMetamask";
-import { defaultWallet } from "../models/defaultWallet";
-import { useRouter } from "next/router";
+import { useKryptikWeb3Service } from "../src/helpers/web3Helper";
+import { useKryptikServiceContext } from "./KryptikServiceProvider";
 
 
 const Navbar:NextPage = () => {
     const [isMenuMobile, setMenuMobile] = useState(false);
-    const authContext = useKryptikWalletContext();
+    const kryptikContext = useKryptikServiceContext();
     const router = useRouter();
     console.log(router.pathname)
 
@@ -40,7 +40,7 @@ const Navbar:NextPage = () => {
                 <Link href="../explore"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 transition-colors duration-300 ${router.pathname == "/explore" ? "font-bold" : ""}`}>Explore</span></Link>
                 <Link href="../createNft"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-transparent rounded hover:bg-indigo-100 hover:cursor-pointer hover:text-green-500 transition-colors duration-300 ${router.pathname == "/createNft" ? "font-bold" : ""}`}>Create</span></Link> 
                 {/* show disconnect button if connected and vise versa */}
-                {authContext.wallet.connected ? 
+                {kryptikContext.kryptikWallet.connected ? 
                 <Link href="../profile/"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Wallet</span></Link>
                 :<Link href="../profile/createWallet"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Connect</span></Link>}
                 
