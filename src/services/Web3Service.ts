@@ -51,15 +51,7 @@ class Web3Service extends BaseService{
     getProviderForNetwork(nw: NetworkDb) {
         throw new Error("Method not implemented.");
     }
-    // create dummy seedloop on construction
-    private wallet:IWallet = 
-    {
-        balance: 0,
-        connected: false,
-        ethAddress: "not set",
-        seedLoop: new HDSeedLoop(),
-        walletProviderName: "not set"
-    }
+    private wallet:IWallet|null = null;
     public isWalletSet:boolean = false;
     public NetworkDbs:NetworkDb[] = []
     public NetworkDbsSupported:NetworkDb[] = []
@@ -68,8 +60,11 @@ class Web3Service extends BaseService{
     public web3Provider: StaticJsonRpcProvider = (null as unknown) as StaticJsonRpcProvider;
     //providers for each network
     public networkProviders: { [ticker:string]: KryptikProvider } = {};
+    // event handlers
+    public onWalletChanged?: (wallet:IWallet) => void
    
     constructor() {
+        console.log("constructing new web3 class");
         super();
     }
 
@@ -79,9 +74,9 @@ class Web3Service extends BaseService{
     private internalSetWallet(inputWallet:IWallet):IWallet{
         this.wallet = inputWallet;
         this.isWalletSet = true;
+        if(this.onWalletChanged) this.onWalletChanged(this.wallet);
         return this.wallet;
     }
-
 
     // get wallet for kryptik web 3 service
     getWallet():IWallet|null{
@@ -106,7 +101,6 @@ class Web3Service extends BaseService{
             else{
               seedloopKryptik = new HDSeedLoop();
             }
-            
         }
         let ethNetwork = NetworkFromTicker("eth");
         // get all ethereum addreses for wallet
@@ -126,21 +120,26 @@ class Web3Service extends BaseService{
         // uncomment to save seed loop in local storage
         // window.localStorage.setItem("kryptikWallet", JSON.stringify(hdseedloopSerialized));
         // set wallet for internal use
-        this.internalSetWallet(newKryptikWallet);
+        // ALLOW THIS TO BE SET IF USING LOCAL CLASS WALLET
+        // this.internalSetWallet(newKryptikWallet);
         // returns new kryptik wallet that adheres to wallet interface
         return newKryptikWallet;
     };
 
     async InternalStartService(){
         try{
-            let networkDbs = await this.populateNetworkDbsAsync();
+            await this.populateNetworkDbsAsync();
         }
         catch{
             throw(Error("Error: Unable to populate NetworkDbs when starting web3 service."))
         }
         this.setRpcEndpoints();
         this.setSupportedProviders();
+        // console logs for debugging
+        // REMOVE for production
         console.log("Internal start service: KryptiK Web3");
+        console.log("Service Id:");
+        console.log(this.serviceId);
         return this;
     }
 
@@ -177,9 +176,10 @@ class Web3Service extends BaseService{
 
     private async populateNetworkDbsAsync() :Promise<NetworkDb[]>{
         console.log("POPULATING Networkksdb");
+        console.log("Web 3 service ID:");
+        console.log(this.serviceId);
         const q = query(NetworkDbsRef);
         const querySnapshot = await getDocs(q);
-        console.log(querySnapshot);
         let NetworkDbsResult:NetworkDb[] = [];
         querySnapshot.forEach((doc) => {
             // doc.data() is never undefined for query doc snapshots
@@ -287,8 +287,7 @@ class Web3Service extends BaseService{
           return (provider || this.web3Provider)?.send(payload.method, payload.params);
       }
 
-      // helper functions!!
-
+    // helper functions!!
     async getKryptikProviderForNetworkDb (
       networkDb: NetworkDb
       ): Promise<KryptikProvider>{
@@ -307,7 +306,8 @@ class Web3Service extends BaseService{
     }
     
     // TODO: Update to support tx. based networks
-    getBalanceAllNetworks = async():Promise<{ [ticker: string]: number }> =>{
+    getBalanceAllNetworks = async(walletUser:IWallet):Promise<{ [ticker: string]: number }> =>{
+        let currWallet:IWallet = this.wallet?this.wallet:walletUser;
         let networksFromDb = this.getSupportedNetworkDbs();
         // initialize return dict.
         let balanceDict: { [ticker: string]: number } = {};
@@ -316,15 +316,15 @@ class Web3Service extends BaseService{
         networksFromDb.forEach(async nw => {
             let network:Network = new Network(nw.fullName, nw.ticker);
             let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
-            if(network.getNetworkfamily()==NetworkFamily.EVM && this.wallet.seedLoop.networkOnSeedloop(network)){
+            if(network.getNetworkfamily()==NetworkFamily.EVM){
                 if(!kryptikProvider.ethProvider) throw Error("No ethereum provider set up.");
                 let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
                 console.log("Processing Network:")
                 console.log(nw);
                 // gets all addresses for network
-                let allAddys:string[] = await this.wallet.seedLoop.getAddresses(network);
+                let allAddys:string[] = await currWallet.seedLoop.getAddresses(network);
                 // gets first address for network
-                let firstAddy:string = allAddys[0];
+                let firstAddy:string = "allAddys[0];"
                 console.log(`${nw.fullName} Addy:`);
                 console.log(firstAddy);
                 // get provider for network
@@ -348,29 +348,29 @@ class Web3Service extends BaseService{
      // TODO: Update to support tx. based networks
      getTransactionsAllNetworks = async():Promise<ITransactionHistory[]> =>{
         throw(Error("Not implemented yet."));
-        let networksFromDb = this.getSupportedNetworkDbs();
-        // initialize return dict.
-        let transactionList:ITransactionHistory[] = [];
-        console.log("Supported networks:");
-        console.log(networksFromDb);
-        networksFromDb.forEach(async nw => {
-            let network:Network = new Network(nw.fullName, nw.ticker);
-            let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
-            if(network.ticker=="eth" && this.wallet.seedLoop.networkOnSeedloop(network)){
-                if(!kryptikProvider.ethProvider) throw Error("No ethereum provider set up.");
-                console.log("Processing Network:")
-                console.log(nw);
-                // gets all addresses for network
-                let allAddys:string[] = await this.wallet.seedLoop.getAddresses(network);
-                // gets first address for network
-                let firstAddy:string = allAddys[0];
-                console.log(`${nw.fullName} Addy:`);
-                console.log(firstAddy);
-                // add network balance to dict. with network ticker as key
-            }
-        });
-        console.log("Returning transaction history:");
-        return transactionList;
+        // let networksFromDb = this.getSupportedNetworkDbs();
+        // // initialize return dict.
+        // let transactionList:ITransactionHistory[] = [];
+        // console.log("Supported networks:");
+        // console.log(networksFromDb);
+        // networksFromDb.forEach(async nw => {
+        //     let network:Network = new Network(nw.fullName, nw.ticker);
+        //     let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
+        //     if(network.ticker=="eth" && this.wallet.seedLoop.networkOnSeedloop(network)){
+        //         if(!kryptikProvider.ethProvider) throw Error("No ethereum provider set up.");
+        //         console.log("Processing Network:")
+        //         console.log(nw);
+        //         // gets all addresses for network
+        //         let allAddys:string[] = await this.wallet.seedLoop.getAddresses(network);
+        //         // gets first address for network
+        //         let firstAddy:string = allAddys[0];
+        //         console.log(`${nw.fullName} Addy:`);
+        //         console.log(firstAddy);
+        //         // add network balance to dict. with network ticker as key
+        //     }
+        // });
+        // console.log("Returning transaction history:");
+        // return transactionList;
     }
         
 }
