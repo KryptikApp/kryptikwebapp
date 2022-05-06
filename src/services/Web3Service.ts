@@ -64,7 +64,6 @@ class Web3Service extends BaseService{
     public onWalletChanged?: (wallet:IWallet) => void
    
     constructor() {
-        console.log("constructing new web3 class");
         super();
     }
 
