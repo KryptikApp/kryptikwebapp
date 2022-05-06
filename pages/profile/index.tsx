@@ -7,6 +7,7 @@ import Navbar from '../../components/Navbar'
 import { useEffect } from 'react'
 import { useAuthContext } from '../../components/AuthProvider'
 import { useRouter } from 'next/router'
+import Divider from '../../components/Divider'
 
 const Profile: NextPage = () => {
   const { authUser, loading } = useAuthContext();
@@ -20,16 +21,13 @@ const Profile: NextPage = () => {
 
   return (
     <div>
-
-     <div className="h-[6rem]">
-              {/* padding div for space between top and main elements */}
-      </div>
       
         <div className="text-center max-w-2xl mx-auto content-center">
-           <h2>Your Balances</h2>
-           <div className="w-6/12 sm:w-4/12 px-4">
-            <img src="https://www.creative-tim.com/learning-lab/tailwind-starter-kit/img/team-2-800x800.jpg" alt="..." className="shadow rounded-full max-w-full h-auto align-middle border-none" />
+           <div className="w-3/12 lg:w-2/12 px-4 mx-auto">
+            <img src="https://www.creative-tim.com/learning-lab/tailwind-starter-kit/img/team-2-800x800.jpg" alt="Profile Image" className="shadow rounded-full max-w-full h-auto align-middle border-none transition ease-in-out delay-100 transform hover:-translate-y-1" />
           </div>
+          <h2>Your Balances</h2>
+          <Divider/>
         </div>
 
     </div>
