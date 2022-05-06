@@ -1,9 +1,6 @@
-import { BigNumber, ethers } from "ethers"; 
+import { ethers } from "ethers"; 
 import * as jose from "jose"
-import { Web3Provider } from "@ethersproject/providers";
-import HDSeedLoop, { HDKeyring, Network, NetworkFamily} from "hdseedloop"
-import Web3Service from "./../services/Web3Service";
-import { firebaseConfig, firebaseserviceKey } from "../../secrets";
+import { firebaseserviceKey } from "../../secrets";
 import * as crypto from "crypto"
 
 
