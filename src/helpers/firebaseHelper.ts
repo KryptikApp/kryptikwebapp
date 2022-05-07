@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, updateCurrentUser } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-import { getFirestore} from 'firebase/firestore';
+import { doc, getFirestore, setDoc} from 'firebase/firestore';
 // set your own firebase secrets to access db
 import { firebaseConfig } from "../../secrets";
 import { Magic } from "@magic-sdk/admin";
@@ -26,6 +26,12 @@ export  {
 export interface UserDB {
     uid: string,
     email: string
+}
+
+// interface for extra user data
+export interface UserExtraData{
+  isTwoFactorAuth: boolean,
+  remoteShare: string
 }
 
 const formatAuthUser = function(user:any)
@@ -77,6 +83,10 @@ export function useFirebaseAuth() {
         let signInCred:UserCredential = await signInWithCustomToken(firebaseAuth, customToken);
         let dbUser = signInCred.user;
         // await firebaseAuth.updateCurrentUser(dbUser);
+    }
+
+    const writeExtraUserData = async function(user:User, data:UserExtraData) {
+      await setDoc(doc(firestore, "users", "uid"), data);
     }
   
     const signOut = () =>
