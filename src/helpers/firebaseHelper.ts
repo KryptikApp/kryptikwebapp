@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, updateCurrentUser } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-import { doc, getFirestore, setDoc} from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc} from 'firebase/firestore';
 // set your own firebase secrets to access db
 import { firebaseConfig } from "../../secrets";
 import { Magic } from "@magic-sdk/admin";
@@ -75,18 +75,29 @@ export function useFirebaseAuth() {
         setAuthUser(formattedUser);    
         setLoading(false);
     };
+    
     const updateCurrentUserKryptik = async(user:User)=>{
       await updateCurrentUser(firebaseAuth, user);
     }
-    const signInWithToken = async(customToken:string) =>
+
+    const signInWithToken = async(customToken:string, data:UserExtraData|null) =>
     {
         let signInCred:UserCredential = await signInWithCustomToken(firebaseAuth, customToken);
         let dbUser = signInCred.user;
-        // await firebaseAuth.updateCurrentUser(dbUser);
+        let docRef = doc(firestore, "users", dbUser.uid);
+        // write extra data to database if not yet set
+        if(!(await getDoc(docRef)).exists() && data){
+            try{
+              await writeExtraUserData(dbUser, data)
+            }
+            catch(err){
+              console.log(err);
+            }
+        }
     }
 
     const writeExtraUserData = async function(user:User, data:UserExtraData) {
-      await setDoc(doc(firestore, "users", "uid"), data);
+      await setDoc(doc(firestore, "users", user.uid), data);
     }
   
     const signOut = () =>
