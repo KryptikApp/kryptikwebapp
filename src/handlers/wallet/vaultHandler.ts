@@ -13,6 +13,8 @@ export interface VaultContents{
     uid:string
 }
 
+
+
 export const createVault = function(seedloop:HDSeedLoop, uid:string):string{
     let seedloopSerialized:SerializedSeedLoop = seedloop.serializeSync();
     // genrate random encryption key
@@ -33,13 +35,15 @@ export const createVault = function(seedloop:HDSeedLoop, uid:string):string{
         uid: uid
     };
     let vaultString:string = JSON.stringify(newVault);
-    localStorage.setItem(uid, vaultString);
+    let vaultName:string = createVaultName(uid);
+    localStorage.setItem(vaultName, vaultString);
     return remoteShare;
 }
 
 
 export const unlockVault = function(uid:string, remoteShare:string){
-    let vaultString:string|null = localStorage.getItem(uid);
+    let vaultName:string = createVaultName(uid);
+    let vaultString:string|null = localStorage.getItem(vaultName);
     if(vaultString == null){
         console.log("There is no vault to unlock with the given id.");
         return;
@@ -52,4 +56,9 @@ export const unlockVault = function(uid:string, remoteShare:string){
     let seedloopSerialized:SerializedSeedLoop = JSON.parse(seedloopDeciphered);
     let seedloopRecovered = HDSeedLoop.deserialize(seedloopSerialized)
     console.log(seedloopRecovered);
+}
+
+// creates standard vault name given uid
+const createVaultName = function(uid:string){
+    return "wallet|"+uid;
 }
