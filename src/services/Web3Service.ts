@@ -15,6 +15,7 @@ import {
 import HDSeedLoop, { Network, NetworkFamily, NetworkFromTicker, SeedLoop, SerializedSeedLoop } from "hdseedloop";
 import { IWallet } from "../../models/IWallet";
 import { defaultWallet } from "../../models/defaultWallet";
+import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
 
 const NetworkDbsRef = collection(firestore, "networks")
 
@@ -83,23 +84,35 @@ class Web3Service extends BaseService{
         return this.wallet;
     }
 
-    connectKryptikWallet = async (seed?:string): Promise<IWallet> => {   
-        // check for kryptik wallet in local storage
-        let existingWallet = window.localStorage.getItem("kryptikWallet");
+    createSeedloop(seed?:string):HDSeedLoop{
         let seedloopKryptik:HDSeedLoop;
-        // if there is already a seedloop available... use it!
-        if(existingWallet){
-          let currSeedloop:SerializedSeedLoop = JSON.parse(existingWallet);
-          seedloopKryptik = HDSeedLoop.deserialize(currSeedloop);
+        if(seed){
+            // create new seedloop from imported seed
+            seedloopKryptik = new HDSeedLoop({mnemonic:seed})
         }
         else{
-            // use imported seed to create seedloop
-            if(seed){
-              seedloopKryptik = new HDSeedLoop({mnemonic:seed})
-            }
-            else{
-              seedloopKryptik = new HDSeedLoop();
-            }
+            seedloopKryptik = new HDSeedLoop();
+        }
+        return seedloopKryptik;
+    }
+
+    connectKryptikWallet = async (uid:string, remoteShare?:string, seed?:string): Promise<IWallet> => {   
+        let seedloopKryptik:HDSeedLoop;
+        // if there is already a seedloop available... use it!
+        if(remoteShare){
+          // access existing wallet from local storage vault
+          let vaultSeedloop:HDSeedLoop|null = unlockVault(uid, remoteShare);
+          if(vaultSeedloop){
+            seedloopKryptik = vaultSeedloop;
+          }
+          else{
+              seedloopKryptik = this.createSeedloop(seed);
+          }
+          
+        }
+        else{
+            seedloopKryptik = this.createSeedloop(seed);
+            let newVault:VaultAndShares = createVault(seedloopKryptik, uid);
         }
         let ethNetwork = NetworkFromTicker("eth");
         // get all ethereum addreses for wallet
@@ -114,14 +127,7 @@ class Web3Service extends BaseService{
         };
         console.log("New kryptik wallet:");
         console.log(newKryptikWallet);
-        // serialize seed loop for storage
-        let hdseedloopSerialized:SerializedSeedLoop =  await newKryptikWallet.seedLoop.serialize();
-        // uncomment to save seed loop in local storage
-        // window.localStorage.setItem("kryptikWallet", JSON.stringify(hdseedloopSerialized));
-        // set wallet for internal use
-        // ALLOW THIS TO BE SET IF USING LOCAL CLASS WALLET
-        // this.internalSetWallet(newKryptikWallet);
-        // returns new kryptik wallet that adheres to wallet interface
+
         return newKryptikWallet;
     };
 
