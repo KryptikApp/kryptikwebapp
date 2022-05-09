@@ -13,8 +13,10 @@
     "@pinata/sdk": "^1.1.23",
     "@prisma/client": "^3.12.0",
     "@solana/web3.js": "^1.37.1",
+    "@types/crypto-js": "^4.1.1",
     "axios": "^0.26.1",
     "crypto": "^1.0.1",
+    "crypto-js": "^4.1.1",
     "ethers": "^5.6.1",
     "firebase": "^9.6.10",
     "firebase-admin": "^10.0.2",
@@ -30,7 +32,8 @@
     "prisma": "^3.12.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "secp256k1": "^4.0.3"
+    "secp256k1": "^4.0.3",
+    "shamirs-secret-sharing-ts": "^1.0.2"
   },
   "devDependencies": {
     "@types/multer": "^1.4.7",
