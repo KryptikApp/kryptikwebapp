@@ -13,9 +13,12 @@ export interface VaultContents{
     uid:string
 }
 
+export interface VaultAndShares{
+    vault:VaultContents,
+    remoteShare: string
+}
 
-
-export const createVault = function(seedloop:HDSeedLoop, uid:string):string{
+export const createVault = function(seedloop:HDSeedLoop, uid:string):VaultAndShares{
     let seedloopSerialized:SerializedSeedLoop = seedloop.serializeSync();
     // genrate random encryption key
     let newPassword = randomBytes(256).toString('hex');
@@ -34,19 +37,21 @@ export const createVault = function(seedloop:HDSeedLoop, uid:string):string{
         lastUnlockTime: 0,
         uid: uid
     };
+    // string that represents vault with encrypted seedloop
     let vaultString:string = JSON.stringify(newVault);
+    // key to access vault in local storage
     let vaultName:string = createVaultName(uid);
     localStorage.setItem(vaultName, vaultString);
-    return remoteShare;
+    return {vault:newVault, remoteShare: remoteShare};
 }
 
 
-export const unlockVault = function(uid:string, remoteShare:string){
+export const unlockVault = function(uid:string, remoteShare:string):HDSeedLoop|null{
     let vaultName:string = createVaultName(uid);
     let vaultString:string|null = localStorage.getItem(vaultName);
     if(vaultString == null){
         console.log("There is no vault to unlock with the given id.");
-        return;
+        return null;
     }
     let vaultRecovered:VaultContents = JSON.parse(vaultString);
     // array of shamir secret shares
@@ -55,7 +60,7 @@ export const unlockVault = function(uid:string, remoteShare:string){
     let seedloopDeciphered = crypt.AES.decrypt(vaultRecovered.seedloopSerlializedCipher, passwordRecovered).toString(crypt.enc.Utf8);
     let seedloopSerialized:SerializedSeedLoop = JSON.parse(seedloopDeciphered);
     let seedloopRecovered = HDSeedLoop.deserialize(seedloopSerialized)
-    console.log(seedloopRecovered);
+    return seedloopRecovered;
 }
 
 // creates standard vault name given uid
