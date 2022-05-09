@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, updateCurrentUser } from "firebase/auth";
 import { getStorage } from "firebase/storage";
-import { doc, getDoc, getFirestore, setDoc} from 'firebase/firestore';
+import { doc, DocumentData, DocumentSnapshot, getDoc, getFirestore, setDoc} from 'firebase/firestore';
 // set your own firebase secrets to access db
 import { firebaseConfig } from "../../secrets";
 import { Magic } from "@magic-sdk/admin";
@@ -25,7 +25,9 @@ export  {
 // user auth helper code
 export interface UserDB {
     uid: string,
-    email: string
+    email: string,
+    name:string,
+    photoUrl:string
 }
 
 // interface for extra user data
@@ -34,7 +36,7 @@ export interface UserExtraData{
   remoteShare: string
 }
 
-const formatAuthUser = function(user:any)
+export const formatAuthUser = function(user:any)
 {
     return {
         uid: user.uid,
@@ -44,11 +46,32 @@ const formatAuthUser = function(user:any)
       };
 };
 
+export const formatUserExtraData = function(docIn:DocumentSnapshot<DocumentData>):UserExtraData{
+    let formatted:UserExtraData;
+    let dataIn = docIn.data();
+    if(dataIn){
+      formatted = {
+        isTwoFactorAuth: dataIn.isTwoFactorAuth,
+        remoteShare: dataIn.remoteShare
+      }
+    }
+    else{
+      formatted = {
+        isTwoFactorAuth: false,
+        remoteShare: ""
+      }
+    }
+    return formatted;
+}
+
 export function useFirebaseAuth() {
     //create dummy user of type userDB
     let dummyUser:UserDB = {
-        uid: "not set",
-        email:"not set"
+        uid: "",
+        email:"",
+        name: "",
+        photoUrl: ""
+
     }
     // init state 
     const [authUser, setAuthUser] = useState(dummyUser);
@@ -83,7 +106,7 @@ export function useFirebaseAuth() {
     const signInWithToken = async(customToken:string, data:UserExtraData|null) =>
     {
         let signInCred:UserCredential = await signInWithCustomToken(firebaseAuth, customToken);
-        let dbUser = signInCred.user;
+        let dbUser:UserDB = formatAuthUser(signInCred.user);
         let docRef = doc(firestore, "users", dbUser.uid);
         // write extra data to database if not yet set
         if(!(await getDoc(docRef)).exists() && data){
@@ -96,7 +119,13 @@ export function useFirebaseAuth() {
         }
     }
 
-    const writeExtraUserData = async function(user:User, data:UserExtraData) {
+    const readExtraUserData = async function(user:UserDB):Promise<UserExtraData>{
+      let extraDataDoc:DocumentSnapshot<DocumentData> = await getDoc(doc(firestore, "users", user.uid));
+      let userExtraData:UserExtraData = formatUserExtraData(extraDataDoc);
+      return userExtraData;
+    }
+
+    const writeExtraUserData = async function(user:UserDB, data:UserExtraData) {
       await setDoc(doc(firestore, "users", user.uid), data);
     }
   
