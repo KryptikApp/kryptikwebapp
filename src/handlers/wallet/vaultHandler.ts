@@ -45,6 +45,16 @@ export const createVault = function(seedloop:HDSeedLoop, uid:string):VaultAndSha
     return {vault:newVault, remoteShare: remoteShare};
 }
 
+// check if vault for a given uid exists in local storage
+export const VaultExists = function(uid:string):boolean{
+    let vaultName:string = createVaultName(uid);
+    let vaultString:string|null = localStorage.getItem(vaultName);
+    if(vaultString == null){
+        return false;
+    }
+    return true;
+}
+
 
 export const unlockVault = function(uid:string, remoteShare:string):HDSeedLoop|null{
     let vaultName:string = createVaultName(uid);
