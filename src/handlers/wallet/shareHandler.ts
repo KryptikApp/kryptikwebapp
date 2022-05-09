@@ -14,10 +14,9 @@ export const createShares = function(secret:string, optionsIn?:ShamirOptions):Bu
 }
 
 
-// combines shares to regenerate seed
-export const combineShares = function (shares:Buffer[]) {
+// combines shares to recover secret
+export const combineShares = function (shares:Buffer[]|string[]):Buffer {
     // combine original shares
-    let combinedOutput = shamir.combine(shares)
-    // return hex version of combined shares
+    let combinedOutput:Buffer = shamir.combine(shares)
     return combinedOutput;
 }
