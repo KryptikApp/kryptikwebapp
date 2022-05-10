@@ -10,7 +10,8 @@ export interface VaultContents{
     localShare:string,
     lastUnlockTime:number,
     createdTime: number
-    uid:string
+    uid:string,
+    check:string
 }
 
 export interface VaultAndShares{
@@ -35,7 +36,8 @@ export const createVault = function(seedloop:HDSeedLoop, uid:string):VaultAndSha
         localShare: localShare,
         createdTime: Date.now(),
         lastUnlockTime: 0,
-        uid: uid
+        uid: uid,
+        check: "valid"
     };
     // string that represents vault with encrypted seedloop
     let vaultString:string = JSON.stringify(newVault);
@@ -64,13 +66,25 @@ export const unlockVault = function(uid:string, remoteShare:string):HDSeedLoop|n
         return null;
     }
     let vaultRecovered:VaultContents = JSON.parse(vaultString);
+    // update last unlock time
+    vaultRecovered.lastUnlockTime = Date.now();
     // array of shamir secret shares
     let shareArray:string[] = [remoteShare, vaultRecovered.localShare]
     let passwordRecovered:string = combineShares(shareArray).toString();
     let seedloopDeciphered = crypt.AES.decrypt(vaultRecovered.seedloopSerlializedCipher, passwordRecovered).toString(crypt.enc.Utf8);
     let seedloopSerialized:SerializedSeedLoop = JSON.parse(seedloopDeciphered);
     let seedloopRecovered = HDSeedLoop.deserialize(seedloopSerialized)
+    // update local storage vault 
+    // string that represents vault with encrypted seedloop
+    let vaultStringUpdated:string = JSON.stringify(vaultRecovered);
+    localStorage.setItem(vaultName, vaultStringUpdated);
     return seedloopRecovered;
+}
+
+
+// ensure vault was decoded correctly
+const isValidVaultDecode = function(vault:VaultContents):boolean{
+    return vault.check == "valid"
 }
 
 // creates standard vault name given uid
