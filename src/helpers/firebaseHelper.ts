@@ -9,6 +9,7 @@ import { signInWithCustomToken, User, UserCredential } from "firebase/auth";
 import { useEffect, useState } from "react";
 
 import { createCustomFirebaseToken } from "./utils";
+import { UserDB } from "../../models/user";
 
 
 const firebaseApp = initializeApp(firebaseConfig);
@@ -23,12 +24,6 @@ export  {
 
 
 // user auth helper code
-export interface UserDB {
-    uid: string,
-    email: string,
-    name:string,
-    photoUrl:string
-}
 
 // interface for extra user data
 export interface UserExtraData{
@@ -36,7 +31,7 @@ export interface UserExtraData{
   remoteShare: string
 }
 
-export const formatAuthUser = function(user:any)
+export const formatAuthUser = function(user:any):UserDB
 {
     return {
         uid: user.uid,
@@ -62,6 +57,16 @@ export const formatUserExtraData = function(docIn:DocumentSnapshot<DocumentData>
       }
     }
     return formatted;
+}
+
+export const readExtraUserData = async function(user:UserDB):Promise<UserExtraData>{
+  let extraDataDoc:DocumentSnapshot<DocumentData> = await getDoc(doc(firestore, "users", user.uid));
+  let userExtraData:UserExtraData = formatUserExtraData(extraDataDoc);
+  return userExtraData;
+}
+
+export const writeExtraUserData = async function(user:UserDB, data:UserExtraData) {
+  await setDoc(doc(firestore, "users", user.uid), data);
 }
 
 export function useFirebaseAuth() {
@@ -117,16 +122,6 @@ export function useFirebaseAuth() {
               console.log(err);
             }
         }
-    }
-
-    const readExtraUserData = async function(user:UserDB):Promise<UserExtraData>{
-      let extraDataDoc:DocumentSnapshot<DocumentData> = await getDoc(doc(firestore, "users", user.uid));
-      let userExtraData:UserExtraData = formatUserExtraData(extraDataDoc);
-      return userExtraData;
-    }
-
-    const writeExtraUserData = async function(user:UserDB, data:UserExtraData) {
-      await setDoc(doc(firestore, "users", user.uid), data);
     }
   
     const signOut = () =>
