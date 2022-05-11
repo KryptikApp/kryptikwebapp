@@ -8,5 +8,6 @@ export const defaultWallet: IWallet = {
   balance: 0,
   connected: false,
   seedLoop: new HDSeedLoop(),
-  ethAddress: ""
+  ethAddress: "",
+  uid: ""
 };
