@@ -1,7 +1,6 @@
-import { signInWithCustomToken, User, UserCredential } from 'firebase/auth';
 import {Magic} from '@magic-sdk/admin'
 import { NextApiRequest, NextApiResponse } from 'next';
-import { firebaseAuth } from '../../src/helpers/firebaseHelper';
+
 import { createCustomFirebaseToken } from '../../src/helpers/utils';
 
 type Data = {
@@ -12,6 +11,7 @@ type Data = {
 // basic login routine
 export default async( req: NextApiRequest, res: NextApiResponse<Data> )=>
 {
+    console.log("Login hit!");
     if (req.method !== 'POST') return res.status(405).end()
     // make sure we have access to a magic secret key
     let  magicSecretKey:string = process.env.MAGIC_SECRET_KEY? process.env.MAGIC_SECRET_KEY: "not set";
