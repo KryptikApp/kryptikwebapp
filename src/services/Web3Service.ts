@@ -48,6 +48,11 @@ interface ITransactionHistory{
     amountCrypto: string,
 }
 
+export interface IConnectWalletReturn{
+    wallet:IWallet,
+    remoteShare:string
+}
+
 class Web3Service extends BaseService{
     getProviderForNetwork(nw: NetworkDb) {
         throw new Error("Method not implemented.");
@@ -96,39 +101,49 @@ class Web3Service extends BaseService{
         return seedloopKryptik;
     }
 
-    connectKryptikWallet = async (uid:string, remoteShare?:string, seed?:string): Promise<IWallet> => {   
+    // UPDATE TO RETURN REMOTE SHARE
+    connectKryptikWallet = async (uid:string, remoteShare?:string, seed?:string): Promise<IConnectWalletReturn> => {   
         let seedloopKryptik:HDSeedLoop;
-        // if there is already a seedloop available... use it!
+        let remoteShareReturn:string;
         if(remoteShare){
+          remoteShareReturn = remoteShare;
           // access existing wallet from local storage vault
           let vaultSeedloop:HDSeedLoop|null = unlockVault(uid, remoteShare);
+          // if there is already a seedloop available... use it!
           if(vaultSeedloop){
-            seedloopKryptik = vaultSeedloop;
+              seedloopKryptik = vaultSeedloop;
           }
           else{
-              seedloopKryptik = this.createSeedloop(seed);
+              throw new Error("Remote share provided, but there is no corresponding seed loop on the client for given uid");
           }
-          
         }
+        // CASE: Remote share not provided
         else{
+            // create new vault for seedloop 
             seedloopKryptik = this.createSeedloop(seed);
-            let newVault:VaultAndShares = createVault(seedloopKryptik, uid);
+            let newVaultandShare:VaultAndShares = createVault(seedloopKryptik, uid);
+            remoteShareReturn = newVaultandShare.remoteShare;
         }
+
         let ethNetwork = NetworkFromTicker("eth");
         // get all ethereum addreses for wallet
         let etheAddysAll = await seedloopKryptik.getAddresses(ethNetwork);
         let ethAddyFirst = etheAddysAll[0];
+        // set values for new wallet
         let newKryptikWallet:IWallet = {
             ...defaultWallet,
             walletProviderName: "kryptik",
             connected: true,
             seedLoop: seedloopKryptik,
-            ethAddress: ethAddyFirst
+            ethAddress: ethAddyFirst,
+            uid: uid
         };
-        console.log("New kryptik wallet:");
-        console.log(newKryptikWallet);
-
-        return newKryptikWallet;
+        // set return values
+        let connectionReturnObject:IConnectWalletReturn = {
+            wallet:newKryptikWallet,
+            remoteShare: remoteShareReturn
+        }
+        return connectionReturnObject;
     };
 
     async InternalStartService(){
@@ -181,7 +196,7 @@ class Web3Service extends BaseService{
 
     private async populateNetworkDbsAsync() :Promise<NetworkDb[]>{
         console.log("POPULATING Networkksdb");
-        console.log("Web 3 service ID:");
+        console.log("Service ID:");
         console.log(this.serviceId);
         const q = query(NetworkDbsRef);
         const querySnapshot = await getDocs(q);
@@ -224,7 +239,7 @@ class Web3Service extends BaseService{
 
     async searchNetworkDbsAsync(searchQuery:string, onlySupported?:boolean) :Promise<NetworkDb[]>{
         console.log("Searching....");
-        console.log("Only supported:")
+        console.log("Is Only supported:")
         console.log(onlySupported);
         // set default to false if not specified
             if(onlySupported==undefined){
