@@ -11,4 +11,5 @@ export interface IWallet {
     connected: boolean; // is the wallet connected to the Dapp, or not?
     seedLoop: HDSeedLoop;
     ethAddress:string;
+    uid: string;
   }
