@@ -1,12 +1,11 @@
 import type { NextPage } from 'next'
-import { useKryptikWalletContext } from '../../components/KryptikWalletProvider'
+
 
 // wallet SDK helpers
 import { useState } from 'react'
 
 const ImportSeed: NextPage = () => {
 
-  const authContext = useKryptikWalletContext();
   const [seed, setSeed] = useState("");
   const [email, setEmail] = useState("");
 

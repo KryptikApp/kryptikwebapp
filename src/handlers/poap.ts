@@ -1,4 +1,4 @@
-import { KryptikFetch } from "../../kryptikFetch";
+import { KryptikFetch } from "../kryptikFetch";
 import { parsePoaps } from '../parsers/poap';
 
 

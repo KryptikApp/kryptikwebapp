@@ -1,37 +1,29 @@
 import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
 import Link from 'next/link'
-import Navbar from '../../components/Navbar'
-import {useKryptikWalletContext} from '../../components/KryptikWalletProvider'
-
-// wallet SDK helpers
-import * as walletMetamask from "../../src/helpers/walletMetamask";
-import { IWallet } from '../../models/IWallet'
-import { useCallback, useState } from 'react'
-import { connectKryptikWallet } from '../../src/helpers/walletKrypt'
-import Web3Service from '../../src/services/Web3Service'
-import { useKryptikContext } from '../../components/KryptikServiceProvider'
+import { useState } from 'react'
 import { Magic } from 'magic-sdk'
 import router from 'next/router'
-import { useAuthContext } from '../../components/AuthProvider'
-import { User } from 'firebase/auth'
+
+// kryptik imports
+import { IWallet } from '../../src/models/IWallet'
+import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 
 const CreateWallet: NextPage = () => {
-  const kryptikWalletContext = useKryptikWalletContext();
-  const kryptikContext = useKryptikContext();
-  const {signInWithToken} = useAuthContext();
+  const {signInWithToken, kryptikWallet, kryptikService} = useKryptikAuthContext();
   const [email, setEmail] = useState("");
   const [isLoading, setisLoading] = useState(false);
+  console.log("Create Wallet Web 3 Service Id:")
+  console.log(kryptikService.serviceId);
   
   const loginUser = async () => {
+      setisLoading(true);
       /* Step 4.1: Generate a DID token with Magic */
       let magicKey:string = process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY? process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY : "";
       const magic = new Magic(magicKey)
       const didToken = await magic.auth.loginWithMagicLink({ email })
       console.log("Magic token:")
       console.log(didToken);
-      
+      console.log("logging in...");
       /* Step 4.4: POST to our /login endpoint */
       const res = await fetch('/api/login', {
         method: 'POST',
@@ -42,8 +34,9 @@ const CreateWallet: NextPage = () => {
         body: JSON.stringify({ email })
       })
     
-      
       if (res.status === 200) {
+        setisLoading(false);
+        console.log("Response body:");
         console.log(res.body);
         let resDecoded = await res.json();
         let customTokenDB:string = resDecoded.dbToken;
@@ -57,27 +50,29 @@ const CreateWallet: NextPage = () => {
       } else {
         throw new Error(await res.text())
       }
+      setisLoading(false);
   }
 
 
   const handleConnect = async () => {
     setisLoading(true);
-    let web3Kryptik = await kryptikContext.kryptikService.StartSevice();
-    console.log("Web 3 service state:");
-    console.log(web3Kryptik.serviceState);
-    let newWallet:IWallet;
-    newWallet = await connectKryptikWallet();
-    console.log("Created NEW KRYPTIK WALLET:");
-    if(newWallet.connected){
-      console.log("Wallet connected. Pulling balances...");
-      let walletBalanceDict:{[ticker: string]: number} = await web3Kryptik.getSeedLoopBalanceAllNetworks(newWallet.seedLoop);
-      // set wallet balance to eth balance for now
-      newWallet.balance = walletBalanceDict["eth"];
-      console.log("Ethereum balance");
-      console.log(newWallet.balance);
-      kryptikWalletContext.setWallet(newWallet);
-    }
-    setisLoading(false);
+    // let web3Kryptik:Web3Service = await kryptikAuthContext.kryptikService.StartSevice();
+    // console.log("Web 3 service state:");
+    // console.log(web3Kryptik.serviceState);
+    // let newWallet:IWallet;
+    // // creates user wallet if none exist
+    // newWallet = await kryptikAuthContext.kryptikService.connectKryptikWallet();
+    // console.log("Created NEW KRYPTIK WALLET:");
+    // if(newWallet.connected){
+    //   kryptikAuthContext.setKryptikWallet(newWallet);
+    //   console.log("Wallet connected. Pulling balances...");
+    //   let walletBalanceDict:{[ticker: string]: number} = await kryptikAuthContext.kryptikService.getBalanceAllNetworks(newWallet);
+    //   // set wallet balance to eth balance for now
+    //   newWallet.balance = walletBalanceDict["eth"];
+    //   console.log("Ethereum balance");
+    //   console.log(newWallet.balance);
+    // }
+    // setisLoading(false);
   }
 
 
@@ -88,16 +83,16 @@ const CreateWallet: NextPage = () => {
         </div>
         {
             // INDICATE CONNECTED
-            kryptikWalletContext.wallet.connected ? 
+            kryptikWallet.connected ? 
           <div className="textCenter max-w-md mx-auto content-center">
             <h1 className="text-3xl font-bold sans ">
               Your wallet is connected.
             </h1>
             <p>
-              Eth Address: <span className="bg-clip-text text-green-400">{kryptikWalletContext.wallet.ethAddress}</span>
+              Eth Address: <span className="bg-clip-text text-green-400">{kryptikWallet.ethAddress}</span>
             </p>
             <p>
-              Balance: <span className="bg-clip-text text-green-400">{kryptikWalletContext.wallet.balance}</span>
+              Balance: <span className="bg-clip-text text-green-400">{kryptikWallet.balance}</span>
             </p>
           </div>
         :
@@ -142,8 +137,7 @@ const CreateWallet: NextPage = () => {
                   <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24">
                   {/* spinner */}
                   </svg>
-                }
-              
+                }         
                             Create Wallet
                 </button>
               </div>

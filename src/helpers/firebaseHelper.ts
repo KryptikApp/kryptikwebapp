@@ -9,7 +9,7 @@ import { signInWithCustomToken, User, UserCredential } from "firebase/auth";
 import { useEffect, useState } from "react";
 
 import { createCustomFirebaseToken } from "./utils";
-import { UserDB } from "../../models/user";
+import { UserDB } from "../models/user"
 
 
 const firebaseApp = initializeApp(firebaseConfig);

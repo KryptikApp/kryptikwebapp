@@ -13,8 +13,8 @@ import {
   } from '@solana/web3.js';
 
 import HDSeedLoop, { Network, NetworkFamily, NetworkFromTicker, SeedLoop, SerializedSeedLoop } from "hdseedloop";
-import { IWallet } from "../../models/IWallet";
-import { defaultWallet } from "../../models/defaultWallet";
+import { IWallet } from "../models/IWallet";
+import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
 
 const NetworkDbsRef = collection(firestore, "networks")

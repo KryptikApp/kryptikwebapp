@@ -1,8 +1,8 @@
 import { User } from 'firebase/auth';
 import { createContext, useContext, Context } from 'react'
-import { defaultWallet } from '../models/defaultWallet';
-import { IWallet } from '../models/IWallet';
-import { defaultUser } from '../models/user';
+import { defaultWallet } from '../src/models/defaultWallet';
+import { IWallet } from '../src/models/IWallet';
+import { defaultUser } from '../src/models/user';
 import { useKryptikAuth } from '../src/helpers/kryptikAuthHelper';
 import Web3Service from '../src/services/Web3Service';
 

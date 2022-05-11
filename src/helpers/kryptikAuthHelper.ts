@@ -1,12 +1,10 @@
 // helps with integrating web3service into app. context
 import { signInWithCustomToken, updateCurrentUser, User, UserCredential } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import HDSeedLoop from "hdseedloop";
 import { useEffect, useState } from "react";
-import { defaultWallet } from "../../models/defaultWallet";
-import { IWallet } from "../../models/IWallet";
-import { defaultUser, UserDB } from "../../models/user";
-import { createVault } from "../handlers/wallet/vaultHandler";
+import { defaultWallet } from "../models/defaultWallet";
+import { IWallet } from "../models/IWallet";
+import { defaultUser, UserDB } from "../models/user";
 import Web3Service, { IConnectWalletReturn } from "../services/Web3Service";
 import { firebaseAuth, firestore, formatAuthUser, UserExtraData, readExtraUserData } from "./firebaseHelper";
 

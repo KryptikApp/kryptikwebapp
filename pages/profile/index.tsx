@@ -1,16 +1,11 @@
 import type { NextPage } from 'next'
-import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Splash.module.css'
-import Link from 'next/link'
-import Navbar from '../../components/Navbar'
 import { useEffect } from 'react'
-import { useAuthContext } from '../../components/AuthProvider'
 import { useRouter } from 'next/router'
 import Divider from '../../components/Divider'
+import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 
 const Profile: NextPage = () => {
-  const { authUser, loading } = useAuthContext();
+  const { authUser, loading } = useKryptikAuthContext();
   const router = useRouter();
 
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
