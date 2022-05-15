@@ -16,6 +16,8 @@ import HDSeedLoop, { Network, NetworkFamily, NetworkFromTicker, SeedLoop, Serial
 import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
+import { BigNumber } from "ethers";
+import { Console } from "console";
 
 const NetworkDbsRef = collection(firestore, "networks")
 
@@ -46,6 +48,13 @@ interface ITransactionHistory{
     assetTicker: string,
     hash: string,
     amountCrypto: string,
+}
+
+export interface IBalance{
+    fullName: string,
+    ticker:string,
+    iconPath:string,
+    amountCrypto: string
 }
 
 export interface IConnectWalletReturn{
@@ -324,45 +333,43 @@ class Web3Service extends BaseService{
       networkDbtoKryptikNetwork(networkFromDb:NetworkDb):Network{
           return new Network(networkFromDb.fullName, networkFromDb.ticker);
     }
-    
+
     // TODO: Update to support tx. based networks
-    getBalanceAllNetworks = async(walletUser:IWallet):Promise<{ [ticker: string]: number }> =>{
-        let currWallet:IWallet = this.wallet?this.wallet:walletUser;
+    getBalanceAllNetworks = async(walletUser:IWallet):Promise<IBalance[]> =>{
         let networksFromDb = this.getSupportedNetworkDbs();
-        // initialize return dict.
-        let balanceDict: { [ticker: string]: number } = {};
-        console.log("Supported networks:");
-        console.log(networksFromDb);
-        networksFromDb.forEach(async nw => {
+        // initialize return array
+        let balances:IBalance[] = [];
+        for(const nw of networksFromDb){
             let network:Network = new Network(nw.fullName, nw.ticker);
             let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
             if(network.getNetworkfamily()==NetworkFamily.EVM){
-                if(!kryptikProvider.ethProvider) throw Error("No ethereum provider set up.");
+                if(!kryptikProvider.ethProvider) throw Error(`No ethereum provider set up for ${network.fullName}.`);
                 let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
                 console.log("Processing Network:")
-                console.log(nw);
+                console.log(nw.fullName);
                 // gets all addresses for network
-                let allAddys:string[] = await currWallet.seedLoop.getAddresses(network);
+                let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
                 // gets first address for network
-                let firstAddy:string = "allAddys[0];"
+                let firstAddy:string = allAddys[0];
                 console.log(`${nw.fullName} Addy:`);
                 console.log(firstAddy);
+                console.log(`Getting balance for ${nw.fullName}...`);
                 // get provider for network
                 let networkBalance = await ethNetworkProvider.getBalance(firstAddy);
-                // add network balance to dict. with network ticker as key
-                balanceDict[network.ticker] = networkBalance.toNumber();
                 console.log(`${nw.fullName} Balance:`);
-                console.log(balanceDict[network.ticker]);
+                console.log(networkBalance);
+                // prettify ether balance
+                let networkBalanceAdjusted:Number = BigNumber.from(networkBalance)
+                .div(BigNumber.from("10000000000000000"))
+                .toNumber() / 100;
+                let networkBalanceString = networkBalanceAdjusted.toString();
+                let newBalanceObj:IBalance = {fullName:nw.fullName, ticker:nw.ticker, iconPath:nw.iconPath, 
+                    amountCrypto:networkBalanceString}
+                // add adjusted balance to balances return object
+                balances.push(newBalanceObj);
             }
-        });
-        // return (
-        //   ethers.BigNumber.from(balance)
-        //     .div(ethers.BigNumber.from("10000000000000000"))
-        //     .toNumber() / 100
-        // );
-        console.log("Returning balance dict:");
-        console.log(balanceDict);
-        return balanceDict;
+        }
+        return balances;
     }
     
      // TODO: Update to support tx. based networks
