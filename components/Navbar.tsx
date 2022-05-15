@@ -39,8 +39,8 @@ const Navbar:NextPage = () => {
                 <Link href="../createNft"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-transparent rounded hover:bg-indigo-100 hover:cursor-pointer hover:text-green-500 transition-colors duration-300 ${router.pathname == "/createNft" ? "font-bold" : ""}`}>Create</span></Link> 
                 {/* show disconnect button if connected and vise versa */}
                 {kryptikWallet.connected && authUser ? 
-                <Link href="../profile/"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Wallet</span></Link>
-                :<Link href="../profile/createWallet"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Connect</span></Link>}
+                <Link href="../wallet/"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Wallet</span></Link>
+                :<Link href="../wallet/createWallet"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Connect</span></Link>}
             </div>
             </div>
 
