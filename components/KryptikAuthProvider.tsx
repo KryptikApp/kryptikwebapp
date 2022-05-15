@@ -2,7 +2,7 @@ import { User } from 'firebase/auth';
 import { createContext, useContext, Context } from 'react'
 import { defaultWallet } from '../src/models/defaultWallet';
 import { IWallet } from '../src/models/IWallet';
-import { defaultUser } from '../src/models/user';
+import { defaultUser, UserDB } from '../src/models/user';
 import { useKryptikAuth } from '../src/helpers/kryptikAuthHelper';
 import Web3Service from '../src/services/Web3Service';
 
@@ -16,6 +16,7 @@ const kryptikAuthContext = createContext({
   loading: true,
   signInWithToken: async (token:string) => {},
   updateCurrentUserKryptik: async(user:User) => {},
+  getUserPhotoPath: async(user:UserDB):Promise<string> => {return ""},
   signOut: ()=>{}
 });
 
