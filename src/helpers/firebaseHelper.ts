@@ -59,6 +59,18 @@ export const formatUserExtraData = function(docIn:DocumentSnapshot<DocumentData>
     return formatted;
 }
 
+const formatPhoto = function(docIn:DocumentSnapshot<DocumentData>):string{
+  let dataIn = docIn.data();
+  let formatted:string;
+  if(dataIn){
+    formatted = dataIn.iconPath;
+  }
+  else{
+    formatted = ""
+  }
+  return formatted;
+}
+
 export const readExtraUserData = async function(user:UserDB):Promise<UserExtraData>{
   let extraDataDoc:DocumentSnapshot<DocumentData> = await getDoc(doc(firestore, "users", user.uid));
   let userExtraData:UserExtraData = formatUserExtraData(extraDataDoc);
@@ -67,6 +79,19 @@ export const readExtraUserData = async function(user:UserDB):Promise<UserExtraDa
 
 export const writeExtraUserData = async function(user:UserDB, data:UserExtraData) {
   await setDoc(doc(firestore, "users", user.uid), data);
+}
+
+// TODO: ADD SUPPORT FOR RANDOM AVATAR
+export const getUserPhotoPath = async function(user:UserDB):Promise<string> {
+  // if user has a proper photo url, return it
+  if(user.photoUrl!=null && user.photoUrl!=""){
+    return user.photoUrl;
+  }
+  // if not... return a default avatar icon
+  let docRef = doc(firestore, "media", "defaultAvatar1");
+  let avatarObj =  await getDoc(docRef);
+  let formattedPhoto:string = formatPhoto(avatarObj);
+  return formattedPhoto;
 }
 
 export function useFirebaseAuth() {
