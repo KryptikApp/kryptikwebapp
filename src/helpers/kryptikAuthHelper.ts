@@ -6,7 +6,7 @@ import { defaultWallet } from "../models/defaultWallet";
 import { IWallet } from "../models/IWallet";
 import { defaultUser, UserDB } from "../models/user";
 import Web3Service, { IConnectWalletReturn } from "../services/Web3Service";
-import { firebaseAuth, firestore, formatAuthUser, UserExtraData, readExtraUserData } from "./firebaseHelper";
+import { firebaseAuth, firestore, formatAuthUser, UserExtraData, readExtraUserData, getUserPhotoPath } from "./firebaseHelper";
 
 
 export function useKryptikAuth() {
@@ -87,6 +87,7 @@ export function useKryptikAuth() {
     const writeExtraUserData = async function(user:UserDB, data:UserExtraData) {
       await setDoc(doc(firestore, "users", user.uid), data);
     }
+
   
     const signOut = () =>
       firebaseAuth.signOut().then(clear);
@@ -109,6 +110,7 @@ export function useKryptikAuth() {
       loading,
       signInWithToken,
       updateCurrentUserKryptik,
+      getUserPhotoPath,
       signOut,
       kryptikService,
       setKryptikWallet,
