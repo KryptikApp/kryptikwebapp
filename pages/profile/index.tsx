@@ -3,16 +3,17 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
+import ListBalance from '../../components/lists/ListBalance'
 
 const Profile: NextPage = () => {
-  const { authUser, loading } = useKryptikAuthContext();
+  const { authUser, loading, kryptikWallet, kryptikService } = useKryptikAuthContext();
   const router = useRouter();
-
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
     if (!loading && !authUser)
       router.push('/')
   }, [authUser, loading])
+
 
   return (
     <div>
@@ -23,6 +24,7 @@ const Profile: NextPage = () => {
           </div>
           <h2>Your Balances</h2>
           <Divider/>
+          <ListBalance/>
         </div>
 
     </div>
