@@ -26,7 +26,7 @@ const Profile: NextPage = () => {
           <h2>Your Balances</h2>
           <Divider/>
           <ListBalance/>
-          <Link href="../profile/manage"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 transition-colors duration-300 ${router.pathname == "/about" ? "font-bold" : ""} `}>Manage Profile</span></Link>
+          <Link href="../profile/"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 transition-colors duration-300 ${router.pathname == "/about" ? "font-bold" : ""} `}>Manage Profile</span></Link>
         </div>
 
     </div>
