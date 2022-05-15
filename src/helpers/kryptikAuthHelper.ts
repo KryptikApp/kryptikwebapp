@@ -1,5 +1,6 @@
 // helps with integrating web3service into app. context
-import { signInWithCustomToken, updateCurrentUser, User, UserCredential } from "firebase/auth";
+import { UserBuilder } from "firebase-functions/v1/auth";
+import { signInWithCustomToken, updateCurrentUser, updateProfile, User, UserCredential } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { defaultWallet } from "../models/defaultWallet";
@@ -23,6 +24,7 @@ export function useKryptikAuth() {
       console.log("Wallet event handler fired!");
       setKryptikWallet(wallet);
     }
+
 
     // routine to run when auth. state changes
     const authStateChanged = async (user:any) => {
@@ -70,9 +72,11 @@ export function useKryptikAuth() {
         return kryptikConnectionObject.wallet;
     }
     
-    // update standard firestore user 
-    const updateCurrentUserKryptik = async(user:User)=>{
-      await updateCurrentUser(firebaseAuth, user);
+    // update standard firestore user's profile
+    const updateCurrentUserKryptik = async(user:UserDB)=>{
+      let userFirebase:User|null = firebaseAuth.currentUser;
+      if(userFirebase == null) throw(new Error("No user is signed in."));
+      await updateProfile(userFirebase, {displayName:user.name, photoURL:user.photoUrl});
     }
 
     // sign in with external auth token
