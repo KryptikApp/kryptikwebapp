@@ -4,11 +4,9 @@ import { getStorage } from "firebase/storage";
 import { doc, DocumentData, DocumentSnapshot, getDoc, getFirestore, setDoc} from 'firebase/firestore';
 // set your own firebase secrets to access db
 import { firebaseConfig } from "../../secrets";
-import { Magic } from "@magic-sdk/admin";
 import { signInWithCustomToken, User, UserCredential } from "firebase/auth";
 import { useEffect, useState } from "react";
 
-import { createCustomFirebaseToken } from "./utils";
 import { UserDB } from "../models/user"
 
 
