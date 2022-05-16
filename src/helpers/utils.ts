@@ -19,6 +19,15 @@ export const reloadApp = () => {
   window.location.reload();
 };
 
+// pull filename from 
+export const getFileName = function(url:string):string{
+  let name = url.split('/').pop()
+  if(!name) throw(new Error("Unable to parse file path."));
+  // remove extension
+  name = name.split(".")[0]
+  return name;
+}
+
 
 // creates custom token for firebase auth 
 export const createCustomFirebaseToken = async(uid:string):Promise<string> => {
