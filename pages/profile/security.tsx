@@ -15,17 +15,6 @@ const Profile: NextPage = () => {
       router.push('/')
   }, [authUser, loading])
 
-  const [photoUrl, setPhotoUrl] = useState("");
-
-  useEffect(()=>{
-    getUserPhotoPath(authUser).then((path)=>{
-        setPhotoUrl(path);
-    })
-  });
-
-  const handleLogout = function(){
-    signOut();
-  }
 
   return (
     <div>
