@@ -55,11 +55,10 @@ const Profile: NextPage = () => {
     let imageUploadUrl:string = imageUrl;
     // upload image to firebase
     console.log("Uploading bytes...");
-    uploadBytes(storageRef, imageFile).then(async (snapshot) => {
-      console.log("Snapshot:");
-      console.log(snapshot);
-      imageUploadUrl = await urlFromRef(storageRef);
-    });
+    // upload file to db
+    await uploadBytes(storageRef, imageFile);
+    // get url for upload
+    imageUploadUrl = await urlFromRef(storageRef);
     return imageUploadUrl;
   }
 
@@ -68,6 +67,8 @@ const Profile: NextPage = () => {
     // upload file to firebase
     let urlImageUpload:string = await uploadToRemote();
     authUser.photoUrl = urlImageUpload;
+    console.log("Avatar url:");
+    console.log(urlImageUpload);
     // update user's profile photo
     await updateCurrentUserKryptik(authUser);
   }
@@ -85,10 +86,10 @@ const Profile: NextPage = () => {
         </div>
         <div className="w-full rounded">
         <h5 className="mb-3 text-base font-bold text-black-900 lg:text-xl dark:text-white">
-              Kryptik Profile Photo
+              Kryptik Avatar
           </h5>
 
-                  <label className="form-label inline-block mb-2 text-gray-700">
+                  <label className="form-label inline-block mb-2 text-gray-700 ">
                     Image Path</label>
                     <input className="form-control
                     block
@@ -107,10 +108,10 @@ const Profile: NextPage = () => {
                     m-0
                     focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" type="file" id="file" name="file" onChange={uploadToClient} required/>         
                   
-
+                  <p className="text-slate-500 text-sm">Your avatar will be shown to other Kryptik users. Square images work best.</p>
                     {/* upload button */}
                     <div className="item-end">
-                      <button onClick={()=>handleClickUpload()} className="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded my-5">
+                      <button onClick={()=>handleClickUpload()} className="bg-transparent hover:bg-sky-400 text-sky-500 font-semibold hover:text-white py-2 px-4 border border-sky-500 hover:border-transparent rounded my-5">
                         Upload
                       </button>
                     </div>     
@@ -118,7 +119,7 @@ const Profile: NextPage = () => {
     </div>
            
 
-    <div className="h-[5rem]">
+    <div className="h-[7rem]">
       {/* padding div for space between top and main elements */}
     </div>
     
