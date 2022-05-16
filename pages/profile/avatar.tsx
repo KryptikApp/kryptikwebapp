@@ -49,7 +49,7 @@ const Profile: NextPage = () => {
   const uploadToRemote = async():Promise<string>=>{
     console.log("firebase image upload starting....");
     let fileName:string = getFileName(imageUrl);
-    let storageFilePath:string = `avatars/${fileName}`
+    let storageFilePath:string = `avatars/${authUser.uid}/${fileName}`
     const storageRef = ref(storage, storageFilePath);
     // placeholder for upload return url
     let imageUploadUrl:string = imageUrl;
