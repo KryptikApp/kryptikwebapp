@@ -18,9 +18,8 @@ const Profile: NextPage = () => {
   const [photoUrl, setPhotoUrl] = useState("");
 
   useEffect(()=>{
-    getUserPhotoPath(authUser).then((path)=>{
-        setPhotoUrl(path);
-    })
+    let photoPath:string = getUserPhotoPath(authUser);
+    setPhotoUrl(photoPath);
   });
 
   const handleLogout = function(){
