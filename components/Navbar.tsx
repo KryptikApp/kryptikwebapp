@@ -34,7 +34,10 @@ const Navbar:NextPage = () => {
                 </button>
             </div>
             <div id="menu" className={menuWrapperClassName}>
-                <Link href="../about"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 transition-colors duration-300 ${router.pathname == "/about" ? "font-bold" : ""} `}>About</span></Link>
+                {kryptikWallet.connected && authUser? 
+                <Link href="../profile"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 transition-colors duration-300 ${router.pathname == "/profile" ? "font-bold" : ""} `}>Profile</span></Link>
+                :<Link href="../about"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 transition-colors duration-300 ${router.pathname == "/about" ? "font-bold" : ""} `}>About</span></Link>
+                }
                 <Link href="../explore"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 transition-colors duration-300 ${router.pathname == "/explore" ? "font-bold" : ""}`}>Explore</span></Link>
                 <Link href="../createNft"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-transparent rounded hover:bg-indigo-100 hover:cursor-pointer hover:text-green-500 transition-colors duration-300 ${router.pathname == "/createNft" ? "font-bold" : ""}`}>Create</span></Link> 
                 {/* show disconnect button if connected and vise versa */}
