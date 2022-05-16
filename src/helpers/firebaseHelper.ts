@@ -82,16 +82,14 @@ export const writeExtraUserData = async function(user:UserDB, data:UserExtraData
 }
 
 // TODO: ADD SUPPORT FOR RANDOM AVATAR
-export const getUserPhotoPath = async function(user:UserDB):Promise<string> {
+export const getUserPhotoPath = function(user:UserDB):string{
   // if user has a proper photo url, return it
   if(user.photoUrl!=null && user.photoUrl!=""){
     return user.photoUrl;
   }
   // if not... return a default avatar icon
-  let docRef = doc(firestore, "media", "defaultAvatar1");
-  let avatarObj =  await getDoc(docRef);
-  let formattedPhoto:string = formatPhoto(avatarObj);
-  return formattedPhoto;
+  let photoUrl:string = "/media/avatars/defaultAvatar1.png"
+  return photoUrl;
 }
 
 export function useFirebaseAuth() {
