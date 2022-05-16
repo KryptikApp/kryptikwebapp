@@ -7,6 +7,7 @@ import Divider from '../../components/Divider'
 import { storage } from '../../src/helpers/firebaseHelper'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import NavProfile from '../../components/NavProfile'
+import { getFileName } from '../../src/helpers/utils'
 
 
 
@@ -19,16 +20,11 @@ const Profile: NextPage = () => {
       router.push('/')
   }, [authUser, loading])
 
-  const [imageUrl, setImageUrl] = useState("");
+  const imageUrlInit:string = getUserPhotoPath(authUser);
+  const [imageUrl, setImageUrl] = useState(imageUrlInit);
   let fileInit:Blob = new Blob();
   //UNCOMMENT for file uploads
   const [imageFile, setImageFile] = useState(fileInit);
-
-  useEffect(()=>{
-    getUserPhotoPath(authUser).then((path)=>{
-        setImageUrl(path);
-    })
-  });
 
   // uploads file to device
   const uploadToClient = (event:any) => {
@@ -42,6 +38,7 @@ const Profile: NextPage = () => {
     }
   };
 
+
   // gets file url from document reference
   const urlFromRef = async(storageRef:StorageReference):Promise<string>=>{
     let urlResult:string = await getDownloadURL(storageRef);
@@ -51,10 +48,13 @@ const Profile: NextPage = () => {
 
   const uploadToRemote = async():Promise<string>=>{
     console.log("firebase image upload starting....");
-    const storageRef = ref(storage, imageUrl);
+    let fileName:string = getFileName(imageUrl);
+    let storageFilePath:string = `avatars/${fileName}`
+    const storageRef = ref(storage, storageFilePath);
     // placeholder for upload return url
-    let imageUploadUrl:string = "https://picsum.photos/200";
+    let imageUploadUrl:string = imageUrl;
     // upload image to firebase
+    console.log("Uploading bytes...");
     uploadBytes(storageRef, imageFile).then(async (snapshot) => {
       console.log("Snapshot:");
       console.log(snapshot);
@@ -85,7 +85,7 @@ const Profile: NextPage = () => {
         </div>
         <div className="w-full rounded">
         <h5 className="mb-3 text-base font-bold text-black-900 lg:text-xl dark:text-white">
-              Upload Profile Photo
+              Kryptik Profile Photo
           </h5>
 
                   <label className="form-label inline-block mb-2 text-gray-700">
