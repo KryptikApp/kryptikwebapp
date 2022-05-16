@@ -16,7 +16,7 @@ const kryptikAuthContext = createContext({
   loading: true,
   signInWithToken: async (token:string) => {},
   updateCurrentUserKryptik: async(user:UserDB) => {},
-  getUserPhotoPath: async(user:UserDB):Promise<string> => {return ""},
+  getUserPhotoPath: (user:UserDB):string => {return ""},
   signOut: ()=>{}
 });
 
