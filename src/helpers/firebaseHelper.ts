@@ -69,6 +69,10 @@ const formatPhoto = function(docIn:DocumentSnapshot<DocumentData>):string{
   return formatted;
 }
 
+export const generateStoragePath = function(fileName:string, user:UserDB){
+  return `avatars/${user.uid}/${fileName}`;
+}
+
 export const readExtraUserData = async function(user:UserDB):Promise<UserExtraData>{
   let extraDataDoc:DocumentSnapshot<DocumentData> = await getDoc(doc(firestore, "users", user.uid));
   let userExtraData:UserExtraData = formatUserExtraData(extraDataDoc);
