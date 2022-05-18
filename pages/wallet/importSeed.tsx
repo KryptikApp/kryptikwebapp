@@ -1,7 +1,4 @@
 import type { NextPage } from 'next'
-
-
-// wallet SDK helpers
 import { useState } from 'react'
 
 const ImportSeed: NextPage = () => {

@@ -1,11 +1,11 @@
-import { Network } from "../models/network";
-import {Status} from "../types/index"
 import {
     Block,
     StaticJsonRpcProvider,
     TransactionRequest,
     TransactionResponse,
 } from '@ethersproject/providers';
+import { Network } from "hdseedloop";
+import {Status} from "../types/index"
 
 
 interface ItransactionBuilder{

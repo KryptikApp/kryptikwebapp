@@ -17,7 +17,6 @@ import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
 import { BigNumber } from "ethers";
-import { Console } from "console";
 
 const NetworkDbsRef = collection(firestore, "networks")
 

@@ -1,11 +1,9 @@
 import pinataClient, { PinataClient } from "@pinata/sdk";
 import axios from "axios";
 import { ReadStream } from "fs";
-import { Stream } from "stream";
 import {pinataConfig} from "../../secrets"
 
 const urlPinataFile:string = "https://api.pinata.cloud/pinning/pinFileToIPFS";
-const urlPinataJson:string = "https://api.pinata.cloud/pinning/pinJSONToIPFS"
 
 let pinata = pinataClient(pinataConfig.apiKey, pinataConfig.apiKeySecret);
 
