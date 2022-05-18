@@ -21,18 +21,30 @@ const Profile: NextPage = () => {
   }, [authUser, loading])
 
   const [name, setName] = useState(authUser.name);
+  const[bio, setBio] = useState(authUser.bio);
   const [loadingUpdate, setloadingUpdate] = useState(false);
 
 
   const handleClickUpdate = async function(){
-    if(name!="" && name!=authUser.name && !loadingUpdate){
-      setloadingUpdate(true);
-      authUser.name = name;
-      await updateCurrentUserKryptik(authUser);
-      setloadingUpdate(false);
-      console.log("TOASTING!");
-      toast.success('Profile Updated!');
+    // make sure name has desired length
+    if(name.length<4){
+      toast.error("Your profile name must be at least 4 characters.")
+      return;
     }
+    try{
+      if(!loadingUpdate){
+        setloadingUpdate(true);
+        authUser.name = name;
+        authUser.bio = bio;
+        await updateCurrentUserKryptik(authUser);
+        setloadingUpdate(false);
+        toast.success('Profile Updated!');
+      }
+    }
+    catch(e){
+        toast.error("Unbale to update profile. Please try again later.");
+    }
+    
   }
 
 
@@ -40,21 +52,30 @@ const Profile: NextPage = () => {
     <div>
          <Toaster/>
         <div className="text-center max-w-2xl mx-auto content-center">
-          <HeaderProfile user={authUser}/>
+          <HeaderProfile user={authUser} showBio={true} center={false}/>
           <Divider/>
         </div>
-        <div className="container mt-5 mx-auto grid grid-cols-1 md:grid-cols-2 lg:px-40">
-            <div className="px-5 py-5 m-2 rounded">
+        <div className="container mt-5 mx-auto grid grid-cols-1 max-w-2xl">
+
+            <div className="px-5 py-5 m-2 rounded mb-0 ">
               <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
                 Profile Name
               </label>
-              <input className="bg-gray-200 appearance-none max-w-20 border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-full-name" placeholder={authUser.name} value={name} onChange={(e) => setName(e.target.value)}/>
+              <input maxLength={12} className="bg-gray-200 appearance-none max-w-20 border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-full-name" placeholder={authUser.name} value={name} onChange={(e) => setName(e.target.value)}/>
             </div>
-            <div className="px-5 py-5 m-2 rounded">
+
+            <div className="px-5 py-5 m-2 rounded mt-0 mb-0">
               <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
                 Your Email
               </label>
               <input disabled className="hover:cursor-not-allowed bg-gray-200 appearance-none max-w-20 border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400 disabled" id="inline-full-name" placeholder={authUser.uid}/>
+            </div>
+
+            <div className="px-5 py-5 m-2 rounded mt-0">
+              <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
+                Your Bio
+              </label>
+              <textarea maxLength={150} className="bg-gray-200 appearance-none max-w-20 border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-bio" placeholder={authUser.bio} value={bio} onChange={(e) => setBio(e.target.value)}/>
               <div className="flex justify-end mt-5">
               <button onClick={()=>handleClickUpdate()}className={`bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 ${loadingUpdate?"hover:cursor-not-allowed":""} border border-green-500 hover:border-transparent rounded-lg my-5`} disabled={loadingUpdate}>
                         Save
@@ -68,8 +89,12 @@ const Profile: NextPage = () => {
                </button>
             </div>
             </div>
+
         </div>
-        
+
+    <div className="h-[7rem]">
+      {/* padding div for space between top and main elements */}
+    </div> 
     <NavProfile/>
     </div>
  
