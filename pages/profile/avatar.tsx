@@ -8,6 +8,7 @@ import { generateStoragePath, storage } from '../../src/helpers/firebaseHelper'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import NavProfile from '../../components/NavProfile'
 import { getFileName } from '../../src/helpers/utils'
+import toast, { Toaster } from 'react-hot-toast'
 
 
 
@@ -63,20 +64,26 @@ const Profile: NextPage = () => {
 
 
   const handleClickUpload = async() =>{
-    setloadingUpdate(true);
-    // don't upload if still in upload process
-    if(loadingUpdate) return;
-    // upload file to firebase
-    let urlImageUpload:string = await uploadToRemote();
-    authUser.photoUrl = urlImageUpload;
-    // update user's profile photo
-    await updateCurrentUserKryptik(authUser);
-    setloadingUpdate(false);
+    try{
+      setloadingUpdate(true);
+      // don't upload if still in upload process
+      if(loadingUpdate) return;
+      // upload file to firebase
+      let urlImageUpload:string = await uploadToRemote();
+      authUser.photoUrl = urlImageUpload;
+      // update user's profile photo
+      await updateCurrentUserKryptik(authUser);
+      setloadingUpdate(false);
+      toast.success('Profile Updated!');
+    }
+    catch(e){
+      toast.error("Error updating avatar. Please try again later.");
+    }
   }
 
   return (
     <div>
-
+    <Toaster/>
     <div className="h-[2rem]">
       {/* padding div for space between top and main elements */}
     </div>
