@@ -1,13 +1,13 @@
 // helps with integrating web3service into app. context
-import { UserBuilder } from "firebase-functions/v1/auth";
 import { signInWithCustomToken, updateCurrentUser, updateProfile, User, UserCredential } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { defaultWallet } from "../models/defaultWallet";
 import { IWallet } from "../models/IWallet";
-import { defaultUser, UserDB } from "../models/user";
+import { defaultUser, UserDB, UserExtraData } from "../models/user";
 import Web3Service, { IConnectWalletReturn } from "../services/Web3Service";
-import { firebaseAuth, firestore, formatAuthUser, UserExtraData, readExtraUserData, getUserPhotoPath } from "./firebaseHelper";
+import { firebaseAuth, firestore, formatAuthUser, readExtraUserData, getUserPhotoPath } from "./firebaseHelper";
+
 
 
 export function useKryptikAuth() {
@@ -28,7 +28,7 @@ export function useKryptikAuth() {
 
     // routine to run when auth. state changes
     const authStateChanged = async (user:any) => {
-        console.log(user);
+        console.log("Running auth. state changed!");
         if (!user) {
           setAuthUser(defaultUser)
           setLoading(false)
@@ -36,6 +36,9 @@ export function useKryptikAuth() {
         }
         setLoading(true)
         let formattedUser:UserDB = formatAuthUser(user);
+        // read extra user data from db
+        let userExtraData = await readExtraUserData(formattedUser);
+        formattedUser.bio = userExtraData.bio;
         // start web3 kryptik service
         let ks = await initServiceState.StartSevice();
         setKryptikService(ks);
@@ -57,7 +60,8 @@ export function useKryptikAuth() {
           // update extra user data to reflect updated remote share
           let updatedUserExtraData:UserExtraData = {
             remoteShare: kryptikConnectionObject.remoteShare,
-            isTwoFactorAuth: UserExtraData.isTwoFactorAuth
+            isTwoFactorAuth: UserExtraData.isTwoFactorAuth,
+            bio: UserExtraData.bio
           }
 
           try{
@@ -76,16 +80,20 @@ export function useKryptikAuth() {
     const updateCurrentUserKryptik = async(user:UserDB)=>{
       let userFirebase:User|null = firebaseAuth.currentUser;
       if(userFirebase == null) throw(new Error("No user is signed in."));
+      // get current extra user data
+      let extraUserData:UserExtraData = await readExtraUserData(user);
+      let extraUserDataUpdated:UserExtraData = {remoteShare: extraUserData.remoteShare, 
+        bio: user.bio, isTwoFactorAuth:extraUserData.isTwoFactorAuth};
+      await writeExtraUserData(user, extraUserDataUpdated);
       await updateProfile(userFirebase, {displayName:user.name, photoURL:user.photoUrl});
     }
 
     // sign in with external auth token
     const signInWithToken = async(customToken:string, seed?:string) =>
-    {
-        let signInCred:UserCredential = await signInWithCustomToken(firebaseAuth, customToken);
-        let formattedUser:UserDB = formatAuthUser(signInCred.user);
-        let walletKryptik:IWallet = await ConnectWalletLocalandRemote(kryptikService, formattedUser, seed);
-        setKryptikWallet(walletKryptik);
+    { 
+        console.log("Signing in with token.");
+        await signInWithCustomToken(firebaseAuth, customToken);
+        // note: auth state changed will run after the line above
     }
 
     const writeExtraUserData = async function(user:UserDB, data:UserExtraData) {
@@ -104,7 +112,9 @@ export function useKryptikAuth() {
     
     // clear current kryptik web 3 service state
     const clear = () => {
+      console.log("Clearing!");
       setAuthUser(defaultUser);
+      setKryptikWallet(defaultWallet);
       setKryptikService(new Web3Service());
       setLoading(true);
     };
