@@ -3,28 +3,27 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Magic } from 'magic-sdk'
 import router from 'next/router'
+import toast, { Toaster } from 'react-hot-toast'
 
 // kryptik imports
-import { IWallet } from '../../src/models/IWallet'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 
 const CreateWallet: NextPage = () => {
-  const {signInWithToken, kryptikWallet, kryptikService} = useKryptikAuthContext();
+  const {signInWithToken, kryptikWallet} = useKryptikAuthContext();
   const [email, setEmail] = useState("");
   const [isLoading, setisLoading] = useState(false);
-  console.log("Create Wallet Web 3 Service Id:")
-  console.log(kryptikService.serviceId);
+  const [loadingMessage, setLoadingMessage] = useState("");
   
   const loginUser = async () => {
       setisLoading(true);
       /* Step 4.1: Generate a DID token with Magic */
       let magicKey:string = process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY? process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY : "";
       const magic = new Magic(magicKey)
-      const didToken = await magic.auth.loginWithMagicLink({ email })
-      console.log("Magic token:")
-      console.log(didToken);
-      console.log("logging in...");
-      /* Step 4.4: POST to our /login endpoint */
+      setLoadingMessage("Fetching authentication token.");
+      const didToken = await magic.auth.loginWithMagicLink({ email });
+      setLoadingMessage("Authenticating with server.");
+
+      // hitting login API
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: {
@@ -35,27 +34,28 @@ const CreateWallet: NextPage = () => {
       })
     
       if (res.status === 200) {
-        setisLoading(false);
-        console.log("Response body:");
-        console.log(res.body);
+        setLoadingMessage("Connecting wallet on device.");
         let resDecoded = await res.json();
         let customTokenDB:string = resDecoded.dbToken;
-        console.log("token:");
-        console.log(customTokenDB);
         await signInWithToken(customTokenDB);
         // If we reach this line, it means our
         // authentication succeeded, so we'll
         // redirect to the home page!
+        toast.success("Kryptik Wallet connected.");
+        setisLoading(false);
         router.push('/')
-      } else {
+      } 
+      else {
+        toast.error("Unable to connect Kryptik wallet. Please contact support.");
+        setisLoading(false);
         throw new Error(await res.text())
       }
-      setisLoading(false);
   }
 
 
   return (
     <div>
+        <Toaster/>
         <div className="h-[7rem]">
           {/* padding div for space between top and main elements */}
         </div>
@@ -120,6 +120,10 @@ const CreateWallet: NextPage = () => {
                 </button>
               </div>
               <Link href="../profile/importSeed"><span className="text-blue-400 hover:cursor-pointer hover:text-blue transition-colors duration-300">or import existing seed</span></Link>
+          {
+            isLoading && 
+            <p className="text-slate-500 text-sm">{loadingMessage}</p>
+          }
           </div>
         </div>
         </div>
