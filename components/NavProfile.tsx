@@ -7,11 +7,9 @@ import {AiOutlineSetting, AiOutlineUser, AiOutlineLock, AiOutlineWallet, AiOutli
 
 const NavProfile:NextPage = () => {
     const router = useRouter();
-    console.log("Router path (Navbar):")
-    console.log(router.pathname)
         
     return(
-        <nav className="fixed bottom-0 inset-x-0 bg-slate-50 flex justify-between text-sm text-sky-600 hover:cursor-pointer">
+        <nav className="fixed bottom-0 inset-x-0 bg-slate-50 opacity-80 flex justify-between text-sm text-sky-600 hover:cursor-pointer">
 
         <Link href="../profile/security">
             <div  className="w-full block py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800">
