@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   webpack: function (config, options) {
     console.log(options.webpack.version); // 5.18.0
-    config.experiments = { asyncWebAssembly: true };
+    config.experiments = { asyncWebAssembly: true, layers:true };
     return config;
   },
 }
