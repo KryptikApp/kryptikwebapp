@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 
 // wallet SDK helpers
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
+import { getUserPhotoPath } from "../src/helpers/firebaseHelper";
 
 
 const Navbar:NextPage = () => {
@@ -42,7 +43,7 @@ const Navbar:NextPage = () => {
                 <Link href="../createNft"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-transparent rounded hover:bg-indigo-100 hover:cursor-pointer hover:text-green-500 transition-colors duration-300 ${router.pathname == "/createNft" ? "font-bold" : ""}`}>Create</span></Link> 
                 {/* show disconnect button if connected and vise versa */}
                 {kryptikWallet.connected && authUser ? 
-                <Link href="../wallet/"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Wallet <img src={authUser.photoUrl} alt="Profile Image" className="inline object-cover w-5 h-5 rounded-full ml-2"/></span></Link>
+                <Link href="../wallet/"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Wallet <img src={getUserPhotoPath(authUser)} alt="Profile Image" className="inline object-cover w-5 h-5 rounded-full ml-2"/></span></Link>
                 :<Link href="../wallet/createWallet"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-grey-600 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Connect</span></Link>}
             </div>
             </div>
