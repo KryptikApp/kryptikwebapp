@@ -119,7 +119,7 @@ const CreateWallet: NextPage = () => {
                         }
                 </button>
               </div>
-              <Link href="../profile/importSeed"><span className="text-blue-400 hover:cursor-pointer hover:text-blue transition-colors duration-300">or import existing seed</span></Link>
+              <Link href="../wallet/importSeed"><span className="text-blue-400 hover:cursor-pointer hover:text-blue transition-colors duration-300">or import existing seed</span></Link>
           {
             isLoading && 
             <p className="text-slate-500 text-sm">{loadingMessage}</p>
