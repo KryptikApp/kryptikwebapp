@@ -44,7 +44,6 @@ const Profile: NextPage = () => {
     catch(e){
         toast.error("Unbale to update profile. Please try again later.");
     }
-    
   }
 
 
@@ -61,21 +60,21 @@ const Profile: NextPage = () => {
               <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
                 Profile Name
               </label>
-              <input maxLength={12} className="bg-gray-200 appearance-none max-w-20 border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-full-name" placeholder={authUser.name} value={name} onChange={(e) => setName(e.target.value)}/>
+              <input maxLength={12} className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-full-name" placeholder={authUser.name} value={name} onChange={(e) => setName(e.target.value)}/>
             </div>
 
             <div className="px-5 py-5 m-2 rounded mt-0 mb-0">
               <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
                 Your Email
               </label>
-              <input disabled className="hover:cursor-not-allowed bg-gray-200 appearance-none max-w-20 border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400 disabled" id="inline-full-name" placeholder={authUser.uid}/>
+              <input disabled className="hover:cursor-not-allowed bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400 disabled" id="inline-full-name" placeholder={authUser.uid}/>
             </div>
 
             <div className="px-5 py-5 m-2 rounded mt-0">
               <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
                 Your Bio
               </label>
-              <textarea maxLength={150} className="bg-gray-200 appearance-none max-w-20 border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-bio" placeholder={authUser.bio} value={bio} onChange={(e) => setBio(e.target.value)}/>
+              <textarea maxLength={150} className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-bio" placeholder={authUser.bio} value={bio} onChange={(e) => setBio(e.target.value)}/>
               <div className="flex justify-end mt-5">
               <button onClick={()=>handleClickUpdate()}className={`bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 ${loadingUpdate?"hover:cursor-not-allowed":""} border border-green-500 hover:border-transparent rounded-lg my-5`} disabled={loadingUpdate}>
                         Save
