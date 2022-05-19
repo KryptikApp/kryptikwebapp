@@ -88,7 +88,7 @@ export const getUserPhotoPath = function(user:UserDB):string{
     return user.photoUrl;
   }
   // if not... return a default avatar icon
-  let photoUrl:string = "/media/avatars/defaultAvatar1.png"
+  let photoUrl:string = "/media/avatars/defaultAvatar1.jpg"
   return photoUrl;
 }
 
