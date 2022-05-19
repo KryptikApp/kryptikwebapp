@@ -100,6 +100,12 @@ export function useKryptikAuth() {
       await setDoc(doc(firestore, "users", user.uid), data);
     }
 
+    const getSeedPhrase = function():string{
+      let seedPhrase:string|null = kryptikWallet.seedLoop.getSeedPhrase();
+      if(!seedPhrase) throw(new Error("Error: HDSeedloop seedphrase is undefined"))
+      return seedPhrase;
+    }
+
   
     const signOut = () =>
       firebaseAuth.signOut().then(clear);
@@ -125,6 +131,7 @@ export function useKryptikAuth() {
       signInWithToken,
       updateCurrentUserKryptik,
       getUserPhotoPath,
+      getSeedPhrase,
       signOut,
       kryptikService,
       setKryptikWallet,
