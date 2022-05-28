@@ -1,10 +1,19 @@
 import type { NextPage } from 'next'
 import { useState } from 'react'
+import { Magic } from 'magic-sdk'
+import router from 'next/router'
+import toast, { Toaster } from 'react-hot-toast'
+
+//kryptic imports
+import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 
 const ImportSeed: NextPage = () => {
 
+  const {signInWithToken, kryptikWallet} = useKryptikAuthContext();
   const [seed, setSeed] = useState("");
   const [email, setEmail] = useState("");
+  const [isLoading, setisLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("");
 
   function handleCreateWallet(): void {
     throw new Error('Function not implemented.')
@@ -13,6 +22,48 @@ const ImportSeed: NextPage = () => {
   const handleClickImport = async () =>{
     console.log("NOT implemented yet!");
   }
+
+  const handleSeed = function(seedIn:string){
+    setSeed(seedIn);
+  }
+
+  const loginUserWithSeed = async () => {
+    setisLoading(true);
+    /* Step 4.1: Generate a DID token with Magic */
+    let magicKey:string = process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY? process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY : "";
+    const magic = new Magic(magicKey)
+    setLoadingMessage("Fetching authentication token.");
+    const didToken = await magic.auth.loginWithMagicLink({ email });
+    setLoadingMessage("Authenticating with server.");
+
+    // hitting login API
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${didToken}`
+      },
+      body: JSON.stringify({ email })
+    })
+  
+    if (res.status === 200) {
+      setLoadingMessage("Connecting wallet on device.");
+      let resDecoded = await res.json();
+      let customTokenDB:string = resDecoded.dbToken;
+      await signInWithToken(customTokenDB, seed);
+      // If we reach this line, it means our
+      // authentication succeeded, so we'll
+      // redirect to the home page!
+      toast.success("Kryptik Wallet connected.");
+      setisLoading(false);
+      router.push('/')
+    } 
+    else {
+      toast.error("Unable to connect Kryptik wallet. Please contact support.");
+      setisLoading(false);
+      throw new Error(await res.text())
+    }
+}
 
   return (
     <div className="h-screen w-full">
@@ -39,7 +90,7 @@ const ImportSeed: NextPage = () => {
               </label>
             </div>
             <div className="md:w-2/3">
-              <input type="password" className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-full-name" required onChange={(e) => setSeed(e.target.value)}/>
+              <input type="password" className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-full-name" required onChange={(e) => handleSeed(e.target.value)}/>
             </div>
           </div>
 
@@ -56,7 +107,7 @@ const ImportSeed: NextPage = () => {
         </form>
         <div className="text-center max-w-2xl mx-auto content-center">
           <div className="flex flex-wrap justify-center">
-            <button onClick={()=>handleCreateWallet()} className="bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded-lg my-5">
+            <button onClick={()=>loginUserWithSeed()} className="bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded-lg my-5">
                          Import Seed
             </button>
           </div>

@@ -27,27 +27,13 @@ export function useKryptikAuth() {
 
 
     // routine to run when auth. state changes
-    const authStateChanged = async (user:any) => {
+    const authStateChanged = async (user:any, seed?:string) => {
         console.log("Running auth. state changed!");
         if (!user) {
           setAuthUser(defaultUser)
           setLoading(false)
           return;
         }
-        setLoading(true)
-        let formattedUser:UserDB = formatAuthUser(user);
-        // read extra user data from db
-        let userExtraData = await readExtraUserData(formattedUser);
-        formattedUser.bio = userExtraData.bio;
-        // start web3 kryptik service
-        let ks = await initServiceState.StartSevice();
-        setKryptikService(ks);
-        ks.onWalletChanged = walletStateChanged;
-        let walletKryptik:IWallet = await ConnectWalletLocalandRemote(ks, formattedUser);
-        // set data
-        setKryptikWallet(walletKryptik)
-        setAuthUser(formattedUser);    
-        setLoading(false);
     };
 
     // connects wallet with local service and updates remote share on server if necessary
@@ -92,7 +78,36 @@ export function useKryptikAuth() {
     const signInWithToken = async(customToken:string, seed?:string) =>
     { 
         console.log("Signing in with token.");
-        await signInWithCustomToken(firebaseAuth, customToken);
+        console.log(seed);
+        
+        let userCred:UserCredential = await signInWithCustomToken(firebaseAuth, customToken);
+        if (seed != undefined) {
+          console.log(seed);
+        }
+
+        //now we are updating the conrtext and connecting the wallet
+        setLoading(true)
+        let formattedUser:UserDB = formatAuthUser(userCred.user);
+        // read extra user data from db
+        let userExtraData = await readExtraUserData(formattedUser);
+        formattedUser.bio = userExtraData.bio;
+        // start web3 kryptik service
+        let ks = await initServiceState.StartSevice();
+        setKryptikService(ks);
+        ks.onWalletChanged = walletStateChanged;
+        let walletKryptik:IWallet;
+        console.log("seed to paass");
+        console.log(seed);
+        if (seed != "") {
+            walletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser, seed);
+        }
+        else {
+            walletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser);
+        }
+        // set data
+        setKryptikWallet(walletKryptik)
+        setAuthUser(formattedUser);    
+        setLoading(false);
         // note: auth state changed will run after the line above
     }
 

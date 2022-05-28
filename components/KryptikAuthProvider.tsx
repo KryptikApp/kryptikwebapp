@@ -14,7 +14,7 @@ const kryptikAuthContext = createContext({
   // auth db funcs and vals
   authUser: defaultUser,
   loading: true,
-  signInWithToken: async (token:string) => {},
+  signInWithToken: async (token:string, seed?:string) => {},
   updateCurrentUserKryptik: async(user:UserDB) => {},
   getUserPhotoPath: (user:UserDB):string => {return ""},
   getSeedPhrase: ():string => {return ""},
