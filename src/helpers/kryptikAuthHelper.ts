@@ -18,7 +18,7 @@ export function useKryptikAuth() {
     const [kryptikWallet, setKryptikWallet] = useState(defaultWallet);
     const [authUser, setAuthUser] = useState(defaultUser);
     const [loading, setLoading] = useState(true);
-
+    
     // wallet state change event handler
     const walletStateChanged = function(wallet:IWallet){
       console.log("Wallet event handler fired!");
@@ -34,6 +34,7 @@ export function useKryptikAuth() {
           setLoading(false)
           return;
         }
+        await updateAuthContext(user);
     };
 
     // connects wallet with local service and updates remote share on server if necessary
@@ -76,18 +77,27 @@ export function useKryptikAuth() {
 
     // sign in with external auth token
     const signInWithToken = async(customToken:string, seed?:string) =>
-    { 
-        console.log("Signing in with token.");
-        console.log(seed);
-        
+    {   
+        // this value is used to prevent auth state changed from updating auth context...
+        // when signing in with custom seed
+        sessionStorage.setItem("isSigniningInWithToken", "true");
         let userCred:UserCredential = await signInWithCustomToken(firebaseAuth, customToken);
-        if (seed != undefined) {
-          console.log(seed);
-        }
+        sessionStorage.removeItem("isSigniningInWithToken")
+        //now we are updating the context and connecting the wallet
+        updateAuthContext(userCred.user, seed, "sign in with token function call");
+        // note: auth state changed will run after the line above
+    }
 
-        //now we are updating the conrtext and connecting the wallet
+    const updateAuthContext = async(user:User, seed?:string, id?:string)=>
+    {
+        let isSigningInWithToken = sessionStorage.getItem("isSigniningInWithToken")
+        if(isSigningInWithToken){
+          // log for developing... remove in production
+          console.log("SIGNING IN WITH TOKEN ESCAPE ROUTE HIT!!!!")
+          return;
+        }
         setLoading(true)
-        let formattedUser:UserDB = formatAuthUser(userCred.user);
+        let formattedUser:UserDB = formatAuthUser(user);
         // read extra user data from db
         let userExtraData = await readExtraUserData(formattedUser);
         formattedUser.bio = userExtraData.bio;
@@ -96,8 +106,6 @@ export function useKryptikAuth() {
         setKryptikService(ks);
         ks.onWalletChanged = walletStateChanged;
         let walletKryptik:IWallet;
-        console.log("seed to paass");
-        console.log(seed);
         if (seed != "") {
             walletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser, seed);
         }
@@ -108,7 +116,6 @@ export function useKryptikAuth() {
         setKryptikWallet(walletKryptik)
         setAuthUser(formattedUser);    
         setLoading(false);
-        // note: auth state changed will run after the line above
     }
 
     const writeExtraUserData = async function(user:UserDB, data:UserExtraData) {
