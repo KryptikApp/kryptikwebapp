@@ -27,7 +27,7 @@ const ListBalance:NextPage = () => {
             !isFetched?<p>Loading Balances.</p>:
             <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
               {balances.map((balance:IBalance) => (
-                  <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={balance.ticker} amount={balance.amountCrypto}/>
+                  <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={balance.ticker} amount={balance.amountCrypto} amountUSD={balance.amountUSD}/>
               ))}
             </ul>
         }

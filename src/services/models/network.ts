@@ -10,5 +10,6 @@ export interface NetworkDb {
     chainId: number,
     hexColor: string,
     dateCreated: Date,
-    provider:string
+    provider:string,
+    coingeckoId:string
 }

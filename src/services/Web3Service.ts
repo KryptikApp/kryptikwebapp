@@ -17,6 +17,7 @@ import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
 import { BigNumber } from "ethers";
+import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 
 const NetworkDbsRef = collection(firestore, "networks")
 
@@ -53,7 +54,8 @@ export interface IBalance{
     fullName: string,
     ticker:string,
     iconPath:string,
-    amountCrypto: string
+    amountCrypto: string,
+    amountUSD: string
 }
 
 export interface IConnectWalletReturn{
@@ -224,7 +226,8 @@ class Web3Service extends BaseService{
                 iconPath: docData.iconPath,
                 whitePaperPath: docData.whitePaperPath,
                 isSupported: docData.isSupported,
-                provider: providerFromDb
+                provider: providerFromDb,
+                coingeckoId: docData.coingeckoId
             }
             NetworkDbsResult.push(NetworkDbToAdd);
         });
@@ -362,8 +365,10 @@ class Web3Service extends BaseService{
                 .div(BigNumber.from("10000000000000000"))
                 .toNumber() / 100;
                 let networkBalanceString = networkBalanceAdjusted.toString();
+                let priceUSD = await getPriceOfTicker(nw.coingeckoId);
+                let amountUSD = priceUSD * networkBalanceAdjusted.valueOf();
                 let newBalanceObj:IBalance = {fullName:nw.fullName, ticker:nw.ticker, iconPath:nw.iconPath, 
-                    amountCrypto:networkBalanceString}
+                    amountCrypto:networkBalanceString, amountUSD:amountUSD.toString()}
                 // add adjusted balance to balances return object
                 balances.push(newBalanceObj);
             }
