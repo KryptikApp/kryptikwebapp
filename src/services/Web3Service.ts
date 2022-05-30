@@ -16,7 +16,7 @@ import HDSeedLoop, { Network, NetworkFamily, NetworkFromTicker, SeedLoop, Serial
 import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
-import { BigNumber } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 
 const NetworkDbsRef = collection(firestore, "networks")
@@ -357,16 +357,14 @@ class Web3Service extends BaseService{
                 console.log(firstAddy);
                 console.log(`Getting balance for ${nw.fullName}...`);
                 // get provider for network
-                let networkBalance = await ethNetworkProvider.getBalance(firstAddy);
+                let networkBalance = Number(utils.formatEther(await ethNetworkProvider.getBalance(firstAddy)));
                 console.log(`${nw.fullName} Balance:`);
                 console.log(networkBalance);
                 // prettify ether balance
-                let networkBalanceAdjusted:Number = BigNumber.from(networkBalance)
-                .div(BigNumber.from("10000000000000000"))
-                .toNumber() / 100;
+                let networkBalanceAdjusted:Number = Number(networkBalance.toPrecision(4));
                 let networkBalanceString = networkBalanceAdjusted.toString();
                 let priceUSD = await getPriceOfTicker(nw.coingeckoId);
-                let amountUSD = priceUSD * networkBalanceAdjusted.valueOf();
+                let amountUSD = (priceUSD * networkBalanceAdjusted.valueOf()).toPrecision(2);
                 let newBalanceObj:IBalance = {fullName:nw.fullName, ticker:nw.ticker, iconPath:nw.iconPath, 
                     amountCrypto:networkBalanceString, amountUSD:amountUSD.toString()}
                 // add adjusted balance to balances return object
