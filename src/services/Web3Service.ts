@@ -175,7 +175,7 @@ class Web3Service extends BaseService{
 
     // sets rpc endpoints for each supported NetworkDb
     private setRpcEndpoints(){
-        this.NetworkDbs.forEach((NetworkDb:NetworkDb)=>{
+        for(const NetworkDb of this.NetworkDbs){
             let ticker:string = NetworkDb.ticker;
             if(NetworkDb.isSupported){
                 try{
@@ -186,7 +186,7 @@ class Web3Service extends BaseService{
                     console.warn("NetworkDb is specified as supported, but there was an error adding rpc endpoint. Check rpc config.")
                 }               
             }
-        });
+        }
     }
 
     // sets providers for each supported NetworkDb
@@ -236,15 +236,15 @@ class Web3Service extends BaseService{
     }
 
     getSupportedNetworkDbs():NetworkDb[]{
-        let NetworkDbsResult:NetworkDb[] = []
-        this.NetworkDbs.forEach((NetworkDb) => {
+        let NetworkDbsResult:NetworkDb[] = [];
+        for(const NetworkDb of this.NetworkDbs){
             // filter results based on searchquery
             if(NetworkDb.isSupported){
                 // build NetworkDb object from doc result     
                 NetworkDbsResult.push(NetworkDb);
                 // console.log(doc.id, " => ", doc.data());
             }
-        });
+        }
         return NetworkDbsResult;
     }
 
@@ -347,19 +347,12 @@ class Web3Service extends BaseService{
             if(network.getNetworkfamily()==NetworkFamily.EVM){
                 if(!kryptikProvider.ethProvider) throw Error(`No ethereum provider set up for ${network.fullName}.`);
                 let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
-                console.log("Processing Network:")
-                console.log(nw.fullName);
                 // gets all addresses for network
                 let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
                 // gets first address for network
                 let firstAddy:string = allAddys[0];
-                console.log(`${nw.fullName} Addy:`);
-                console.log(firstAddy);
-                console.log(`Getting balance for ${nw.fullName}...`);
                 // get provider for network
                 let networkBalance = Number(utils.formatEther(await ethNetworkProvider.getBalance(firstAddy)));
-                console.log(`${nw.fullName} Balance:`);
-                console.log(networkBalance);
                 // prettify ether balance
                 let networkBalanceAdjusted:Number = Number(networkBalance.toPrecision(4));
                 let networkBalanceString = networkBalanceAdjusted.toString();
