@@ -12,5 +12,12 @@ enum Status
     Done = 3
 }
 
-export{ServiceState, Status}
+enum SendProgress{
+    Begin = 0,
+    SetParamaters = 1,
+    Rewiew = 2,
+    Complete = 3
+}
+
+export{ServiceState, Status, SendProgress}
 
