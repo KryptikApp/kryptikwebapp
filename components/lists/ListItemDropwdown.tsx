@@ -12,7 +12,7 @@ const ListItemDropdown:NextPage<Props> = (props) => {
     let title = network.fullName;
     let imgSrc = network.iconPath;
     return(
-        <li className="text-gray-900 cursor-default select-none relative py-2 pl-3 pr-9" key={title} id={title} role="option" onClick={()=>selectFunction(network)}>
+        <li className="text-gray-900 select-none relative py-2 pl-3 pr-9 hover:bg-gray-100 cursor-pointer" key={title} id={title} role="option" onClick={()=>selectFunction(network)}>
             <div className="flex items-center">
             <img src={imgSrc} alt="" className="flex-shrink-0 h-6 w-6 rounded-full"/>
             <span className="font-normal ml-3 block truncate"> {title} </span>
