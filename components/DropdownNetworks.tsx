@@ -57,7 +57,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                 </span>
                 </button>
 
-                <ul className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm" tabIndex={-1} role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3" hidden={!showOptions}>
+                <ul className="absolute z-10 mt-1 w-full bg-white opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm" tabIndex={-1} role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3" hidden={!showOptions}>
                 {networks.map((nw:NetworkDb) => (
                   <ListItemDropdown selectedNetwork={selectedNetwork} selectFunction={handleOptionClick} network={nw}/>
                 ))}
