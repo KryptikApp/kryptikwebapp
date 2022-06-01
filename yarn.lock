@@ -3714,10 +3714,10 @@ hash.js@1.1.7, hash.js@^1.0.0, hash.js@^1.0.3, hash.js@^1.1.7:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
-hdseedloop@^0.2.5:
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/hdseedloop/-/hdseedloop-0.2.5.tgz#93a10ac77bdc2ace166ca3e9bfcaa8ba36c7ccd7"
-  integrity sha512-LlPUsa58XlcYNItS6dMeWXNc5t4I+fwoQ7rVu8CKHhyl5FgutD+tWu2spOOytHPhoo3hNEh3AaoaFbxi1A6GSg==
+hdseedloop@^0.2.7:
+  version "0.2.7"
+  resolved "https://registry.yarnpkg.com/hdseedloop/-/hdseedloop-0.2.7.tgz#25f65129e06b887e541347d688d80867100f1a94"
+  integrity sha512-LSbLH9taeJdo+rGnJpz1FbRFlCiCVsMRVb9YHrN/bSlF3uI8UBmiF/U431a9PA6AcwmAQMkuU6hi/6FMTCoIWA==
   dependencies:
     "@ethersproject/abstract-provider" "^5.4.0"
     "@ethersproject/abstract-signer" "^5.4.0"
