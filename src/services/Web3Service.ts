@@ -18,6 +18,9 @@ import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
 import { BigNumber, utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
+import { provider } from "firebase-functions/v1/analytics";
+import TransactionFeeData from "./models/transaction";
+import { roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
 
 const NetworkDbsRef = collection(firestore, "networks")
 
@@ -354,10 +357,10 @@ class Web3Service extends BaseService{
                 // get provider for network
                 let networkBalance = Number(utils.formatEther(await ethNetworkProvider.getBalance(firstAddy)));
                 // prettify ether balance
-                let networkBalanceAdjusted:Number = Number(networkBalance.toPrecision(4));
+                let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
                 let networkBalanceString = networkBalanceAdjusted.toString();
                 let priceUSD = await getPriceOfTicker(nw.coingeckoId);
-                let amountUSD = (priceUSD * networkBalanceAdjusted.valueOf()).toPrecision(2);
+                let amountUSD = roundUsdAmount((priceUSD * networkBalanceAdjusted.valueOf()));
                 let newBalanceObj:IBalance = {fullName:nw.fullName, ticker:nw.ticker, iconPath:nw.iconPath, 
                     amountCrypto:networkBalanceString, amountUSD:amountUSD.toString()}
                 // add adjusted balance to balances return object
@@ -366,6 +369,68 @@ class Web3Service extends BaseService{
         }
         return balances;
     }
+
+    getTransactionFeeData = async(network:NetworkDb):Promise<TransactionFeeData|null> => {
+        let kryptikProvider:KryptikProvider;
+        let tokenPriceUsd = await getPriceOfTicker(network.coingeckoId);
+        switch(network.ticker){
+            case ("eth"): { 
+                let transactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
+                return transactionFeeData;
+                break; 
+             } 
+             case("matic"):{
+                let transactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
+                return transactionFeeData;
+             }
+             default: { 
+                 // for now... just keep original address
+                return null;
+                break; 
+             } 
+        }
+    }
+
+    getTransactionFeeData1559Compatible = async(network:NetworkDb, tokenPriceUsd:number) =>{
+        let kryptikProvider:KryptikProvider;
+        kryptikProvider = await this.getKryptikProviderForNetworkDb(network);
+        // validate provider
+        if(!kryptikProvider.ethProvider){
+            throw(new Error(`No provider specified for ${kryptikProvider.network.fullName}`));
+        }
+        let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
+        let feeData = await ethNetworkProvider.getFeeData();
+        // validate fee data response
+        if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
+            throw(new Error(`No fee data returned for ${kryptikProvider.network.fullName}`));
+        }
+        let baseFeePerGas:number = Number(utils.formatEther(feeData.gasPrice));
+        let maxFeePerGas:number = Number(utils.formatEther(feeData.maxFeePerGas));
+        let maxTipPerGas:number = Number(utils.formatEther(feeData.maxPriorityFeePerGas));
+        let baseTipPerGas:number = maxTipPerGas*.6;
+        // amount hardcoded to gas required to transfer ether to someone else
+        let gasLimit:number = 21000;
+        let lowerBoundCrypto:number = gasLimit*(baseFeePerGas+baseTipPerGas);
+        let lowerBoundUSD:number = lowerBoundCrypto*tokenPriceUsd;
+        let upperBoundCrypto:number = gasLimit*(maxFeePerGas+maxTipPerGas);
+        let upperBoundUsd:number = upperBoundCrypto*tokenPriceUsd;
+        let transactionFeeData:TransactionFeeData = {
+            network: kryptikProvider.network,
+            isFresh: true,
+            lowerBoundCrypto: roundCryptoAmount(lowerBoundCrypto),
+            lowerBoundUSD: roundUsdAmount(lowerBoundUSD),
+            upperBoundCrypto: roundCryptoAmount(upperBoundCrypto),
+            upperBoundUsd: roundUsdAmount(upperBoundUsd),
+        }
+        console.log("Returning tx. fee data:");
+        console.log(transactionFeeData);
+        return transactionFeeData;
+    }
+
+    // // amount of gas required for a particular transaction
+    // getGasAmount(network){
+
+    // }
     
      // TODO: Update to support tx. based networks
      getTransactionsAllNetworks = async():Promise<ITransactionHistory[]> =>{
