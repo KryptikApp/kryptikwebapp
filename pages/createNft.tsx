@@ -2,6 +2,7 @@ import type { NextPage } from 'next'
 import { useState } from 'react'
 import { storage } from '../src/helpers/firebaseHelper'
 import { getDownloadURL, ref, StorageReference, uploadBytes } from 'firebase/storage'
+import toast, { Toaster } from 'react-hot-toast'
 
 
 const CreateNft: NextPage = () => {
@@ -71,8 +72,18 @@ const CreateNft: NextPage = () => {
 
   const handleClickUpload = async() =>{
     // upload file to firebase
-    let urlImageUpload = await uploadToRemote();
-    console.log(urlImageUpload);
+    try{
+      let urlImageUpload = await uploadToRemote();
+      console.log("Image url:");
+      console.log(urlImageUpload);
+      toast.success("NFT succesfully uploaded!");
+    }
+    catch(e){
+      toast.error("Error uploading image.");
+    }
+    
+    //  THE COMMENT BELOW WILL BE USEFUL FOR UPLOADING METADATA TO IPFS
+    // JUST REPLACE THE FIREBASE URL WITH IPFS PATH AS SPECIFICIED IN DOC.
     // const metadata = {
     //   name: name,
     //   image: urlImageUpload,
@@ -91,7 +102,7 @@ const CreateNft: NextPage = () => {
   return (
     
     <div>
-
+        <Toaster/>
         <div className="h-[2rem]">
           {/* padding div for space between top and main elements */}
         </div>
