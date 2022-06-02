@@ -12,15 +12,18 @@ import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
+import TransactionFeeData, { defaultTransactionFeeData } from '../../src/services/models/transaction'
+import { roundCryptoAmount } from '../../src/helpers/wallet/utils'
 
 
 
 
 const Send: NextPage = () => {
 
-  const { authUser, loading, kryptikWallet } = useKryptikAuthContext();
+  const { authUser, loading, kryptikWallet, kryptikService } = useKryptikAuthContext();
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [amountUSD, setAmountUSD] = useState("0");
+  const [transactionFeeData, setTransactionFeedata] = useState(defaultTransactionFeeData)
   const [tokenPrice, setTokenPrice] = useState(0);
   const [fromAddress, setFromAddress] = useState(kryptikWallet.ethAddress);
   const [toAddress, setToAddress] = useState("");
@@ -46,12 +49,12 @@ const Send: NextPage = () => {
       if(addys[0] == ""){
         toast.error(`Error: no address found for ${network.fullName}. Please contact the Kryptik team or try refreshing your page.`);
         setFromAddress(kryptikWallet.ethAddress);
-        setReadableFromAddress(kryptikWallet.ethAddress);
+        setReadableFromAddress(truncateAddress(kryptikWallet.ethAddress, network));
         setSelectedNetwork(defaultNetworkDb);
         return;
       }
       setFromAddress(addys[0]);
-      setReadableFromAddress(addys[0]);
+      setReadableFromAddress(truncateAddress(addys[0], network));
   }
 
   const fetchTokenPrice = async(network:NetworkDb) =>{
@@ -59,10 +62,21 @@ const Send: NextPage = () => {
     setTokenPrice(tokenPriceCoinGecko);
   }
 
+  const fetchNetworkFees = async(network:NetworkDb) =>{
+    let transactionFeeDataFresh:TransactionFeeData|null = await kryptikService.getTransactionFeeData(network);
+    if(transactionFeeDataFresh){
+      setTransactionFeedata(transactionFeeDataFresh);
+    }
+    else{
+      setTransactionFeedata(defaultTransactionFeeData);
+    }
+  }
+
   useEffect(()=>{
       let nw:Network = NetworkFromTicker(selectedNetwork.ticker);
       fetchFromAddress(nw);
       fetchTokenPrice(selectedNetwork);
+      fetchNetworkFees(selectedNetwork);
       handleAmountChange("0");
   }, [selectedNetwork]);
 
@@ -199,6 +213,12 @@ const Send: NextPage = () => {
                 <div className="max-w-xs mx-auto">
                     <DropdownNetworks selectedNetwork={selectedNetwork} selectFunction={setSelectedNetwork}/>
                 </div>
+              {
+                  transactionFeeData.isFresh &&
+                  <div>
+                    <p className="text-slate-400 text-sm inline">Fees: {`$${transactionFeeData.lowerBoundUSD}-$${transactionFeeData.upperBoundUsd}`}</p>
+                  </div>
+              }
               {/* next button... to set recipient */}
               <button onClick={()=>handleStartParameterSetting()} className={`bg-transparent hover:bg-sky-400 text-sky-400 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent rounded-lg my-5`} disabled={isLoading}>      
                             Next
@@ -281,7 +301,7 @@ const Send: NextPage = () => {
                             ${amountUSD}
                           </p>
                           <p className="text-sm text-gray-500 truncate dark:text-gray-400">
-                            2.5
+                            {roundCryptoAmount(Number(amountCrypto))}
                           </p>
                       </div>
                     </div>
@@ -315,6 +335,22 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             <p className="text-right">{selectedNetwork.fullName}</p>
+                          </div>
+                    </div>
+                    <div className="flex flex-row">
+                          <div className="flex-1">
+                            <p className="text-slate-600 text-left">Network Fees</p>
+                          </div>
+                          <div className="flex-1 px-1">
+                            <p className="text-right">{`$${transactionFeeData.lowerBoundUSD}-$${transactionFeeData.upperBoundUsd}`}</p>
+                          </div>
+                    </div>
+                    <div className="flex flex-row">
+                          <div className="flex-1">
+                            <p className="text-slate-600 text-left">Total Amount</p>
+                          </div>
+                          <div className="flex-1 px-1">
+                            <p className="text-right text-semibold">{`$${transactionFeeData.lowerBoundUSD+amountUSD}-$${transactionFeeData.upperBoundUsd+amountUSD}`}</p>
                           </div>
                     </div>
                   </div>
