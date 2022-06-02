@@ -1,5 +1,7 @@
 // data model for cryptocurrency networks (blockchains) pulled from firebase
 
+import { Network, NetworkFromTicker } from "hdseedloop"
+
 export interface NetworkDb {
     fullName: string,
     ticker: string,
@@ -28,3 +30,6 @@ export const defaultNetworkDb:NetworkDb = {
     provider: "https://eth-mainnet.alchemyapi.io/v2/NnS19sbjsKljODizz9zB-C8Fw511M-ej",
     coingeckoId: "ethereum"
 }
+
+
+export const defaultNetwork:Network = NetworkFromTicker("eth");
