@@ -10,15 +10,15 @@ import {
 import {
     clusterApiUrl,
     Connection,
+    PublicKey,
   } from '@solana/web3.js';
 
-import HDSeedLoop, { Network, NetworkFamily, NetworkFromTicker, SeedLoop, SerializedSeedLoop } from "hdseedloop";
+import HDSeedLoop, { HDKeyring, Network, NetworkFamily, NetworkFromTicker, SeedLoop, SerializedSeedLoop } from "hdseedloop";
 import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
-import { BigNumber, utils } from "ethers";
+import { utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
-import { provider } from "firebase-functions/v1/analytics";
 import TransactionFeeData from "./models/transaction";
 import { roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
 
@@ -347,6 +347,8 @@ class Web3Service extends BaseService{
         for(const nw of networksFromDb){
             let network:Network = new Network(nw.fullName, nw.ticker);
             let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
+            let priceUSD = await getPriceOfTicker(nw.coingeckoId);
+            // get balance for supported evm family networks
             if(network.getNetworkfamily()==NetworkFamily.EVM){
                 if(!kryptikProvider.ethProvider) throw Error(`No ethereum provider set up for ${network.fullName}.`);
                 let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
@@ -354,16 +356,38 @@ class Web3Service extends BaseService{
                 let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
                 // gets first address for network
                 let firstAddy:string = allAddys[0];
-                // get provider for network
-                let networkBalance = Number(utils.formatEther(await ethNetworkProvider.getBalance(firstAddy)));
+                // get balance in layer 1 token amount
+                let networkBalance:number = Number(utils.formatEther(await ethNetworkProvider.getBalance(firstAddy)));
                 // prettify ether balance
                 let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
                 let networkBalanceString = networkBalanceAdjusted.toString();
-                let priceUSD = await getPriceOfTicker(nw.coingeckoId);
-                let amountUSD = roundUsdAmount((priceUSD * networkBalanceAdjusted.valueOf()));
+                let amountUSD = roundUsdAmount((priceUSD * networkBalance));
                 let newBalanceObj:IBalance = {fullName:nw.fullName, ticker:nw.ticker, iconPath:nw.iconPath, 
                     amountCrypto:networkBalanceString, amountUSD:amountUSD.toString()}
                 // add adjusted balance to balances return object
+                balances.push(newBalanceObj);
+            }
+            // get balance for supported solana family networks
+            if(network.getNetworkfamily() == NetworkFamily.Solana){
+                if(!kryptikProvider.solProvider) throw(new Error("No solana provider is set up."))
+                let solNetworkProvider:Connection = kryptikProvider.solProvider;
+                // gets all addresses for network
+                let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
+                let firstAddy:string = allAddys[0];
+                console.log("SOLANA ADDRESS:");
+                console.log(allAddys);
+                console.log(firstAddy);
+                // gets pub key for solana network
+                let solNetwork:Network = NetworkFromTicker("sol");
+                let keyring:HDKeyring = await walletUser.seedLoop.getKeyRing(solNetwork);
+                let solPubKey:PublicKey|null = keyring.getSolanaFamilyPubKey();
+                if(!solPubKey){
+                    continue;
+                }
+                let networkBalance = await solNetworkProvider.getBalance(solPubKey);
+                let amountUSD = roundUsdAmount((priceUSD * networkBalance.valueOf()));
+                let newBalanceObj:IBalance = {fullName:nw.fullName, ticker: nw.ticker, iconPath:nw.iconPath, 
+                    amountCrypto:roundCryptoAmount(networkBalance).toString(), amountUSD:amountUSD.toString()};
                 balances.push(newBalanceObj);
             }
         }
@@ -375,12 +399,16 @@ class Web3Service extends BaseService{
         let tokenPriceUsd = await getPriceOfTicker(network.coingeckoId);
         switch(network.ticker){
             case ("eth"): { 
-                let transactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
                 return transactionFeeData;
                 break; 
              } 
              case("matic"):{
-                let transactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
+                return transactionFeeData;
+             }
+             case("avaxc"):{
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
                 return transactionFeeData;
              }
              default: { 
