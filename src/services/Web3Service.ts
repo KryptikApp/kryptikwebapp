@@ -385,6 +385,8 @@ class Web3Service extends BaseService{
                     continue;
                 }
                 let networkBalance = await solNetworkProvider.getBalance(solPubKey);
+                // adjust network balance value
+                networkBalance = networkBalance/1000000000
                 let amountUSD = roundUsdAmount((priceUSD * networkBalance.valueOf()));
                 let newBalanceObj:IBalance = {fullName:nw.fullName, ticker: nw.ticker, iconPath:nw.iconPath, 
                     amountCrypto:roundCryptoAmount(networkBalance).toString(), amountUSD:amountUSD.toString()};
