@@ -25,7 +25,7 @@ import { roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
 const NetworkDbsRef = collection(firestore, "networks")
 
 
-class KryptikProvider{
+export class KryptikProvider{
     public ethProvider: StaticJsonRpcProvider|undefined;
     public solProvider: Connection|undefined;
     public network:Network;
@@ -67,8 +67,8 @@ export interface IConnectWalletReturn{
 }
 
 class Web3Service extends BaseService{
-    getProviderForNetwork(nw: NetworkDb) {
-        throw new Error("Method not implemented.");
+    getProviderForNetwork(nw: NetworkDb):KryptikProvider {
+        return(this.networkProviders[nw.ticker]);
     }
     private wallet:IWallet|null = null;
     public isWalletSet:boolean = false;
@@ -451,6 +451,10 @@ class Web3Service extends BaseService{
             lowerBoundUSD: roundUsdAmount(lowerBoundUSD),
             upperBoundCrypto: roundCryptoAmount(upperBoundCrypto),
             upperBoundUsd: roundUsdAmount(upperBoundUsd),
+            // add inputs in original wei amount
+            gasLimit: gasLimit,
+            maxFeePerGas: Number(feeData.maxFeePerGas),
+            maxPriorityFeePerGas: Number(feeData.maxPriorityFeePerGas) 
         }
         console.log("Returning tx. fee data:");
         console.log(transactionFeeData);
