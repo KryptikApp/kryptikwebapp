@@ -6,14 +6,15 @@ import { defaultNetworkDb, NetworkDb } from '../../src/services/models/network'
 import { SendProgress } from '../../src/services/types'
 import { AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapBoxLine, RiSwapLine} from "react-icons/ri"
-import { isValidAddress, Network, NetworkFamily, NetworkFromTicker, truncateAddress } from "hdseedloop"
+import { isValidAddress, Network, NetworkFamily, NetworkFromTicker, SignedTransaction, TransactionParameters, truncateAddress } from "hdseedloop"
 
 import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
-import TransactionFeeData, { defaultTransactionFeeData } from '../../src/services/models/transaction'
+import TransactionFeeData, { defaultTransactionFeeData, TransactionRequest } from '../../src/services/models/transaction'
 import { roundCryptoAmount } from '../../src/helpers/wallet/utils'
+import { createEVMTransaction } from '../../src/handlers/wallet/transactionHandler'
 
 
 
@@ -164,8 +165,36 @@ const Send: NextPage = () => {
   };
 
   // handler for when user clicks create transaction button
-  const handleSendTransaction = function(){
+  const handleSendTransaction = async function(){
     setisLoading(true);
+    await handleCreateTransaction();
+    setisLoading(false);
+  }
+
+  const handleCreateTransaction = async function(){
+    let network = NetworkFromTicker(selectedNetwork.ticker);
+    if(network.getNetworkfamily()!=NetworkFamily.EVM){
+      toast.error(`Error: Unable to build transaction for ${selectedNetwork.fullName}`);
+      handleCancelTransaction();
+      return null;
+    }
+    let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
+    // UPDATE TO REFLECT ERROR IN UI
+    if(!kryptikProvider.ethProvider) throw(new Error(`Error: Provider not set for ${network.fullName}`));
+    let ethProvider = kryptikProvider.ethProvider;
+    let EVMTransaction:TransactionRequest = await createEVMTransaction({value: amountCrypto, sendAccount: fromAddress, 
+      toAddress: toAddress, gasLimit:transactionFeeData.gasLimit.toString(), 
+      maxFeePerGas:transactionFeeData.maxFeePerGas.toString(), 
+      maxPriorityFeePerGas:transactionFeeData.maxPriorityFeePerGas.toString(), 
+      networkDb:selectedNetwork, 
+      kryptikProvider:kryptikService.getProviderForNetwork(selectedNetwork)});
+    let kryptikTxParams:TransactionParameters = {
+        evmTransaction: EVMTransaction
+    }
+    let signedTx:SignedTransaction = await kryptikWallet.seedLoop.signTransaction(fromAddress, kryptikTxParams, network);
+    if(!signedTx.evmFamilyTx) throw(new Error("Error: Unable to sign EVM transaction"));
+    let txResponse = await ethProvider.sendTransaction(signedTx.evmFamilyTx);
+    console.log(txResponse);
   }
 
   const handleClickBack = function(){
@@ -207,7 +236,7 @@ const Send: NextPage = () => {
                 <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-8xl text-center" id="amount" placeholder="$0" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
               </div>
               <br/>
-              <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${amountCrypto} ${selectedNetwork.ticker}`:`$${amountUSD}`}</span>
+              <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedNetwork.ticker}`:`$${amountUSD}`}</span>
               <RiSwapLine className="hover:cursor-pointer inline text-slate-300 ml-2" onClick={()=>handleToggleIsCrypto()} size="20"/>
               {/* network dropdown */}
                 <div className="max-w-xs mx-auto">
