@@ -12,10 +12,14 @@ export default interface TransactionFeeData{
     lowerBoundUSD: number,
     upperBoundCrypto: number,
     upperBoundUsd: number,
-    gasLimit:number,
-    maxFeePerGas:number,
-    maxPriorityFeePerGas:number,
-    isFresh: boolean
+    isFresh: boolean,
+    EVMGas: EVMGas
+}
+
+export interface EVMGas{
+    gasLimit:BigNumberish,
+    maxFeePerGas:BigNumberish,
+    maxPriorityFeePerGas:BigNumberish,
 }
 
 export const defaultTransactionFeeData:TransactionFeeData = {
@@ -25,9 +29,11 @@ export const defaultTransactionFeeData:TransactionFeeData = {
     lowerBoundUSD: 0,
     upperBoundCrypto: 0,
     upperBoundUsd: 0,
-    gasLimit:0, 
-    maxFeePerGas: 0,
-    maxPriorityFeePerGas: 0,
+    EVMGas: {
+        gasLimit: 0,
+        maxFeePerGas: 0,
+        maxPriorityFeePerGas: 0
+    }
 }
 
 export interface EVMTransaction{
@@ -36,13 +42,13 @@ export interface EVMTransaction{
     networkDb:NetworkDb
     toAddress:string,
     // how much gas we're willing to use
-    gasLimit: string,
+    gasLimit: BigNumberish,
     // max fee per gas unit we're willing to pay
-    maxFeePerGas: string,
+    maxFeePerGas: BigNumberish,
     // max tip per gas unit we're willing to pay
-    maxPriorityFeePerGas: string,
+    maxPriorityFeePerGas: BigNumberish,
     // value in token we are sending
-    value: string
+    value: BigNumberish
 }
 
 export type TransactionRequest = {
