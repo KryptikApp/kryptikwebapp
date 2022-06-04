@@ -29,15 +29,11 @@ export class KryptikProvider{
     public ethProvider: StaticJsonRpcProvider|undefined;
     public solProvider: Connection|undefined;
     public network:Network;
-    constructor(rpcEndpoint:string, network:Network){
+    constructor(rpcEndpoint:string, networkDb:NetworkDb){
+        let network = NetworkFromTicker(networkDb.ticker);
         this.network = network;
         if(network.getNetworkfamily() == NetworkFamily.EVM){
-            if(network.ticker == "bnb"){
-                this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: 'binance', chainId: 56 });
-            }
-            else{
-                this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint);
-            }    
+            this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: networkDb.fullName, chainId: networkDb.chainIdEVM });  
         }
         if(network.getNetworkfamily()==NetworkFamily.Solana){
             this.solProvider = new Connection(rpcEndpoint);
@@ -202,7 +198,9 @@ class Web3Service extends BaseService{
     private setProviderFromTicker(ticker:string):KryptikProvider{
         let network:Network = NetworkFromTicker(ticker);
         let rpcEndpoint:string = this.rpcEndpoints[ticker];
-        let newKryptikProvider = new KryptikProvider(rpcEndpoint, network);
+        let networkDb = this.NetworkDbs.find((nw)=>nw.ticker==ticker);
+        if(!networkDb) throw(new Error("Error: Unable to find service networkdb by ticker."))
+        let newKryptikProvider = new KryptikProvider(rpcEndpoint, networkDb);
         this.networkProviders[ticker] = newKryptikProvider;
         return newKryptikProvider;
     }
@@ -223,6 +221,7 @@ class Web3Service extends BaseService{
                 fullName: docData.fullName,
                 ticker: docData.ticker,
                 chainId: docData.chainId,
+                chainIdEVM: docData.chainIdEVM,
                 hexColor: docData.hexColor,
                 about: docData.about,
                 dateCreated: docData.dateCreated,
@@ -451,10 +450,12 @@ class Web3Service extends BaseService{
             lowerBoundUSD: roundUsdAmount(lowerBoundUSD),
             upperBoundCrypto: roundCryptoAmount(upperBoundCrypto),
             upperBoundUsd: roundUsdAmount(upperBoundUsd),
-            // add inputs in original wei amount
-            gasLimit: gasLimit,
-            maxFeePerGas: Number(feeData.maxFeePerGas),
-            maxPriorityFeePerGas: Number(feeData.maxPriorityFeePerGas) 
+            EVMGas:{
+                // add inputs in original wei amount
+                gasLimit: gasLimit,
+                maxFeePerGas: feeData.maxFeePerGas,
+                maxPriorityFeePerGas: feeData.maxPriorityFeePerGas 
+            }
         }
         console.log("Returning tx. fee data:");
         console.log(transactionFeeData);
