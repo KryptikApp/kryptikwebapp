@@ -15,6 +15,7 @@ import DropdownNetworks from '../../components/DropdownNetworks'
 import TransactionFeeData, { defaultTransactionFeeData, TransactionRequest } from '../../src/services/models/transaction'
 import { roundCryptoAmount } from '../../src/helpers/wallet/utils'
 import { createEVMTransaction } from '../../src/handlers/wallet/transactionHandler'
+import { utils } from 'ethers'
 
 
 
@@ -182,17 +183,21 @@ const Send: NextPage = () => {
     // UPDATE TO REFLECT ERROR IN UI
     if(!kryptikProvider.ethProvider) throw(new Error(`Error: Provider not set for ${network.fullName}`));
     let ethProvider = kryptikProvider.ethProvider;
-    let EVMTransaction:TransactionRequest = await createEVMTransaction({value: amountCrypto, sendAccount: fromAddress, 
-      toAddress: toAddress, gasLimit:transactionFeeData.gasLimit.toString(), 
-      maxFeePerGas:transactionFeeData.maxFeePerGas.toString(), 
-      maxPriorityFeePerGas:transactionFeeData.maxPriorityFeePerGas.toString(), 
+    let EVMTransaction:TransactionRequest = await createEVMTransaction({value: utils.parseEther(amountCrypto), sendAccount: fromAddress,
+      toAddress: toAddress, gasLimit:transactionFeeData.EVMGas.gasLimit, 
+      maxFeePerGas:transactionFeeData.EVMGas.maxFeePerGas, 
+      maxPriorityFeePerGas:transactionFeeData.EVMGas.maxPriorityFeePerGas, 
       networkDb:selectedNetwork, 
       kryptikProvider:kryptikService.getProviderForNetwork(selectedNetwork)});
     let kryptikTxParams:TransactionParameters = {
         evmTransaction: EVMTransaction
     }
+    console.log("EVM Transaction:");
+    console.log(EVMTransaction);
     let signedTx:SignedTransaction = await kryptikWallet.seedLoop.signTransaction(fromAddress, kryptikTxParams, network);
     if(!signedTx.evmFamilyTx) throw(new Error("Error: Unable to sign EVM transaction"));
+    console.log("Signed Tx:");
+    console.log(signedTx.evmFamilyTx);
     let txResponse = await ethProvider.sendTransaction(signedTx.evmFamilyTx);
     console.log(txResponse);
   }
