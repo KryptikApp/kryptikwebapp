@@ -1,6 +1,6 @@
 import {firestore} from "../helpers/firebaseHelper"
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { ServiceState, Status } from './types';
+import { ServiceState } from './types';
 import BaseService from './BaseService';
 import {NetworkDb} from './models/network'
 import {
@@ -11,6 +11,7 @@ import {
     clusterApiUrl,
     Connection,
     PublicKey,
+    Transaction,
   } from '@solana/web3.js';
 
 import HDSeedLoop, { HDKeyring, Network, NetworkFamily, NetworkFromTicker, SeedLoop, SerializedSeedLoop } from "hdseedloop";
@@ -19,25 +20,22 @@ import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
 import { utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
-import TransactionFeeData from "./models/transaction";
-import { roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
+import TransactionFeeData, { defaultEVMGas } from "./models/transaction";
+import { lamportsToSol, roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
+import { async } from "@firebase/util";
 
 const NetworkDbsRef = collection(firestore, "networks")
 
 
-class KryptikProvider{
+export class KryptikProvider{
     public ethProvider: StaticJsonRpcProvider|undefined;
     public solProvider: Connection|undefined;
     public network:Network;
-    constructor(rpcEndpoint:string, network:Network){
+    constructor(rpcEndpoint:string, networkDb:NetworkDb){
+        let network = NetworkFromTicker(networkDb.ticker);
         this.network = network;
         if(network.getNetworkfamily() == NetworkFamily.EVM){
-            if(network.ticker == "bnb"){
-                this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: 'binance', chainId: 56 });
-            }
-            else{
-                this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint);
-            }    
+            this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: networkDb.fullName, chainId: networkDb.chainIdEVM });  
         }
         if(network.getNetworkfamily()==NetworkFamily.Solana){
             this.solProvider = new Connection(rpcEndpoint);
@@ -67,8 +65,8 @@ export interface IConnectWalletReturn{
 }
 
 class Web3Service extends BaseService{
-    getProviderForNetwork(nw: NetworkDb) {
-        throw new Error("Method not implemented.");
+    getProviderForNetwork(nw: NetworkDb):KryptikProvider {
+        return(this.networkProviders[nw.ticker]);
     }
     private wallet:IWallet|null = null;
     public isWalletSet:boolean = false;
@@ -202,7 +200,9 @@ class Web3Service extends BaseService{
     private setProviderFromTicker(ticker:string):KryptikProvider{
         let network:Network = NetworkFromTicker(ticker);
         let rpcEndpoint:string = this.rpcEndpoints[ticker];
-        let newKryptikProvider = new KryptikProvider(rpcEndpoint, network);
+        let networkDb = this.NetworkDbs.find((nw)=>nw.ticker==ticker);
+        if(!networkDb) throw(new Error("Error: Unable to find service networkdb by ticker."))
+        let newKryptikProvider = new KryptikProvider(rpcEndpoint, networkDb);
         this.networkProviders[ticker] = newKryptikProvider;
         return newKryptikProvider;
     }
@@ -223,6 +223,7 @@ class Web3Service extends BaseService{
                 fullName: docData.fullName,
                 ticker: docData.ticker,
                 chainId: docData.chainId,
+                chainIdEVM: docData.chainIdEVM,
                 hexColor: docData.hexColor,
                 about: docData.about,
                 dateCreated: docData.dateCreated,
@@ -386,7 +387,7 @@ class Web3Service extends BaseService{
                 }
                 let networkBalance = await solNetworkProvider.getBalance(solPubKey);
                 // adjust network balance value
-                networkBalance = networkBalance/1000000000
+                networkBalance = lamportsToSol(networkBalance);
                 let amountUSD = roundUsdAmount((priceUSD * networkBalance.valueOf()));
                 let newBalanceObj:IBalance = {fullName:nw.fullName, ticker: nw.ticker, iconPath:nw.iconPath, 
                     amountCrypto:roundCryptoAmount(networkBalance).toString(), amountUSD:amountUSD.toString()};
@@ -396,21 +397,18 @@ class Web3Service extends BaseService{
         return balances;
     }
 
-    getTransactionFeeData = async(network:NetworkDb):Promise<TransactionFeeData|null> => {
-        let kryptikProvider:KryptikProvider;
-        let tokenPriceUsd = await getPriceOfTicker(network.coingeckoId);
-        switch(network.ticker){
-            case ("eth"): { 
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
+    getTransactionFeeData = async(networkDb:NetworkDb, solTransaction?:Transaction):Promise<TransactionFeeData|null> => {
+        let network:Network = NetworkFromTicker(networkDb.ticker);
+        let tokenPriceUsd = await getPriceOfTicker(networkDb.coingeckoId);
+        switch(network.getNetworkfamily()){
+            case (NetworkFamily.EVM): { 
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible(networkDb, tokenPriceUsd);
                 return transactionFeeData;
                 break; 
              } 
-             case("matic"):{
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
-                return transactionFeeData;
-             }
-             case("avaxc"):{
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible(network, tokenPriceUsd);
+             case(NetworkFamily.Solana):{
+                if(!solTransaction) return null;
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataSolana(networkDb, tokenPriceUsd, solTransaction);
                 return transactionFeeData;
              }
              default: { 
@@ -421,7 +419,33 @@ class Web3Service extends BaseService{
         }
     }
 
-    getTransactionFeeData1559Compatible = async(network:NetworkDb, tokenPriceUsd:number) =>{
+    getTransactionFeeDataSolana = async(network:NetworkDb, tokenPriceUsd:number, transaction:Transaction):Promise<TransactionFeeData> =>{
+        let kryptikProvider:KryptikProvider;
+        kryptikProvider = await this.getKryptikProviderForNetworkDb(network);
+        // validate provider
+        if(!kryptikProvider.solProvider){
+            throw(new Error(`No provider specified for ${kryptikProvider.network.fullName}`));
+        }
+        let solNetworkProvider:Connection = kryptikProvider.solProvider;
+        const feeData = await solNetworkProvider.getFeeForMessage(
+            transaction.compileMessage(),
+            'confirmed',
+        );
+        let feeInSol:number = lamportsToSol(feeData.value);
+        let feeInUsd:number = tokenPriceUsd*feeInSol;
+        let transactionFeeData:TransactionFeeData = {
+            network: kryptikProvider.network,
+            isFresh: true,
+            lowerBoundCrypto: feeInSol,
+            lowerBoundUSD: feeInUsd,
+            upperBoundCrypto: feeInSol,
+            upperBoundUSD: feeInUsd,
+            EVMGas: defaultEVMGas
+        };
+        return transactionFeeData;
+    }
+
+    getTransactionFeeData1559Compatible = async(network:NetworkDb, tokenPriceUsd:number):Promise<TransactionFeeData> =>{
         let kryptikProvider:KryptikProvider;
         kryptikProvider = await this.getKryptikProviderForNetworkDb(network);
         // validate provider
@@ -447,10 +471,16 @@ class Web3Service extends BaseService{
         let transactionFeeData:TransactionFeeData = {
             network: kryptikProvider.network,
             isFresh: true,
-            lowerBoundCrypto: roundCryptoAmount(lowerBoundCrypto),
-            lowerBoundUSD: roundUsdAmount(lowerBoundUSD),
-            upperBoundCrypto: roundCryptoAmount(upperBoundCrypto),
-            upperBoundUsd: roundUsdAmount(upperBoundUsd),
+            lowerBoundCrypto: lowerBoundCrypto,
+            lowerBoundUSD: lowerBoundUSD,
+            upperBoundCrypto: upperBoundCrypto,
+            upperBoundUSD: upperBoundUsd,
+            EVMGas:{
+                // add inputs in original wei amount
+                gasLimit: gasLimit,
+                maxFeePerGas: feeData.maxFeePerGas,
+                maxPriorityFeePerGas: feeData.maxPriorityFeePerGas 
+            }
         }
         console.log("Returning tx. fee data:");
         console.log(transactionFeeData);
