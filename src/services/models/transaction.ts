@@ -11,15 +11,22 @@ export default interface TransactionFeeData{
     // gas price denominated in the dollar
     lowerBoundUSD: number,
     upperBoundCrypto: number,
-    upperBoundUsd: number,
+    upperBoundUSD: number,
     isFresh: boolean,
     EVMGas: EVMGas
 }
+
 
 export interface EVMGas{
     gasLimit:BigNumberish,
     maxFeePerGas:BigNumberish,
     maxPriorityFeePerGas:BigNumberish,
+}
+
+export const defaultEVMGas:EVMGas = {
+    gasLimit: 0,
+    maxFeePerGas: 0,
+    maxPriorityFeePerGas: 0
 }
 
 export const defaultTransactionFeeData:TransactionFeeData = {
@@ -28,12 +35,16 @@ export const defaultTransactionFeeData:TransactionFeeData = {
     lowerBoundCrypto: 0,
     lowerBoundUSD: 0,
     upperBoundCrypto: 0,
-    upperBoundUsd: 0,
-    EVMGas: {
-        gasLimit: 0,
-        maxFeePerGas: 0,
-        maxPriorityFeePerGas: 0
-    }
+    upperBoundUSD: 0,
+    EVMGas: defaultEVMGas
+}
+
+export interface SolTransaction{
+    sendAccount:string,
+    toAddress: string,
+    kryptikProvider:KryptikProvider,
+    networkDb:NetworkDb,
+    valueSol:number
 }
 
 export interface EVMTransaction{
