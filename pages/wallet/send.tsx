@@ -5,26 +5,32 @@ import toast, { Toaster } from 'react-hot-toast'
 import { defaultNetworkDb, NetworkDb } from '../../src/services/models/network'
 import { SendProgress } from '../../src/services/types'
 import { AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
-import {RiSwapBoxLine, RiSwapLine} from "react-icons/ri"
+import {RiSwapLine} from "react-icons/ri"
 import { isValidAddress, Network, NetworkFamily, NetworkFromTicker, SignedTransaction, TransactionParameters, truncateAddress } from "hdseedloop"
 
 import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
-import TransactionFeeData, { defaultTransactionFeeData, TransactionRequest } from '../../src/services/models/transaction'
-import { roundCryptoAmount } from '../../src/helpers/wallet/utils'
-import { createEVMTransaction } from '../../src/handlers/wallet/transactionHandler'
+import TransactionFeeData, { defaultTransactionFeeData, SolTransaction, TransactionRequest } from '../../src/services/models/transaction'
+import { roundCryptoAmount, roundUsdAmount } from '../../src/helpers/wallet/utils'
+import { createEVMTransaction, createSolTransaction } from '../../src/handlers/wallet/transactionHandler'
 import { utils } from 'ethers'
+import { PublicKey, Transaction } from '@solana/web3.js'
 
 
 
 
 const Send: NextPage = () => {
-
+  interface AmountTotalBounds{
+    lowerBoundTotalUsd: string,
+    upperBoundTotalUsd: string
+  }
+  const defaultAmountTotalBounds = {lowerBoundTotalUsd: "0", upperBoundTotalUsd: "0"};
   const { authUser, loading, kryptikWallet, kryptikService } = useKryptikAuthContext();
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [amountUSD, setAmountUSD] = useState("0");
+  const [amountTotalBounds, setAmountTotalbounds] = useState<AmountTotalBounds>(defaultAmountTotalBounds);
   const [transactionFeeData, setTransactionFeedata] = useState(defaultTransactionFeeData)
   const [tokenPrice, setTokenPrice] = useState(0);
   const [fromAddress, setFromAddress] = useState(kryptikWallet.ethAddress);
@@ -38,7 +44,6 @@ const Send: NextPage = () => {
   const[selectedNetwork, setSelectedNetwork] = useState(defaultNetworkDb);
 
   const router = useRouter();
-  const allowedInputs = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."]
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
     if (!loading && !authUser) router.push('/');
@@ -64,14 +69,33 @@ const Send: NextPage = () => {
     setTokenPrice(tokenPriceCoinGecko);
   }
 
-  const fetchNetworkFees = async(network:NetworkDb) =>{
-    let transactionFeeDataFresh:TransactionFeeData|null = await kryptikService.getTransactionFeeData(network);
+  const fetchNetworkFees = async(network:NetworkDb, solTx?:Transaction) =>{
+    let transactionFeeDataFresh:TransactionFeeData|null = await kryptikService.getTransactionFeeData(network, solTx);
     if(transactionFeeDataFresh){
       setTransactionFeedata(transactionFeeDataFresh);
     }
     else{
       setTransactionFeedata(defaultTransactionFeeData);
     }
+  }
+
+  // gets solana tx. fees and sets sol transaction
+  const fetchSolTransactionFees = async()=>{
+      let nw:Network = NetworkFromTicker(selectedNetwork.ticker);
+      let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
+      // get solana transaction fee
+      if(nw.getNetworkfamily() != NetworkFamily.Solana){
+        return;
+      }
+      let txIn:SolTransaction = {
+        sendAccount: fromAddress,
+        toAddress: toAddress,
+        valueSol: Number(amountCrypto),
+        kryptikProvider: kryptikProvider,
+        networkDb: selectedNetwork
+      }
+      let txSol:Transaction = await createSolTransaction(txIn);
+      await fetchNetworkFees(selectedNetwork, txSol);
   }
 
   useEffect(()=>{
@@ -82,12 +106,34 @@ const Send: NextPage = () => {
       handleAmountChange("0");
   }, [selectedNetwork]);
 
+  useEffect(()=>{
+    updateTotalBounds();
+  }, [amountUSD, transactionFeeData]);
+
+  // get solana tx. fees upon review
+  useEffect(()=>{
+    if(progress != SendProgress.Rewiew){
+      return;
+    }
+    console.log("networkkkkkkk:");
+    console.log(selectedNetwork.fullName);
+    fetchSolTransactionFees()
+  }, [progress]);
+
   const handleToggleIsCrypto = function(){
     setIsInputCrypto(!isInputCrypto);
  }
 
   const handleToAddressChange = function(toAddressIn:string){
     setToAddress(toAddressIn);
+  }
+
+  const updateTotalBounds = function(){
+    let newTotalBounds:AmountTotalBounds = {
+      lowerBoundTotalUsd: (Number(amountUSD) + Number(transactionFeeData.lowerBoundUSD)).toString(),
+      upperBoundTotalUsd: (Number(amountUSD) + Number(transactionFeeData.upperBoundUSD)).toString()
+    }
+    setAmountTotalbounds(newTotalBounds);
   }
 
   const handleAmountChange = function(amountIn:string){
@@ -144,6 +190,7 @@ const Send: NextPage = () => {
        setisLoading(false);
        return;
     }
+
     setReadableToAddress(truncateAddress(toAddress, nw));
     // change progress state
     setProgress(SendProgress.Rewiew);
@@ -158,6 +205,7 @@ const Send: NextPage = () => {
     setForMessage("");
     setFromAddress("");
     setToAddress("");
+    setAmountTotalbounds(defaultAmountTotalBounds);
     setReadableFromAddress(truncateAddress(kryptikWallet.ethAddress, nw));
     setReadableToAddress("");
     setSelectedNetwork(defaultNetworkDb);
@@ -174,32 +222,71 @@ const Send: NextPage = () => {
 
   const handleCreateTransaction = async function(){
     let network = NetworkFromTicker(selectedNetwork.ticker);
-    if(network.getNetworkfamily()!=NetworkFamily.EVM){
-      toast.error(`Error: Unable to build transaction for ${selectedNetwork.fullName}`);
-      handleCancelTransaction();
-      return null;
-    }
     let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
     // UPDATE TO REFLECT ERROR IN UI
-    if(!kryptikProvider.ethProvider) throw(new Error(`Error: Provider not set for ${network.fullName}`));
-    let ethProvider = kryptikProvider.ethProvider;
-    let EVMTransaction:TransactionRequest = await createEVMTransaction({value: utils.parseEther(amountCrypto), sendAccount: fromAddress,
-      toAddress: toAddress, gasLimit:transactionFeeData.EVMGas.gasLimit, 
-      maxFeePerGas:transactionFeeData.EVMGas.maxFeePerGas, 
-      maxPriorityFeePerGas:transactionFeeData.EVMGas.maxPriorityFeePerGas, 
-      networkDb:selectedNetwork, 
-      kryptikProvider:kryptikService.getProviderForNetwork(selectedNetwork)});
-    let kryptikTxParams:TransactionParameters = {
-        evmTransaction: EVMTransaction
+    switch(network.getNetworkfamily()){
+      case (NetworkFamily.EVM): { 
+          if(!kryptikProvider.ethProvider){
+            toast.error(`Error: Provider not set for ${network.fullName}`);
+            handleCancelTransaction();
+            return null;
+          }
+          let ethProvider = kryptikProvider.ethProvider;
+          let EVMTransaction:TransactionRequest = await createEVMTransaction({value: utils.parseEther(amountCrypto), sendAccount: fromAddress,
+            toAddress: toAddress, gasLimit:transactionFeeData.EVMGas.gasLimit, 
+            maxFeePerGas:transactionFeeData.EVMGas.maxFeePerGas, 
+            maxPriorityFeePerGas:transactionFeeData.EVMGas.maxPriorityFeePerGas, 
+            networkDb:selectedNetwork, 
+            kryptikProvider:kryptikService.getProviderForNetwork(selectedNetwork)});
+          let kryptikTxParams:TransactionParameters = {
+              evmTransaction: EVMTransaction
+          }
+          let signedTx:SignedTransaction = await kryptikWallet.seedLoop.signTransaction(fromAddress, kryptikTxParams, network);
+          if(!signedTx.evmFamilyTx) throw(new Error("Error: Unable to sign EVM transaction"));
+          console.log(signedTx.evmFamilyTx);
+          let txResponse = await ethProvider.sendTransaction(signedTx.evmFamilyTx);
+          console.log(txResponse);
+          break; 
+      } 
+      case(NetworkFamily.Solana):{
+          if(!kryptikProvider.solProvider){
+            toast.error(`Error: Provider not set for ${network.fullName}`);
+            handleCancelTransaction();
+            return null;
+          }
+          let solProvider = kryptikProvider.solProvider;
+          let txIn:SolTransaction = {
+            sendAccount: fromAddress,
+            toAddress: toAddress,
+            valueSol: Number(amountCrypto),
+            kryptikProvider: kryptikProvider,
+            networkDb: selectedNetwork
+          }
+          let txSol:Transaction = await createSolTransaction(txIn);
+          let kryptikTxParams:TransactionParameters = {
+            solTransactionBuffer: txSol.serializeMessage()
+          };
+          const signature = await kryptikWallet.seedLoop.signTransaction(fromAddress, kryptikTxParams, network);
+          if(!signature.solanaFamilyTx){
+            toast.error(`Error: Unable to create signature for ${selectedNetwork.fullName} transaction.`);
+            handleCancelTransaction();
+            return null;
+          }
+          txSol.addSignature(new PublicKey(fromAddress), Buffer.from(signature.solanaFamilyTx));
+          if(!txSol.verifySignatures()){
+            toast.error(`Error: Unable to verify signature for ${selectedNetwork.fullName} transaction.`);
+            handleCancelTransaction();
+            return null;
+          }
+          const txPostResult = await solProvider.sendRawTransaction(txSol.serialize());
+          console.log(txPostResult);
+          break;
+      }
+      default: { 
+          return toast.error(`Error: Unable to build transaction for ${selectedNetwork.fullName}`);
+          break; 
+      } 
     }
-    console.log("EVM Transaction:");
-    console.log(EVMTransaction);
-    let signedTx:SignedTransaction = await kryptikWallet.seedLoop.signTransaction(fromAddress, kryptikTxParams, network);
-    if(!signedTx.evmFamilyTx) throw(new Error("Error: Unable to sign EVM transaction"));
-    console.log("Signed Tx:");
-    console.log(signedTx.evmFamilyTx);
-    let txResponse = await ethProvider.sendTransaction(signedTx.evmFamilyTx);
-    console.log(txResponse);
   }
 
   const handleClickBack = function(){
@@ -248,9 +335,16 @@ const Send: NextPage = () => {
                     <DropdownNetworks selectedNetwork={selectedNetwork} selectFunction={setSelectedNetwork}/>
                 </div>
               {
-                  transactionFeeData.isFresh &&
+                  (transactionFeeData.isFresh && 
+                  NetworkFromTicker(selectedNetwork.ticker).getNetworkfamily()!=NetworkFamily.Solana) &&
                   <div>
-                    <p className="text-slate-400 text-sm inline">Fees: {`$${transactionFeeData.lowerBoundUSD}-$${transactionFeeData.upperBoundUsd}`}</p>
+                    <p className="text-slate-400 text-sm inline">Fees: {`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
+                  </div>
+              }
+              {
+                  ( NetworkFromTicker(selectedNetwork.ticker).getNetworkfamily() == NetworkFamily.Solana) &&
+                  <div>
+                    <p className="text-slate-400 text-sm inline">Fees will be calculated on review</p>
                   </div>
               }
               {/* next button... to set recipient */}
@@ -376,7 +470,11 @@ const Send: NextPage = () => {
                             <p className="text-slate-600 text-left">Network Fees</p>
                           </div>
                           <div className="flex-1 px-1">
-                            <p className="text-right">{`$${transactionFeeData.lowerBoundUSD}-$${transactionFeeData.upperBoundUsd}`}</p>
+                            {
+                              NetworkFromTicker(selectedNetwork.ticker).getNetworkfamily() == NetworkFamily.Solana?
+                              <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
+                              <p className="text-right">{`$${transactionFeeData.lowerBoundUSD}-$${transactionFeeData.upperBoundUSD}`}</p>
+                            }
                           </div>
                     </div>
                     <div className="flex flex-row">
@@ -384,7 +482,11 @@ const Send: NextPage = () => {
                             <p className="text-slate-600 text-left">Total Amount</p>
                           </div>
                           <div className="flex-1 px-1">
-                            <p className="text-right text-semibold">{`$${transactionFeeData.lowerBoundUSD+amountUSD}-$${transactionFeeData.upperBoundUsd+amountUSD}`}</p>
+                            {
+                              NetworkFromTicker(selectedNetwork.ticker).getNetworkfamily() == NetworkFamily.Solana?
+                              <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
+                              <p className="text-right">{`$${amountTotalBounds.lowerBoundTotalUsd}-$${amountTotalBounds.upperBoundTotalUsd}`}</p>
+                            }
                           </div>
                     </div>
                   </div>
