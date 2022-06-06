@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
 import { defaultNetworkDb, NetworkDb } from '../../src/services/models/network'
 import { SendProgress } from '../../src/services/types'
-import { AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
+import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapLine} from "react-icons/ri"
 import { isValidAddress, Network, NetworkFamily, NetworkFromTicker, SignedTransaction, TransactionParameters, truncateAddress } from "hdseedloop"
 
@@ -84,7 +84,7 @@ const Send: NextPage = () => {
       let nw:Network = NetworkFromTicker(selectedNetwork.ticker);
       let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
       // get solana transaction fee
-      if(nw.getNetworkfamily() != NetworkFamily.Solana){
+      if(nw.networkFamily != NetworkFamily.Solana){
         return;
       }
       let txIn:SolTransaction = {
@@ -197,7 +197,7 @@ const Send: NextPage = () => {
     setisLoading(false);
   };
 
-  const handleCancelTransaction = function(){
+  const handleCancelTransaction = function(isComplete?:false){
     let nw:Network = NetworkFromTicker(defaultNetworkDb.ticker);
     setisLoading(true);
     setAmountUSD("0");
@@ -209,7 +209,7 @@ const Send: NextPage = () => {
     setReadableFromAddress(truncateAddress(kryptikWallet.ethAddress, nw));
     setReadableToAddress("");
     setSelectedNetwork(defaultNetworkDb);
-    setProgress(SendProgress.Begin);
+    if(!isComplete) setProgress(SendProgress.Begin);
     setisLoading(false);
   };
 
@@ -224,7 +224,7 @@ const Send: NextPage = () => {
     let network = NetworkFromTicker(selectedNetwork.ticker);
     let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
     // UPDATE TO REFLECT ERROR IN UI
-    switch(network.getNetworkfamily()){
+    switch(network.networkFamily){
       case (NetworkFamily.EVM): { 
           if(!kryptikProvider.ethProvider){
             toast.error(`Error: Provider not set for ${network.fullName}`);
@@ -286,6 +286,7 @@ const Send: NextPage = () => {
           return toast.error(`Error: Unable to build transaction for ${selectedNetwork.fullName}`);
           break; 
       } 
+      setProgress(SendProgress.Complete);
     }
   }
 
@@ -299,6 +300,10 @@ const Send: NextPage = () => {
          setProgress(SendProgress.SetParamaters);
          break; 
       } 
+      case SendProgress.Complete:{
+         handleCancelTransaction();
+         break; 
+      }
       default: { 
          setProgress(SendProgress.Begin);
          break; 
@@ -336,13 +341,13 @@ const Send: NextPage = () => {
                 </div>
               {
                   (transactionFeeData.isFresh && 
-                  NetworkFromTicker(selectedNetwork.ticker).getNetworkfamily()!=NetworkFamily.Solana) &&
+                  NetworkFromTicker(selectedNetwork.ticker).networkFamily!=NetworkFamily.Solana) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees: {`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                   </div>
               }
               {
-                  ( NetworkFromTicker(selectedNetwork.ticker).getNetworkfamily() == NetworkFamily.Solana) &&
+                  ( NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees will be calculated on review</p>
                   </div>
@@ -471,7 +476,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                              NetworkFromTicker(selectedNetwork.ticker).getNetworkfamily() == NetworkFamily.Solana?
+                              NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
                               <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
                               <p className="text-right">{`$${transactionFeeData.lowerBoundUSD}-$${transactionFeeData.upperBoundUSD}`}</p>
                             }
@@ -483,7 +488,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                              NetworkFromTicker(selectedNetwork.ticker).getNetworkfamily() == NetworkFamily.Solana?
+                              NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
                               <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
                               <p className="text-right">{`$${amountTotalBounds.lowerBoundTotalUsd}-$${amountTotalBounds.upperBoundTotalUsd}`}</p>
                             }
@@ -514,6 +519,111 @@ const Send: NextPage = () => {
                                           <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
                                           </svg>
                                     }
+                          </button>
+                        </div>
+                  </div>
+                  
+                </div>
+            </div>
+          }
+          {
+            progress == SendProgress.Complete &&
+            <div>
+              <div className="h-[4rem]">
+                  {/* padding div for space between top and main elements */}
+                </div>
+                <div className="max-w-md mx-auto border rounded-lg border-solid border-2 border-gray-400 py-4 px-2">
+                <div className='flex mb-4'>
+                    <div className='flex-1'>
+                      <AiOutlineArrowLeft className="hover:cursor-pointer" onClick={()=>handleClickBack()} size="25"/>
+                    </div>
+                    <div className='flex-2'>
+                      <h4 className="font-bold text-xl mx-auto content-center text-green-600">Transaction Complete <AiFillCheckCircle className="inline ml-3"/></h4>
+                    </div>
+                    <div className='flex-1'>
+                        {/* space filler */}
+                    </div>
+                  </div>
+                  <div className="border border-solid border-1 border-gray-300 py-4 rounded-lg mx-2">
+                    <div className="flex flex-row">
+                      <div className="flex-1 pl-1">
+                        <img className="w-8 h-8 rounded-full" src={selectedNetwork.iconPath} alt="Network Image"/>
+                        <AiOutlineArrowDown className="text-gray-200 pl-1" size="30"/>
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-base mx-2">{selectedNetwork.fullName}</p>
+                      </div>
+                      <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-900 truncate">
+                            ${amountUSD}
+                          </p>
+                          <p className="text-sm text-gray-500 truncate dark:text-gray-400">
+                            {roundCryptoAmount(Number(amountCrypto))}
+                          </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row">
+                        <div className="flex-1 px-1">
+                          <AiOutlineWallet className="text-sky-400 pl-1" size="30"/>
+                        </div>
+                        <div className="flex-1 px-1">
+                          <p className="italic">{readableToAddress}</p>
+                        </div>
+                        <div className='flex-1'>
+                          {/* space filler */}
+                        </div>
+                    </div>
+
+                  </div>
+                  <br/>
+                <div className='mx-3'>
+                    <div className="flex">
+                          <div className="flex-1">
+                            <p className="text-slate-600 text-left">Wallet Used</p>
+                          </div>
+                          <div className="flex-1 px-1">
+                            <p className="text-right">{readableFromAddress}</p>
+                          </div>
+                    </div>
+                    <div className="flex flex-row">
+                          <div className="flex-1">
+                            <p className="text-slate-600 text-left">Blockchain</p>
+                          </div>
+                          <div className="flex-1 px-1">
+                            <p className="text-right">{selectedNetwork.fullName}</p>
+                          </div>
+                    </div>
+                    <div className="flex flex-row">
+                          <div className="flex-1">
+                            <p className="text-slate-600 text-left">Network Fees</p>
+                          </div>
+                          <div className="flex-1 px-1">
+                            {
+                              NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
+                              <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
+                              <p className="text-right">{`$${transactionFeeData.lowerBoundUSD}-$${transactionFeeData.upperBoundUSD}`}</p>
+                            }
+                          </div>
+                    </div>
+                    <div className="flex flex-row">
+                          <div className="flex-1">
+                            <p className="text-slate-600 text-left">Total Amount</p>
+                          </div>
+                          <div className="flex-1 px-1">
+                            {
+                              NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
+                              <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
+                              <p className="text-right">{`$${amountTotalBounds.lowerBoundTotalUsd}-$${amountTotalBounds.upperBoundTotalUsd}`}</p>
+                            }
+                          </div>
+                    </div>
+                  </div>
+                  <Divider/>
+                  <div className="flex">
+                        <div className="flex-1 px-1">
+                          <button className={`bg-transparent hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent rounded-lg my-5`} disabled={isLoading}>      
+                                  View Transaction
                           </button>
                         </div>
                   </div>

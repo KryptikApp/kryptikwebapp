@@ -21,7 +21,7 @@ import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vau
 import { utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 import TransactionFeeData, { defaultEVMGas } from "./models/transaction";
-import { lamportsToSol, roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
+import { lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
 import { async } from "@firebase/util";
 
 const NetworkDbsRef = collection(firestore, "networks")
@@ -32,12 +32,12 @@ export class KryptikProvider{
     public solProvider: Connection|undefined;
     public network:Network;
     constructor(rpcEndpoint:string, networkDb:NetworkDb){
-        let network = NetworkFromTicker(networkDb.ticker);
+        let network = networkFromNetworkDb(networkDb);
         this.network = network;
-        if(network.getNetworkfamily() == NetworkFamily.EVM){
+        if(network.networkFamily == NetworkFamily.EVM){
             this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: networkDb.fullName, chainId: networkDb.chainIdEVM });  
         }
-        if(network.getNetworkfamily()==NetworkFamily.Solana){
+        if(network.networkFamily == NetworkFamily.Solana){
             this.solProvider = new Connection(rpcEndpoint);
         }
     }
@@ -221,6 +221,7 @@ class Web3Service extends BaseService{
             if(docData.provider) providerFromDb = docData.provider;
             let NetworkDbToAdd:NetworkDb = {
                 fullName: docData.fullName,
+                networkFamilyName: docData.networkFamilyName,
                 ticker: docData.ticker,
                 chainId: docData.chainId,
                 chainIdEVM: docData.chainIdEVM,
@@ -336,9 +337,7 @@ class Web3Service extends BaseService{
           let newKryptikProvider:KryptikProvider = this.setProviderFromTicker(ticker);
           return newKryptikProvider;
       }
-      networkDbtoKryptikNetwork(networkFromDb:NetworkDb):Network{
-          return new Network(networkFromDb.fullName, networkFromDb.ticker);
-    }
+
 
     // TODO: Update to support tx. based networks
     getBalanceAllNetworks = async(walletUser:IWallet):Promise<IBalance[]> =>{
@@ -346,11 +345,11 @@ class Web3Service extends BaseService{
         // initialize return array
         let balances:IBalance[] = [];
         for(const nw of networksFromDb){
-            let network:Network = new Network(nw.fullName, nw.ticker);
+            let network:Network = networkFromNetworkDb(nw);
             let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
             let priceUSD = await getPriceOfTicker(nw.coingeckoId);
             // get balance for supported evm family networks
-            if(network.getNetworkfamily()==NetworkFamily.EVM){
+            if(network.networkFamily==NetworkFamily.EVM){
                 if(!kryptikProvider.ethProvider) throw Error(`No ethereum provider set up for ${network.fullName}.`);
                 let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
                 // gets all addresses for network
@@ -369,7 +368,7 @@ class Web3Service extends BaseService{
                 balances.push(newBalanceObj);
             }
             // get balance for supported solana family networks
-            if(network.getNetworkfamily() == NetworkFamily.Solana){
+            if(network.networkFamily == NetworkFamily.Solana){
                 if(!kryptikProvider.solProvider) throw(new Error("No solana provider is set up."))
                 let solNetworkProvider:Connection = kryptikProvider.solProvider;
                 // gets all addresses for network
@@ -400,7 +399,7 @@ class Web3Service extends BaseService{
     getTransactionFeeData = async(networkDb:NetworkDb, solTransaction?:Transaction):Promise<TransactionFeeData|null> => {
         let network:Network = NetworkFromTicker(networkDb.ticker);
         let tokenPriceUsd = await getPriceOfTicker(networkDb.coingeckoId);
-        switch(network.getNetworkfamily()){
+        switch(network.networkFamily){
             case (NetworkFamily.EVM): { 
                 let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible(networkDb, tokenPriceUsd);
                 return transactionFeeData;
