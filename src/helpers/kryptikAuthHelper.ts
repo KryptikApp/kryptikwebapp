@@ -7,6 +7,7 @@ import { IWallet } from "../models/IWallet";
 import { defaultUser, UserDB, UserExtraData } from "../models/user";
 import Web3Service, { IConnectWalletReturn } from "../services/Web3Service";
 import { firebaseAuth, firestore, formatAuthUser, readExtraUserData, getUserPhotoPath } from "./firebaseHelper";
+import { networkFromNetworkDb } from "./wallet/utils";
 
 
 
@@ -112,10 +113,26 @@ export function useKryptikAuth() {
         else {
             walletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser);
         }
+        try{
+          await updateWalletNetworks(walletKryptik, kryptikService);
+        }
+        catch(e){
+          throw(new Error("Error: unable to synchronize remote networks."))
+        }
         // set data
         setKryptikWallet(walletKryptik)
         setAuthUser(formattedUser);    
         setLoading(false);
+    }
+
+    // update wallets on local seedloop to match networks supported by app.
+    const updateWalletNetworks = async function(wallet:IWallet, ks:Web3Service){
+      for(const networkDb of ks.getSupportedNetworkDbs()){
+        let network = networkFromNetworkDb(networkDb);
+        if(!wallet.seedLoop.networkOnSeedloop(network)){
+          wallet.seedLoop.addKeyRingByNetwork(network);
+        }
+      }
     }
 
     const writeExtraUserData = async function(user:UserDB, data:UserExtraData) {
