@@ -14,6 +14,7 @@ export interface NetworkDb {
     hexColor: string,
     dateCreated: Date,
     provider:string,
+    networkFamilyName:string,
     coingeckoId:string
 }
 
@@ -28,6 +29,7 @@ export const defaultNetworkDb:NetworkDb = {
     chainId: 60,
     chainIdEVM: 1,
     hexColor: "#3c3c3d",
+    networkFamilyName: "evm",
     dateCreated: new Date('July 29, 2015 03:24:00'),
     provider: "https://eth-mainnet.alchemyapi.io/v2/NnS19sbjsKljODizz9zB-C8Fw511M-ej",
     coingeckoId: "ethereum"
