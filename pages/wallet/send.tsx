@@ -208,6 +208,7 @@ const Send: NextPage = () => {
     setAmountTotalbounds(defaultAmountTotalBounds);
     setReadableFromAddress(truncateAddress(kryptikWallet.ethAddress, nw));
     setReadableToAddress("");
+    setTxPubData(defaultTxPublishedData);
     setSelectedNetwork(defaultNetworkDb);
     if(!isComplete) setProgress(SendProgress.Begin);
     setisLoading(false);
