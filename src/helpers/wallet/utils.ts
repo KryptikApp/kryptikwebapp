@@ -35,22 +35,26 @@ export const networkFromNetworkDb = function(nw: NetworkDb):Network{
 // UPDATE SO BLOCKCHIAN EXPLORER LINKS ARE INCLUDED WITH NETWORKDB 
 export const getTransactionExplorerPath = function(network:NetworkDb, txPublishedData:TransactionPublishedData):string|null{
     let linkPathToReturn:string|null = null;
-    switch(network.ticker){
+    switch(network.ticker.toLowerCase()){
         case("eth"):{
             linkPathToReturn = `https://etherscan.io/tx/${txPublishedData.hash}`
             break;
         }
         case("eth(rop.)"):{
             linkPathToReturn = `https://ropsten.etherscan.io/tx/${txPublishedData.hash}`
+            break;
         }
         case("sol"):{
             linkPathToReturn = `https://solscan.io/tx/${txPublishedData.hash}`
+            break;
         }
         case("matic"):{
             linkPathToReturn = `https://polygonscan.com/tx/${txPublishedData.hash}`
+            break;
         }
         default:{
             linkPathToReturn = null;
+            break;
         }
     }
     return linkPathToReturn;
