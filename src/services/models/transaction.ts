@@ -83,3 +83,14 @@ export type TransactionRequest = {
     customData?: Record<string, any>;
     ccipReadEnabled?: boolean;
 }
+
+export interface TransactionPublishedData{
+    // transaction hash on network
+    hash: string
+    explorerPath?:string
+}
+
+export const defaultTxPublishedData:TransactionPublishedData = {
+    // genesis tx. hash on ethereum network
+    hash: "0xc8cc9c54f19f6cb85c3fa27f493d50e136374ce5b2e3f5307b3c5eea113a003b"
+}

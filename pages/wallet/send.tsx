@@ -12,11 +12,12 @@ import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
-import TransactionFeeData, { defaultTransactionFeeData, SolTransaction, TransactionRequest } from '../../src/services/models/transaction'
-import { roundCryptoAmount, roundUsdAmount } from '../../src/helpers/wallet/utils'
+import TransactionFeeData, { defaultTransactionFeeData, defaultTxPublishedData, SolTransaction, TransactionPublishedData, TransactionRequest } from '../../src/services/models/transaction'
+import { getTransactionExplorerPath, roundCryptoAmount, roundUsdAmount } from '../../src/helpers/wallet/utils'
 import { createEVMTransaction, createSolTransaction } from '../../src/handlers/wallet/transactionHandler'
 import { utils } from 'ethers'
 import { PublicKey, Transaction } from '@solana/web3.js'
+import Link from 'next/link'
 
 
 
@@ -32,6 +33,7 @@ const Send: NextPage = () => {
   const [amountUSD, setAmountUSD] = useState("0");
   const [amountTotalBounds, setAmountTotalbounds] = useState<AmountTotalBounds>(defaultAmountTotalBounds);
   const [transactionFeeData, setTransactionFeedata] = useState(defaultTransactionFeeData)
+  const [txPubData, setTxPubData] = useState<TransactionPublishedData>(defaultTxPublishedData);
   const [tokenPrice, setTokenPrice] = useState(0);
   const [fromAddress, setFromAddress] = useState(kryptikWallet.ethAddress);
   const [toAddress, setToAddress] = useState("");
@@ -223,6 +225,7 @@ const Send: NextPage = () => {
   const handleCreateTransaction = async function(){
     let network = NetworkFromTicker(selectedNetwork.ticker);
     let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
+    let txDoneData:TransactionPublishedData = defaultTxPublishedData;
     // UPDATE TO REFLECT ERROR IN UI
     switch(network.networkFamily){
       case (NetworkFamily.EVM): { 
@@ -245,7 +248,11 @@ const Send: NextPage = () => {
           if(!signedTx.evmFamilyTx) throw(new Error("Error: Unable to sign EVM transaction"));
           console.log(signedTx.evmFamilyTx);
           let txResponse = await ethProvider.sendTransaction(signedTx.evmFamilyTx);
-          console.log(txResponse);
+          txDoneData.hash = txResponse.hash;
+          // set tx. explorer path
+          let txExplorerPath:string|null = getTransactionExplorerPath(selectedNetwork, txDoneData);
+          txDoneData.explorerPath = txExplorerPath!=null? txExplorerPath:txDoneData.explorerPath;
+          setTxPubData(txDoneData);
           break; 
       } 
       case(NetworkFamily.Solana):{
@@ -279,7 +286,11 @@ const Send: NextPage = () => {
             return null;
           }
           const txPostResult = await solProvider.sendRawTransaction(txSol.serialize());
-          console.log(txPostResult);
+          txDoneData.hash = txPostResult;
+          // set tx. explorer path
+          let txExplorerPath:string|null = getTransactionExplorerPath(selectedNetwork, txDoneData);
+          txDoneData.explorerPath = txExplorerPath!=null? txExplorerPath:txDoneData.explorerPath;
+          setTxPubData(txDoneData);
           break;
       }
       default: { 
@@ -317,7 +328,7 @@ const Send: NextPage = () => {
           <Toaster/>
           <div className="text-center max-w-xl mx-auto content-center">
           {
-            ((progress != SendProgress.Begin) && progress!= SendProgress.Rewiew)  &&
+            ((progress != SendProgress.Begin) && progress!= SendProgress.Rewiew && progress != SendProgress.Complete)  &&
             <div className="align-left m-7">
               <AiOutlineArrowLeft className="hover:cursor-pointer" onClick={()=>handleClickBack()} size="30"/>
             </div>
@@ -601,8 +612,8 @@ const Send: NextPage = () => {
                           <div className="flex-1 px-1">
                             {
                               NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
-                              <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
-                              <p className="text-right">{`$${transactionFeeData.lowerBoundUSD}-$${transactionFeeData.upperBoundUSD}`}</p>
+                              <p className="text-right">{`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>:
+                              <p className="text-right">{`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                             }
                           </div>
                     </div>
@@ -613,21 +624,27 @@ const Send: NextPage = () => {
                           <div className="flex-1 px-1">
                             {
                               NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
-                              <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
-                              <p className="text-right">{`$${amountTotalBounds.lowerBoundTotalUsd}-$${amountTotalBounds.upperBoundTotalUsd}`}</p>
+                              <p className="text-right">{`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>:
+                              <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
                             }
                           </div>
                     </div>
                   </div>
-                  <Divider/>
-                  <div className="flex">
-                        <div className="flex-1 px-1">
-                          <button className={`bg-transparent hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent rounded-lg my-5`} disabled={isLoading}>      
-                                  View Transaction
-                          </button>
-                        </div>
-                  </div>
-                  
+                  {
+                    txPubData.explorerPath &&
+                    <div>
+                    <Divider/>
+                    <div className="flex">
+                          <div className="flex-1 px-1">                      
+                              <Link href={txPubData.explorerPath} passHref={true}>
+                                <button className={`bg-transparent hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent rounded-lg my-5`} disabled={isLoading}>      
+                                    View Transaction
+                                </button>
+                              </Link>
+                          </div>
+                    </div>
+                    </div>
+                  }
                 </div>
             </div>
           }

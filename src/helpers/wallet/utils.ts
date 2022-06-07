@@ -1,5 +1,6 @@
 import { Network, NetworkFamily, NetworkFamilyFromFamilyName, NetworkParameters} from "hdseedloop";
 import { NetworkDb } from "../../services/models/network";
+import { TransactionPublishedData } from "../../services/models/transaction";
 
 export const roundCryptoAmount = function(amountIn:number):number{
     return Number(amountIn.toPrecision(4));
@@ -29,4 +30,28 @@ export const networkFromNetworkDb = function(nw: NetworkDb):Network{
         networkFamilyName: networkFamilyNameIn
     })
     return network;
+}
+
+// UPDATE SO BLOCKCHIAN EXPLORER LINKS ARE INCLUDED WITH NETWORKDB 
+export const getTransactionExplorerPath = function(network:NetworkDb, txPublishedData:TransactionPublishedData):string|null{
+    let linkPathToReturn:string|null = null;
+    switch(network.ticker){
+        case("eth"):{
+            linkPathToReturn = `https://etherscan.io/tx/${txPublishedData.hash}`
+            break;
+        }
+        case("eth(rop.)"):{
+            linkPathToReturn = `https://ropsten.etherscan.io/tx/${txPublishedData.hash}`
+        }
+        case("sol"):{
+            linkPathToReturn = `https://solscan.io/tx/${txPublishedData.hash}`
+        }
+        case("matic"):{
+            linkPathToReturn = `https://polygonscan.com/tx/${txPublishedData.hash}`
+        }
+        default:{
+            linkPathToReturn = null;
+        }
+    }
+    return linkPathToReturn;
 }
