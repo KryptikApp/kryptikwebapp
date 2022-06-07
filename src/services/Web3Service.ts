@@ -23,6 +23,7 @@ import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 import TransactionFeeData, { defaultEVMGas } from "./models/transaction";
 import { lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
 import { async } from "@firebase/util";
+import { UserDB } from "../models/user";
 
 const NetworkDbsRef = collection(firestore, "networks")
 
@@ -341,11 +342,13 @@ class Web3Service extends BaseService{
 
 
     // TODO: Update to support tx. based networks
-    getBalanceAllNetworks = async(walletUser:IWallet):Promise<IBalance[]> =>{
+    getBalanceAllNetworks = async(walletUser:IWallet, user?:UserDB):Promise<IBalance[]> =>{
         let networksFromDb = this.getSupportedNetworkDbs();
         // initialize return array
         let balances:IBalance[] = [];
         for(const nw of networksFromDb){
+            // only show testnets to advanced users
+            if(nw.isTestnet && user && !user.isAdvanced) continue;
             let network:Network = networkFromNetworkDb(nw);
             let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
             let priceUSD = await getPriceOfTicker(nw.coingeckoId);

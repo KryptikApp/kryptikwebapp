@@ -6,14 +6,14 @@ import ListItem from "./ListItem";
 import Link from 'next/link';
 
 const ListBalance:NextPage = () => {
-    const {kryptikService, kryptikWallet} = useKryptikAuthContext();
+    const {kryptikService, kryptikWallet, authUser} = useKryptikAuthContext();
     const initBalances:IBalance[] = [];
     const[isFetched, setIsFetched] = useState(false);
     const[balances, setBalances] = useState<IBalance[]>(initBalances);
 
     // retrieves wallet balances
     const fetchBalances = async() =>{
-        let bals:IBalance[] = await kryptikService.getBalanceAllNetworks(kryptikWallet);
+        let bals:IBalance[] = await kryptikService.getBalanceAllNetworks(kryptikWallet, authUser);
         setBalances(bals);
         setIsFetched(true);
     }

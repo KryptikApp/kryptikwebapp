@@ -10,7 +10,7 @@ interface Props{
 }
 const DropdownNetworks:NextPage<Props> = (props) => {
     const {selectedNetwork, selectFunction} = props;
-    const {kryptikService} = useKryptikAuthContext();
+    const {kryptikService, authUser} = useKryptikAuthContext();
     const[networks, setNetworks] = useState<NetworkDb[]>([]);
 
     const[isFetched, setIsFetched] = useState(false);
@@ -59,6 +59,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
 
                 <ul className="absolute z-10 mt-1 w-full bg-white opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm" tabIndex={-1} role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3" hidden={!showOptions}>
                 {networks.map((nw:NetworkDb) => (
+                  (!(nw.isTestnet&&!authUser.isAdvanced)) &&
                   <ListItemDropdown selectedNetwork={selectedNetwork} selectFunction={handleOptionClick} network={nw}/>
                 ))}
                 </ul>
