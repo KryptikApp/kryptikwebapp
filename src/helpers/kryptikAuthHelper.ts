@@ -72,7 +72,7 @@ export function useKryptikAuth() {
       // get current extra user data
       let extraUserData:UserExtraData = await readExtraUserData(user);
       let extraUserDataUpdated:UserExtraData = {remoteShare: extraUserData.remoteShare, 
-        bio: user.bio, isTwoFactorAuth:extraUserData.isTwoFactorAuth, isAdvanced:extraUserData.isAdvanced};
+        bio: user.bio, isTwoFactorAuth:extraUserData.isTwoFactorAuth, isAdvanced:user.isAdvanced};
       await writeExtraUserData(user, extraUserDataUpdated);
       await updateProfile(userFirebase, {displayName:user.name, photoURL:user.photoUrl});
     }
