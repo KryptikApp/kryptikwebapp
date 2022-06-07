@@ -44,6 +44,10 @@ export const getTransactionExplorerPath = function(network:NetworkDb, txPublishe
             linkPathToReturn = `https://ropsten.etherscan.io/tx/${txPublishedData.hash}`
             break;
         }
+        case("avaxc"):{
+            linkPathToReturn = `https://snowtrace.io/tx/${txPublishedData.hash}`
+            break;
+        }
         case("sol"):{
             linkPathToReturn = `https://solscan.io/tx/${txPublishedData.hash}`
             break;
