@@ -16,6 +16,7 @@ export interface NetworkDb {
     provider:string,
     networkFamilyName:string,
     coingeckoId:string
+    isTestnet: boolean
 }
 
 
@@ -32,7 +33,8 @@ export const defaultNetworkDb:NetworkDb = {
     networkFamilyName: "evm",
     dateCreated: new Date('July 29, 2015 03:24:00'),
     provider: "https://eth-mainnet.alchemyapi.io/v2/NnS19sbjsKljODizz9zB-C8Fw511M-ej",
-    coingeckoId: "ethereum"
+    coingeckoId: "ethereum",
+    isTestnet: false
 }
 
 
