@@ -199,7 +199,6 @@ class Web3Service extends BaseService{
     }
 
     private setProviderFromTicker(ticker:string):KryptikProvider{
-        let network:Network = NetworkFromTicker(ticker);
         let rpcEndpoint:string = this.rpcEndpoints[ticker];
         let networkDb = this.NetworkDbs.find((nw)=>nw.ticker==ticker);
         if(!networkDb) throw(new Error("Error: Unable to find service networkdb by ticker."))
@@ -233,7 +232,8 @@ class Web3Service extends BaseService{
                 whitePaperPath: docData.whitePaperPath,
                 isSupported: docData.isSupported,
                 provider: providerFromDb,
-                coingeckoId: docData.coingeckoId
+                coingeckoId: docData.coingeckoId,
+                isTestnet: docData.isTestnet?docData.isTestnet:false
             }
             NetworkDbsResult.push(NetworkDbToAdd);
         });
@@ -398,7 +398,7 @@ class Web3Service extends BaseService{
     }
 
     getTransactionFeeData = async(networkDb:NetworkDb, solTransaction?:Transaction):Promise<TransactionFeeData|null> => {
-        let network:Network = NetworkFromTicker(networkDb.ticker);
+        let network:Network =  networkFromNetworkDb(networkDb);
         let tokenPriceUsd = await getPriceOfTicker(networkDb.coingeckoId);
         switch(network.networkFamily){
             case (NetworkFamily.EVM): { 

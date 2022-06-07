@@ -13,7 +13,7 @@ import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
 import TransactionFeeData, { defaultTransactionFeeData, defaultTxPublishedData, SolTransaction, TransactionPublishedData, TransactionRequest } from '../../src/services/models/transaction'
-import { getTransactionExplorerPath, roundCryptoAmount, roundUsdAmount } from '../../src/helpers/wallet/utils'
+import { getTransactionExplorerPath, networkFromNetworkDb, roundCryptoAmount, roundUsdAmount } from '../../src/helpers/wallet/utils'
 import { createEVMTransaction, createSolTransaction } from '../../src/handlers/wallet/transactionHandler'
 import { utils } from 'ethers'
 import { PublicKey, Transaction } from '@solana/web3.js'
@@ -83,7 +83,7 @@ const Send: NextPage = () => {
 
   // gets solana tx. fees and sets sol transaction
   const fetchSolTransactionFees = async()=>{
-      let nw:Network = NetworkFromTicker(selectedNetwork.ticker);
+      let nw:Network =  networkFromNetworkDb(selectedNetwork);
       let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
       // get solana transaction fee
       if(nw.networkFamily != NetworkFamily.Solana){
@@ -101,7 +101,7 @@ const Send: NextPage = () => {
   }
 
   useEffect(()=>{
-      let nw:Network = NetworkFromTicker(selectedNetwork.ticker);
+      let nw:Network =  networkFromNetworkDb(selectedNetwork);
       fetchFromAddress(nw);
       fetchTokenPrice(selectedNetwork);
       fetchNetworkFees(selectedNetwork);
@@ -185,7 +185,7 @@ const Send: NextPage = () => {
   const handleStartReview = function(){
     setisLoading(true);
     // verify recipient address is correct
-    let nw:Network = NetworkFromTicker(selectedNetwork.ticker);
+    let nw:Network =  networkFromNetworkDb(selectedNetwork);
     // format recipient address
     if(!isValidAddress(toAddress, nw)){
        toast.error("Invalid address.");
@@ -200,7 +200,7 @@ const Send: NextPage = () => {
   };
 
   const handleCancelTransaction = function(isComplete?:false){
-    let nw:Network = NetworkFromTicker(defaultNetworkDb.ticker);
+    let nw:Network =  networkFromNetworkDb(selectedNetwork);
     setisLoading(true);
     setAmountUSD("0");
     setAmountCrypto("0");
@@ -223,7 +223,7 @@ const Send: NextPage = () => {
   }
 
   const handleCreateTransaction = async function(){
-    let network = NetworkFromTicker(selectedNetwork.ticker);
+    let network =  networkFromNetworkDb(selectedNetwork);
     let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
     let txDoneData:TransactionPublishedData = defaultTxPublishedData;
     // UPDATE TO REFLECT ERROR IN UI
@@ -352,13 +352,13 @@ const Send: NextPage = () => {
                 </div>
               {
                   (transactionFeeData.isFresh && 
-                  NetworkFromTicker(selectedNetwork.ticker).networkFamily!=NetworkFamily.Solana) &&
+                  networkFromNetworkDb(selectedNetwork).networkFamily!=NetworkFamily.Solana) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees: {`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                   </div>
               }
               {
-                  ( NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana) &&
+                  (  networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees will be calculated on review</p>
                   </div>
@@ -487,7 +487,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                              NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
+                               networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana?
                               <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
                               <p className="text-right">{`$${transactionFeeData.lowerBoundUSD}-$${transactionFeeData.upperBoundUSD}`}</p>
                             }
@@ -499,7 +499,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                              NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
+                               networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana?
                               <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
                               <p className="text-right">{`$${amountTotalBounds.lowerBoundTotalUsd}-$${amountTotalBounds.upperBoundTotalUsd}`}</p>
                             }
@@ -611,7 +611,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                              NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
+                               networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana?
                               <p className="text-right">{`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>:
                               <p className="text-right">{`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                             }
@@ -623,7 +623,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                              NetworkFromTicker(selectedNetwork.ticker).networkFamily == NetworkFamily.Solana?
+                               networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana?
                               <p className="text-right">{`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>:
                               <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
                             }
