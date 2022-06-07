@@ -49,6 +49,7 @@ export function useKryptikAuth() {
           let updatedUserExtraData:UserExtraData = {
             remoteShare: kryptikConnectionObject.remoteShare,
             isTwoFactorAuth: UserExtraData.isTwoFactorAuth,
+            isAdvanced: UserExtraData.isAdvanced,
             bio: UserExtraData.bio
           }
 
@@ -71,7 +72,7 @@ export function useKryptikAuth() {
       // get current extra user data
       let extraUserData:UserExtraData = await readExtraUserData(user);
       let extraUserDataUpdated:UserExtraData = {remoteShare: extraUserData.remoteShare, 
-        bio: user.bio, isTwoFactorAuth:extraUserData.isTwoFactorAuth};
+        bio: user.bio, isTwoFactorAuth:extraUserData.isTwoFactorAuth, isAdvanced:extraUserData.isAdvanced};
       await writeExtraUserData(user, extraUserDataUpdated);
       await updateProfile(userFirebase, {displayName:user.name, photoURL:user.photoUrl});
     }
@@ -102,6 +103,7 @@ export function useKryptikAuth() {
         // read extra user data from db
         let userExtraData = await readExtraUserData(formattedUser);
         formattedUser.bio = userExtraData.bio;
+        formattedUser.isAdvanced = userExtraData.isAdvanced;
         // start web3 kryptik service
         let ks = await initServiceState.StartSevice();
         setKryptikService(ks);

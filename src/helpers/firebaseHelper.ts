@@ -32,6 +32,7 @@ export const formatAuthUser = function(user:any):UserDB
         name: user.displayName,
         bio: user.bio,
         photoUrl: user.photoURL,
+        isAdvanced: user.isAdvanced
       };
 };
 
@@ -41,6 +42,7 @@ export const formatUserExtraData = function(docIn:DocumentSnapshot<DocumentData>
     if(dataIn){
       formatted = {
         isTwoFactorAuth: dataIn.isTwoFactorAuth,
+        isAdvanced: dataIn.isAdvanced?dataIn.isAdvanced:false,
         remoteShare: dataIn.remoteShare,
         bio: dataIn.bio
       }
@@ -48,6 +50,7 @@ export const formatUserExtraData = function(docIn:DocumentSnapshot<DocumentData>
     else{
       formatted = {
         isTwoFactorAuth: false,
+        isAdvanced: false,
         remoteShare: "",
         bio: ""
       }
