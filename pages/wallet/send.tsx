@@ -219,6 +219,7 @@ const Send: NextPage = () => {
   const handleSendTransaction = async function(){
     setisLoading(true);
     await handleCreateTransaction();
+    setProgress(SendProgress.Complete);
     setisLoading(false);
   }
 
