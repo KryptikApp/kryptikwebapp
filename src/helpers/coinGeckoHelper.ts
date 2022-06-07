@@ -1,8 +1,8 @@
 // helps with integrating web3service into app. context
-import { CoinGeckoClient, SimplePriceResponse } from 'coingecko-api-v3';
+import { CoinGeckoClient, CoinMarketChartResponse } from 'coingecko-api-v3';
 
 
-  export const getPriceOfTicker = async function(ticker:string):Promise<number>{
+  export const getPriceOfTicker = async function(id:string):Promise<number>{
     
     const client = new CoinGeckoClient({
       timeout: 10000,
@@ -10,7 +10,7 @@ import { CoinGeckoClient, SimplePriceResponse } from 'coingecko-api-v3';
     });
     let input = {
     vs_currencies: "usd",
-    ids: ticker,
+    ids: id,
     include_market_cap: false,
     include_24hr_vol: false,
     include_24hr_change: false,
@@ -18,6 +18,24 @@ import { CoinGeckoClient, SimplePriceResponse } from 'coingecko-api-v3';
     }
 
     const priceResponse = await client.simplePrice(input);
-    return priceResponse[ticker].usd;
+    return priceResponse[id].usd;
   }
   
+
+  export const getHistoricalPriceForTicker = async function(id:string, days:number):Promise<CoinMarketChartResponse>{
+    
+    const client = new CoinGeckoClient({
+      timeout: 10000,
+      autoRetry: true,
+    });
+
+    let input = {
+    id: id,
+    vs_currency: "usd",
+    days: days
+    }
+
+    const marketChartResponse = await client.coinIdMarketChart(input);
+    console.log(marketChartResponse);
+    return marketChartResponse;
+  }

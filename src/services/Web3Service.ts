@@ -56,7 +56,8 @@ export interface IBalance{
     ticker:string,
     iconPath:string,
     amountCrypto: string,
-    amountUSD: string
+    amountUSD: string,
+    networkCoinGecko: string
 }
 
 export interface IConnectWalletReturn{
@@ -363,7 +364,7 @@ class Web3Service extends BaseService{
                 let networkBalanceString = networkBalanceAdjusted.toString();
                 let amountUSD = roundUsdAmount((priceUSD * networkBalance));
                 let newBalanceObj:IBalance = {fullName:nw.fullName, ticker:nw.ticker, iconPath:nw.iconPath, 
-                    amountCrypto:networkBalanceString, amountUSD:amountUSD.toString()}
+                    amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), networkCoinGecko:nw.coingeckoId}
                 // add adjusted balance to balances return object
                 balances.push(newBalanceObj);
             }
@@ -389,7 +390,7 @@ class Web3Service extends BaseService{
                 networkBalance = lamportsToSol(networkBalance);
                 let amountUSD = roundUsdAmount((priceUSD * networkBalance.valueOf()));
                 let newBalanceObj:IBalance = {fullName:nw.fullName, ticker: nw.ticker, iconPath:nw.iconPath, 
-                    amountCrypto:roundCryptoAmount(networkBalance).toString(), amountUSD:amountUSD.toString()};
+                    amountCrypto:roundCryptoAmount(networkBalance).toString(), amountUSD:amountUSD.toString(), networkCoinGecko:nw.coingeckoId};
                 balances.push(newBalanceObj);
             }
         }

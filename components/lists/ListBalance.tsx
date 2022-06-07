@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { IBalance } from "../../src/services/Web3Service";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import ListItem from "./ListItem";
+import Link from 'next/link';
 
 const ListBalance:NextPage = () => {
     const {kryptikService, kryptikWallet} = useKryptikAuthContext();
@@ -26,8 +27,9 @@ const ListBalance:NextPage = () => {
         {
             !isFetched?<p>Loading Balances.</p>:
             <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-              {balances.map((balance:IBalance) => (
-                  <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={balance.ticker} amount={balance.amountCrypto} amountUSD={balance.amountUSD}/>
+              {balances.map((balance:IBalance) => (        
+                  <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={balance.ticker}
+                   amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}/>
               ))}
             </ul>
         }

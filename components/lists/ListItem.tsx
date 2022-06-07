@@ -1,15 +1,17 @@
 import { NextPage } from "next";
+import Link from 'next/link';
 
 interface Props{
     title:string,
     subtitle:string,
     imgSrc:string,
     amount:string,
-    amountUSD:string
+    amountUSD:string,
+    networkCoinGecko: string
 }
 
 const ListItem:NextPage<Props> = (props) => {
-    const {title, subtitle, imgSrc, amount, amountUSD} = props;
+    const {title, subtitle, imgSrc, amount, amountUSD, networkCoinGecko} = props;
     return(
       <li key={title} className="py-3 sm:py-4">
           <div className="flex items-center space-x-4">
@@ -17,9 +19,11 @@ const ListItem:NextPage<Props> = (props) => {
                   <img className="w-8 h-8 rounded-full" src={imgSrc} alt="List Image"/>
               </div>
               <div className="flex-1 min-w-0">
+              <Link href={{ pathname: '../coins/coinInfo', query: { network:  networkCoinGecko} }}>
                   <p className="text-sm font-medium text-gray-900 truncate">
                       {title}
                   </p>
+                </Link>
                   <p className="text-sm text-gray-500 truncate dark:text-gray-400">
                       {subtitle}
                   </p>
