@@ -15,13 +15,6 @@ const ImportSeed: NextPage = () => {
   const [isLoading, setisLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
 
-  function handleCreateWallet(): void {
-    throw new Error('Function not implemented.')
-  }
-
-  const handleClickImport = async () =>{
-    console.log("NOT implemented yet!");
-  }
 
   const handleSeed = function(seedIn:string){
     setSeed(seedIn);
