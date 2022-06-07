@@ -1,8 +1,5 @@
 import type { NextPage } from 'next'
-import Link from 'next/link'
 import { useState } from 'react'
-import { Magic } from 'magic-sdk'
-import router from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
 import { Network, NetworkFromTicker } from "hdseedloop"
 import { defaultNetworkDb, NetworkDb } from '../../src/services/models/network'
@@ -16,7 +13,7 @@ import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 
 
 const Recieve: NextPage = () => {
-    const { authUser, loading, kryptikWallet } = useKryptikAuthContext();
+    const { kryptikWallet } = useKryptikAuthContext();
     const[selectedNetwork, setSelectedNetwork] = useState(defaultNetworkDb);
     const [readableFromAddress, setReadableFromAddress] = useState("");
     const [toAddress, setToAddress] = useState(" ");
@@ -68,34 +65,22 @@ const Recieve: NextPage = () => {
   return (
     <div>
         <Toaster/>
-        <div className="h-[7rem]">
+        <div className="h-[5rem]">
           {/* padding div for space between top and main elements */}
         </div>
         
-        
-        <div className="text-center max-w-md mx-auto content-center">
-
-        <div className="rounded-md border border-solid border-grey-600 py-10 hover:border-grey-800 shadow-md hover:shadow-lg">
-        <div className="text-center max-w-2xl mx-auto content-center">
-
-          <div className="flex flex-wrap justify-center">
-            <div className="w-6/12 sm:w-4/12 px-4 lg:w-32">
-              <img src="/kryptikBrand/kryptikEyez.png" alt="Kryptik Eyes" className="rounded-full max-w-full h-auto align-middle border-none" />
-            </div>
+        <div className="max-w-lg mx-auto content-center rounded-lg border border-solid border-grey-600 py-10 hover:border-grey-800">
+          <h1 className="text-center text-3xl font-bold lg:mb-2">Recieve  <img src="/kryptikBrand/kryptikEyez.png" alt="Kryptik Eyes" className="rounded-full w-10 inline max-h-sm h-auto align-middle border-none" /></h1> 
+          <p className="mx-auto text-center text-slate-500 text-sm">Easily receive money on {selectedNetwork.fullName} by having someone scan the code below.</p> 
+           {/* network dropdown */}
+          <div className="max-w-xs mx-auto">
+                      <DropdownNetworks selectedNetwork={selectedNetwork} selectFunction={handleNetowrkChange}/>
           </div>
-          <h1 className="text-2xl font-bold lg:mb-2">Recieve</h1> 
-          <p>Easily recive money by having someone scan your qr code or copy the address, select network below</p>   
-        </div>
-
-        {/* network dropdown */}
-        <div className="max-w-xs mx-auto">
-                    <DropdownNetworks selectedNetwork={selectedNetwork} selectFunction={handleNetowrkChange}/>
-                </div>
-
-
-            <div className="max-w-2xl mx-auto content-center">
-        
-                <Canvas
+          {/* QR CODE */}
+          <div className="flex">
+            <div className="flex-1"/>
+            <div className="flex-2">
+            <Canvas
                 text={toAddress}
                 options={{
                     type: 'image/jpeg',
@@ -103,25 +88,28 @@ const Recieve: NextPage = () => {
                     level: 'M',
                     margin: 3,
                     scale: 4,
-                    width: 200,
+                    width: 300,
                     color: {
-                    dark: '#010599FF',
-                    light: '#FFBF60FF',
+                    dark: '#20d0f7',
+                    light: '##fcfcfc',
                     },
                 }}
                 />
             </div>
-
-          {
-            isCopied?
-            <p className="font-bold text-green-600 hover:cursor-pointer" onClick={()=>handleIsCopiedToggle()}><AiFillCheckCircle className="inline mr-3"/>Copied to Clipboard</p>:
-            <p className="hover:cursor-pointer" onClick={()=>handleIsCopiedToggle()}><AiOutlineCopy className="inline mr-3"/>Copy address to clipboard</p>
-          }
-
+            <div className="flex-1"/>
+          </div>
+          <div className="text-center">
+              {
+                isCopied?
+                <p className="font-bold text-green-600 hover:cursor-pointer" onClick={()=>handleIsCopiedToggle()}><AiFillCheckCircle className="inline mr-3"/>Copied to Clipboard</p>:
+                <p className="hover:cursor-pointer" onClick={()=>handleIsCopiedToggle()}><AiOutlineCopy className="inline mr-3"/>Copy address to clipboard</p>
+              }
+          </div>
         </div>
+
+        <div className="h-[3rem]">
+          {/* padding div for space between bottom and main elements */}
         </div>
-          
-        
 
     </div>
  
