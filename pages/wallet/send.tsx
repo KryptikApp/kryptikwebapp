@@ -13,7 +13,7 @@ import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
 import TransactionFeeData, { defaultTransactionFeeData, defaultTxPublishedData, SolTransaction, TransactionPublishedData, TransactionRequest } from '../../src/services/models/transaction'
-import { getTransactionExplorerPath, networkFromNetworkDb, roundCryptoAmount, roundUsdAmount } from '../../src/helpers/wallet/utils'
+import { getTransactionExplorerPath, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from '../../src/helpers/wallet/utils'
 import { createEVMTransaction, createSolTransaction } from '../../src/handlers/wallet/transactionHandler'
 import { utils } from 'ethers'
 import { PublicKey, Transaction } from '@solana/web3.js'
@@ -237,7 +237,9 @@ const Send: NextPage = () => {
             return null;
           }
           let ethProvider = kryptikProvider.ethProvider;
-          let EVMTransaction:TransactionRequest = await createEVMTransaction({value: utils.parseEther(amountCrypto), sendAccount: fromAddress,
+          // amount with correct number of decimals
+          let amountDecimals = roundToDecimals(Number(amountCrypto)).toString();
+          let EVMTransaction:TransactionRequest = await createEVMTransaction({value: utils.parseEther(amountDecimals), sendAccount: fromAddress,
             toAddress: toAddress, gasLimit:transactionFeeData.EVMGas.gasLimit, 
             maxFeePerGas:transactionFeeData.EVMGas.maxFeePerGas, 
             maxPriorityFeePerGas:transactionFeeData.EVMGas.maxPriorityFeePerGas, 
@@ -352,13 +354,23 @@ const Send: NextPage = () => {
                 <div className="max-w-xs mx-auto">
                     <DropdownNetworks selectedNetwork={selectedNetwork} selectFunction={setSelectedNetwork}/>
                 </div>
+              {/* case: network family is ethereum and network fees are different */}
               {
                   (transactionFeeData.isFresh && 
-                  networkFromNetworkDb(selectedNetwork).networkFamily!=NetworkFamily.Solana) &&
+                  networkFromNetworkDb(selectedNetwork).networkFamily!=NetworkFamily.Solana) && networkFromNetworkDb(selectedNetwork).networkFamily==NetworkFamily.EVM && (transactionFeeData.lowerBoundUSD != transactionFeeData.upperBoundUSD) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees: {`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                   </div>
               }
+              {/* case: network family is ethereum and network fees are same */}
+              {
+                  (transactionFeeData.isFresh && 
+                  networkFromNetworkDb(selectedNetwork).networkFamily!=NetworkFamily.Solana) && networkFromNetworkDb(selectedNetwork).networkFamily==NetworkFamily.EVM && (transactionFeeData.lowerBoundUSD == transactionFeeData.upperBoundUSD) &&
+                  <div>
+                    <p className="text-slate-400 text-sm inline">Fees: {`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
+                  </div>
+              }
+              {/* case: network family is solana */}
               {
                   (  networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana) &&
                   <div>
@@ -489,8 +501,8 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                               networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana?
-                              <p className="text-right">{`$${transactionFeeData.upperBoundUSD}`}</p>:
+                               (networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana || transactionFeeData.lowerBoundUSD == transactionFeeData.upperBoundUSD)?
+                              <p className="text-right">{`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>:
                               <p className="text-right">{`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                             }
                           </div>
@@ -501,8 +513,8 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                               networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana?
-                              <p className="text-right">{`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>:
+                               (networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana || amountTotalBounds.lowerBoundTotalUsd == amountTotalBounds.upperBoundTotalUsd)?
+                              <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>:
                               <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
                             }
                           </div>
