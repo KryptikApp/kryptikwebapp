@@ -21,7 +21,7 @@
     "crypto": "^1.0.1",
     "crypto-js": "^4.1.1",
     "ethers": "^5.6.1",
-    "firebase": "^9.6.10",
+    "firebase": "^9.8.2",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.19.0",
     "hdseedloop": "^0.4.5",
