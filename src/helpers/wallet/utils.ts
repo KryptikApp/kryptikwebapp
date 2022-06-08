@@ -10,6 +10,10 @@ export const roundUsdAmount = function(amountIn:number):number{
     return Number(amountIn.toPrecision(4));
 }
 
+export const roundToDecimals = function(amountIn:number, decimals:number=18){
+    return Number(amountIn.toFixed(decimals));
+}
+
 export const lamportsToSol = function(amountIn:number):number{
     return amountIn/1000000000;
 }
@@ -62,4 +66,12 @@ export const getTransactionExplorerPath = function(network:NetworkDb, txPublishe
         }
     }
     return linkPathToReturn;
+}
+
+export const formatTicker = function(tickerIn:string):string{
+    let ticker:string;
+    // remove extra ticker info. for eth network ticker
+    // UPDATE so tickers like weth (wrapped eth) stay o.g.
+    if(tickerIn.toLowerCase().includes("eth")) return "ETH";
+    return tickerIn.toUpperCase(); 
 }
