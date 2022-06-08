@@ -18,7 +18,7 @@ import HDSeedLoop, { HDKeyring, Network, NetworkFamily, NetworkFromTicker, SeedL
 import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
-import { utils } from "ethers";
+import { BigNumber, utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 import TransactionFeeData, { defaultEVMGas } from "./models/transaction";
 import { lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
@@ -457,14 +457,26 @@ class Web3Service extends BaseService{
         }
         let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
         let feeData = await ethNetworkProvider.getFeeData();
+        console.log("Fee data");
+        console.log(feeData);
+        let gasser = await ethNetworkProvider.getGasPrice()
+        console.log(Number(gasser));
         // validate fee data response
         if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
-            throw(new Error(`No fee data returned for ${kryptikProvider.network.fullName}`));
+            if(network.ticker == "eth(arbitrum)"){
+                let baseGas = await ethNetworkProvider.getGasPrice();
+                feeData.gasPrice = baseGas;
+                feeData.maxFeePerGas = baseGas;
+                feeData.maxPriorityFeePerGas = BigNumber.from(0);
+            }
+            else{
+                throw(new Error(`No fee data returned for ${kryptikProvider.network.fullName}`));
+            }
         }
         let baseFeePerGas:number = Number(utils.formatEther(feeData.gasPrice));
         let maxFeePerGas:number = Number(utils.formatEther(feeData.maxFeePerGas));
         let maxTipPerGas:number = Number(utils.formatEther(feeData.maxPriorityFeePerGas));
-        let baseTipPerGas:number = maxTipPerGas*.6;
+        let baseTipPerGas:number = maxTipPerGas*.3;
         // amount hardcoded to gas required to transfer ether to someone else
         let gasLimit:number = 21000;
         let lowerBoundCrypto:number = gasLimit*(baseFeePerGas+baseTipPerGas);
