@@ -457,14 +457,14 @@ class Web3Service extends BaseService{
         }
         let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
         let feeData = await ethNetworkProvider.getFeeData();
-        console.log("Fee data");
-        console.log(feeData);
-        let gasser = await ethNetworkProvider.getGasPrice()
-        console.log(Number(gasser));
+        let gasLimit:number = 21000;
         // validate fee data response
         if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
             if(network.ticker == "eth(arbitrum)"){
                 let baseGas = await ethNetworkProvider.getGasPrice();
+                // FIX ASAP
+                // ARTIFICIALLY INFLATING, BECAUSE OG VALUE TOO SMALL
+                gasLimit = gasLimit*30;
                 feeData.gasPrice = baseGas;
                 feeData.maxFeePerGas = baseGas;
                 feeData.maxPriorityFeePerGas = BigNumber.from(0);
@@ -478,7 +478,6 @@ class Web3Service extends BaseService{
         let maxTipPerGas:number = Number(utils.formatEther(feeData.maxPriorityFeePerGas));
         let baseTipPerGas:number = maxTipPerGas*.3;
         // amount hardcoded to gas required to transfer ether to someone else
-        let gasLimit:number = 21000;
         let lowerBoundCrypto:number = gasLimit*(baseFeePerGas+baseTipPerGas);
         let lowerBoundUSD:number = lowerBoundCrypto*tokenPriceUsd;
         let upperBoundCrypto:number = gasLimit*(maxFeePerGas+maxTipPerGas);
@@ -493,6 +492,7 @@ class Web3Service extends BaseService{
             EVMGas:{
                 // add inputs in original wei amount
                 gasLimit: gasLimit,
+                gasPrice: feeData.gasPrice,
                 maxFeePerGas: feeData.maxFeePerGas,
                 maxPriorityFeePerGas: feeData.maxPriorityFeePerGas 
             }
