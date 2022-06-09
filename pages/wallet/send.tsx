@@ -244,6 +244,7 @@ const Send: NextPage = () => {
             maxFeePerGas:transactionFeeData.EVMGas.maxFeePerGas, 
             maxPriorityFeePerGas:transactionFeeData.EVMGas.maxPriorityFeePerGas, 
             networkDb:selectedNetwork, 
+            gasPrice: transactionFeeData.EVMGas.gasPrice,
             kryptikProvider:kryptikService.getProviderForNetwork(selectedNetwork)});
           let kryptikTxParams:TransactionParameters = {
               evmTransaction: EVMTransaction
