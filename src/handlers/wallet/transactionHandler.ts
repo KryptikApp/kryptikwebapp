@@ -28,16 +28,31 @@ export const createEVMTransaction = async function(txIn:EVMTransaction):Promise<
     let ethProvider = kryptikProvider.ethProvider;
     let accountNonce = await ethProvider.getTransactionCount(sendAccount, "latest");
     let chainIdEVM = networkDb.chainIdEVM;
-    const tx:TransactionRequest= {
-        from: sendAccount,
-        to: toAddress,
-        value: value,
-        nonce: accountNonce,
-        gasLimit: gasLimit,
-        chainId: chainIdEVM,
-        type:2,
-        maxFeePerGas: maxFeePerGas,
-        maxPriorityFeePerGas: maxPriorityFeePerGas,
+    let tx:TransactionRequest;
+    // UPDATE SO BETTER TYPE 1 VS. TYPE 2 CASING
+    if(txIn.networkDb.ticker != "eth(arbitrum)"){
+        tx = {
+            from: sendAccount,
+            to: toAddress,
+            value: value,
+            nonce: accountNonce,
+            gasLimit: gasLimit,
+            chainId: chainIdEVM,
+            type:2,
+            maxFeePerGas: maxFeePerGas,
+            maxPriorityFeePerGas: maxPriorityFeePerGas,
+        }
+    }
+    else{
+        tx = {
+            from: sendAccount,
+            to: toAddress,
+            value: value,
+            nonce: accountNonce,
+            gasLimit: gasLimit,
+            chainId: chainIdEVM,
+            gasPrice: txIn.gasPrice
+        }
     }
     return tx;
 }
