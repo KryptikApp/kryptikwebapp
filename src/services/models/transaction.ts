@@ -18,12 +18,14 @@ export default interface TransactionFeeData{
 
 
 export interface EVMGas{
+    gasPrice:BigNumberish,
     gasLimit:BigNumberish,
     maxFeePerGas:BigNumberish,
     maxPriorityFeePerGas:BigNumberish,
 }
 
 export const defaultEVMGas:EVMGas = {
+    gasPrice: 0,
     gasLimit: 0,
     maxFeePerGas: 0,
     maxPriorityFeePerGas: 0
@@ -52,6 +54,7 @@ export interface EVMTransaction{
     kryptikProvider:KryptikProvider,
     networkDb:NetworkDb
     toAddress:string,
+    gasPrice: BigNumberish,
     // how much gas we're willing to use
     gasLimit: BigNumberish,
     // max fee per gas unit we're willing to pay
