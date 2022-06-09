@@ -2,6 +2,7 @@
 import { signInWithCustomToken, updateCurrentUser, updateProfile, User, UserCredential } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { updateVaultSeedloop } from "../handlers/wallet/vaultHandler";
 import { defaultWallet } from "../models/defaultWallet";
 import { IWallet } from "../models/IWallet";
 import { defaultUser, UserDB, UserExtraData } from "../models/user";
@@ -116,7 +117,9 @@ export function useKryptikAuth() {
             walletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser);
         }
         try{
-          await updateWalletNetworks(walletKryptik, kryptikService);
+          console.log("Updating wallet networks;");
+          await updateWalletNetworks(walletKryptik, kryptikService, formattedUser, userExtraData);
+          console.log("wallet up to date");
         }
         catch(e){
           throw(new Error("Error: unable to synchronize remote networks."))
@@ -128,11 +131,25 @@ export function useKryptikAuth() {
     }
 
     // update wallets on local seedloop to match networks supported by app.
-    const updateWalletNetworks = async function(wallet:IWallet, ks:Web3Service){
+    const updateWalletNetworks = async function(wallet:IWallet, ks:Web3Service, user:UserDB, extraUserData:UserExtraData){
+      // flag for if networks are added to seedloop
+      let isUpdated:boolean = false;
       for(const networkDb of ks.getSupportedNetworkDbs()){
         let network = networkFromNetworkDb(networkDb);
         if(!wallet.seedLoop.networkOnSeedloop(network)){
-          wallet.seedLoop.addKeyRingByNetwork(network);
+          isUpdated = true;
+          console.log(`Adding ${network.fullName} to wallet.`);
+          wallet.seedLoop.addKeyRingByNetwork(network);;
+        }
+      }
+      if(isUpdated){
+        try{
+          console.log(`Updating kryptik vault with id: ${user.uid}`);
+          updateVaultSeedloop(user.uid, extraUserData.remoteShare, wallet);
+          console.log("Vault updated");
+        }
+        catch(e){
+          throw(new Error("Error: Unable to update vault with network synchronized seedloop"));
         }
       }
     }
