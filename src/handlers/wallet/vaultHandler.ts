@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto"
 import * as crypt from "crypto-js"
 import HDSeedLoop, { SerializedSeedLoop } from "hdseedloop"
+import { IWallet } from "../../models/IWallet"
 import { combineShares, createShares } from "./shareHandler"
 
 
@@ -57,7 +58,7 @@ export const vaultExists = function(uid:string):boolean{
     return true;
 }
 
-export const unlockVault = function(uid:string, remoteShare:string):HDSeedLoop|null{
+export const unlockVault = function(uid:string, remoteShare:string, seedloopUpdated?:HDSeedLoop):HDSeedLoop|null{
     let vaultName:string = createVaultName(uid);
     let vaultString:string|null = localStorage.getItem(vaultName);
     if(vaultString == null){
@@ -73,6 +74,14 @@ export const unlockVault = function(uid:string, remoteShare:string):HDSeedLoop|n
     let seedloopDeciphered = crypt.AES.decrypt(vaultRecovered.seedloopSerlializedCipher, passwordRecovered).toString(crypt.enc.Utf8);
     let seedloopSerialized:SerializedSeedLoop = JSON.parse(seedloopDeciphered);
     let seedloopRecovered = HDSeedLoop.deserialize(seedloopSerialized)
+    // update vault seedloop if updated seedloop is provided
+    if(seedloopUpdated){
+        let seedloopSerialized:SerializedSeedLoop = seedloopUpdated.serializeSync();
+        // genrate random encryption key
+        let seedloopString = JSON.stringify(seedloopSerialized);
+        let seedloopEncrypted:string = crypt.AES.encrypt(seedloopString, passwordRecovered).toString();
+        vaultRecovered.seedloopSerlializedCipher = seedloopEncrypted;
+    }
     // update local storage vault 
     // string that represents vault with encrypted seedloop
     let vaultStringUpdated:string = JSON.stringify(vaultRecovered);
@@ -89,4 +98,15 @@ const isValidVaultDecode = function(vault:VaultContents):boolean{
 // creates standard vault name given uid
 const createVaultName = function(uid:string){
     return "wallet|"+uid;
+}
+
+export const updateVaultSeedloop = function(uid:string, remoteShare:string, wallet:IWallet){
+    unlockVault(uid, remoteShare, wallet.seedLoop);
+}
+
+export const deleteVault = function(uid:string){
+    let vaultName = createVaultName(uid);
+    console.log("removing vault with name:");
+    console.log(vaultName);
+    localStorage.removeItem(vaultName);
 }
