@@ -24,6 +24,7 @@ import TransactionFeeData, { defaultEVMGas } from "./models/transaction";
 import { lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
 import { async } from "@firebase/util";
 import { UserDB } from "../models/user";
+import toast from "react-hot-toast";
 
 const NetworkDbsRef = collection(firestore, "networks")
 
@@ -347,6 +348,8 @@ class Web3Service extends BaseService{
         // initialize return array
         let balances:IBalance[] = [];
         for(const nw of networksFromDb){
+            console.log("NETWORK FETCHING FOR:");
+            console.log(nw.fullName);
             // only show testnets to advanced users
             if(nw.isTestnet && user && !user.isAdvanced) continue;
             let network:Network = networkFromNetworkDb(nw);
@@ -356,6 +359,16 @@ class Web3Service extends BaseService{
             if(network.networkFamily==NetworkFamily.EVM){
                 if(!kryptikProvider.ethProvider) throw Error(`No ethereum provider set up for ${network.fullName}.`);
                 let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
+                // if network doesn't exist on seedloop... create it
+                if(!walletUser.seedLoop.networkOnSeedloop(network)){
+                    console.log("Creating keyring for:");
+                    console.log(network.fullName);
+                    let newKeyring = walletUser.seedLoop.addKeyRingByNetwork(network);
+                    if(!newKeyring){
+                        toast.error(`Unable to read balance for ${network.fullName}`);
+                        continue;
+                    }
+                }
                 // gets all addresses for network
                 let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
                 // gets first address for network
@@ -460,6 +473,7 @@ class Web3Service extends BaseService{
         let gasLimit:number = 21000;
         // validate fee data response
         if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
+            // arbitrum uses pre EIP-1559 fee structure
             if(network.ticker == "eth(arbitrum)"){
                 let baseGas = await ethNetworkProvider.getGasPrice();
                 // FIX ASAP
@@ -473,6 +487,7 @@ class Web3Service extends BaseService{
                 throw(new Error(`No fee data returned for ${kryptikProvider.network.fullName}`));
             }
         }
+        // calculate fees in token amount
         let baseFeePerGas:number = Number(utils.formatEther(feeData.gasPrice));
         let maxFeePerGas:number = Number(utils.formatEther(feeData.maxFeePerGas));
         let maxTipPerGas:number = Number(utils.formatEther(feeData.maxPriorityFeePerGas));
@@ -482,6 +497,7 @@ class Web3Service extends BaseService{
         let lowerBoundUSD:number = lowerBoundCrypto*tokenPriceUsd;
         let upperBoundCrypto:number = gasLimit*(maxFeePerGas+maxTipPerGas);
         let upperBoundUsd:number = upperBoundCrypto*tokenPriceUsd;
+        // create new fee data object
         let transactionFeeData:TransactionFeeData = {
             network: kryptikProvider.network,
             isFresh: true,
@@ -497,8 +513,6 @@ class Web3Service extends BaseService{
                 maxPriorityFeePerGas: feeData.maxPriorityFeePerGas 
             }
         }
-        console.log("Returning tx. fee data:");
-        console.log(transactionFeeData);
         return transactionFeeData;
     }
 
