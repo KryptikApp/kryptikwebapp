@@ -28,7 +28,8 @@ const ListBalance:NextPage = () => {
         {
             !isFetched?<p>Loading Balances.</p>:
             <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-              {balances.map((balance:IBalance) => (        
+              {balances.map((balance:IBalance) => (
+                  (balance.amountCrypto!="0") &&        
                   <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
                    amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}/>
               ))}
