@@ -5,6 +5,7 @@ import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import NavProfile from '../../components/NavProfile'
 import toast, { Toaster } from 'react-hot-toast'
 import Divider from '../../components/Divider'
+import { removeUser } from '../../src/helpers/firebaseHelper'
 
 
 const Settings: NextPage = () => {
@@ -24,6 +25,17 @@ const Settings: NextPage = () => {
     }
     catch(e){
       toast.error("Unable to sign out. Please contact support.");
+    }
+  }
+
+  const handleDeleteWallet = function(){
+    try{
+      removeUser(authUser);
+      toast.success("Wallet deleted.")
+      router.push('/');
+    }
+    catch(e){
+      toast.error("Error: Unable to delete wallet. Please contact the Kryptik team.")
     }
   }
 
@@ -72,6 +84,12 @@ const Settings: NextPage = () => {
           <button onClick={()=>handleLogout()} className="bg-transparent hover:bg-red-500 text-black-500 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded my-5">
                             Logout
           </button>
+          <div>
+          <Divider/>
+          <button onClick={()=>handleDeleteWallet()} className="bg-red-500 hover:bg-red-700 text-white font-semibold py-2 px-4 border border-red-500 hover:border-transparent rounded my-5">
+                              Delete Wallet
+          </button>
+          </div>
         </div>
 
     <div className="h-[7rem]">
