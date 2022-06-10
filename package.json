@@ -24,7 +24,7 @@
     "firebase": "^9.8.2",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.19.0",
-    "hdseedloop": "^0.4.5",
+    "hdseedloop": "^0.4.8",
     "jose": "^4.6.2",
     "lodash": "^4.17.21",
     "magic-sdk": "^8.1.0",
