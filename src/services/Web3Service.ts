@@ -2,7 +2,7 @@ import {firestore} from "../helpers/firebaseHelper"
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { ServiceState } from './types';
 import BaseService from './BaseService';
-import {NetworkDb} from './models/network'
+import {defaultNetworkDb, NetworkDb} from './models/network'
 import {
     JsonRpcProvider,
     StaticJsonRpcProvider,
@@ -58,6 +58,7 @@ export interface IBalance{
     fullName: string,
     ticker:string,
     iconPath:string,
+    iconPathSecondary?:string,
     amountCrypto: string,
     amountUSD: string,
     networkCoinGecko: string
@@ -391,15 +392,9 @@ class Web3Service extends BaseService{
             if(network.networkFamily==NetworkFamily.EVM){
                 if(!kryptikProvider.ethProvider) throw Error(`No ethereum provider set up for ${network.fullName}.`);
                 let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
-                // if network doesn't exist on seedloop... create it
+                // if network doesn't exist on seedloop... skip
                 if(!walletUser.seedLoop.networkOnSeedloop(network)){
-                    console.log("Creating keyring for:");
-                    console.log(network.fullName);
-                    let newKeyring = walletUser.seedLoop.addKeyRingByNetwork(network);
-                    if(!newKeyring){
-                        toast.error(`Unable to read balance for ${network.fullName}`);
-                        continue;
-                    }
+                    continue;
                 }
                 // gets all addresses for network
                 let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
@@ -411,8 +406,18 @@ class Web3Service extends BaseService{
                 let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
                 let networkBalanceString = networkBalanceAdjusted.toString();
                 let amountUSD = roundUsdAmount((priceUSD * networkBalance));
-                let newBalanceObj:IBalance = {fullName:nw.fullName, ticker:nw.ticker, iconPath:nw.iconPath, 
-                    amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), networkCoinGecko:nw.coingeckoId}
+                // HANDLE ICONS FOR LAYER TWO NETWORKS
+                let iconMain = nw.iconPath;
+                let iconSecondary = undefined;
+                // UPDATE IF SO any second layer maps with main layer
+                if(nw.ticker == "eth(arbitrum)"){
+                    iconMain = defaultNetworkDb.iconPath
+                    iconSecondary = nw.iconPath;
+                }
+                // create new balance obj for balance data
+                let newBalanceObj:IBalance = {fullName:nw.fullName, ticker:nw.ticker, iconPath:iconMain, 
+                    iconPathSecondary:iconSecondary, amountCrypto:networkBalanceString, 
+                    amountUSD:amountUSD.toString(), networkCoinGecko:nw.coingeckoId}
                 // add adjusted balance to balances return object
                 balances.push(newBalanceObj);
             }
@@ -435,8 +440,10 @@ class Web3Service extends BaseService{
                 // adjust network balance value
                 networkBalance = lamportsToSol(networkBalance);
                 let amountUSD = roundUsdAmount((priceUSD * networkBalance.valueOf()));
-                let newBalanceObj:IBalance = {fullName:nw.fullName, ticker: nw.ticker, iconPath:nw.iconPath, 
+                // create new balance obj 
+                let newBalanceObj:IBalance = {fullName:nw.fullName, ticker: nw.ticker, iconPath:nw.iconPath,
                     amountCrypto:roundCryptoAmount(networkBalance).toString(), amountUSD:amountUSD.toString(), networkCoinGecko:nw.coingeckoId};
+                // push balance obj to balance data array
                 balances.push(newBalanceObj);
             }
         }
@@ -459,8 +466,6 @@ class Web3Service extends BaseService{
             for(const chainInfo of erc20Db.chainData){
                 // get ethereum network db
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
-                console.log("Network erc20");
-                console.log(networkDb?.fullName);
                 if(!networkDb) continue;
                 // hdseedloop compatible network
                 let network = networkFromNetworkDb(networkDb);
@@ -489,8 +494,9 @@ class Web3Service extends BaseService{
                 let networkBalanceString = networkBalanceAdjusted.toString();
                 let amountUSD = roundUsdAmount((priceUSD * networkBalance));
                 // create new object for balance data
-                let newBalanceObj:IBalance = {fullName:erc20Db.name, ticker:erc20Db.symbol, iconPath:erc20Db.logoURI, 
-                amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), networkCoinGecko:networkDb.coingeckoId}
+                let newBalanceObj:IBalance = {fullName:erc20Db.name, ticker:erc20Db.symbol, iconPath:erc20Db.logoURI,
+                iconPathSecondary: networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
+                networkCoinGecko:networkDb.coingeckoId}
                 // push balance data to balance array
                 erc20balances.push(newBalanceObj);
             }
