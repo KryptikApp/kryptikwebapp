@@ -6,6 +6,8 @@ import ListItem from "./ListItem";
 import Link from 'next/link';
 import { formatTicker } from "../../src/helpers/wallet/utils";
 import Divider from "../Divider";
+import { NetworkDb } from "../../src/services/models/network";
+import ListItemLoading from "./ListItemLoading";
 
 const ListBalance:NextPage = () => {
     const {kryptikService, kryptikWallet, authUser} = useKryptikAuthContext();
@@ -15,6 +17,7 @@ const ListBalance:NextPage = () => {
     const[isFetchedERC20, setIsFetchedERC20] = useState(false);
     const[balances, setBalances] = useState<IBalance[]>(initBalances);
     const[balancesERC20, setBalancesERC20] = useState<IBalance[]>(initBalances);
+
 
     // retrieves wallet balances
     const fetchBalances = async() =>{
@@ -34,27 +37,65 @@ const ListBalance:NextPage = () => {
 
     return(
         <div>
+            {/* Network balances */}
+        <div>
+                <div className="flex justify-start mt-5">
+                    <h2 className="font-medium text-slate-700">Your Network Balances</h2>
+                </div>
+                <Divider/>
+        </div>
         {
-            !isFetchedBalances?<p>Loading Balances.</p>:
+            !isFetchedBalances?
+            
             <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-              {balances.map((balance:IBalance) => (
-                  (balance.amountCrypto!="0") &&        
-                  <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
-                   amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}/>
-              ))}
+            {
+                <div>
+                    <ListItemLoading/>
+                    <ListItemLoading/>
+                    <ListItemLoading/>
+                </div>
+            }
             </ul>
-        }
-        {
-            !isFetchedERC20?<p>Loading ERC20 Balances.</p>:
+            :
             <div>
+                <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+                {balances.map((balance:IBalance) => (
+                    (balance.amountCrypto!="0") &&        
+                    <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
+                    amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}
+                    imgSrcSecondary={balance.iconPathSecondary}
+                    />
+                ))}
+                </ul>
+            </div>
+        }
+        {/* ERC20 Balances */}
+        <div>
                 <div className="flex justify-start mt-5">
                     <h2 className="font-medium text-slate-700">Your Token Balances</h2>
                 </div>
                 <Divider/>
+        </div>
+        {
+            !isFetchedERC20?
+            <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+            {
+                <div>
+                    <ListItemLoading/>
+                    <ListItemLoading/>
+                    <ListItemLoading/>
+                </div>
+            }
+            </ul>
+            :
+            <div>
                 <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-                {balancesERC20.map((balance:IBalance) => (       
+                {balancesERC20.map((balance:IBalance) => (    
+                    (balance.amountCrypto!="0") &&     
                     <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
-                    amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}/>
+                    amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}
+                    imgSrcSecondary={balance.iconPathSecondary}
+                    />
                 ))}
                 </ul>
             </div>
