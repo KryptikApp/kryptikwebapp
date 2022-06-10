@@ -8,13 +8,12 @@ import {
     StaticJsonRpcProvider,
 } from '@ethersproject/providers';
 import {
-    clusterApiUrl,
     Connection,
     PublicKey,
     Transaction,
   } from '@solana/web3.js';
 
-import HDSeedLoop, { HDKeyring, Network, NetworkFamily, NetworkFromTicker, SeedLoop, SerializedSeedLoop } from "hdseedloop";
+import HDSeedLoop, { HDKeyring, Network, NetworkFamily, NetworkFromTicker, SeedLoop, SerializedSeedLoop, WalletKryptik } from "hdseedloop";
 import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
@@ -22,11 +21,13 @@ import { BigNumber, utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 import TransactionFeeData, { defaultEVMGas } from "./models/transaction";
 import { lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
-import { async } from "@firebase/util";
 import { UserDB } from "../models/user";
 import toast from "react-hot-toast";
+import {ERC20Db} from "./models/erc20";
+import { createERC20Contract } from "../handlers/wallet/transactionHandler";
 
-const NetworkDbsRef = collection(firestore, "networks")
+const NetworkDbsRef = collection(firestore, "networks");
+const ERC20DbRef = collection(firestore, "erc20tokens");
 
 
 export class KryptikProvider{
@@ -73,8 +74,8 @@ class Web3Service extends BaseService{
     }
     private wallet:IWallet|null = null;
     public isWalletSet:boolean = false;
-    public NetworkDbs:NetworkDb[] = []
-    public NetworkDbsSupported:NetworkDb[] = []
+    public NetworkDbs:NetworkDb[] = [];
+    public erc20Dbs:ERC20Db[] = [];
     // NetworkDb is referenced by its BIP44 chain id
     public rpcEndpoints: { [ticker:string]: string } = {};
     public web3Provider: StaticJsonRpcProvider = (null as unknown) as StaticJsonRpcProvider;
@@ -161,11 +162,19 @@ class Web3Service extends BaseService{
     };
 
     async InternalStartService(){
+        // fetch network data
         try{
             await this.populateNetworkDbsAsync();
         }
         catch{
             throw(Error("Error: Unable to populate NetworkDbs when starting web3 service."))
+        }
+        // fetch erc20 data
+        try{
+            await this.populateErc20DbsAsync();
+        }
+        catch{
+            throw(new Error("Error: Unable to populate ERC20 array from database when starting web3 service."));
         }
         this.setRpcEndpoints();
         this.setSupportedProviders();
@@ -209,8 +218,31 @@ class Web3Service extends BaseService{
         return newKryptikProvider;
     }
 
-    private async populateNetworkDbsAsync() :Promise<NetworkDb[]>{
-        console.log("POPULATING Networkksdb");
+    private async populateErc20DbsAsync():Promise<ERC20Db[]>{
+        console.log("Populating erc20 data from db");
+        const q = query(ERC20DbRef);
+        const querySnapshot = await getDocs(q);
+        let erc20DbsResult:ERC20Db[] = [];
+        querySnapshot.forEach((doc) => {
+            let docData = doc.data();
+            let erc20DbToAdd:ERC20Db = {
+                name: docData.name,
+                coingeckoId: docData.coingeckoId,
+                symbol: docData.symbol,
+                decimals: docData.decimals,
+                chainData:docData.chainData,
+                logoURI: docData.logoURI,
+                extensions: docData.extensions,
+                tags:docData.tags
+            }
+            erc20DbsResult.push(erc20DbToAdd);
+        });
+        this.erc20Dbs = erc20DbsResult;
+        return this.erc20Dbs;
+    }
+
+    private async populateNetworkDbsAsync():Promise<NetworkDb[]>{
+        console.log("POPULATING Networks from db");
         console.log("Service ID:");
         console.log(this.serviceId);
         const q = query(NetworkDbsRef);
@@ -395,9 +427,7 @@ class Web3Service extends BaseService{
                 console.log(allAddys);
                 console.log(firstAddy);
                 // gets pub key for solana network
-                let solNetwork:Network = NetworkFromTicker("sol");
-                let keyring:HDKeyring = await walletUser.seedLoop.getKeyRing(solNetwork);
-                let solPubKey:PublicKey|null = keyring.getSolanaFamilyPubKey();
+                let solPubKey:PublicKey|null = new PublicKey(firstAddy);
                 if(!solPubKey){
                     continue;
                 }
@@ -411,6 +441,61 @@ class Web3Service extends BaseService{
             }
         }
         return balances;
+    }
+
+    getNetworkDbByTicker(ticker:string):NetworkDb|null{
+        for(const nw of this.NetworkDbs){
+            if(nw.ticker == ticker) return nw;
+        }
+        return null;
+    }
+
+    // get balances for all erc20 networks
+    async getBalanceERC20(walletUser:IWallet){
+        let erc20balances:IBalance[] = [];
+        console.log("ERC20 dataaa:");
+        console.log(this.erc20Dbs);
+        for(const erc20Db of this.erc20Dbs){
+            for(const chainInfo of erc20Db.chainData){
+                // get ethereum network db
+                let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
+                console.log("Network erc20");
+                console.log(networkDb?.fullName);
+                if(!networkDb) continue;
+                // hdseedloop compatible network
+                let network = networkFromNetworkDb(networkDb);
+                let provider = await this.getKryptikProviderForNetworkDb(networkDb);
+                if(!provider.ethProvider) continue;
+                let ethProvider:JsonRpcProvider = provider.ethProvider;
+                // gets all addresses for network
+                let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
+                // gets first address for network
+                let firstAddy:string = allAddys[0];
+                // connect provider and signer and attach to contract
+                let walletKryptik:WalletKryptik|null = walletUser.seedLoop.getWalletForAddress(network, firstAddy);
+                if(!walletKryptik) continue;
+                let ProviderAndSigner = walletKryptik.connect(ethProvider)
+                let erc20Contract = createERC20Contract(networkDb, erc20Db);
+                if(!erc20Contract) continue;
+                erc20Contract = erc20Contract.connect(ProviderAndSigner);
+                if(!erc20Contract) continue;
+                // fetch price
+                let priceUSD = await getPriceOfTicker(erc20Db.coingeckoId);
+                // fetch balance
+                console.log(`getting erc20 balance for ${firstAddy}`);
+                let networkBalance:number = Number(utils.formatEther(await erc20Contract.balanceOf(firstAddy)));
+                // prettify ether balance
+                let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
+                let networkBalanceString = networkBalanceAdjusted.toString();
+                let amountUSD = roundUsdAmount((priceUSD * networkBalance));
+                // create new object for balance data
+                let newBalanceObj:IBalance = {fullName:erc20Db.name, ticker:erc20Db.symbol, iconPath:erc20Db.logoURI, 
+                amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), networkCoinGecko:networkDb.coingeckoId}
+                // push balance data to balance array
+                erc20balances.push(newBalanceObj);
+            }
+        }
+        return erc20balances;
     }
 
     getTransactionFeeData = async(networkDb:NetworkDb, solTransaction?:Transaction):Promise<TransactionFeeData|null> => {
