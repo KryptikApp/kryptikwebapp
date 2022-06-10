@@ -50,7 +50,7 @@ const Profile: NextPage = () => {
             </div>
           </div>
           <div className="flex justify-start mt-5">
-            <h2 className="font-medium text-slate-700">Your Balances</h2>
+            <h2 className="font-medium text-slate-700">Your Network Balances</h2>
           </div>
           <Divider/>
           <ListBalance/>
