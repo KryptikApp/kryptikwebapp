@@ -1,11 +1,11 @@
 import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { Contract } from "ethers";
-import { solToLamports } from "../../helpers/wallet/utils";
+import { networkFromNetworkDb, solToLamports } from "../../helpers/wallet/utils";
 import { EVMTransaction, SolTransaction, TransactionRequest } from "../../services/models/transaction"
-import {erc20Abi} from "../../abis/erc20Abi";
 import { ChainData, ERC20Db } from "../../services/models/erc20";
 import { NetworkDb } from "../../services/models/network";
 import { JsonRpcProvider } from "@ethersproject/providers";
+import { CreateEVMContractParameters } from "../../services/models/token";
 
 
 export const createSolTransaction = async function(txIn:SolTransaction):Promise<Transaction>{
@@ -63,7 +63,7 @@ export const createEVMTransaction = async function(txIn:EVMTransaction):Promise<
 }
 
 
-const getChainDataForNetwork = function(network:NetworkDb, erc20Data:ERC20Db):ChainData|null{
+export const getChainDataForNetwork = function(network:NetworkDb, erc20Data:ERC20Db):ChainData|null{
     let chainDataArray:ChainData[] = erc20Data.chainData;
     for(const chainInfo of chainDataArray){
         // each contract has a different address depending on the chain
@@ -76,10 +76,3 @@ const getChainDataForNetwork = function(network:NetworkDb, erc20Data:ERC20Db):Ch
     return null;
 }
 
-// creates erc20 contract 
-export const createERC20Contract = function(network:NetworkDb, erc20Data:ERC20Db):Contract|null{
-    let erc20ChainData:ChainData|null = getChainDataForNetwork(network, erc20Data);
-    if(!erc20ChainData) return null;
-    const erc20Contract = new Contract(erc20ChainData.address, erc20Abi);
-    return erc20Contract;
-}
