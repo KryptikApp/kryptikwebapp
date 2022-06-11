@@ -1,8 +1,10 @@
-import { BigNumberish, BytesLike } from "ethers";
+import { Transaction } from "@solana/web3.js";
+import { BigNumber, BigNumberish, BytesLike } from "ethers";
 import { AccessListish } from "ethers/lib/utils";
 import { Network } from "hdseedloop";
 import { KryptikProvider } from "../Web3Service";
 import { defaultNetwork, NetworkDb } from "./network";
+import { TokenDataEVM } from "./token";
 
 export default interface TransactionFeeData{
     network: Network,
@@ -96,4 +98,18 @@ export interface TransactionPublishedData{
 export const defaultTxPublishedData:TransactionPublishedData = {
     // genesis tx. hash on ethereum network
     hash: "0xc8cc9c54f19f6cb85c3fa27f493d50e136374ce5b2e3f5307b3c5eea113a003b"
+}
+
+export interface FeeDataParameters{
+    networkDb:NetworkDb, solTransaction?:Transaction, tokenData?:TokenDataEVM, amountToken:string
+}
+
+export interface FeeDataSolParameters{
+    transaction:Transaction,
+    tokenPriceUsd:number,
+    networkDb:NetworkDb
+}
+
+export interface FeeDataEvmParameters{
+    network:NetworkDb, tokenPriceUsd:number, tokenData?:TokenDataEVM, amountToken:string
 }
