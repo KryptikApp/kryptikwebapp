@@ -51,6 +51,8 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                 networkBalance: networkBalance
             };
             tokensAndNetworks.push(tokenAndNetworkToAdd);
+            // make eth network default option
+            if(nw.ticker == "eth") selectFunction(tokenAndNetworkToAdd);
         }
         // add all tokens
         let erc20Dbs:ERC20Db[] = kryptikService.erc20Dbs;
@@ -100,8 +102,8 @@ const DropdownNetworks:NextPage<Props> = (props) => {
         setShowOptions(!showOptions);
     }
 
-    const handleOptionClick = function(network:NetworkDb){
-        selectFunction(network);
+    const handleOptionClick = function(tokenAndNetwork:TokenAndNetwork){
+        selectFunction(tokenAndNetwork);
         toggleShowOptions();
     }
 
