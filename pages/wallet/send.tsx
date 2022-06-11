@@ -418,8 +418,8 @@ const Send: NextPage = () => {
                 <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-8xl text-center" id="amount" placeholder="$0" autoComplete="off" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
               </div>
               <br/>
-              <div className="rounded-full border border-gray-400 p-1 max-w-fit inline mr-2 hover:cursor-pointer" onClick={()=>setMaxAmount()}>
-                <span className="text-xs text-slate-400">MAX</span>
+              <div className="rounded-full border border-gray-400 p-1 max-w-fit inline mr-2 text-slate-400 hover:cursor-pointer hover:bg-slate-100 hover:text-sky-400 hover:font-semibold" onClick={()=>setMaxAmount()}>
+                <span className="text-xs">MAX</span>
               </div>
               <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.erc20Db.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}`:`$${amountUSD}`}</span>
               <RiSwapLine className="hover:cursor-pointer inline text-slate-300 ml-2" onClick={()=>handleToggleIsCrypto()} size="20"/>
