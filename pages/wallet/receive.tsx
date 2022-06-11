@@ -1,8 +1,7 @@
 import type { NextPage } from 'next'
 import { useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
-import { Network, NetworkFromTicker } from "hdseedloop"
-import { defaultNetworkDb, NetworkDb } from '../../src/services/models/network'
+import { defaultTokenAndNetwork} from '../../src/services/models/network'
 import DropdownNetworks from '../../components/DropdownNetworks'
 import {AiFillCheckCircle, AiOutlineCopy} from "react-icons/ai"
 import { useQRCode } from 'next-qrcode';
@@ -10,32 +9,33 @@ import { useEffect} from 'react'
 
 // kryptik imports
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
+import { TokenAndNetwork } from '../../src/services/models/token'
 
 
 const Recieve: NextPage = () => {
-    const { kryptikWallet } = useKryptikAuthContext();
-    const[selectedNetwork, setSelectedNetwork] = useState(defaultNetworkDb);
+    const { kryptikWallet, kryptikService } = useKryptikAuthContext();
+    const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
     const [readableFromAddress, setReadableFromAddress] = useState("");
     const [toAddress, setToAddress] = useState(" ");
     const [isCopied, setIsCopied] = useState(false);
     const { Canvas } = useQRCode();
 
     useEffect(()=>{
-        fetchFromAddress(NetworkFromTicker(selectedNetwork.ticker));
+        fetchFromAddress();
     }, []);
 
-    const fetchFromAddress = async(network:Network) =>{
-        let addys:string[] = await kryptikWallet.seedLoop.getAddresses(network);
+    const fetchFromAddress = async() =>{
+        let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
          // handle empty address
-         if(addys[0] == ""){
-           toast.error(`Error: no address found for ${network.fullName}. Please contact the Kryptik team or try refreshing your page.`);
+         if(accountAddress == ""){
+           toast.error(`Error: no address found for ${selectedTokenAndNetwork.baseNetworkDb.fullName}. Please contact the Kryptik team or try refreshing your page.`);
            setToAddress(kryptikWallet.ethAddress);
            setReadableFromAddress(kryptikWallet.ethAddress);
-           setSelectedNetwork(defaultNetworkDb);
+           setSelectedTokenAndNetwork(defaultTokenAndNetwork);
            return;
          }
-         setToAddress(addys[0]);
-         setReadableFromAddress(addys[0]);
+         setToAddress(accountAddress);
+         setReadableFromAddress(accountAddress);
      }
 
      const handleIsCopiedToggle = async() =>{
@@ -49,16 +49,14 @@ const Recieve: NextPage = () => {
       }
 
       useEffect(()=>{
-        let nw:Network = NetworkFromTicker(selectedNetwork.ticker);
-        fetchFromAddress(nw);
+        fetchFromAddress();
+    }, [selectedTokenAndNetwork]);
 
-    }, [selectedNetwork]);
-
-      const handleNetowrkChange = function(network:NetworkDb) {
-        console.log(network);
-        setSelectedNetwork(network);
-        setIsCopied(false);
-      }
+  
+    const handleTokenAndNetworkChange = function(tokenAndNetwork:TokenAndNetwork){
+      setSelectedTokenAndNetwork(tokenAndNetwork);
+      setIsCopied(false);
+    }
 
 
 
@@ -71,10 +69,15 @@ const Recieve: NextPage = () => {
         
         <div className="max-w-lg mx-auto content-center rounded-lg border border-solid border-grey-600 py-10 hover:border-grey-800">
           <h1 className="text-center text-3xl font-bold lg:mb-2">Recieve  <img src="/kryptikBrand/kryptikEyez.png" alt="Kryptik Eyes" className="rounded-full w-10 inline max-h-sm h-auto align-middle border-none" /></h1> 
-          <p className="mx-auto text-center text-slate-500 text-sm">Easily receive money on {selectedNetwork.fullName} by having someone scan the code below.</p> 
+          {
+            selectedTokenAndNetwork.tokenData?
+            <p className="mx-auto text-center text-slate-500 text-sm px-4">Easily receive {selectedTokenAndNetwork.tokenData.erc20Db.name} on {selectedTokenAndNetwork.baseNetworkDb.fullName} by having someone scan the code below.</p>:
+            <p className="mx-auto text-center text-slate-500 text-sm px-4">Easily receive money on {selectedTokenAndNetwork.baseNetworkDb.fullName} by having someone scan the code below.</p> 
+          }
+          
            {/* network dropdown */}
           <div className="max-w-xs mx-auto">
-                      <DropdownNetworks selectedNetwork={selectedNetwork} selectFunction={handleNetowrkChange}/>
+                      <DropdownNetworks selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleTokenAndNetworkChange}/>
           </div>
           {/* QR CODE */}
           <div className="flex">
