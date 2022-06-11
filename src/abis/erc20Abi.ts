@@ -1,4 +1,4 @@
-let erc20Abi = [
+let erc20Abi:string[] = [
     // Some details about the token
     "function name() view returns (string)",
     "function symbol() view returns (string)",
