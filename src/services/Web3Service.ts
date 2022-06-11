@@ -2,7 +2,7 @@ import {firestore} from "../helpers/firebaseHelper"
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { ServiceState } from './types';
 import BaseService from './BaseService';
-import {defaultNetworkDb, NetworkDb} from './models/network'
+import {defaultNetworkDb, NetworkBalanceParameters, NetworkDb, placeHolderEVMAddress} from './models/network'
 import {
     JsonRpcProvider,
     StaticJsonRpcProvider,
@@ -13,18 +13,19 @@ import {
     Transaction,
   } from '@solana/web3.js';
 
-import HDSeedLoop, { HDKeyring, Network, NetworkFamily, NetworkFromTicker, SeedLoop, SerializedSeedLoop, WalletKryptik } from "hdseedloop";
+import HDSeedLoop, {Network, NetworkFamily, NetworkFromTicker, WalletKryptik } from "hdseedloop";
 import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
-import { BigNumber, utils } from "ethers";
+import { BigNumber, Contract, utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
-import TransactionFeeData, { defaultEVMGas } from "./models/transaction";
-import { lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundUsdAmount } from "../helpers/wallet/utils";
+import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataParameters, FeeDataSolParameters} from "./models/transaction";
+import { isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
 import { UserDB } from "../models/user";
-import toast from "react-hot-toast";
-import {ERC20Db} from "./models/erc20";
-import { createERC20Contract } from "../handlers/wallet/transactionHandler";
+import {ChainData, ERC20Db} from "./models/erc20";
+import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
+import { CreateEVMContractParameters, TokenBalanceParameters, TokenDataEVM } from "./models/token";
+import {erc20Abi} from "../abis/erc20Abi";
 
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
@@ -262,6 +263,7 @@ class Web3Service extends BaseService{
                 chainIdEVM: docData.chainIdEVM,
                 hexColor: docData.hexColor,
                 about: docData.about,
+                blockExplorerURL: docData.blockExplorerURL,
                 dateCreated: docData.dateCreated,
                 iconPath: docData.iconPath,
                 whitePaperPath: docData.whitePaperPath,
@@ -364,15 +366,74 @@ class Web3Service extends BaseService{
       networkDb: NetworkDb
       ): Promise<KryptikProvider>{
           return this.getKryptikProviderFromTicker(networkDb.ticker);
-      }
-      private async getKryptikProviderFromTicker (
+    }
+    
+    private async getKryptikProviderFromTicker (
           ticker:string
       ): Promise<KryptikProvider>{
           // try to get existing provider (set on construction)... else, make provider and add to dict.
           if(this.networkProviders[ticker]!=null) return this.networkProviders[ticker];
           let newKryptikProvider:KryptikProvider = this.setProviderFromTicker(ticker);
           return newKryptikProvider;
-      }
+    }
+
+    //TODO: change to simple dictionary lookup
+    getNetworkDbByTicker(ticker:string):NetworkDb|null{
+        for(const nw of this.NetworkDbs){
+            if(nw.ticker == ticker) return nw;
+        }
+        return null;
+    }
+
+    // GET BALANCE FOR A SINGLE NETWORK
+    getBalanceNetwork = async(params:NetworkBalanceParameters):Promise<IBalance|null> =>{
+       let priceUSD = await getPriceOfTicker(params.networkDb.coingeckoId);
+       let balanceNetwork:number;
+       let network:Network = networkFromNetworkDb(params.networkDb);
+       let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
+       // get balance in layer 1 token amount
+       switch(network.networkFamily){
+            case(NetworkFamily.EVM):{
+                if(!kryptikProvider.ethProvider) return null;
+                let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
+                balanceNetwork = Number(utils.formatEther(await ethNetworkProvider.getBalance(params.accountAddress)));
+                break;
+            }
+            case(NetworkFamily.Solana):{
+                // gets pub key for solana network
+                let solPubKey:PublicKey|null = new PublicKey(params.accountAddress);
+                if(!solPubKey){
+                    return null;
+                }
+                // ensures provider is set
+                if(!kryptikProvider.solProvider) throw(new Error("No solana provider is set up."))
+                let solNetworkProvider:Connection = kryptikProvider.solProvider;
+                balanceNetwork = lamportsToSol(await solNetworkProvider.getBalance(solPubKey));
+                break;
+            }
+            default:{
+                return null;
+            }
+       }
+       // prettify balance
+       let networkBalanceAdjusted:Number = roundCryptoAmount(balanceNetwork);
+       let networkBalanceString = networkBalanceAdjusted.toString();
+       let amountUSD = roundUsdAmount((priceUSD * balanceNetwork));
+       // HANDLE ICONS FOR LAYER TWO NETWORKS
+       let iconMain = params.networkDb.iconPath;
+       let iconSecondary = undefined;
+       // UPDATE IF SO any second layer maps with main layer
+       if(params.networkDb.ticker == "eth(arbitrum)"){
+           iconMain = defaultNetworkDb.iconPath
+           iconSecondary = params.networkDb.iconPath;
+       }
+       // create new balance obj for balance data
+       let newBalanceObj:IBalance = {fullName:params.networkDb.fullName, ticker:params.networkDb.ticker, iconPath:iconMain, 
+           iconPathSecondary:iconSecondary, amountCrypto:networkBalanceString, 
+           amountUSD:amountUSD.toString(), networkCoinGecko:params.networkDb.coingeckoId};
+
+        return newBalanceObj;
+    }
 
 
     // TODO: Update to support tx. based networks
@@ -381,141 +442,83 @@ class Web3Service extends BaseService{
         // initialize return array
         let balances:IBalance[] = [];
         for(const nw of networksFromDb){
-            console.log("NETWORK FETCHING FOR:");
-            console.log(nw.fullName);
             // only show testnets to advanced users
             if(nw.isTestnet && user && !user.isAdvanced) continue;
-            let network:Network = networkFromNetworkDb(nw);
-            let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
-            let priceUSD = await getPriceOfTicker(nw.coingeckoId);
-            // get balance for supported evm family networks
-            if(network.networkFamily==NetworkFamily.EVM){
-                if(!kryptikProvider.ethProvider) throw Error(`No ethereum provider set up for ${network.fullName}.`);
-                let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
-                // if network doesn't exist on seedloop... skip
-                if(!walletUser.seedLoop.networkOnSeedloop(network)){
-                    continue;
-                }
-                // gets all addresses for network
-                let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
-                // gets first address for network
-                let firstAddy:string = allAddys[0];
-                // get balance in layer 1 token amount
-                let networkBalance:number = Number(utils.formatEther(await ethNetworkProvider.getBalance(firstAddy)));
-                // prettify ether balance
-                let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
-                let networkBalanceString = networkBalanceAdjusted.toString();
-                let amountUSD = roundUsdAmount((priceUSD * networkBalance));
-                // HANDLE ICONS FOR LAYER TWO NETWORKS
-                let iconMain = nw.iconPath;
-                let iconSecondary = undefined;
-                // UPDATE IF SO any second layer maps with main layer
-                if(nw.ticker == "eth(arbitrum)"){
-                    iconMain = defaultNetworkDb.iconPath
-                    iconSecondary = nw.iconPath;
-                }
-                // create new balance obj for balance data
-                let newBalanceObj:IBalance = {fullName:nw.fullName, ticker:nw.ticker, iconPath:iconMain, 
-                    iconPathSecondary:iconSecondary, amountCrypto:networkBalanceString, 
-                    amountUSD:amountUSD.toString(), networkCoinGecko:nw.coingeckoId}
-                // add adjusted balance to balances return object
-                balances.push(newBalanceObj);
+            // gets all addresses for network
+            let accountAddress:string = await this.getAddressForNetworkDb(walletUser, nw);
+            let NetworkBalanceParams:NetworkBalanceParameters = {
+                accountAddress: accountAddress,
+                networkDb: nw
             }
-            // get balance for supported solana family networks
-            if(network.networkFamily == NetworkFamily.Solana){
-                if(!kryptikProvider.solProvider) throw(new Error("No solana provider is set up."))
-                let solNetworkProvider:Connection = kryptikProvider.solProvider;
-                // gets all addresses for network
-                let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
-                let firstAddy:string = allAddys[0];
-                console.log("SOLANA ADDRESS:");
-                console.log(allAddys);
-                console.log(firstAddy);
-                // gets pub key for solana network
-                let solPubKey:PublicKey|null = new PublicKey(firstAddy);
-                if(!solPubKey){
-                    continue;
-                }
-                let networkBalance = await solNetworkProvider.getBalance(solPubKey);
-                // adjust network balance value
-                networkBalance = lamportsToSol(networkBalance);
-                let amountUSD = roundUsdAmount((priceUSD * networkBalance.valueOf()));
-                // create new balance obj 
-                let newBalanceObj:IBalance = {fullName:nw.fullName, ticker: nw.ticker, iconPath:nw.iconPath,
-                    amountCrypto:roundCryptoAmount(networkBalance).toString(), amountUSD:amountUSD.toString(), networkCoinGecko:nw.coingeckoId};
-                // push balance obj to balance data array
-                balances.push(newBalanceObj);
-            }
+            let networkBalance:IBalance|null = await this.getBalanceNetwork(NetworkBalanceParams);
+            // push balance obj to balance data array
+            if(networkBalance) balances.push(networkBalance);
         }
         return balances;
     }
 
-    getNetworkDbByTicker(ticker:string):NetworkDb|null{
-        for(const nw of this.NetworkDbs){
-            if(nw.ticker == ticker) return nw;
-        }
-        return null;
+    // gets balance for a single erc20 token
+    async getBalanceErc20Token(params:TokenBalanceParameters){
+        // fetch price
+        let priceUSD = await getPriceOfTicker(params.erc20Db.coingeckoId);
+        // fetch balance
+        console.log(`getting ${params.erc20Db.name} balance for ${params.accountAddress}`);
+        let networkBalance:number = Number(utils.formatEther(await params.erc20Contract.balanceOf(params.accountAddress)));
+        // prettify ether balance
+        let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
+        let networkBalanceString = networkBalanceAdjusted.toString();
+        let amountUSD = roundUsdAmount((priceUSD * networkBalance));
+        // create new object for balance data
+        let newBalanceObj:IBalance = {fullName:params.erc20Db.name, ticker:params.erc20Db.symbol, iconPath:params.erc20Db.logoURI,
+        iconPathSecondary: params.networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
+        networkCoinGecko:params.networkDb.coingeckoId}
+        return newBalanceObj;
     }
 
     // get balances for all erc20 networks
-    async getBalanceERC20(walletUser:IWallet){
+    async getBalanceAllERC20Tokens(walletUser:IWallet){
         let erc20balances:IBalance[] = [];
-        console.log("ERC20 dataaa:");
-        console.log(this.erc20Dbs);
         for(const erc20Db of this.erc20Dbs){
             for(const chainInfo of erc20Db.chainData){
                 // get ethereum network db
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
                 if(!networkDb) continue;
                 // hdseedloop compatible network
-                let network = networkFromNetworkDb(networkDb);
-                let provider = await this.getKryptikProviderForNetworkDb(networkDb);
-                if(!provider.ethProvider) continue;
-                let ethProvider:JsonRpcProvider = provider.ethProvider;
-                // gets all addresses for network
-                let allAddys:string[] = await walletUser.seedLoop.getAddresses(network);
-                // gets first address for network
-                let firstAddy:string = allAddys[0];
-                // connect provider and signer and attach to contract
-                let walletKryptik:WalletKryptik|null = walletUser.seedLoop.getWalletForAddress(network, firstAddy);
-                if(!walletKryptik) continue;
-                let ProviderAndSigner = walletKryptik.connect(ethProvider)
-                let erc20Contract = createERC20Contract(networkDb, erc20Db);
+                let erc20ContractParams:CreateEVMContractParameters= {
+                    wallet: walletUser,
+                    networkDb: networkDb,
+                    erc20Db: erc20Db
+                }
+                let erc20Contract = await this.createERC20Contract(erc20ContractParams);
                 if(!erc20Contract) continue;
-                erc20Contract = erc20Contract.connect(ProviderAndSigner);
-                if(!erc20Contract) continue;
-                // fetch price
-                let priceUSD = await getPriceOfTicker(erc20Db.coingeckoId);
-                // fetch balance
-                console.log(`getting erc20 balance for ${firstAddy}`);
-                let networkBalance:number = Number(utils.formatEther(await erc20Contract.balanceOf(firstAddy)));
-                // prettify ether balance
-                let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
-                let networkBalanceString = networkBalanceAdjusted.toString();
-                let amountUSD = roundUsdAmount((priceUSD * networkBalance));
-                // create new object for balance data
-                let newBalanceObj:IBalance = {fullName:erc20Db.name, ticker:erc20Db.symbol, iconPath:erc20Db.logoURI,
-                iconPathSecondary: networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
-                networkCoinGecko:networkDb.coingeckoId}
+                let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
+                // get balance for contract
+                let tokenParams:TokenBalanceParameters = {
+                    erc20Contract: erc20Contract,
+                    erc20Db: erc20Db,
+                    accountAddress: accountAddress,
+                    networkDb: networkDb
+                }
+                let tokenBalance:IBalance = await this.getBalanceErc20Token(tokenParams)
                 // push balance data to balance array
-                erc20balances.push(newBalanceObj);
+                erc20balances.push(tokenBalance);
             }
         }
         return erc20balances;
     }
 
-    getTransactionFeeData = async(networkDb:NetworkDb, solTransaction?:Transaction):Promise<TransactionFeeData|null> => {
-        let network:Network =  networkFromNetworkDb(networkDb);
-        let tokenPriceUsd = await getPriceOfTicker(networkDb.coingeckoId);
+    getTransactionFeeData = async(params:FeeDataParameters):Promise<TransactionFeeData|null> => {
+        let network:Network =  networkFromNetworkDb(params.networkDb);
+        let tokenPriceUsd:number = await getPriceOfTicker(params.networkDb.coingeckoId);
         switch(network.networkFamily){
             case (NetworkFamily.EVM): { 
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible(networkDb, tokenPriceUsd);
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible({network:params.networkDb, tokenPriceUsd: tokenPriceUsd, tokenData: params.tokenData, amountToken:params.amountToken});
                 return transactionFeeData;
                 break; 
              } 
              case(NetworkFamily.Solana):{
-                if(!solTransaction) return null;
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataSolana(networkDb, tokenPriceUsd, solTransaction);
+                if(!params.solTransaction) return null;
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataSolana({tokenPriceUsd:tokenPriceUsd, transaction:params.solTransaction, networkDb:params.networkDb});
                 return transactionFeeData;
              }
              default: { 
@@ -526,20 +529,20 @@ class Web3Service extends BaseService{
         }
     }
 
-    getTransactionFeeDataSolana = async(network:NetworkDb, tokenPriceUsd:number, transaction:Transaction):Promise<TransactionFeeData> =>{
+    getTransactionFeeDataSolana = async(params:FeeDataSolParameters):Promise<TransactionFeeData> =>{
         let kryptikProvider:KryptikProvider;
-        kryptikProvider = await this.getKryptikProviderForNetworkDb(network);
+        kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
         // validate provider
         if(!kryptikProvider.solProvider){
-            throw(new Error(`No provider specified for ${kryptikProvider.network.fullName}`));
+            throw(new Error(`Error: No provider specified for ${kryptikProvider.network.fullName}`));
         }
         let solNetworkProvider:Connection = kryptikProvider.solProvider;
         const feeData = await solNetworkProvider.getFeeForMessage(
-            transaction.compileMessage(),
+            params.transaction.compileMessage(),
             'confirmed',
         );
         let feeInSol:number = lamportsToSol(feeData.value);
-        let feeInUsd:number = tokenPriceUsd*feeInSol;
+        let feeInUsd:number = params.tokenPriceUsd*feeInSol;
         let transactionFeeData:TransactionFeeData = {
             network: kryptikProvider.network,
             isFresh: true,
@@ -552,24 +555,32 @@ class Web3Service extends BaseService{
         return transactionFeeData;
     }
 
-    getTransactionFeeData1559Compatible = async(network:NetworkDb, tokenPriceUsd:number):Promise<TransactionFeeData> =>{
+    getTransactionFeeData1559Compatible = async(params:FeeDataEvmParameters):Promise<TransactionFeeData> =>{
         let kryptikProvider:KryptikProvider;
-        kryptikProvider = await this.getKryptikProviderForNetworkDb(network);
+        kryptikProvider = await this.getKryptikProviderForNetworkDb(params.network);
         // validate provider
         if(!kryptikProvider.ethProvider){
             throw(new Error(`No provider specified for ${kryptikProvider.network.fullName}`));
         }
         let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
         let feeData = await ethNetworkProvider.getFeeData();
-        let gasLimit:number = 21000;
+        // FIX ASAP
+        // ARTIFICIALLY INFLATING ARBITRUM BASE GAS LIMIT, BECAUSE OG VALUE IS TOO SMALL
+        let gasLimit:number = isNetworkArbitrum(params.network)?500000:21000;
+        if(params.tokenData){
+            let amount = roundToDecimals(Number(params.amountToken), params.tokenData.erc20Db.decimals);
+            // get gaslimit for nonzero amount
+            if(amount == 0) amount = 2;
+            // get estimated gas limit for token transfer
+            gasLimit = Number(await params.tokenData.tokenContractConnected.estimateGas.transfer(placeHolderEVMAddress, amount));
+            console.log("Token gas limit:")
+            console.log(gasLimit);
+        }
         // validate fee data response
         if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
             // arbitrum uses pre EIP-1559 fee structure
-            if(network.ticker == "eth(arbitrum)"){
+            if(isNetworkArbitrum(params.network)){
                 let baseGas = await ethNetworkProvider.getGasPrice();
-                // FIX ASAP
-                // ARTIFICIALLY INFLATING, BECAUSE OG VALUE TOO SMALL
-                gasLimit = gasLimit*30;
                 feeData.gasPrice = baseGas;
                 feeData.maxFeePerGas = baseGas;
                 feeData.maxPriorityFeePerGas = BigNumber.from(0);
@@ -585,9 +596,9 @@ class Web3Service extends BaseService{
         let baseTipPerGas:number = maxTipPerGas*.3;
         // amount hardcoded to gas required to transfer ether to someone else
         let lowerBoundCrypto:number = gasLimit*(baseFeePerGas+baseTipPerGas);
-        let lowerBoundUSD:number = lowerBoundCrypto*tokenPriceUsd;
+        let lowerBoundUSD:number = lowerBoundCrypto*params.tokenPriceUsd;
         let upperBoundCrypto:number = gasLimit*(maxFeePerGas+maxTipPerGas);
-        let upperBoundUsd:number = upperBoundCrypto*tokenPriceUsd;
+        let upperBoundUsd:number = upperBoundCrypto*params.tokenPriceUsd;
         // create new fee data object
         let transactionFeeData:TransactionFeeData = {
             network: kryptikProvider.network,
@@ -606,38 +617,35 @@ class Web3Service extends BaseService{
         }
         return transactionFeeData;
     }
-
-    // // amount of gas required for a particular transaction
-    // getGasAmount(network){
-
-    // }
     
-     // TODO: Update to support tx. based networks
-     getTransactionsAllNetworks = async():Promise<ITransactionHistory[]> =>{
-        throw(Error("Not implemented yet."));
-        // let networksFromDb = this.getSupportedNetworkDbs();
-        // // initialize return dict.
-        // let transactionList:ITransactionHistory[] = [];
-        // console.log("Supported networks:");
-        // console.log(networksFromDb);
-        // networksFromDb.forEach(async nw => {
-        //     let network:Network = new Network(nw.fullName, nw.ticker);
-        //     let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(nw);
-        //     if(network.ticker=="eth" && this.wallet.seedLoop.networkOnSeedloop(network)){
-        //         if(!kryptikProvider.ethProvider) throw Error("No ethereum provider set up.");
-        //         console.log("Processing Network:")
-        //         console.log(nw);
-        //         // gets all addresses for network
-        //         let allAddys:string[] = await this.wallet.seedLoop.getAddresses(network);
-        //         // gets first address for network
-        //         let firstAddy:string = allAddys[0];
-        //         console.log(`${nw.fullName} Addy:`);
-        //         console.log(firstAddy);
-        //         // add network balance to dict. with network ticker as key
-        //     }
-        // });
-        // console.log("Returning transaction history:");
-        // return transactionList;
+
+    // creates and returns a connected erc20 contract 
+    createERC20Contract = async(params:CreateEVMContractParameters):Promise<Contract|null> =>{
+        // hdseedloop compatible network
+        let network = networkFromNetworkDb(params.networkDb);
+        let provider = await this.getKryptikProviderForNetworkDb(params.networkDb);
+        if(!provider.ethProvider) return null;
+        let ethProvider:JsonRpcProvider = provider.ethProvider;
+        let accountAddress:string = await this.getAddressForNetworkDb(params.wallet, params.networkDb);
+        // connect provider and signer and attach to contract
+        let walletKryptik:WalletKryptik|null = params.wallet.seedLoop.getWalletForAddress(network, accountAddress);
+        if(!walletKryptik) return null;;
+        let ProviderAndSigner = walletKryptik.connect(ethProvider)
+        let erc20ChainData:ChainData|null = getChainDataForNetwork(params.networkDb, params.erc20Db);
+        if(!erc20ChainData) return null;
+        let erc20Contract = new Contract(erc20ChainData.address, erc20Abi);
+        let contractConnected = erc20Contract.connect(ProviderAndSigner);
+        return contractConnected;
+    }
+
+    // returns blockchain address for a given networkdb
+    getAddressForNetworkDb = async(wallet:IWallet, networkDb:NetworkDb):Promise<string>=>{
+        let network = networkFromNetworkDb(networkDb);
+        // gets all addresses for network
+        let allAddys:string[] = await wallet.seedLoop.getAddresses(network);
+        // gets first address for network
+        let firstAddy:string = allAddys[0];
+        return firstAddy;
     }
         
 }
