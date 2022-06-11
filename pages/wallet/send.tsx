@@ -271,8 +271,6 @@ const Send: NextPage = () => {
           // amount with correct number of decimals
           let tokenDecimals = selectedTokenAndNetwork.tokenData?.erc20Db.decimals;
           let amountDecimals = roundToDecimals(Number(amountCrypto), tokenDecimals).toString();
-          console.log("Amount decimals rounded:")
-          console.log(amountDecimals);
           // sign and send erc20 token
           if(selectedTokenAndNetwork.tokenData){
              let txResponse = await selectedTokenAndNetwork.tokenData.tokenContractConnected.transfer(toAddress, utils.parseEther(amountDecimals));
@@ -387,7 +385,7 @@ const Send: NextPage = () => {
               </div>
               {/* amount input */}
               <div className="flex justify-start mt-5">
-                <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-8xl text-center" id="amount" placeholder="$0" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
+                <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-8xl text-center" id="amount" placeholder="$0" autoComplete="off" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
               </div>
               <br/>
               <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.erc20Db.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}`:`$${amountUSD}`}</span>
