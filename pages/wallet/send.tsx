@@ -6,7 +6,7 @@ import { defaultTokenAndNetwork } from '../../src/services/models/network'
 import { SendProgress } from '../../src/services/types'
 import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapLine} from "react-icons/ri"
-import { isValidAddress, Network, NetworkFamily, SignedTransaction, TransactionParameters, truncateAddress } from "hdseedloop"
+import { isValidAddress, Network, NetworkFamily, NetworkFamilyFromFamilyName, SignedTransaction, TransactionParameters, truncateAddress } from "hdseedloop"
 
 import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
@@ -134,6 +134,31 @@ const Send: NextPage = () => {
 
   const handleToAddressChange = function(toAddressIn:string){
     setToAddress(toAddressIn);
+  }
+
+  const setMaxAmount = function(){
+    console.log("Setting max amount called");
+    // UPDATE SO SOLANA CAN BE SET MAX
+    if(NetworkFamilyFromFamilyName(selectedTokenAndNetwork.baseNetworkDb.networkFamilyName)==NetworkFamily.Solana) return;
+    console.log("1");
+    // set max with token value
+    if(selectedTokenAndNetwork.tokenData){
+      if(!selectedTokenAndNetwork.tokenData.tokenBalance) return;
+      let maxAmountCrypto = Number(selectedTokenAndNetwork.tokenData.tokenBalance.amountCrypto)-Number(amountTotalBounds.upperBoundTotalUsd)/tokenPrice;
+      let maxAmountUsd = maxAmountCrypto*tokenPrice;
+      setAmountCrypto(maxAmountCrypto.toString());
+      setAmountUSD(maxAmountUsd.toString());
+    }
+    // set max with 
+    else{
+      console.log("5");
+      if(!selectedTokenAndNetwork.networkBalance) return;
+      console.log("Setting max amount");
+      let maxAmountCrypto = Number(selectedTokenAndNetwork.networkBalance.amountCrypto)-Number(amountTotalBounds.upperBoundTotalUsd)/tokenPrice;
+      let maxAmountUsd = maxAmountCrypto*tokenPrice;
+      setAmountCrypto(maxAmountCrypto.toString());
+      setAmountUSD(maxAmountUsd.toString());
+    }
   }
 
   const updateTotalBounds = function(){
@@ -388,6 +413,9 @@ const Send: NextPage = () => {
                 <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-8xl text-center" id="amount" placeholder="$0" autoComplete="off" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
               </div>
               <br/>
+              <div className="rounded-full border border-gray-400 p-1 max-w-fit inline mr-2 hover:cursor-pointer" onClick={()=>setMaxAmount()}>
+                <span className="text-xs text-slate-400">MAX</span>
+              </div>
               <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.erc20Db.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}`:`$${amountUSD}`}</span>
               <RiSwapLine className="hover:cursor-pointer inline text-slate-300 ml-2" onClick={()=>handleToggleIsCrypto()} size="20"/>
               {/* network dropdown */}
