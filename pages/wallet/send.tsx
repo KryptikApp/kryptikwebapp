@@ -2,22 +2,21 @@ import type { NextPage } from 'next'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
-import { defaultNetworkDb, NetworkDb } from '../../src/services/models/network'
+import { defaultTokenAndNetwork } from '../../src/services/models/network'
 import { SendProgress } from '../../src/services/types'
 import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapLine} from "react-icons/ri"
-import { isValidAddress, Network, NetworkFamily, NetworkFromTicker, SignedTransaction, TransactionParameters, truncateAddress } from "hdseedloop"
+import { isValidAddress, Network, NetworkFamily, SignedTransaction, TransactionParameters, truncateAddress } from "hdseedloop"
 
 import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
-import TransactionFeeData, { defaultTransactionFeeData, defaultTxPublishedData, SolTransaction, TransactionPublishedData, TransactionRequest } from '../../src/services/models/transaction'
-import { getTransactionExplorerPath, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from '../../src/helpers/wallet/utils'
+import TransactionFeeData, { defaultTransactionFeeData, defaultTxPublishedData, FeeDataParameters, SolTransaction, TransactionPublishedData, TransactionRequest } from '../../src/services/models/transaction'
+import { formatTicker, getTransactionExplorerPath, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from '../../src/helpers/wallet/utils'
 import { createEVMTransaction, createSolTransaction } from '../../src/handlers/wallet/transactionHandler'
 import { utils } from 'ethers'
 import { PublicKey, Transaction } from '@solana/web3.js'
-import Link from 'next/link'
 
 
 
@@ -43,7 +42,8 @@ const Send: NextPage = () => {
   const [forMessage, setForMessage] = useState("");
   const [isLoading, setisLoading] = useState(false);
   const [progress, setProgress] = useState(SendProgress.Begin);
-  const[selectedNetwork, setSelectedNetwork] = useState(defaultNetworkDb);
+  const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
+
 
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
@@ -52,27 +52,36 @@ const Send: NextPage = () => {
   }, [authUser, loading])
 
   // retrieves wallet balances
-  const fetchFromAddress = async(network:Network) =>{
-     let addys:string[] = await kryptikWallet.seedLoop.getAddresses(network);
+  const fetchFromAddress = async() =>{
+     let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
+     let network:Network = networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
       // handle empty address
-      if(addys[0] == ""){
-        toast.error(`Error: no address found for ${network.fullName}. Please contact the Kryptik team or try refreshing your page.`);
-        setFromAddress(kryptikWallet.ethAddress);
+      if(accountAddress == ""){
+        toast.error(`Error: no address found for ${selectedTokenAndNetwork.baseNetworkDb.fullName}. Please contact the Kryptik team or try refreshing your page.`);
+        setFromAddress(kryptikWallet.ethAddress);      
         setReadableFromAddress(truncateAddress(kryptikWallet.ethAddress, network));
-        setSelectedNetwork(defaultNetworkDb);
+        setSelectedTokenAndNetwork(defaultTokenAndNetwork);
         return;
       }
-      setFromAddress(addys[0]);
-      setReadableFromAddress(truncateAddress(addys[0], network));
+      setFromAddress(accountAddress);
+      setReadableFromAddress(truncateAddress(accountAddress, network));
   }
 
-  const fetchTokenPrice = async(network:NetworkDb) =>{
-    let tokenPriceCoinGecko:number = await getPriceOfTicker(network.coingeckoId);
+  const fetchTokenPrice = async() =>{
+    let coingeckoId = selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.coingeckoId:
+    selectedTokenAndNetwork.baseNetworkDb.coingeckoId;
+    let tokenPriceCoinGecko:number = await getPriceOfTicker(coingeckoId);
     setTokenPrice(tokenPriceCoinGecko);
   }
 
-  const fetchNetworkFees = async(network:NetworkDb, solTx?:Transaction) =>{
-    let transactionFeeDataFresh:TransactionFeeData|null = await kryptikService.getTransactionFeeData(network, solTx);
+  const fetchNetworkFees = async(solTx?:Transaction) =>{
+    let feeDataParams:FeeDataParameters = {
+      networkDb: selectedTokenAndNetwork.baseNetworkDb,
+      tokenData: selectedTokenAndNetwork.tokenData,
+      amountToken: amountCrypto,
+      solTransaction: solTx
+    }
+    let transactionFeeDataFresh:TransactionFeeData|null = await kryptikService.getTransactionFeeData(feeDataParams);
     if(transactionFeeDataFresh){
       setTransactionFeedata(transactionFeeDataFresh);
     }
@@ -83,8 +92,8 @@ const Send: NextPage = () => {
 
   // gets solana tx. fees and sets sol transaction
   const fetchSolTransactionFees = async()=>{
-      let nw:Network =  networkFromNetworkDb(selectedNetwork);
-      let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
+      let nw:Network =  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
+      let kryptikProvider = kryptikService.getProviderForNetwork(selectedTokenAndNetwork.baseNetworkDb);
       // get solana transaction fee
       if(nw.networkFamily != NetworkFamily.Solana){
         return;
@@ -94,19 +103,18 @@ const Send: NextPage = () => {
         toAddress: toAddress,
         valueSol: Number(amountCrypto),
         kryptikProvider: kryptikProvider,
-        networkDb: selectedNetwork
+        networkDb: selectedTokenAndNetwork.baseNetworkDb
       }
       let txSol:Transaction = await createSolTransaction(txIn);
-      await fetchNetworkFees(selectedNetwork, txSol);
+      await fetchNetworkFees(txSol);
   }
 
   useEffect(()=>{
-      let nw:Network =  networkFromNetworkDb(selectedNetwork);
-      fetchFromAddress(nw);
-      fetchTokenPrice(selectedNetwork);
-      fetchNetworkFees(selectedNetwork);
+      fetchFromAddress();
+      fetchTokenPrice();
+      fetchNetworkFees();
       handleAmountChange("0");
-  }, [selectedNetwork]);
+  }, [selectedTokenAndNetwork]);
 
   useEffect(()=>{
     updateTotalBounds();
@@ -175,7 +183,30 @@ const Send: NextPage = () => {
 
   const handleStartParameterSetting = function(){
     setisLoading(true);
-    // verify sender has sufficient balance
+    // VERIFY sender has sufficient balance
+    // token main send
+    if(amountCrypto == "0"){
+      toast.error("Please enter a nonzero amount.");
+      return;
+    }
+    if(selectedTokenAndNetwork.tokenData && (Number(selectedTokenAndNetwork.tokenData.tokenBalance?.amountCrypto) < Number(amountCrypto))){
+      toast.error(`You don't have enough ${selectedTokenAndNetwork.tokenData.erc20Db.name} to complete this transaction`);
+      setisLoading(false);
+      return;
+    }
+    // check sufficient network balance for tx. fees (when sending token)
+    if(selectedTokenAndNetwork.tokenData && (Number(selectedTokenAndNetwork.networkBalance?.amountCrypto) < Number(transactionFeeData.upperBoundCrypto))){
+      toast.error(`You don't have enough ${selectedTokenAndNetwork.baseNetworkDb.fullName} to pay for network transaction fees`);
+      setisLoading(false);
+      return;
+    }
+    // sending base network token... check balance vs. total amount (send+fees)
+    if(!selectedTokenAndNetwork.tokenData && Number(selectedTokenAndNetwork.networkBalance?.amountUSD)<Number(amountTotalBounds.upperBoundTotalUsd)){
+      toast.error(`You don't have enough ${selectedTokenAndNetwork.baseNetworkDb.fullName} to complete this transaction`);
+      setisLoading(false);
+      return;
+    }
+    // VERIFICATION COMPLETE
     setProgress(SendProgress.SetParamaters);
     setisLoading(false);
   }
@@ -183,7 +214,7 @@ const Send: NextPage = () => {
   const handleStartReview = function(){
     setisLoading(true);
     // verify recipient address is correct
-    let nw:Network =  networkFromNetworkDb(selectedNetwork);
+    let nw:Network =  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
     // format recipient address
     if(!isValidAddress(toAddress, nw)){
        toast.error("Invalid address.");
@@ -198,7 +229,7 @@ const Send: NextPage = () => {
   };
 
   const handleCancelTransaction = function(isComplete?:false){
-    let nw:Network =  networkFromNetworkDb(selectedNetwork);
+    let nw:Network =  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
     setisLoading(true);
     setAmountUSD("0");
     setAmountCrypto("0");
@@ -209,7 +240,7 @@ const Send: NextPage = () => {
     setReadableFromAddress(truncateAddress(kryptikWallet.ethAddress, nw));
     setReadableToAddress("");
     setTxPubData(defaultTxPublishedData);
-    setSelectedNetwork(defaultNetworkDb);
+    setSelectedTokenAndNetwork(defaultTokenAndNetwork);
     if(!isComplete) setProgress(SendProgress.Begin);
     setisLoading(false);
   };
@@ -225,8 +256,8 @@ const Send: NextPage = () => {
   }
 
   const handleCreateTransaction = async function(){
-    let network =  networkFromNetworkDb(selectedNetwork);
-    let kryptikProvider = kryptikService.getProviderForNetwork(selectedNetwork);
+    let network =  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
+    let kryptikProvider = kryptikService.getProviderForNetwork(selectedTokenAndNetwork.baseNetworkDb);
     let txDoneData:TransactionPublishedData = defaultTxPublishedData;
     // UPDATE TO REFLECT ERROR IN UI
     switch(network.networkFamily){
@@ -238,24 +269,34 @@ const Send: NextPage = () => {
           }
           let ethProvider = kryptikProvider.ethProvider;
           // amount with correct number of decimals
-          let amountDecimals = roundToDecimals(Number(amountCrypto)).toString();
-          let EVMTransaction:TransactionRequest = await createEVMTransaction({value: utils.parseEther(amountDecimals), sendAccount: fromAddress,
-            toAddress: toAddress, gasLimit:transactionFeeData.EVMGas.gasLimit, 
-            maxFeePerGas:transactionFeeData.EVMGas.maxFeePerGas, 
-            maxPriorityFeePerGas:transactionFeeData.EVMGas.maxPriorityFeePerGas, 
-            networkDb:selectedNetwork, 
-            gasPrice: transactionFeeData.EVMGas.gasPrice,
-            kryptikProvider:kryptikService.getProviderForNetwork(selectedNetwork)});
-          let kryptikTxParams:TransactionParameters = {
-              evmTransaction: EVMTransaction
+          let tokenDecimals = selectedTokenAndNetwork.tokenData?.erc20Db.decimals;
+          let amountDecimals = roundToDecimals(Number(amountCrypto), tokenDecimals).toString();
+          console.log("Amount decimals rounded:")
+          console.log(amountDecimals);
+          // sign and send erc20 token
+          if(selectedTokenAndNetwork.tokenData){
+             let txResponse = await selectedTokenAndNetwork.tokenData.tokenContractConnected.transfer(toAddress, utils.parseEther(amountDecimals));
+             if(txResponse.hash) txDoneData.hash = txResponse.hash;
           }
-          let signedTx:SignedTransaction = await kryptikWallet.seedLoop.signTransaction(fromAddress, kryptikTxParams, network);
-          if(!signedTx.evmFamilyTx) throw(new Error("Error: Unable to sign EVM transaction"));
-          console.log(signedTx.evmFamilyTx);
-          let txResponse = await ethProvider.sendTransaction(signedTx.evmFamilyTx);
-          txDoneData.hash = txResponse.hash;
+          else{
+              let EVMTransaction:TransactionRequest = await createEVMTransaction({value: utils.parseEther(amountDecimals), sendAccount: fromAddress,
+                toAddress: toAddress, gasLimit:transactionFeeData.EVMGas.gasLimit, 
+                maxFeePerGas:transactionFeeData.EVMGas.maxFeePerGas, 
+                maxPriorityFeePerGas:transactionFeeData.EVMGas.maxPriorityFeePerGas, 
+                networkDb:selectedTokenAndNetwork.baseNetworkDb, 
+                gasPrice: transactionFeeData.EVMGas.gasPrice,
+                kryptikProvider:kryptikService.getProviderForNetwork(selectedTokenAndNetwork.baseNetworkDb)});
+              let kryptikTxParams:TransactionParameters = {
+                  evmTransaction: EVMTransaction
+              }
+              let signedTx:SignedTransaction = await kryptikWallet.seedLoop.signTransaction(fromAddress, kryptikTxParams, network);
+              if(!signedTx.evmFamilyTx) throw(new Error("Error: Unable to sign EVM transaction"));
+              console.log(signedTx.evmFamilyTx);
+              let txResponse = await ethProvider.sendTransaction(signedTx.evmFamilyTx);
+              txDoneData.hash = txResponse.hash;
+          }
           // set tx. explorer path
-          let txExplorerPath:string|null = getTransactionExplorerPath(selectedNetwork, txDoneData);
+          let txExplorerPath:string|null = getTransactionExplorerPath(selectedTokenAndNetwork.baseNetworkDb, txDoneData);
           txDoneData.explorerPath = txExplorerPath?txExplorerPath:txDoneData.explorerPath;
           setTxPubData(txDoneData);
           break; 
@@ -272,7 +313,7 @@ const Send: NextPage = () => {
             toAddress: toAddress,
             valueSol: Number(amountCrypto),
             kryptikProvider: kryptikProvider,
-            networkDb: selectedNetwork
+            networkDb: selectedTokenAndNetwork.baseNetworkDb
           }
           let txSol:Transaction = await createSolTransaction(txIn);
           let kryptikTxParams:TransactionParameters = {
@@ -280,26 +321,26 @@ const Send: NextPage = () => {
           };
           const signature = await kryptikWallet.seedLoop.signTransaction(fromAddress, kryptikTxParams, network);
           if(!signature.solanaFamilyTx){
-            toast.error(`Error: Unable to create signature for ${selectedNetwork.fullName} transaction.`);
+            toast.error(`Error: Unable to create signature for ${selectedTokenAndNetwork.baseNetworkDb.fullName} transaction.`);
             handleCancelTransaction();
             return null;
           }
           txSol.addSignature(new PublicKey(fromAddress), Buffer.from(signature.solanaFamilyTx));
           if(!txSol.verifySignatures()){
-            toast.error(`Error: Unable to verify signature for ${selectedNetwork.fullName} transaction.`);
+            toast.error(`Error: Unable to verify signature for ${selectedTokenAndNetwork.baseNetworkDb.fullName} transaction.`);
             handleCancelTransaction();
             return null;
           }
           const txPostResult = await solProvider.sendRawTransaction(txSol.serialize());
           txDoneData.hash = txPostResult;
           // set tx. explorer path
-          let txExplorerPath:string|null = getTransactionExplorerPath(selectedNetwork, txDoneData);
+          let txExplorerPath:string|null = getTransactionExplorerPath(selectedTokenAndNetwork.baseNetworkDb, txDoneData);
           txDoneData.explorerPath = txExplorerPath? txExplorerPath:txDoneData.explorerPath;
           setTxPubData(txDoneData);
           break;
       }
       default: { 
-          return toast.error(`Error: Unable to build transaction for ${selectedNetwork.fullName}`);
+          return toast.error(`Error: Unable to build transaction for ${selectedTokenAndNetwork.baseNetworkDb.fullName}`);
           break; 
       } 
       setProgress(SendProgress.Complete);
@@ -349,16 +390,16 @@ const Send: NextPage = () => {
                 <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-8xl text-center" id="amount" placeholder="$0" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
               </div>
               <br/>
-              <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedNetwork.ticker}`:`$${amountUSD}`}</span>
+              <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.erc20Db.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}`:`$${amountUSD}`}</span>
               <RiSwapLine className="hover:cursor-pointer inline text-slate-300 ml-2" onClick={()=>handleToggleIsCrypto()} size="20"/>
               {/* network dropdown */}
                 <div className="max-w-xs mx-auto">
-                    <DropdownNetworks selectedNetwork={selectedNetwork} selectFunction={setSelectedNetwork}/>
+                    <DropdownNetworks selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={setSelectedTokenAndNetwork} onlyWithValue={true}/>
                 </div>
               {/* case: network family is ethereum and network fees are different */}
               {
                   (transactionFeeData.isFresh && 
-                  networkFromNetworkDb(selectedNetwork).networkFamily!=NetworkFamily.Solana) && networkFromNetworkDb(selectedNetwork).networkFamily==NetworkFamily.EVM && (transactionFeeData.lowerBoundUSD != transactionFeeData.upperBoundUSD) &&
+                  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily!=NetworkFamily.Solana) && networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily==NetworkFamily.EVM && (transactionFeeData.lowerBoundUSD != transactionFeeData.upperBoundUSD) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees: {`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                   </div>
@@ -366,14 +407,14 @@ const Send: NextPage = () => {
               {/* case: network family is ethereum and network fees are same */}
               {
                   (transactionFeeData.isFresh && 
-                  networkFromNetworkDb(selectedNetwork).networkFamily!=NetworkFamily.Solana) && networkFromNetworkDb(selectedNetwork).networkFamily==NetworkFamily.EVM && (transactionFeeData.lowerBoundUSD == transactionFeeData.upperBoundUSD) &&
+                  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily!=NetworkFamily.Solana) && networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily==NetworkFamily.EVM && (transactionFeeData.lowerBoundUSD == transactionFeeData.upperBoundUSD) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees: {`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                   </div>
               }
               {/* case: network family is solana */}
               {
-                  (  networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana) &&
+                  (  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily == NetworkFamily.Solana) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees will be calculated on review</p>
                   </div>
@@ -396,7 +437,11 @@ const Send: NextPage = () => {
             <div>
                {/* amount indicator */}
                 <div className="border rounded border-solid border-grey-600 w-40 mx-7 py-3">
-                  <img className="w-8 h-8 rounded-full inline" src={selectedNetwork.iconPath} alt="Network Image"/>
+                  <img className="w-8 h-8 rounded-full inline" src={selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath} alt="Network Image"/>
+                  {
+                      selectedTokenAndNetwork.tokenData &&
+                      <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${selectedTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                  }
                   <span className="inline mx-2">${amountUSD}</span>
                 </div>
                 
@@ -448,12 +493,18 @@ const Send: NextPage = () => {
                   <div className="border border-solid border-1 border-gray-300 py-4 rounded-lg mx-2">
 
                     <div className="flex flex-row">
-                      <div className="flex-1 pl-1">
-                        <img className="w-8 h-8 rounded-full" src={selectedNetwork.iconPath} alt="Network Image"/>
-                        <AiOutlineArrowDown className="text-gray-200 pl-1" size="30"/>
+                      <div className="flex-1">
+                        <div className="text-left pl-1">
+                        <img className="w-8 h-8 rounded-full inline" src={selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath} alt="Network Image"/>
+                        {
+                            selectedTokenAndNetwork.tokenData &&
+                            <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${selectedTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                        }
+                        </div>
+                        <AiOutlineArrowDown className="text-gray-200 pl-2" size="30"/>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-base mx-2">{selectedNetwork.fullName}</p>
+                        <p className="font-semibold text-base mx-2">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
                       </div>
                       <div className="flex-1">
                           <p className="text-sm font-semibold text-gray-900 truncate">
@@ -493,7 +544,7 @@ const Send: NextPage = () => {
                             <p className="text-slate-600 text-left">Blockchain</p>
                           </div>
                           <div className="flex-1 px-1">
-                            <p className="text-right">{selectedNetwork.fullName}</p>
+                            <p className="text-right">{selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
                           </div>
                     </div>
                     <div className="flex flex-row">
@@ -502,7 +553,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                               (networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana || transactionFeeData.lowerBoundUSD == transactionFeeData.upperBoundUSD)?
+                               (networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily == NetworkFamily.Solana || transactionFeeData.lowerBoundUSD == transactionFeeData.upperBoundUSD)?
                               <p className="text-right">{`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>:
                               <p className="text-right">{`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                             }
@@ -514,7 +565,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                               (networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana || amountTotalBounds.lowerBoundTotalUsd == amountTotalBounds.upperBoundTotalUsd)?
+                               (networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily == NetworkFamily.Solana || amountTotalBounds.lowerBoundTotalUsd == amountTotalBounds.upperBoundTotalUsd)?
                               <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>:
                               <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
                             }
@@ -565,11 +616,16 @@ const Send: NextPage = () => {
                   <div className="border border-solid border-1 border-gray-300 py-4 rounded-lg mx-2">
                     <div className="flex flex-row">
                       <div className="flex-1 pl-1">
-                        <img className="w-8 h-8 rounded-full" src={selectedNetwork.iconPath} alt="Network Image"/>
-                        <AiOutlineArrowDown className="text-gray-200 pl-1" size="30"/>
+                        <div className="text-left pl-1">
+                          <img className="w-8 h-8 rounded-full inline" src={selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath} alt="Network Image"/>
+                          {
+                              selectedTokenAndNetwork.tokenData &&
+                              <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${selectedTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                          }
+                        </div>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-base mx-2">{selectedNetwork.fullName}</p>
+                        <p className="font-semibold text-base mx-2">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
                       </div>
                       <div className="flex-1">
                           <p className="text-sm font-semibold text-gray-900 truncate">
@@ -582,7 +638,7 @@ const Send: NextPage = () => {
                     </div>
 
                     <div className="flex flex-row">
-                        <div className="flex-1 px-1">
+                        <div className="flex-1 pl-2">
                           <AiOutlineWallet className="text-sky-400 pl-1" size="30"/>
                         </div>
                         <div className="flex-1 px-1">
@@ -609,7 +665,7 @@ const Send: NextPage = () => {
                             <p className="text-slate-600 text-left">Blockchain</p>
                           </div>
                           <div className="flex-1 px-1">
-                            <p className="text-right">{selectedNetwork.fullName}</p>
+                            <p className="text-right">{selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
                           </div>
                     </div>
                     <div className="flex flex-row">
@@ -618,7 +674,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                               networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana?
+                               networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily == NetworkFamily.Solana?
                               <p className="text-right">{`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>:
                               <p className="text-right">{`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
                             }
@@ -630,7 +686,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                               networkFromNetworkDb(selectedNetwork).networkFamily == NetworkFamily.Solana?
+                               networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily == NetworkFamily.Solana?
                               <p className="text-right">{`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>:
                               <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
                             }
