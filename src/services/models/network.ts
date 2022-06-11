@@ -1,6 +1,7 @@
 // data model for cryptocurrency networks (blockchains) pulled from firebase
 
 import { Network, NetworkFromTicker } from "hdseedloop"
+import { TokenAndNetwork } from "./token"
 
 export interface NetworkDb {
     fullName: string,
@@ -13,10 +14,11 @@ export interface NetworkDb {
     chainIdEVM: number,
     hexColor: string,
     dateCreated: Date,
-    provider:string,
-    networkFamilyName:string,
-    coingeckoId:string
+    provider: string,
+    networkFamilyName: string,
+    coingeckoId: string
     isTestnet: boolean
+    blockExplorerURL: string
 }
 
 
@@ -27,6 +29,7 @@ export const defaultNetworkDb:NetworkDb = {
     isSupported: true,
     about: "Ethereum is the community-run technology powering the cryptocurrency ether (ETH) and thousands of decentralized applications.",
     whitePaperPath: "https://ethereum.org/en/whitepaper/",
+    blockExplorerURL: "https://etherscan.io/",
     chainId: 60,
     chainIdEVM: 1,
     hexColor: "#3c3c3d",
@@ -35,6 +38,17 @@ export const defaultNetworkDb:NetworkDb = {
     provider: "https://eth-mainnet.alchemyapi.io/v2/NnS19sbjsKljODizz9zB-C8Fw511M-ej",
     coingeckoId: "ethereum",
     isTestnet: false
+}
+
+export const placeHolderEVMAddress:string = "0xb794f5ea0ba39494ce839613fffba74279579268";
+
+export const defaultTokenAndNetwork:TokenAndNetwork = {
+    baseNetworkDb:defaultNetworkDb
+}
+
+export interface NetworkBalanceParameters{
+    networkDb:NetworkDb,
+    accountAddress: string
 }
 
 
