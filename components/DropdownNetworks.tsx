@@ -13,9 +13,10 @@ interface Props{
     onlyWithValue?:boolean
     selectedTokenAndNetwork:TokenAndNetwork
     selectFunction:any
+    onLoadedFunction?:any
 }
 const DropdownNetworks:NextPage<Props> = (props) => {
-    const {selectedTokenAndNetwork, selectFunction, onlyWithValue} = props;
+    const {selectedTokenAndNetwork, selectFunction, onlyWithValue, onLoadedFunction} = props;
     const {kryptikService, authUser, kryptikWallet} = useKryptikAuthContext();
     const[networkAndTokens, setNetworkAndTokens] = useState<TokenAndNetwork[]>([]);
     const[isFetched, setIsFetched] = useState(false);
@@ -96,6 +97,9 @@ const DropdownNetworks:NextPage<Props> = (props) => {
         }
         setNetworkAndTokens(tokensAndNetworks);
         setIsFetched(true);
+        if(onLoadedFunction){
+            onLoadedFunction();
+        }
     }
 
     const toggleShowOptions = async() =>{
