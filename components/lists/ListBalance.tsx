@@ -12,7 +12,6 @@ import ListItemLoading from "./ListItemLoading";
 const ListBalance:NextPage = () => {
     const {kryptikService, kryptikWallet, authUser} = useKryptikAuthContext();
     const initBalances:IBalance[] = [];
-    const initBalancesErc20:IBalance[] = [];
     const[isFetchedBalances, setIsFetchedBalances] = useState(false);
     const[isFetchedERC20, setIsFetchedERC20] = useState(false);
     const[balances, setBalances] = useState<IBalance[]>(initBalances);
@@ -26,7 +25,7 @@ const ListBalance:NextPage = () => {
         setBalances(bals);
         setIsFetchedBalances(true);
         // fetch erc0 balances
-        let balsERC20:IBalance[] = await kryptikService.getBalanceERC20(kryptikWallet);
+        let balsERC20:IBalance[] = await kryptikService.getBalanceAllERC20Tokens(kryptikWallet);
         setBalancesERC20(balsERC20);
         setIsFetchedERC20(true);
     }
