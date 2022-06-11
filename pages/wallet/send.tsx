@@ -30,6 +30,7 @@ const Send: NextPage = () => {
   const { authUser, loading, kryptikWallet, kryptikService } = useKryptikAuthContext();
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [amountUSD, setAmountUSD] = useState("0");
+  const [dropdownLoaded, setDropDownLoaded] = useState(false);
   const [amountTotalBounds, setAmountTotalbounds] = useState<AmountTotalBounds>(defaultAmountTotalBounds);
   const [transactionFeeData, setTransactionFeedata] = useState(defaultTransactionFeeData)
   const [txPubData, setTxPubData] = useState<TransactionPublishedData>(defaultTxPublishedData);
@@ -127,6 +128,10 @@ const Send: NextPage = () => {
     }
     fetchSolTransactionFees()
   }, [progress]);
+
+  const handleDropdownLoaded = function(){
+    setDropDownLoaded(true);
+  }
 
   const handleToggleIsCrypto = function(){
     setIsInputCrypto(!isInputCrypto);
@@ -420,11 +425,16 @@ const Send: NextPage = () => {
               <RiSwapLine className="hover:cursor-pointer inline text-slate-300 ml-2" onClick={()=>handleToggleIsCrypto()} size="20"/>
               {/* network dropdown */}
                 <div className="max-w-xs mx-auto">
-                    <DropdownNetworks selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={setSelectedTokenAndNetwork} onlyWithValue={true}/>
+                    <DropdownNetworks selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={setSelectedTokenAndNetwork} onlyWithValue={true} onLoadedFunction={handleDropdownLoaded}/>
                 </div>
+              {/* skeleton fee loader */}
+              {
+                (!dropdownLoaded) &&
+                <div className="w-40 h-6 mt-2 truncate bg-gray-300 animate-pulse rounded mx-auto"/>
+              }
               {/* case: network family is ethereum and network fees are different */}
               {
-                  (transactionFeeData.isFresh && 
+                  (transactionFeeData.isFresh && dropdownLoaded &&
                   networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily!=NetworkFamily.Solana) && networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily==NetworkFamily.EVM && (transactionFeeData.lowerBoundUSD != transactionFeeData.upperBoundUSD) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees: {`$${roundUsdAmount(transactionFeeData.lowerBoundUSD)}-$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
@@ -432,7 +442,7 @@ const Send: NextPage = () => {
               }
               {/* case: network family is ethereum and network fees are same */}
               {
-                  (transactionFeeData.isFresh && 
+                  (transactionFeeData.isFresh && dropdownLoaded &&
                   networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily!=NetworkFamily.Solana) && networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily==NetworkFamily.EVM && (transactionFeeData.lowerBoundUSD == transactionFeeData.upperBoundUSD) &&
                   <div>
                     <p className="text-slate-400 text-sm inline">Fees: {`$${roundUsdAmount(transactionFeeData.upperBoundUSD)}`}</p>
