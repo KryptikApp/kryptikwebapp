@@ -22,9 +22,8 @@ import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataParameters, FeeDataSolParameters} from "./models/transaction";
 import { isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
 import { UserDB } from "../models/user";
-import {ChainData, ERC20Db} from "./models/erc20";
 import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
-import { CreateEVMContractParameters, TokenBalanceParameters, TokenDataEVM } from "./models/token";
+import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
 
 const NetworkDbsRef = collection(firestore, "networks");
@@ -77,7 +76,7 @@ class Web3Service extends BaseService{
     private wallet:IWallet|null = null;
     public isWalletSet:boolean = false;
     public NetworkDbs:NetworkDb[] = [];
-    public erc20Dbs:ERC20Db[] = [];
+    public erc20Dbs:TokenDb[] = [];
     // NetworkDb is referenced by its BIP44 chain id
     public rpcEndpoints: { [ticker:string]: string } = {};
     public web3Provider: StaticJsonRpcProvider = (null as unknown) as StaticJsonRpcProvider;
@@ -220,14 +219,14 @@ class Web3Service extends BaseService{
         return newKryptikProvider;
     }
 
-    private async populateErc20DbsAsync():Promise<ERC20Db[]>{
+    private async populateErc20DbsAsync():Promise<TokenDb[]>{
         console.log("Populating erc20 data from db");
         const q = query(ERC20DbRef);
         const querySnapshot = await getDocs(q);
-        let erc20DbsResult:ERC20Db[] = [];
+        let erc20DbsResult:TokenDb[] = [];
         querySnapshot.forEach((doc) => {
             let docData = doc.data();
-            let erc20DbToAdd:ERC20Db = {
+            let erc20DbToAdd:TokenDb = {
                 name: docData.name,
                 coingeckoId: docData.coingeckoId,
                 symbol: docData.symbol,
@@ -460,16 +459,16 @@ class Web3Service extends BaseService{
     // gets balance for a single erc20 token
     async getBalanceErc20Token(params:TokenBalanceParameters){
         // fetch price
-        let priceUSD = await getPriceOfTicker(params.erc20Db.coingeckoId);
+        let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
         // fetch balance
-        console.log(`getting ${params.erc20Db.name} balance for ${params.accountAddress}`);
+        console.log(`getting ${params.tokenDb.name} balance for ${params.accountAddress}`);
         let networkBalance:number = Number(utils.formatEther(await params.erc20Contract.balanceOf(params.accountAddress)));
         // prettify ether balance
         let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
         let networkBalanceString = networkBalanceAdjusted.toString();
         let amountUSD = roundUsdAmount((priceUSD * networkBalance));
         // create new object for balance data
-        let newBalanceObj:IBalance = {fullName:params.erc20Db.name, ticker:params.erc20Db.symbol, iconPath:params.erc20Db.logoURI,
+        let newBalanceObj:IBalance = {fullName:params.tokenDb.name, ticker:params.tokenDb.symbol, iconPath:params.tokenDb.logoURI,
         iconPathSecondary: params.networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
         networkCoinGecko:params.networkDb.coingeckoId}
         return newBalanceObj;
@@ -495,7 +494,7 @@ class Web3Service extends BaseService{
                 // get balance for contract
                 let tokenParams:TokenBalanceParameters = {
                     erc20Contract: erc20Contract,
-                    erc20Db: erc20Db,
+                    tokenDb: erc20Db,
                     accountAddress: accountAddress,
                     networkDb: networkDb
                 }
@@ -568,7 +567,7 @@ class Web3Service extends BaseService{
         // ARTIFICIALLY INFLATING ARBITRUM BASE GAS LIMIT, BECAUSE OG VALUE IS TOO SMALL
         let gasLimit:number = isNetworkArbitrum(params.network)?500000:21000;
         if(params.tokenData){
-            let amount = roundToDecimals(Number(params.amountToken), params.tokenData.erc20Db.decimals);
+            let amount = roundToDecimals(Number(params.amountToken), params.tokenData.tokenDb.decimals);
             // get gaslimit for nonzero amount
             if(amount == 0) amount = 2;
             // get estimated gas limit for token transfer

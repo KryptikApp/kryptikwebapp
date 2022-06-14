@@ -69,7 +69,7 @@ const Send: NextPage = () => {
   }
 
   const fetchTokenPrice = async() =>{
-    let coingeckoId = selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.coingeckoId:
+    let coingeckoId = selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.coingeckoId:
     selectedTokenAndNetwork.baseNetworkDb.coingeckoId;
     let tokenPriceCoinGecko:number = await getPriceOfTicker(coingeckoId);
     setTokenPrice(tokenPriceCoinGecko);
@@ -220,7 +220,7 @@ const Send: NextPage = () => {
       return;
     }
     if(selectedTokenAndNetwork.tokenData && (Number(selectedTokenAndNetwork.tokenData.tokenBalance?.amountCrypto) < Number(amountCrypto))){
-      toast.error(`You don't have enough ${selectedTokenAndNetwork.tokenData.erc20Db.name} to complete this transaction`);
+      toast.error(`You don't have enough ${selectedTokenAndNetwork.tokenData.tokenDb.name} to complete this transaction`);
       setisLoading(false);
       return;
     }
@@ -299,7 +299,7 @@ const Send: NextPage = () => {
           }
           let ethProvider = kryptikProvider.ethProvider;
           // amount with correct number of decimals
-          let tokenDecimals = selectedTokenAndNetwork.tokenData?.erc20Db.decimals;
+          let tokenDecimals = selectedTokenAndNetwork.tokenData?.tokenDb.decimals;
           let amountDecimals = roundToDecimals(Number(amountCrypto), tokenDecimals).toString();
           // sign and send erc20 token
           if(selectedTokenAndNetwork.tokenData){
@@ -421,7 +421,7 @@ const Send: NextPage = () => {
               <div className="rounded-full border border-gray-400 p-1 max-w-fit inline mr-2 text-slate-400 hover:cursor-pointer hover:bg-slate-100 hover:text-sky-400 hover:font-semibold" onClick={()=>setMaxAmount()}>
                 <span className="text-xs">MAX</span>
               </div>
-              <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.erc20Db.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}`:`$${amountUSD}`}</span>
+              <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}`:`$${amountUSD}`}</span>
               <RiSwapLine className="hover:cursor-pointer inline text-slate-300 ml-2" onClick={()=>handleToggleIsCrypto()} size="20"/>
               {/* network dropdown */}
                 <div className="max-w-xs mx-auto">
@@ -473,7 +473,7 @@ const Send: NextPage = () => {
             <div>
                {/* amount indicator */}
                 <div className="border rounded border-solid border-grey-600 w-40 mx-7 py-3">
-                  <img className="w-8 h-8 rounded-full inline" src={selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath} alt="Network Image"/>
+                  <img className="w-8 h-8 rounded-full inline" src={selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath} alt="Network Image"/>
                   {
                       selectedTokenAndNetwork.tokenData &&
                       <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${selectedTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
@@ -531,7 +531,7 @@ const Send: NextPage = () => {
                     <div className="flex flex-row">
                       <div className="flex-1">
                         <div className="text-left pl-1">
-                        <img className="w-8 h-8 rounded-full inline" src={selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath} alt="Network Image"/>
+                        <img className="w-8 h-8 rounded-full inline" src={selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath} alt="Network Image"/>
                         {
                             selectedTokenAndNetwork.tokenData &&
                             <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${selectedTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
@@ -540,7 +540,7 @@ const Send: NextPage = () => {
                         <AiOutlineArrowDown className="text-gray-200 pl-2" size="30"/>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-base mx-2">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
+                        <p className="font-semibold text-base mx-2">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
                       </div>
                       <div className="flex-1">
                           <p className="text-sm font-semibold text-gray-900 truncate">
@@ -653,7 +653,7 @@ const Send: NextPage = () => {
                     <div className="flex flex-row">
                       <div className="flex-1 pl-1">
                         <div className="text-left pl-1">
-                          <img className="w-8 h-8 rounded-full inline" src={selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath} alt="Network Image"/>
+                          <img className="w-8 h-8 rounded-full inline" src={selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath} alt="Network Image"/>
                           {
                               selectedTokenAndNetwork.tokenData &&
                               <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${selectedTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
@@ -661,7 +661,7 @@ const Send: NextPage = () => {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-base mx-2">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.erc20Db.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
+                        <p className="font-semibold text-base mx-2">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
                       </div>
                       <div className="flex-1">
                           <p className="text-sm font-semibold text-gray-900 truncate">

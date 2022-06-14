@@ -1,8 +1,7 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { ERC20Db } from "../src/services/models/erc20";
 import { NetworkBalanceParameters, NetworkDb } from "../src/services/models/network";
-import { CreateEVMContractParameters, TokenAndNetwork, TokenBalanceParameters, TokenDataEVM } from "../src/services/models/token";
+import { CreateEVMContractParameters, TokenAndNetwork, TokenBalanceParameters, TokenDataEVM, TokenDb } from "../src/services/models/token";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 import ListItemDropdown from "./lists/ListItemDropwdown";
 import { Contract } from "ethers";
@@ -56,7 +55,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             if(nw.ticker == "eth") selectFunction(tokenAndNetworkToAdd);
         }
         // add all tokens
-        let erc20Dbs:ERC20Db[] = kryptikService.erc20Dbs;
+        let erc20Dbs:TokenDb[] = kryptikService.erc20Dbs;
         for(const erc20Db of erc20Dbs){
             for(const chainInfo of erc20Db.chainData){
                 let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
@@ -74,7 +73,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                     // get balance for contract
                     let tokenBalanceParams:TokenBalanceParameters = {
                         erc20Contract: erc20Contract,
-                        erc20Db: erc20Db,
+                        tokenDb: erc20Db,
                         accountAddress: accountAddress,
                         networkDb: networkDb
                     }
@@ -85,7 +84,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                 let tokenDataToAdd:TokenDataEVM = {
                     tokenContractConnected: erc20Contract,
                     tokenBalance: tokenBalance,
-                    erc20Db: erc20Db
+                    tokenDb: erc20Db
                 }
                 let tokenAndNetworkToAdd:TokenAndNetwork = {
                     baseNetworkDb: networkDb,
@@ -135,9 +134,9 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                     {
                         selectedTokenAndNetwork.tokenData?
                         <div className="py-1">
-                            <img src={selectedTokenAndNetwork.tokenData.erc20Db.logoURI} alt={`${title} icon`} className="flex-shrink-0 h-6 w-6 rounded-full inline"/>
+                            <img src={selectedTokenAndNetwork.tokenData.tokenDb.logoURI} alt={`${title} icon`} className="flex-shrink-0 h-6 w-6 rounded-full inline"/>
                             <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${title} secondary image`}/>
-                            <span className="ml-3 block truncate inline"> {selectedTokenAndNetwork.tokenData.erc20Db.name}</span>
+                            <span className="ml-3 block truncate inline"> {selectedTokenAndNetwork.tokenData.tokenDb.name}</span>
                         </div>:
                         <div className="py-1">
                             <img src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${title} icon`} className="flex-shrink-0 h-6 w-6 rounded-full inline"/>
