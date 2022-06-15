@@ -25,9 +25,10 @@ import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataParamete
 import { createEd25519PubKey, createSolTokenAccount, isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
 import { UserDB } from "../models/user";
 import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
-import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams } from "./models/token";
+import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, TokenData } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
 import * as splToken from "@solana/spl-token"
+import { responseSymbol } from "next/dist/server/web/spec-compliant/fetch-event";
 
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
@@ -243,6 +244,7 @@ class Web3Service extends BaseService{
                 coingeckoId: docData.coingeckoId,
                 symbol: docData.symbol,
                 decimals: docData.decimals,
+                hexColor: docData.hexColor?docData.hexColor:"#000000",
                 chainData:docData.chainData,
                 logoURI: docData.logoURI,
                 extensions: docData.extensions,
@@ -266,6 +268,7 @@ class Web3Service extends BaseService{
                 coingeckoId: docData.coingeckoId,
                 symbol: docData.symbol,
                 decimals: docData.decimals,
+                hexColor: docData.hexColor?docData.hexColor:"#000000",
                 chainData:docData.chainData,
                 logoURI: docData.logoURI,
                 extensions: docData.extensions,
@@ -510,25 +513,21 @@ class Web3Service extends BaseService{
     }
 
     async getBalanceSplToken(params:TokenBalanceParameters):Promise<IBalance>{
-        if(!params.splParams) throw(new Error("Error: Spl data must be provided to fetch spl token balance."))
+        if(!params.splParams) throw(new Error(`Error: spl balance parameters not provided.`));
         let kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
         if(!kryptikProvider.solProvider) throw(new Error(`Error: no provider specified for ${params.networkDb.fullName}`));
         // fetch price
         let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
-        // get sol network
-        let networkSol = networkFromNetworkDb(params.networkDb);
         // fetch balance
-        console.log(`getting ${params.tokenDb.name} balance for ${params.accountAddress}`);
-         // gets pub key for solana network
-        let accountKeypair = params.splParams.wallet.seedLoop.getKeypairForAddress(networkSol, params.accountAddress);
-        if(!accountKeypair) throw(new Error("Error: unable to fetch keypair for given address."))
         // UPDATE TO SUPPORT ARRAY OF CHAIN DATA
-        let tokenAccount = await createSolTokenAccount(params.accountAddress, params.tokenDb.chainData[0].address);
+        let tokenAccount = await createSolTokenAccount(params.accountAddress, params.splParams.tokenAddress);
         let tokenBalance:number;
         // if no token account exists, value should be 0
         try{
             let repsonse:RpcResponseAndContext<TokenAmount> = await kryptikProvider.solProvider.getTokenAccountBalance(tokenAccount);
-            tokenBalance = lamportsToSol(Number(repsonse.value.amount)); 
+            tokenBalance = Number(repsonse.value.uiAmount); 
+            console.log("TOKEN BALANCE FETCHED:");
+            console.log(repsonse.value);
         }
         catch(e){
             tokenBalance = 0;
@@ -584,16 +583,16 @@ class Web3Service extends BaseService{
         let splBalances:IBalance[] = [];
         for(const splDb of this.splDbs){          
             for(const chainInfo of splDb.chainData){  
+                console.log(`GETTING SPL balance FOR ${chainInfo.ticker}`);
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
                 if(!networkDb) continue;
+                console.log("hit 1");
                 let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
-                let splParams:SplParams = {
-                    wallet: walletUser
-                };
                 // get balance for contract
+                let splParams:SplParams = {tokenAddress:chainInfo.address};
                 let tokenParams:TokenBalanceParameters = {
-                    splParams: splParams,
                     tokenDb: splDb,
+                    splParams: splParams,
                     accountAddress: accountAddress,
                     networkDb: networkDb
                 }
@@ -670,12 +669,12 @@ class Web3Service extends BaseService{
         // FIX ASAP
         // ARTIFICIALLY INFLATING ARBITRUM BASE GAS LIMIT, BECAUSE OG VALUE IS TOO SMALL
         let gasLimit:number = isNetworkArbitrum(params.network)?500000:21000;
-        if(params.tokenData){
+        if(params.tokenData && params.tokenData.tokenParamsEVM){
             let amount = roundToDecimals(Number(params.amountToken), params.tokenData.tokenDb.decimals);
             // get gaslimit for nonzero amount
             if(amount == 0) amount = 2;
             // get estimated gas limit for token transfer
-            gasLimit = Number(await params.tokenData.tokenContractConnected.estimateGas.transfer(placeHolderEVMAddress, amount));
+            gasLimit = Number(await params.tokenData.tokenParamsEVM.tokenContractConnected.estimateGas.transfer(placeHolderEVMAddress, amount));
             console.log("Token gas limit:")
             console.log(gasLimit);
         }
