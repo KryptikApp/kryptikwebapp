@@ -14,8 +14,10 @@ const ListBalance:NextPage = () => {
     const initBalances:IBalance[] = [];
     const[isFetchedBalances, setIsFetchedBalances] = useState(false);
     const[isFetchedERC20, setIsFetchedERC20] = useState(false);
+    const[isFetchedSpl, setIsFetchedSpl] = useState(false);
     const[balances, setBalances] = useState<IBalance[]>(initBalances);
     const[balancesERC20, setBalancesERC20] = useState<IBalance[]>(initBalances);
+    const[balancesSpl, setBalancesSpl] = useState<IBalance[]>(initBalances);
 
 
     // retrieves wallet balances
@@ -28,6 +30,10 @@ const ListBalance:NextPage = () => {
         let balsERC20:IBalance[] = await kryptikService.getBalanceAllERC20Tokens(kryptikWallet);
         setBalancesERC20(balsERC20);
         setIsFetchedERC20(true);
+        // fetch spl balances
+        let balsSpl:IBalance[] = await kryptikService.getBalanceAllSplTokens(kryptikWallet);
+        setBalancesSpl(balsSpl);
+        setIsFetchedSpl(true);
     }
 
     useEffect(() => {
@@ -71,7 +77,7 @@ const ListBalance:NextPage = () => {
         {/* ERC20 Balances */}
         <div>
                 <div className="flex justify-start mt-5">
-                    <h2 className="font-medium text-slate-700">Your Token Balances</h2>
+                    <h2 className="font-medium text-slate-700">Your ERC20 Balances</h2>
                 </div>
                 <Divider/>
         </div>
@@ -90,6 +96,37 @@ const ListBalance:NextPage = () => {
             <div>
                 <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
                 {balancesERC20.map((balance:IBalance) => (    
+                    (balance.amountCrypto!="0") &&     
+                    <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
+                    amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}
+                    imgSrcSecondary={balance.iconPathSecondary}
+                    />
+                ))}
+                </ul>
+            </div>
+        }
+        {/* SPL Balances */}
+        <div>
+                <div className="flex justify-start mt-5">
+                    <h2 className="font-medium text-slate-700">Your SPL Balances</h2>
+                </div>
+                <Divider/>
+        </div>
+        {
+            !isFetchedSpl?
+            <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+            {
+                <div>
+                    <ListItemLoading/>
+                    <ListItemLoading/>
+                    <ListItemLoading/>
+                </div>
+            }
+            </ul>
+            :
+            <div>
+                <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+                {balancesSpl.map((balance:IBalance) => (    
                     (balance.amountCrypto!="0") &&     
                     <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
                     amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}
