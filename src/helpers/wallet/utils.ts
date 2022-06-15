@@ -67,10 +67,10 @@ export const getTransactionExplorerPath = function(network:NetworkDb, txPublishe
 }
 
 export const formatTicker = function(tickerIn:string):string{
-    let ticker:string;
     // remove extra ticker info. for eth network ticker
     // UPDATE so tickers like weth (wrapped eth) stay o.g.
     if(tickerIn.toLowerCase().includes("eth")) return "ETH";
+    if(tickerIn.toLowerCase().includes("sol")) return "SOL";
     return tickerIn.toUpperCase(); 
 }
 
