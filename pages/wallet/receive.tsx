@@ -71,8 +71,8 @@ const Recieve: NextPage = () => {
           <h1 className="text-center text-3xl font-bold lg:mb-2">Recieve  <img src="/kryptikBrand/kryptikEyez.png" alt="Kryptik Eyes" className="rounded-full w-10 inline max-h-sm h-auto align-middle border-none" /></h1> 
           {
             selectedTokenAndNetwork.tokenData?
-            <p className="mx-auto text-center text-slate-500 text-sm px-4">Easily receive {selectedTokenAndNetwork.tokenData.erc20Db.name} on {selectedTokenAndNetwork.baseNetworkDb.fullName} by having someone scan the code below.</p>:
-            <p className="mx-auto text-center text-slate-500 text-sm px-4">Easily receive money on {selectedTokenAndNetwork.baseNetworkDb.fullName} by having someone scan the code below.</p> 
+            <p className="mx-auto text-center text-slate-500 text-sm px-4">Easily receive <span style={{color:`${selectedTokenAndNetwork.tokenData.tokenDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.tokenData.tokenDb.name}</span> on <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span> by having someone scan the code below.</p>:
+            <p className="mx-auto text-center text-slate-500 text-sm px-4">Easily receive money on <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span> by having someone scan the code below.</p> 
           }
           
            {/* network dropdown */}
