@@ -1,4 +1,3 @@
-import { User } from 'firebase/auth';
 import { createContext, useContext, Context } from 'react'
 import { defaultWallet } from '../src/models/defaultWallet';
 import { IWallet } from '../src/models/IWallet';
