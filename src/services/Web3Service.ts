@@ -9,8 +9,10 @@ import {
 } from '@ethersproject/providers';
 import {
     Connection,
+    Keypair,
     PublicKey,
-    Transaction,
+    RpcResponseAndContext,
+    TokenAmount,
   } from '@solana/web3.js';
 
 import HDSeedLoop, {Network, NetworkFamily, NetworkFromTicker, WalletKryptik } from "hdseedloop";
@@ -20,14 +22,16 @@ import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vau
 import { BigNumber, Contract, utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataParameters, FeeDataSolParameters} from "./models/transaction";
-import { isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
+import { createEd25519PubKey, createSolTokenAccount, isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
 import { UserDB } from "../models/user";
 import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
-import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb } from "./models/token";
+import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
+import * as splToken from "@solana/spl-token"
 
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
+const SplDbRef = collection(firestore, "spltokens");
 
 
 export class KryptikProvider{
@@ -77,6 +81,7 @@ class Web3Service extends BaseService{
     public isWalletSet:boolean = false;
     public NetworkDbs:NetworkDb[] = [];
     public erc20Dbs:TokenDb[] = [];
+    public splDbs:TokenDb[] = [];
     // NetworkDb is referenced by its BIP44 chain id
     public rpcEndpoints: { [ticker:string]: string } = {};
     public web3Provider: StaticJsonRpcProvider = (null as unknown) as StaticJsonRpcProvider;
@@ -177,6 +182,13 @@ class Web3Service extends BaseService{
         catch{
             throw(new Error("Error: Unable to populate ERC20 array from database when starting web3 service."));
         }
+        // fetch spl data
+        try{
+            await this.populateSplDbsAsync();
+        }
+        catch{
+            throw(new Error("Error: Unable to populate SPL array from database when starting web3 service."));
+        }
         this.setRpcEndpoints();
         this.setSupportedProviders();
         // console logs for debugging
@@ -240,6 +252,29 @@ class Web3Service extends BaseService{
         });
         this.erc20Dbs = erc20DbsResult;
         return this.erc20Dbs;
+    }
+
+    private async populateSplDbsAsync():Promise<TokenDb[]>{
+        console.log("Populating spl data from db");
+        const q = query(SplDbRef);
+        const querySnapshot = await getDocs(q);
+        let splDbsResult:TokenDb[] = [];
+        querySnapshot.forEach((doc) => {
+            let docData = doc.data();
+            let splDbToAdd:TokenDb = {
+                name: docData.name,
+                coingeckoId: docData.coingeckoId,
+                symbol: docData.symbol,
+                decimals: docData.decimals,
+                chainData:docData.chainData,
+                logoURI: docData.logoURI,
+                extensions: docData.extensions,
+                tags:docData.tags
+            }
+            splDbsResult.push(splDbToAdd);
+        });
+        this.splDbs = splDbsResult;
+        return this.splDbs;
     }
 
     private async populateNetworkDbsAsync():Promise<NetworkDb[]>{
@@ -390,6 +425,8 @@ class Web3Service extends BaseService{
        let balanceNetwork:number;
        let network:Network = networkFromNetworkDb(params.networkDb);
        let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
+       console.log(`Getting network balance for ${network.fullName}`);
+       console.log(`Address: ${params.accountAddress}`);
        // get balance in layer 1 token amount
        switch(network.networkFamily){
             case(NetworkFamily.EVM):{
@@ -400,10 +437,7 @@ class Web3Service extends BaseService{
             }
             case(NetworkFamily.Solana):{
                 // gets pub key for solana network
-                let solPubKey:PublicKey|null = new PublicKey(params.accountAddress);
-                if(!solPubKey){
-                    return null;
-                }
+                let solPubKey:PublicKey = createEd25519PubKey(params.accountAddress);
                 // ensures provider is set
                 if(!kryptikProvider.solProvider) throw(new Error("No solana provider is set up."))
                 let solNetworkProvider:Connection = kryptikProvider.solProvider;
@@ -457,16 +491,52 @@ class Web3Service extends BaseService{
     }
 
     // gets balance for a single erc20 token
-    async getBalanceErc20Token(params:TokenBalanceParameters){
+    async getBalanceErc20Token(params:TokenBalanceParameters):Promise<IBalance>{
+        if(!params.erc20Params) throw(new Error("Error: Contract must be provided to fetch erc20 token balance."))
         // fetch price
         let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
         // fetch balance
         console.log(`getting ${params.tokenDb.name} balance for ${params.accountAddress}`);
-        let networkBalance:number = Number(utils.formatEther(await params.erc20Contract.balanceOf(params.accountAddress)));
-        // prettify ether balance
+        let networkBalance:number = Number(utils.formatEther(await params.erc20Params.erc20Contract.balanceOf(params.accountAddress)));
+        // prettify token balance
         let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
         let networkBalanceString = networkBalanceAdjusted.toString();
         let amountUSD = roundUsdAmount((priceUSD * networkBalance));
+        // create new object for balance data
+        let newBalanceObj:IBalance = {fullName:params.tokenDb.name, ticker:params.tokenDb.symbol, iconPath:params.tokenDb.logoURI,
+        iconPathSecondary: params.networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
+        networkCoinGecko:params.networkDb.coingeckoId}
+        return newBalanceObj;
+    }
+
+    async getBalanceSplToken(params:TokenBalanceParameters):Promise<IBalance>{
+        if(!params.splParams) throw(new Error("Error: Spl data must be provided to fetch spl token balance."))
+        let kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
+        if(!kryptikProvider.solProvider) throw(new Error(`Error: no provider specified for ${params.networkDb.fullName}`));
+        // fetch price
+        let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
+        // get sol network
+        let networkSol = networkFromNetworkDb(params.networkDb);
+        // fetch balance
+        console.log(`getting ${params.tokenDb.name} balance for ${params.accountAddress}`);
+         // gets pub key for solana network
+        let accountKeypair = params.splParams.wallet.seedLoop.getKeypairForAddress(networkSol, params.accountAddress);
+        if(!accountKeypair) throw(new Error("Error: unable to fetch keypair for given address."))
+        // UPDATE TO SUPPORT ARRAY OF CHAIN DATA
+        let tokenAccount = await createSolTokenAccount(params.accountAddress, params.tokenDb.chainData[0].address);
+        let tokenBalance:number;
+        // if no token account exists, value should be 0
+        try{
+            let repsonse:RpcResponseAndContext<TokenAmount> = await kryptikProvider.solProvider.getTokenAccountBalance(tokenAccount);
+            tokenBalance = lamportsToSol(Number(repsonse.value.amount)); 
+        }
+        catch(e){
+            tokenBalance = 0;
+        }
+        // prettify token balance
+        let networkBalanceAdjusted:Number = roundCryptoAmount(tokenBalance);
+        let networkBalanceString = networkBalanceAdjusted.toString();
+        let amountUSD = roundUsdAmount((priceUSD * tokenBalance));
         // create new object for balance data
         let newBalanceObj:IBalance = {fullName:params.tokenDb.name, ticker:params.tokenDb.symbol, iconPath:params.tokenDb.logoURI,
         iconPathSecondary: params.networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
@@ -491,9 +561,12 @@ class Web3Service extends BaseService{
                 let erc20Contract = await this.createERC20Contract(erc20ContractParams);
                 if(!erc20Contract) continue;
                 let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
+                let erc20Params:ERC20Params = {
+                    erc20Contract: erc20Contract
+                };
                 // get balance for contract
                 let tokenParams:TokenBalanceParameters = {
-                    erc20Contract: erc20Contract,
+                    erc20Params: erc20Params,
                     tokenDb: erc20Db,
                     accountAddress: accountAddress,
                     networkDb: networkDb
@@ -504,6 +577,37 @@ class Web3Service extends BaseService{
             }
         }
         return erc20balances;
+    }
+
+    // get balances for all spl tokens
+    async getBalanceAllSplTokens(walletUser:IWallet){
+        let splBalances:IBalance[] = [];
+        for(const splDb of this.splDbs){          
+            for(const chainInfo of splDb.chainData){  
+                let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
+                if(!networkDb) continue;
+                let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
+                let splParams:SplParams = {
+                    wallet: walletUser
+                };
+                // get balance for contract
+                let tokenParams:TokenBalanceParameters = {
+                    splParams: splParams,
+                    tokenDb: splDb,
+                    accountAddress: accountAddress,
+                    networkDb: networkDb
+                }
+                try{
+                    let tokenBalance:IBalance = await this.getBalanceSplToken(tokenParams);
+                    // push balance data to balance array
+                    splBalances.push(tokenBalance);
+                }
+                catch(e){
+                    console.warn(`Unable to fetch balance for ${splDb.name} on ${networkDb.fullName}.`)
+                }
+            }
+        }
+        return splBalances;
     }
 
     getTransactionFeeData = async(params:FeeDataParameters):Promise<TransactionFeeData|null> => {
