@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { NetworkBalanceParameters, NetworkDb } from "../src/services/models/network";
-import { CreateEVMContractParameters, TokenAndNetwork, TokenBalanceParameters, TokenDataEVM, TokenDb } from "../src/services/models/token";
+import { CreateEVMContractParameters, ERC20Params, TokenAndNetwork, TokenBalanceParameters, TokenDataEVM, TokenDb } from "../src/services/models/token";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 import ListItemDropdown from "./lists/ListItemDropwdown";
 import { Contract } from "ethers";
@@ -54,7 +54,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             // make eth network default option
             if(nw.ticker == "eth") selectFunction(tokenAndNetworkToAdd);
         }
-        // add all tokens
+        // add all erc20 tokens
         let erc20Dbs:TokenDb[] = kryptikService.erc20Dbs;
         for(const erc20Db of erc20Dbs){
             for(const chainInfo of erc20Db.chainData){
@@ -68,11 +68,12 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                 let erc20Contract:Contract|null = await kryptikService.createERC20Contract(erc20ContractParams);
                 if(!erc20Contract) return;
                 let tokenBalance:IBalance|undefined = undefined;
+                let erc20Params:ERC20Params = {erc20Contract:erc20Contract};
                 if(onlyWithValue){
                     let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, networkDb);
                     // get balance for contract
                     let tokenBalanceParams:TokenBalanceParameters = {
-                        erc20Contract: erc20Contract,
+                        erc20Params: erc20Params,
                         tokenDb: erc20Db,
                         accountAddress: accountAddress,
                         networkDb: networkDb

@@ -1,3 +1,4 @@
+import { Connection } from "@solana/web3.js";
 import { Contract } from "ethers";
 import { IWallet } from "../../models/IWallet";
 import { IBalance } from "../Web3Service";
@@ -40,9 +41,18 @@ export interface TokenAndNetwork{
     baseNetworkDb: NetworkDb
 }
 
+export interface ERC20Params{
+    erc20Contract:Contract, 
+}
+
+export interface SplParams{
+    wallet: IWallet
+}
+
 export interface TokenBalanceParameters{
     tokenDb:TokenDb, 
-    erc20Contract:Contract, 
+    erc20Params?:ERC20Params, 
+    splParams?: SplParams,
     accountAddress:string, 
     networkDb:NetworkDb
 }
