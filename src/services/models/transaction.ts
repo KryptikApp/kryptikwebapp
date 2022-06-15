@@ -4,7 +4,7 @@ import { AccessListish } from "ethers/lib/utils";
 import { Network } from "hdseedloop";
 import { KryptikProvider } from "../Web3Service";
 import { defaultNetwork, NetworkDb } from "./network";
-import { TokenDataEVM } from "./token";
+import { TokenData, TokenParamsEVM, TokenParamsSol } from "./token";
 
 export default interface TransactionFeeData{
     network: Network,
@@ -48,7 +48,8 @@ export interface SolTransaction{
     toAddress: string,
     kryptikProvider:KryptikProvider,
     networkDb:NetworkDb,
-    valueSol:number
+    valueSol:number,
+    tokenParamsSol?:TokenParamsSol
 }
 
 export interface EVMTransaction{
@@ -101,7 +102,7 @@ export const defaultTxPublishedData:TransactionPublishedData = {
 }
 
 export interface FeeDataParameters{
-    networkDb:NetworkDb, solTransaction?:Transaction, tokenData?:TokenDataEVM, amountToken:string
+    networkDb:NetworkDb, solTransaction?:Transaction, tokenData?:TokenData, amountToken:string
 }
 
 export interface FeeDataSolParameters{
@@ -111,5 +112,5 @@ export interface FeeDataSolParameters{
 }
 
 export interface FeeDataEvmParameters{
-    network:NetworkDb, tokenPriceUsd:number, tokenData?:TokenDataEVM, amountToken:string
+    network:NetworkDb, tokenPriceUsd:number, tokenData?:TokenData, amountToken:string
 }
