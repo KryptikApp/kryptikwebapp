@@ -16,6 +16,7 @@ export interface TokenDb{
     symbol: string,
     decimals: number,
     coingeckoId: string,
+    hexColor: string,
     chainData: ChainData[],
     logoURI: string,
     extensions: {
@@ -25,8 +26,17 @@ export interface TokenDb{
     tags:string[]
 }
 
-export interface TokenDataEVM{
-    tokenContractConnected: Contract,
+export interface TokenParamsEVM{
+    tokenContractConnected: Contract
+}
+
+export interface TokenParamsSol{
+    contractAddress: string
+}
+
+export interface TokenData{
+    tokenParamsSol?:TokenParamsSol,
+    tokenParamsEVM?:TokenParamsEVM,
     tokenBalance?:IBalance
     tokenDb: TokenDb
 }
@@ -35,7 +45,7 @@ export interface TokenDataEVM{
 export interface TokenAndNetwork{
     // contract on the underlying blockchain network
     // TO DO: Add non-evm token contracts
-    tokenData?:TokenDataEVM,
+    tokenData?:TokenData,
     networkBalance?:IBalance,
     // blockchain network the token resides on
     baseNetworkDb: NetworkDb
@@ -46,13 +56,13 @@ export interface ERC20Params{
 }
 
 export interface SplParams{
-    wallet: IWallet
+    tokenAddress: string
 }
 
 export interface TokenBalanceParameters{
     tokenDb:TokenDb, 
+    splParams?:SplParams
     erc20Params?:ERC20Params, 
-    splParams?: SplParams,
     accountAddress:string, 
     networkDb:NetworkDb
 }
