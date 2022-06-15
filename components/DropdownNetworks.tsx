@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { NetworkBalanceParameters, NetworkDb } from "../src/services/models/network";
-import { CreateEVMContractParameters, ERC20Params, TokenAndNetwork, TokenBalanceParameters, TokenDataEVM, TokenDb } from "../src/services/models/token";
+import { CreateEVMContractParameters, ERC20Params, SplParams, TokenAndNetwork, TokenBalanceParameters, TokenData, TokenDb, TokenParamsEVM, TokenParamsSol } from "../src/services/models/token";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 import ListItemDropdown from "./lists/ListItemDropwdown";
 import { Contract } from "ethers";
@@ -82,10 +82,50 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                     // exclude tokens with zero balance
                     if(tokenBalance.amountCrypto == "0") continue;
                 }
-                let tokenDataToAdd:TokenDataEVM = {
+                let evmParams:TokenParamsEVM = {
                     tokenContractConnected: erc20Contract,
+                }
+                let tokenDataToAdd:TokenData = {
+                    tokenParamsEVM: evmParams,
                     tokenBalance: tokenBalance,
                     tokenDb: erc20Db
+                }
+                let tokenAndNetworkToAdd:TokenAndNetwork = {
+                    baseNetworkDb: networkDb,
+                    networkBalance: tickerToNetworkBalance[networkDb.ticker],
+                    tokenData:tokenDataToAdd
+                };
+                tokensAndNetworks.push(tokenAndNetworkToAdd);
+            }
+        }
+        // add all spl tokens
+        let splDbs:TokenDb[] = kryptikService.splDbs;
+        for(const splDb of splDbs){
+            for(const chainInfo of splDb.chainData){
+                let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
+                if(!networkDb) continue;
+                let tokenBalance:IBalance|undefined = undefined;
+                let solParams:TokenParamsSol = {
+                    contractAddress: chainInfo.address
+                }
+                if(onlyWithValue){
+                    let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, networkDb);
+                    let splParams:SplParams = {tokenAddress:chainInfo.address};
+                    let tokenBalanceParams:TokenBalanceParameters = {
+                        tokenDb: splDb,
+                        splParams: splParams,
+                        accountAddress: accountAddress,
+                        networkDb: networkDb
+                    }
+                    // get balance for contract
+                    tokenBalance = await kryptikService.getBalanceSplToken(tokenBalanceParams);
+                    // exclude tokens with zero balance
+                    if(tokenBalance.amountCrypto == "0") continue;
+                }
+                let tokenDataToAdd:TokenData = {
+                    tokenParamsSol: solParams,
+                    tokenBalance: tokenBalance,
+                    tokenDb: splDb
                 }
                 let tokenAndNetworkToAdd:TokenAndNetwork = {
                     baseNetworkDb: networkDb,
