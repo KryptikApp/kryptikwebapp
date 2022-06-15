@@ -13,10 +13,11 @@ import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
 import TransactionFeeData, { defaultTransactionFeeData, defaultTxPublishedData, FeeDataParameters, SolTransaction, TransactionPublishedData, TransactionRequest } from '../../src/services/models/transaction'
-import { formatTicker, getTransactionExplorerPath, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from '../../src/helpers/wallet/utils'
-import { createEVMTransaction, createSolTransaction } from '../../src/handlers/wallet/transactionHandler'
+import { createEd25519PubKey, createSolTokenAccount, formatTicker, getTransactionExplorerPath, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from '../../src/helpers/wallet/utils'
+import { createEVMTransaction, createSolTokenTransaction, createSolTransaction } from '../../src/handlers/wallet/transactionHandler'
 import { utils } from 'ethers'
-import { PublicKey, Transaction } from '@solana/web3.js'
+import { Keypair, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js'
+import { TokenParamsSol } from '../../src/services/models/token'
 
 
 
@@ -106,7 +107,19 @@ const Send: NextPage = () => {
         kryptikProvider: kryptikProvider,
         networkDb: selectedTokenAndNetwork.baseNetworkDb
       }
-      let txSol:Transaction = await createSolTransaction(txIn);
+      let txSol:Transaction;
+      // send sol token 
+      if(selectedTokenAndNetwork.tokenData && selectedTokenAndNetwork.tokenData.tokenParamsSol){
+        // add sol token data to input params
+        let txSolParams:TokenParamsSol = selectedTokenAndNetwork.tokenData.tokenParamsSol;
+        txIn.tokenParamsSol = txSolParams;
+        console.log("Fetching sol token transaction fees!");
+        txSol = await createSolTokenTransaction(txIn);
+      }
+      // OR send base network sol coin
+      else{
+        txSol = await createSolTransaction(txIn);
+      }
       await fetchNetworkFees(txSol);
   }
 
@@ -115,6 +128,8 @@ const Send: NextPage = () => {
       fetchTokenPrice();
       fetchNetworkFees();
       handleAmountChange("0");
+      console.log("COLOR:");
+      console.log(selectedTokenAndNetwork.baseNetworkDb.hexColor);
   }, [selectedTokenAndNetwork]);
 
   useEffect(()=>{
@@ -142,10 +157,8 @@ const Send: NextPage = () => {
   }
 
   const setMaxAmount = function(){
-    console.log("Setting max amount called");
     // UPDATE SO SOLANA CAN BE SET MAX
     if(NetworkFamilyFromFamilyName(selectedTokenAndNetwork.baseNetworkDb.networkFamilyName)==NetworkFamily.Solana) return;
-    console.log("1");
     // set max with token value
     if(selectedTokenAndNetwork.tokenData){
       if(!selectedTokenAndNetwork.tokenData.tokenBalance) return;
@@ -156,7 +169,6 @@ const Send: NextPage = () => {
     }
     // set max with 
     else{
-      console.log("5");
       if(!selectedTokenAndNetwork.networkBalance) return;
       console.log("Setting max amount");
       let maxAmountCrypto = Number(selectedTokenAndNetwork.networkBalance.amountCrypto)-Number(amountTotalBounds.upperBoundTotalUsd)/tokenPrice;
@@ -180,14 +192,11 @@ const Send: NextPage = () => {
         amount = amount.slice(1, amount.length);
         let lastChar:string = amount.slice(-1);
         let oldAmount:string = amount.slice(0, -1);
-        console.log(oldAmount);
-        if(lastChar == "." && !isNaN(Number(oldAmount))){
-          setAmountUSD(amount);
-          return;
-        }
-        amount = Number(amount).toString();
-        if(amount == "NaN"){
-          amount = "0";
+        if(!(lastChar == "." && !isNaN(Number(oldAmount)))){
+          amount = Number(amount).toString();
+          if(amount == "NaN"){
+            amount = "0";
+          }
         }
         // calcaulate token amount from usd input and token price
         let amountToken:number = Number(amount)/tokenPrice;
@@ -217,6 +226,7 @@ const Send: NextPage = () => {
     // token main send
     if(amountCrypto == "0"){
       toast.error("Please enter a nonzero amount.");
+      setisLoading(false);
       return;
     }
     if(selectedTokenAndNetwork.tokenData && (Number(selectedTokenAndNetwork.tokenData.tokenBalance?.amountCrypto) < Number(amountCrypto))){
@@ -251,7 +261,6 @@ const Send: NextPage = () => {
        setisLoading(false);
        return;
     }
-
     setReadableToAddress(truncateAddress(toAddress, nw));
     // change progress state
     setProgress(SendProgress.Rewiew);
@@ -302,8 +311,8 @@ const Send: NextPage = () => {
           let tokenDecimals = selectedTokenAndNetwork.tokenData?.tokenDb.decimals;
           let amountDecimals = roundToDecimals(Number(amountCrypto), tokenDecimals).toString();
           // sign and send erc20 token
-          if(selectedTokenAndNetwork.tokenData){
-             let txResponse = await selectedTokenAndNetwork.tokenData.tokenContractConnected.transfer(toAddress, utils.parseEther(amountDecimals));
+          if(selectedTokenAndNetwork.tokenData && selectedTokenAndNetwork.tokenData.tokenParamsEVM){
+             let txResponse = await selectedTokenAndNetwork.tokenData.tokenParamsEVM.tokenContractConnected.transfer(toAddress, utils.parseEther(amountDecimals));
              if(txResponse.hash) txDoneData.hash = txResponse.hash;
           }
           else{
@@ -343,22 +352,37 @@ const Send: NextPage = () => {
             kryptikProvider: kryptikProvider,
             networkDb: selectedTokenAndNetwork.baseNetworkDb
           }
-          let txSol:Transaction = await createSolTransaction(txIn);
+          let txSol:Transaction;
+          // send sol token 
+          if(selectedTokenAndNetwork.tokenData && selectedTokenAndNetwork.tokenData.tokenParamsSol){
+            // add sol token data to input params
+            let txSolData:TokenParamsSol = selectedTokenAndNetwork.tokenData.tokenParamsSol;
+            txIn.tokenParamsSol = txSolData;
+            txSol = await createSolTokenTransaction(txIn);
+          }
+          else{
+            txSol = await createSolTransaction(txIn);
+          }
+          // create transaction parameters
           let kryptikTxParams:TransactionParameters = {
             solTransactionBuffer: txSol.serializeMessage()
           };
+          // sign sol transaction
           const signature = await kryptikWallet.seedLoop.signTransaction(fromAddress, kryptikTxParams, network);
+          // ensure signature was created
           if(!signature.solanaFamilyTx){
             toast.error(`Error: Unable to create signature for ${selectedTokenAndNetwork.baseNetworkDb.fullName} transaction.`);
             handleCancelTransaction();
             return null;
           }
           txSol.addSignature(new PublicKey(fromAddress), Buffer.from(signature.solanaFamilyTx));
+          // verify signature
           if(!txSol.verifySignatures()){
             toast.error(`Error: Unable to verify signature for ${selectedTokenAndNetwork.baseNetworkDb.fullName} transaction.`);
             handleCancelTransaction();
             return null;
           }
+          // publish transaction to the blockchain
           const txPostResult = await solProvider.sendRawTransaction(txSol.serialize());
           txDoneData.hash = txPostResult;
           // set tx. explorer path
@@ -421,7 +445,7 @@ const Send: NextPage = () => {
               <div className="rounded-full border border-gray-400 p-1 max-w-fit inline mr-2 text-slate-400 hover:cursor-pointer hover:bg-slate-100 hover:text-sky-400 hover:font-semibold" onClick={()=>setMaxAmount()}>
                 <span className="text-xs">MAX</span>
               </div>
-              <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}`:`$${amountUSD}`}</span>
+              <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.symbol:formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}`:`$${amountUSD}`}</span>
               <RiSwapLine className="hover:cursor-pointer inline text-slate-300 ml-2" onClick={()=>handleToggleIsCrypto()} size="20"/>
               {/* network dropdown */}
                 <div className="max-w-xs mx-auto">
@@ -750,6 +774,19 @@ const Send: NextPage = () => {
           
           
           <Divider/>
+          {
+            progress == SendProgress.Begin &&
+            <div className="mx-auto text-center text-gray-500 text-sm">
+              {
+                (selectedTokenAndNetwork.networkBalance && !selectedTokenAndNetwork.tokenData) &&
+                <p>{isInputCrypto?roundCryptoAmount(Number(selectedTokenAndNetwork.networkBalance.amountCrypto)):`$${roundUsdAmount(Number(selectedTokenAndNetwork.networkBalance.amountUSD))}`} <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-semibold">{formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}</span> available</p>
+              }
+              {
+                (selectedTokenAndNetwork.tokenData && selectedTokenAndNetwork.tokenData.tokenBalance) && 
+                <p>{isInputCrypto?roundCryptoAmount(Number(selectedTokenAndNetwork.tokenData.tokenBalance.amountCrypto)):`$${roundUsdAmount(Number(selectedTokenAndNetwork.tokenData.tokenBalance.amountUSD))}`} <span style={{color:`${selectedTokenAndNetwork.tokenData.tokenDb.hexColor}`}} className="font-semibold">{selectedTokenAndNetwork.tokenData.tokenDb.symbol}</span> available</p>
+              }
+            </div>
+          }
           <div className="h-[7rem]">
           {/* padding div for space between top and main elements */}
           </div>
