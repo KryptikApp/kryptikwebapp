@@ -34,9 +34,14 @@ export interface TokenParamsSol{
     contractAddress: string
 }
 
+export interface TokenParamsNep141{
+    contractAddress: string
+}
+
 export interface TokenData{
     tokenParamsSol?:TokenParamsSol,
     tokenParamsEVM?:TokenParamsEVM,
+    tokenParamsNep141?:TokenParamsNep141,
     tokenBalance?:IBalance
     tokenDb: TokenDb
 }
@@ -59,9 +64,14 @@ export interface SplParams{
     tokenAddress: string
 }
 
+export interface Nep141Params{
+    tokenAddress: string
+}
+
 export interface TokenBalanceParameters{
     tokenDb:TokenDb, 
-    splParams?:SplParams
+    splParams?:SplParams,
+    nep141Params?:Nep141Params
     erc20Params?:ERC20Params, 
     accountAddress:string, 
     networkDb:NetworkDb
