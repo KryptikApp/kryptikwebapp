@@ -22,7 +22,7 @@ import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vau
 import { BigNumber, Contract, utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataParameters, FeeDataSolParameters} from "./models/transaction";
-import { createEd25519PubKey, createSolTokenAccount, isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
+import { createEd25519PubKey, createSolTokenAccount, divByDecimals, isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
 import { UserDB } from "../models/user";
 import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
 import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, TokenData } from "./models/token";
@@ -299,6 +299,7 @@ class Web3Service extends BaseService{
                 chainId: docData.chainId,
                 chainIdEVM: docData.chainIdEVM,
                 hexColor: docData.hexColor,
+                decimals: docData.decimals?docData.decimals:6,
                 about: docData.about,
                 blockExplorerURL: docData.blockExplorerURL,
                 dateCreated: docData.dateCreated,
@@ -525,9 +526,7 @@ class Web3Service extends BaseService{
         // if no token account exists, value should be 0
         try{
             let repsonse:RpcResponseAndContext<TokenAmount> = await kryptikProvider.solProvider.getTokenAccountBalance(tokenAccount);
-            tokenBalance = Number(repsonse.value.uiAmount); 
-            console.log("TOKEN BALANCE FETCHED:");
-            console.log(repsonse.value);
+            tokenBalance =  divByDecimals(Number(repsonse.value.amount), repsonse.value.decimals); 
         }
         catch(e){
             tokenBalance = 0;
@@ -624,7 +623,6 @@ class Web3Service extends BaseService{
                 return transactionFeeData;
              }
              default: { 
-                 // for now... just keep original address
                 return null;
                 break; 
              } 

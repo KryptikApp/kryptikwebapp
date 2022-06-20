@@ -12,6 +12,7 @@ export interface NetworkDb {
     whitePaperPath: string,
     chainId: number,
     chainIdEVM: number,
+    decimals: number,
     hexColor: string,
     dateCreated: Date,
     provider: string,
@@ -31,6 +32,7 @@ export const defaultNetworkDb:NetworkDb = {
     whitePaperPath: "https://ethereum.org/en/whitepaper/",
     blockExplorerURL: "https://etherscan.io/",
     chainId: 60,
+    decimals: 18,
     chainIdEVM: 1,
     hexColor: "#3c3c3d",
     networkFamilyName: "evm",
@@ -41,6 +43,8 @@ export const defaultNetworkDb:NetworkDb = {
 }
 
 export const placeHolderEVMAddress:string = "0xb794f5ea0ba39494ce839613fffba74279579268";
+
+export const placeHolderSolAddress:string = "DYw8jCTfwHNRJhhmFcbXvVDTqWMEVFBX6ZKUmG5CNSKK"
 
 export const defaultTokenAndNetwork:TokenAndNetwork = {
     baseNetworkDb:defaultNetworkDb
