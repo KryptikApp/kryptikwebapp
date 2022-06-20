@@ -142,6 +142,7 @@ export function useKryptikAuth() {
           wallet.seedLoop.addKeyRingByNetwork(network);;
         }
       }
+      // save updated seedloop in local vault
       if(isUpdated){
         try{
           console.log(`Updating kryptik vault with id: ${user.uid}`);
