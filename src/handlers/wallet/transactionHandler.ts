@@ -1,6 +1,6 @@
-import { Keypair, PublicKey, SystemProgram, Transaction, TransactionInstruction } from "@solana/web3.js";
-import { createEd25519PubKey, createSolTokenAccount, networkFromNetworkDb, roundToDecimals, solToLamports } from "../../helpers/wallet/utils";
-import { EVMTransaction, SolTransaction, TransactionRequest } from "../../services/models/transaction"
+import { PublicKey, SystemProgram, Transaction as SOLTransaction } from "@solana/web3.js";
+import { createEd25519PubKey, createSolTokenAccount, multByDecimals, roundToDecimals, solToLamports } from "../../helpers/wallet/utils";
+import { EVMTransactionParams, SolTransactionParams, TransactionRequest } from "../../services/models/transaction"
 import { NetworkDb } from "../../services/models/network";
 import { ChainData, TokenDb } from "../../services/models/token";
 import * as splToken from "@solana/spl-token"
@@ -8,11 +8,11 @@ import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 
 // tx: basic send of base sol coin
-export const createSolTransaction = async function(txIn:SolTransaction):Promise<Transaction>{
+export const createSolTransaction = async function(txIn:SolTransactionParams):Promise<SOLTransaction>{
     if(!txIn.kryptikProvider.solProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
     let fromPubKey:PublicKey = new PublicKey(txIn.sendAccount);
     let toPubKey:PublicKey = new PublicKey(txIn.toAddress);
-    let transaction:Transaction = new Transaction().add(
+    let transaction:SOLTransaction = new SOLTransaction().add(
         SystemProgram.transfer({
           fromPubkey: fromPubKey,
           toPubkey: toPubKey,
@@ -26,10 +26,10 @@ export const createSolTransaction = async function(txIn:SolTransaction):Promise<
 }
 
 // tx: send token that lives on solana blockchain
-export const createSolTokenTransaction = async function(txIn:SolTransaction){
+export const createSolTokenTransaction = async function(txIn:SolTransactionParams){
     if(!txIn.kryptikProvider.solProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
     if(!txIn.tokenParamsSol) throw(new Error(`No token data provided for ${txIn.networkDb.fullName}. Unable to create transaction.`));
-    let transaction:Transaction = new Transaction();
+    let transaction:SOLTransaction = new SOLTransaction();
     // destination token account for transfer
     let toPubkey = createEd25519PubKey(txIn.toAddress);
     let toTokenAccount = await createSolTokenAccount(txIn.toAddress, txIn.tokenParamsSol.contractAddress);
@@ -39,6 +39,7 @@ export const createSolTokenTransaction = async function(txIn:SolTransaction){
     let mintPubKey = createEd25519PubKey(txIn.tokenParamsSol.contractAddress);
     // test if to account already exists
     const toAccountInfo = await txIn.kryptikProvider.solProvider.getAccountInfo(toTokenAccount);
+    console.log(toAccountInfo);
     if(!toAccountInfo){
         // create token account for to account if none
         console.log("Adding create account instruction");
@@ -46,14 +47,14 @@ export const createSolTokenTransaction = async function(txIn:SolTransaction){
             splToken.createAssociatedTokenAccountInstruction(fromPubKey, toTokenAccount , toPubkey, mintPubKey)
         );
     }
-    let amountlamparts = solToLamports(roundToDecimals(txIn.valueSol, 9));
+    let amountToken = multByDecimals(txIn.valueSol, txIn.decimals);
     // UPDATE TO USE ACTUAL NUMBER OF DECIMALS
     transaction.add(
         splToken.createTransferInstruction(
           fromTokenAccount,
           toTokenAccount,
           fromPubKey,
-          amountlamparts,
+          amountToken,
           [],
           TOKEN_PROGRAM_ID
         )
@@ -64,7 +65,7 @@ export const createSolTokenTransaction = async function(txIn:SolTransaction){
     return transaction;
 }
 
-export const createEVMTransaction = async function(txIn:EVMTransaction):Promise<TransactionRequest>{
+export const createEVMTransaction = async function(txIn:EVMTransactionParams):Promise<TransactionRequest>{
     const {sendAccount, toAddress, value, gasLimit, maxFeePerGas, maxPriorityFeePerGas, kryptikProvider, networkDb} = txIn;
     if(!kryptikProvider.ethProvider){
         throw(new Error(`Error: No EVM provider specified for ${networkDb.fullName}`));
