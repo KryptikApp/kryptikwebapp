@@ -2,9 +2,10 @@ import { Transaction } from "@solana/web3.js";
 import { BigNumber, BigNumberish, BytesLike } from "ethers";
 import { AccessListish } from "ethers/lib/utils";
 import { Network } from "hdseedloop";
-import { KryptikProvider } from "../Web3Service";
+import { IWallet } from "../../models/IWallet";
+import Web3Service, { KryptikProvider } from "../Web3Service";
 import { defaultNetwork, NetworkDb } from "./network";
-import { TokenData, TokenParamsEVM, TokenParamsSol } from "./token";
+import { TokenAndNetwork, TokenData, TokenParamsEVM, TokenParamsSol } from "./token";
 
 export default interface TransactionFeeData{
     network: Network,
@@ -43,16 +44,17 @@ export const defaultTransactionFeeData:TransactionFeeData = {
     EVMGas: defaultEVMGas
 }
 
-export interface SolTransaction{
+export interface SolTransactionParams{
     sendAccount:string,
     toAddress: string,
+    decimals: number,
     kryptikProvider:KryptikProvider,
     networkDb:NetworkDb,
     valueSol:number,
     tokenParamsSol?:TokenParamsSol
 }
 
-export interface EVMTransaction{
+export interface EVMTransactionParams{
     sendAccount:string,
     kryptikProvider:KryptikProvider,
     networkDb:NetworkDb
@@ -113,4 +115,15 @@ export interface FeeDataSolParameters{
 
 export interface FeeDataEvmParameters{
     network:NetworkDb, tokenPriceUsd:number, tokenData?:TokenData, amountToken:string
+}
+
+export interface CreateTransactionParameters{
+    tokenAndNetwork:TokenAndNetwork,
+    amountCrypto: string,
+    txFeeData: TransactionFeeData,
+    kryptikService: Web3Service,
+    wallet: IWallet,
+    toAddress:string,
+    fromAddress:string,
+    errorHandler: (message:string, isFatal?:boolean)=>void
 }
