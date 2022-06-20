@@ -3,8 +3,9 @@ import { BigNumber, BigNumberish, BytesLike } from "ethers";
 import { AccessListish } from "ethers/lib/utils";
 import { Network } from "hdseedloop";
 import { IWallet } from "../../models/IWallet";
-import Web3Service, { KryptikProvider } from "../Web3Service";
+import Web3Service from "../Web3Service";
 import { defaultNetwork, NetworkDb } from "./network";
+import { KryptikProvider } from "./provider";
 import { TokenAndNetwork, TokenData, TokenParamsEVM, TokenParamsSol } from "./token";
 
 export default interface TransactionFeeData{
