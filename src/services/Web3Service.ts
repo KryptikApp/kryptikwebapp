@@ -25,7 +25,7 @@ import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataParamete
 import { createEd25519PubKey, createSolTokenAccount, divByDecimals, isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
 import { UserDB } from "../models/user";
 import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
-import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, TokenData } from "./models/token";
+import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, TokenData, Nep141Params } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
 import { Account as NearAccount, Near } from "near-api-js";
@@ -35,6 +35,7 @@ import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
 const SplDbRef = collection(firestore, "spltokens");
+const Nep141Ref = collection(firestore, "nep141tokens")
 
 
 
@@ -62,6 +63,7 @@ class Web3Service extends BaseService{
     public isWalletSet:boolean = false;
     public NetworkDbs:NetworkDb[] = [];
     public erc20Dbs:TokenDb[] = [];
+    public nep141Dbs:TokenDb[] = [];
     public splDbs:TokenDb[] = [];
     // NetworkDb is referenced by its BIP44 chain id
     public rpcEndpoints: { [ticker:string]: string } = {};
@@ -163,6 +165,13 @@ class Web3Service extends BaseService{
         catch{
             throw(new Error("Error: Unable to populate ERC20 array from database when starting web3 service."));
         }
+        // fetch nep141 data
+        try{
+            await this.populateNep141DbsAsync();
+        }
+        catch{
+            throw(new Error("Error: Unable to populate Nep141 array from database when starting web3 service."));
+        }
         // fetch spl data
         try{
             await this.populateSplDbsAsync();
@@ -258,6 +267,30 @@ class Web3Service extends BaseService{
         });
         this.splDbs = splDbsResult;
         return this.splDbs;
+    }
+
+    private async populateNep141DbsAsync():Promise<TokenDb[]>{
+        console.log("Populating nep141 data from db");
+        const q = query(Nep141Ref);
+        const querySnapshot = await getDocs(q);
+        let nep141DbsResult:TokenDb[] = [];
+        querySnapshot.forEach((doc) => {
+            let docData = doc.data();
+            let nep141DbToAdd:TokenDb = {
+                name: docData.name,
+                coingeckoId: docData.coingeckoId,
+                symbol: docData.symbol,
+                decimals: docData.decimals,
+                hexColor: docData.hexColor?docData.hexColor:"#000000",
+                chainData:docData.chainData,
+                logoURI: docData.logoURI,
+                extensions: docData.extensions,
+                tags:docData.tags
+            }
+            nep141DbsResult.push(nep141DbToAdd);
+        });
+        this.nep141Dbs = nep141DbsResult;
+        return this.nep141Dbs;
     }
 
     private async populateNetworkDbsAsync():Promise<NetworkDb[]>{
@@ -503,6 +536,31 @@ class Web3Service extends BaseService{
         return newBalanceObj;
     }
 
+    async getBalanceNep141Token(params:TokenBalanceParameters):Promise<IBalance>{
+        if(!params.nep141Params) throw(new Error("Error: Contract must be provided to fetch erc20 token balance."))
+        let kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
+        if(!kryptikProvider.nearProvider) throw(new Error(`Error: no provider specified for ${params.networkDb.fullName}`));
+        let nearNetworkProvider:Near = kryptikProvider.nearProvider;
+        // fetch price
+        let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
+        // fetch balance
+        console.log(`getting ${params.tokenDb.name} balance for ${params.accountAddress}`);
+        let nearAccount = await nearNetworkProvider.account(params.accountAddress);
+        // call token contract balance method
+        let response = await nearAccount.viewFunction(params.nep141Params.tokenAddress, "ft_balance_of", 
+        {account_id:params.accountAddress});
+        let networkBalance:number = divByDecimals(Number(response), params.tokenDb.decimals) ;
+        // prettify token balance
+        let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
+        let networkBalanceString = networkBalanceAdjusted.toString();
+        let amountUSD = roundUsdAmount((priceUSD * networkBalance));
+        // create new object for balance data
+        let newBalanceObj:IBalance = {fullName:params.tokenDb.name, ticker:params.tokenDb.symbol, iconPath:params.tokenDb.logoURI,
+        iconPathSecondary: params.networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
+        networkCoinGecko:params.networkDb.coingeckoId}
+        return newBalanceObj;
+    }
+
     async getBalanceSplToken(params:TokenBalanceParameters):Promise<IBalance>{
         if(!params.splParams) throw(new Error(`Error: spl balance parameters not provided.`));
         let kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
@@ -567,6 +625,37 @@ class Web3Service extends BaseService{
         return erc20balances;
     }
 
+     // get balances for allNep141 tokens
+     async getBalanceAllNep141Tokens(walletUser:IWallet){
+        console.log("getting nep141 balances");
+        let nep141Balances:IBalance[] = [];
+        for(const nep141Db of this.nep141Dbs){          
+            for(const chainInfo of nep141Db.chainData){  
+                console.log(`GETTING Nep141 balance FOR ${chainInfo.ticker}`);
+                let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
+                if(!networkDb) continue;
+                let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
+                // get balance for contract
+                let nep141Params:Nep141Params = {tokenAddress:chainInfo.address};
+                let tokenParams:TokenBalanceParameters = {
+                    tokenDb: nep141Db,
+                    nep141Params: nep141Params,
+                    accountAddress: accountAddress,
+                    networkDb: networkDb
+                }
+                try{
+                    let tokenBalance:IBalance = await this.getBalanceNep141Token(tokenParams);
+                    // push balance data to balance array
+                    nep141Balances.push(tokenBalance);
+                }
+                catch(e){
+                    console.warn(`Unable to fetch balance for ${nep141Db.name} on ${networkDb.fullName}.`)
+                }
+            }
+        }
+        return nep141Balances;
+    }
+
     // get balances for all spl tokens
     async getBalanceAllSplTokens(walletUser:IWallet){
         let splBalances:IBalance[] = [];
@@ -575,7 +664,6 @@ class Web3Service extends BaseService{
                 console.log(`GETTING SPL balance FOR ${chainInfo.ticker}`);
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
                 if(!networkDb) continue;
-                console.log("hit 1");
                 let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
                 // get balance for contract
                 let splParams:SplParams = {tokenAddress:chainInfo.address};
