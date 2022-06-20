@@ -1,5 +1,5 @@
 import { PublicKey, SystemProgram, Transaction as SOLTransaction } from "@solana/web3.js";
-import { createEd25519PubKey, createSolTokenAccount, multByDecimals, roundToDecimals, solToLamports } from "../../helpers/wallet/utils";
+import { createEd25519PubKey, createSolTokenAccount, multByDecimals, solToLamports } from "../../helpers/wallet/utils";
 import { EVMTransactionParams, SolTransactionParams, TransactionRequest } from "../../services/models/transaction"
 import { NetworkDb } from "../../services/models/network";
 import { ChainData, TokenDb } from "../../services/models/token";
