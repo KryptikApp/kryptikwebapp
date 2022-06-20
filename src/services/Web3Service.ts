@@ -27,37 +27,17 @@ import { UserDB } from "../models/user";
 import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
 import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, TokenData } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
-import * as splToken from "@solana/spl-token"
-import { responseSymbol } from "next/dist/server/web/spec-compliant/fetch-event";
+import { KryptikProvider } from "./models/provider";
+import { Account as NearAccount, Near } from "near-api-js";
+import { parseNearAmount } from "near-api-js/lib/utils/format";
+import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
 
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
 const SplDbRef = collection(firestore, "spltokens");
 
 
-export class KryptikProvider{
-    public ethProvider: StaticJsonRpcProvider|undefined;
-    public solProvider: Connection|undefined;
-    public network:Network;
-    constructor(rpcEndpoint:string, networkDb:NetworkDb){
-        let network = networkFromNetworkDb(networkDb);
-        this.network = network;
-        if(network.networkFamily == NetworkFamily.EVM){
-            this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: networkDb.fullName, chainId: networkDb.chainIdEVM });  
-        }
-        if(network.networkFamily == NetworkFamily.Solana){
-            this.solProvider = new Connection(rpcEndpoint);
-        }
-    }
-}
 
-interface ITransactionHistory{
-    assetName: string,
-    assetImagePath: string,
-    assetTicker: string,
-    hash: string,
-    amountCrypto: string,
-}
 
 export interface IBalance{
     fullName: string,
@@ -443,9 +423,19 @@ class Web3Service extends BaseService{
                 // gets pub key for solana network
                 let solPubKey:PublicKey = createEd25519PubKey(params.accountAddress);
                 // ensures provider is set
-                if(!kryptikProvider.solProvider) throw(new Error("No solana provider is set up."))
+                if(!kryptikProvider.solProvider) throw(new Error("No near provider is set up."))
                 let solNetworkProvider:Connection = kryptikProvider.solProvider;
                 balanceNetwork = lamportsToSol(await solNetworkProvider.getBalance(solPubKey));
+                break;
+            }
+            case(NetworkFamily.Near):{
+                // ensures provider is set
+                if(!kryptikProvider.nearProvider) throw(new Error("No solana provider is set up."))
+                let nearNetworkProvider:Near = kryptikProvider.nearProvider;
+                // create account with implicit address
+                let nearAccount = await nearNetworkProvider.account(params.accountAddress);
+                let nearBalanceObject:NearAccountBalance = await nearAccount.getAccountBalance();
+                balanceNetwork = divByDecimals(Number(nearBalanceObject.total), params.networkDb.decimals);
                 break;
             }
             default:{
