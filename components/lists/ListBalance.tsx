@@ -15,8 +15,10 @@ const ListBalance:NextPage = () => {
     const[isFetchedBalances, setIsFetchedBalances] = useState(false);
     const[isFetchedERC20, setIsFetchedERC20] = useState(false);
     const[isFetchedSpl, setIsFetchedSpl] = useState(false);
+    const[isFetchedNep141, setIsFetchedNep141] = useState(false);
     const[balances, setBalances] = useState<IBalance[]>(initBalances);
     const[balancesERC20, setBalancesERC20] = useState<IBalance[]>(initBalances);
+    const[balancesNep141, setBalancesNep141] = useState<IBalance[]>(initBalances);
     const[balancesSpl, setBalancesSpl] = useState<IBalance[]>(initBalances);
 
 
@@ -34,6 +36,10 @@ const ListBalance:NextPage = () => {
         let balsSpl:IBalance[] = await kryptikService.getBalanceAllSplTokens(kryptikWallet);
         setBalancesSpl(balsSpl);
         setIsFetchedSpl(true);
+        // fetch nep141 balances
+        let balsNep141:IBalance[] = await kryptikService.getBalanceAllNep141Tokens(kryptikWallet);
+        setBalancesNep141(balsNep141);
+        setIsFetchedNep141(true);
     }
 
     useEffect(() => {
@@ -136,6 +142,39 @@ const ListBalance:NextPage = () => {
                 </ul>
             </div>
         }
+
+        {/* NEP141 Balances */}
+        <div>
+                <div className="flex justify-start mt-5">
+                    <h2 className="font-medium text-slate-700">Your Nep141 Balances</h2>
+                </div>
+                <Divider/>
+        </div>
+        {
+            !isFetchedSpl?
+            <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+            {
+                <div>
+                    <ListItemLoading/>
+                    <ListItemLoading/>
+                    <ListItemLoading/>
+                </div>
+            }
+            </ul>
+            :
+            <div>
+                <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+                {balancesNep141.map((balance:IBalance) => (    
+                    (balance.amountCrypto!="0") &&     
+                    <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
+                    amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}
+                    imgSrcSecondary={balance.iconPathSecondary}
+                    />
+                ))}
+                </ul>
+            </div>
+        }
+        
         </div>
     )   
 }
