@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { NetworkBalanceParameters, NetworkDb } from "../src/services/models/network";
-import { CreateEVMContractParameters, ERC20Params, SplParams, TokenAndNetwork, TokenBalanceParameters, TokenData, TokenDb, TokenParamsEVM, TokenParamsSol } from "../src/services/models/token";
+import { CreateEVMContractParameters, ERC20Params, SplParams, TokenAndNetwork, TokenBalanceParameters, TokenData, TokenDb, TokenParamsEVM, TokenParamsNep141, TokenParamsSol } from "../src/services/models/token";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 import ListItemDropdown from "./lists/ListItemDropwdown";
 import { Contract } from "ethers";
@@ -135,6 +135,43 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                 tokensAndNetworks.push(tokenAndNetworkToAdd);
             }
         }
+         // add all nep141
+         let nep141Dbs:TokenDb[] = kryptikService.nep141Dbs;
+         for(const nep141Db of nep141Dbs){
+             for(const chainInfo of nep141Db.chainData){
+                 let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
+                 if(!networkDb) continue;
+                 let tokenBalance:IBalance|undefined = undefined;
+                 let nep141Params:TokenParamsNep141 = {
+                     contractAddress: chainInfo.address
+                 }
+                 if(onlyWithValue){
+                     let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, networkDb);
+                     let nep141Params:SplParams = {tokenAddress:chainInfo.address};
+                     let tokenBalanceParams:TokenBalanceParameters = {
+                         tokenDb: nep141Db,
+                         nep141Params: nep141Params,
+                         accountAddress: accountAddress,
+                         networkDb: networkDb
+                     }
+                     // get balance for contract
+                     tokenBalance = await kryptikService.getBalanceNep141Token(tokenBalanceParams);
+                     // exclude tokens with zero balance
+                     if(tokenBalance.amountCrypto == "0") continue;
+                 }
+                 let tokenDataToAdd:TokenData = {
+                     tokenParamsNep141: nep141Params,
+                     tokenBalance: tokenBalance,
+                     tokenDb: nep141Db
+                 }
+                 let tokenAndNetworkToAdd:TokenAndNetwork = {
+                     baseNetworkDb: networkDb,
+                     networkBalance: tickerToNetworkBalance[networkDb.ticker],
+                     tokenData:tokenDataToAdd
+                 };
+                 tokensAndNetworks.push(tokenAndNetworkToAdd);
+             }
+         }
         setNetworkAndTokens(tokensAndNetworks);
         setIsFetched(true);
         if(onLoadedFunction){
