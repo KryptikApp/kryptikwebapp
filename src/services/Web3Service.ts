@@ -466,9 +466,14 @@ class Web3Service extends BaseService{
                 if(!kryptikProvider.nearProvider) throw(new Error("No solana provider is set up."))
                 let nearNetworkProvider:Near = kryptikProvider.nearProvider;
                 // create account with implicit address
-                let nearAccount = await nearNetworkProvider.account(params.accountAddress);
-                let nearBalanceObject:NearAccountBalance = await nearAccount.getAccountBalance();
-                balanceNetwork = divByDecimals(Number(nearBalanceObject.total), params.networkDb.decimals);
+                try{
+                    let nearAccount = await nearNetworkProvider.account(params.accountAddress);
+                    let nearBalanceObject:NearAccountBalance = await nearAccount.getAccountBalance();
+                    balanceNetwork = divByDecimals(Number(nearBalanceObject.total), params.networkDb.decimals);
+                }
+                catch(e){
+                    balanceNetwork = 0;
+                }
                 break;
             }
             default:{
@@ -545,11 +550,17 @@ class Web3Service extends BaseService{
         let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
         // fetch balance
         console.log(`getting ${params.tokenDb.name} balance for ${params.accountAddress}`);
-        let nearAccount = await nearNetworkProvider.account(params.accountAddress);
-        // call token contract balance method
-        let response = await nearAccount.viewFunction(params.nep141Params.tokenAddress, "ft_balance_of", 
-        {account_id:params.accountAddress});
-        let networkBalance:number = divByDecimals(Number(response), params.tokenDb.decimals) ;
+        let networkBalance:number;
+        try{
+            let nearAccount = await nearNetworkProvider.account(params.accountAddress);
+            // call token contract balance method
+            let response = await nearAccount.viewFunction(params.nep141Params.tokenAddress, "ft_balance_of", 
+            {account_id:params.accountAddress});
+            networkBalance = divByDecimals(Number(response), params.tokenDb.decimals) ;
+        }
+        catch(e){
+            networkBalance = 0;
+        }
         // prettify token balance
         let networkBalanceAdjusted:Number = roundCryptoAmount(networkBalance);
         let networkBalanceString = networkBalanceAdjusted.toString();
@@ -696,6 +707,11 @@ class Web3Service extends BaseService{
                 break; 
              } 
              case(NetworkFamily.Solana):{
+                if(!params.solTransaction) return null;
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataSolana({tokenPriceUsd:tokenPriceUsd, transaction:params.solTransaction, networkDb:params.networkDb});
+                return transactionFeeData;
+             }
+             case(NetworkFamily.Near):{
                 if(!params.solTransaction) return null;
                 let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataSolana({tokenPriceUsd:tokenPriceUsd, transaction:params.solTransaction, networkDb:params.networkDb});
                 return transactionFeeData;
