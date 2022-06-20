@@ -163,16 +163,24 @@ const ListBalance:NextPage = () => {
             </ul>
             :
             <div>
-                <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-                {balancesNep141.map((balance:IBalance) => (    
-                    (balance.amountCrypto!="0") &&     
-                    <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
-                    amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}
-                    imgSrcSecondary={balance.iconPathSecondary}
-                    />
-                ))}
-                </ul>
+            {
+                (balancesNep141.length == 0)? 
+                <h2 className="text-slate-700 mx-auto my-8">No NEP141 Token Balances</h2>
+                :
+                <div>
+                    <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {balancesNep141.map((balance:IBalance) => (    
+                        (balance.amountCrypto!="0") &&     
+                        <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
+                        amount={balance.amountCrypto} amountUSD={balance.amountUSD} networkCoinGecko={balance.networkCoinGecko}
+                        imgSrcSecondary={balance.iconPathSecondary}
+                        />
+                    ))}
+                    </ul>
+                </div>
+            }
             </div>
+            
         }
         
         </div>
