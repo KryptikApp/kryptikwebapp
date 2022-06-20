@@ -31,6 +31,7 @@
     "magic-sdk": "^8.1.0",
     "multer": "^1.4.4",
     "multiparty": "^4.2.3",
+    "near-api-js": "^0.45.1",
     "next": "12.1.0",
     "next-connect": "^0.12.2",
     "next-qrcode": "^2.1.0",
