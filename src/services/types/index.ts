@@ -16,7 +16,8 @@ enum SendProgress{
     Begin = 0,
     SetParamaters = 1,
     Rewiew = 2,
-    Complete = 3
+    Complete = 3,
+    Failure = 4
 }
 
 export{ServiceState, Status, SendProgress}
