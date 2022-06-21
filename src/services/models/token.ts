@@ -30,7 +30,7 @@ export interface TokenParamsEVM{
     tokenContractConnected: Contract
 }
 
-export interface TokenParamsSol{
+export interface TokenParamsSpl{
     contractAddress: string
 }
 
@@ -39,7 +39,7 @@ export interface TokenParamsNep141{
 }
 
 export interface TokenData{
-    tokenParamsSol?:TokenParamsSol,
+    tokenParamsSol?:TokenParamsSpl,
     tokenParamsEVM?:TokenParamsEVM,
     tokenParamsNep141?:TokenParamsNep141,
     tokenBalance?:IBalance
