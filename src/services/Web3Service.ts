@@ -2,7 +2,7 @@ import {firestore} from "../helpers/firebaseHelper"
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { ServiceState } from './types';
 import BaseService from './BaseService';
-import {defaultNetworkDb, NetworkBalanceParameters, NetworkDb, placeHolderEVMAddress} from './models/network'
+import {defaultNetworkDb, defaultTokenAndNetwork, NetworkBalanceParameters, NetworkDb, placeHolderEVMAddress} from './models/network'
 import {
     JsonRpcProvider,
     StaticJsonRpcProvider,
@@ -15,7 +15,7 @@ import {
     TokenAmount,
   } from '@solana/web3.js';
 
-import HDSeedLoop, {Network, NetworkFamily, NetworkFromTicker, WalletKryptik } from "hdseedloop";
+import HDSeedLoop, {Network, NetworkFamily, NetworkFamilyFromFamilyName, NetworkFromTicker, WalletKryptik } from "hdseedloop";
 import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
@@ -25,12 +25,13 @@ import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataParamete
 import { createEd25519PubKey, createSolTokenAccount, divByDecimals, isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
 import { UserDB } from "../models/user";
 import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
-import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, TokenData, Nep141Params } from "./models/token";
+import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, TokenData, Nep141Params, TokenAndNetwork } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
 import { Account as NearAccount, Near } from "near-api-js";
 import { parseNearAmount } from "near-api-js/lib/utils/format";
 import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
+import { searchTokenListByTicker } from "../helpers/search";
 
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
@@ -47,7 +48,8 @@ export interface IBalance{
     iconPathSecondary?:string,
     amountCrypto: string,
     amountUSD: string,
-    networkCoinGecko: string
+    coinGeckoId: string,
+    baseNetworkTicker: string
 }
 
 export interface IConnectWalletReturn{
@@ -305,41 +307,45 @@ class Web3Service extends BaseService{
             let docData = doc.data();
             let providerFromDb:string = "";
             if(docData.provider) providerFromDb = docData.provider;
-            let NetworkDbToAdd:NetworkDb = {
-                fullName: docData.fullName,
-                networkFamilyName: docData.networkFamilyName,
-                ticker: docData.ticker,
-                chainId: docData.chainId,
-                chainIdEVM: docData.chainIdEVM,
-                hexColor: docData.hexColor,
-                decimals: docData.decimals?docData.decimals:6,
-                about: docData.about,
-                blockExplorerURL: docData.blockExplorerURL,
-                dateCreated: docData.dateCreated,
-                iconPath: docData.iconPath,
-                whitePaperPath: docData.whitePaperPath,
-                isSupported: docData.isSupported,
-                provider: providerFromDb,
-                coingeckoId: docData.coingeckoId,
-                isTestnet: docData.isTestnet?docData.isTestnet:false
+            // UPDATE TO ADD NONSUPPORTED AS WELL?
+            if(docData.isSupported){
+                let NetworkDbToAdd:NetworkDb = {
+                    fullName: docData.fullName,
+                    networkFamilyName: docData.networkFamilyName,
+                    ticker: docData.ticker,
+                    chainId: docData.chainId,
+                    chainIdEVM: docData.chainIdEVM,
+                    hexColor: docData.hexColor,
+                    decimals: docData.decimals?docData.decimals:6,
+                    about: docData.about,
+                    blockExplorerURL: docData.blockExplorerURL,
+                    dateCreated: docData.dateCreated,
+                    iconPath: docData.iconPath,
+                    whitePaperPath: docData.whitePaperPath,
+                    isSupported: docData.isSupported,
+                    provider: providerFromDb,
+                    coingeckoId: docData.coingeckoId,
+                    isTestnet: docData.isTestnet?docData.isTestnet:false
+                }
+                NetworkDbsResult.push(NetworkDbToAdd);
             }
-            NetworkDbsResult.push(NetworkDbToAdd);
         });
         this.NetworkDbs = NetworkDbsResult;
         return NetworkDbsResult;
     }
 
     getSupportedNetworkDbs():NetworkDb[]{
-        let NetworkDbsResult:NetworkDb[] = [];
-        for(const NetworkDb of this.NetworkDbs){
-            // filter results based on searchquery
-            if(NetworkDb.isSupported){
-                // build NetworkDb object from doc result     
-                NetworkDbsResult.push(NetworkDb);
-                // console.log(doc.id, " => ", doc.data());
-            }
-        }
-        return NetworkDbsResult;
+        return this.NetworkDbs;
+        // UNCOMMENT CODE BELOW TO HANDLE UNSUPPORTED NETWORKS;
+        // let NetworkDbsResult:NetworkDb[] = [];
+        // for(const NetworkDb of this.NetworkDbs){
+        //     // filter results based on searchquery
+        //     if(NetworkDb.isSupported){
+        //         // build NetworkDb object from doc result     
+        //         NetworkDbsResult.push(NetworkDb);
+        //     }
+        // }
+        // return NetworkDbsResult;
     }
 
     async searchNetworkDbsAsync(searchQuery:string, onlySupported?:boolean) :Promise<NetworkDb[]>{
@@ -495,29 +501,46 @@ class Web3Service extends BaseService{
        // create new balance obj for balance data
        let newBalanceObj:IBalance = {fullName:params.networkDb.fullName, ticker:params.networkDb.ticker, iconPath:iconMain, 
            iconPathSecondary:iconSecondary, amountCrypto:networkBalanceString, 
-           amountUSD:amountUSD.toString(), networkCoinGecko:params.networkDb.coingeckoId};
+           amountUSD:amountUSD.toString(), coinGeckoId:params.networkDb.coingeckoId, baseNetworkTicker:network.ticker};
 
         return newBalanceObj;
     }
 
 
     // TODO: Update to support tx. based networks
-    getBalanceAllNetworks = async(walletUser:IWallet, user?:UserDB):Promise<IBalance[]> =>{
+    getBalanceAllNetworks = async(walletUser:IWallet, user?:UserDB, onFetch?:(balance:IBalance|null)=>void):Promise<IBalance[]> =>{
         let networksFromDb = this.getSupportedNetworkDbs();
         // initialize return array
         let balances:IBalance[] = [];
         for(const nw of networksFromDb){
             // only show testnets to advanced users
-            if(nw.isTestnet && user && !user.isAdvanced) continue;
+            if(nw.isTestnet && user && !user.isAdvanced){
+                if(onFetch){
+                    onFetch(null);
+                }
+                continue;
+            }
             // gets all addresses for network
             let accountAddress:string = await this.getAddressForNetworkDb(walletUser, nw);
             let NetworkBalanceParams:NetworkBalanceParameters = {
                 accountAddress: accountAddress,
                 networkDb: nw
             }
-            let networkBalance:IBalance|null = await this.getBalanceNetwork(NetworkBalanceParams);
-            // push balance obj to balance data array
-            if(networkBalance) balances.push(networkBalance);
+            try{
+                let networkBalance:IBalance|null = await this.getBalanceNetwork(NetworkBalanceParams);
+                // push balance obj to balance data array
+                if(networkBalance) balances.push(networkBalance);
+                if(onFetch){
+                    onFetch(networkBalance);
+                }
+            }
+            catch(e){
+                if(onFetch){
+                    onFetch(null);
+                }
+                console.warn(`Unable to fetch network balance for ${nw.fullName}`);
+            }
+            
         }
         return balances;
     }
@@ -537,7 +560,7 @@ class Web3Service extends BaseService{
         // create new object for balance data
         let newBalanceObj:IBalance = {fullName:params.tokenDb.name, ticker:params.tokenDb.symbol, iconPath:params.tokenDb.logoURI,
         iconPathSecondary: params.networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
-        networkCoinGecko:params.networkDb.coingeckoId}
+        coinGeckoId:params.networkDb.coingeckoId, baseNetworkTicker:params.networkDb.ticker}
         return newBalanceObj;
     }
 
@@ -568,7 +591,7 @@ class Web3Service extends BaseService{
         // create new object for balance data
         let newBalanceObj:IBalance = {fullName:params.tokenDb.name, ticker:params.tokenDb.symbol, iconPath:params.tokenDb.logoURI,
         iconPathSecondary: params.networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
-        networkCoinGecko:params.networkDb.coingeckoId}
+        coinGeckoId:params.networkDb.coingeckoId, baseNetworkTicker:params.networkDb.ticker}
         return newBalanceObj;
     }
 
@@ -597,18 +620,23 @@ class Web3Service extends BaseService{
         // create new object for balance data
         let newBalanceObj:IBalance = {fullName:params.tokenDb.name, ticker:params.tokenDb.symbol, iconPath:params.tokenDb.logoURI,
         iconPathSecondary: params.networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), 
-        networkCoinGecko:params.networkDb.coingeckoId}
+        coinGeckoId:params.networkDb.coingeckoId, baseNetworkTicker:params.networkDb.ticker}
         return newBalanceObj;
     }
 
     // get balances for all erc20 networks
-    async getBalanceAllERC20Tokens(walletUser:IWallet){
+    async getBalanceAllERC20Tokens(walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void){
         let erc20balances:IBalance[] = [];
         for(const erc20Db of this.erc20Dbs){
             for(const chainInfo of erc20Db.chainData){
                 // get ethereum network db
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb) continue;
+                if(!networkDb){
+                    if(onFetch){
+                        onFetch(null);
+                    }
+                    continue;
+                }
                 // hdseedloop compatible network
                 let erc20ContractParams:CreateEVMContractParameters= {
                     wallet: walletUser,
@@ -616,7 +644,13 @@ class Web3Service extends BaseService{
                     erc20Db: erc20Db
                 }
                 let erc20Contract = await this.createERC20Contract(erc20ContractParams);
-                if(!erc20Contract) continue;
+                if(!erc20Contract)
+                {
+                    if(onFetch){
+                        onFetch(null);
+                    }
+                    continue;
+                }
                 let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
                 let erc20Params:ERC20Params = {
                     erc20Contract: erc20Contract
@@ -629,6 +663,9 @@ class Web3Service extends BaseService{
                     networkDb: networkDb
                 }
                 let tokenBalance:IBalance = await this.getBalanceErc20Token(tokenParams)
+                if(onFetch){
+                    onFetch(tokenBalance);
+                }
                 // push balance data to balance array
                 erc20balances.push(tokenBalance);
             }
@@ -637,14 +674,20 @@ class Web3Service extends BaseService{
     }
 
      // get balances for allNep141 tokens
-     async getBalanceAllNep141Tokens(walletUser:IWallet){
+     async getBalanceAllNep141Tokens(walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void){
         console.log("getting nep141 balances");
         let nep141Balances:IBalance[] = [];
         for(const nep141Db of this.nep141Dbs){          
             for(const chainInfo of nep141Db.chainData){  
                 console.log(`GETTING Nep141 balance FOR ${chainInfo.ticker}`);
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb) continue;
+                if(!networkDb)
+                {
+                    if(onFetch){
+                        onFetch(null);
+                    }
+                    continue;
+                }
                 let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
                 // get balance for contract
                 let nep141Params:Nep141Params = {tokenAddress:chainInfo.address};
@@ -658,8 +701,14 @@ class Web3Service extends BaseService{
                     let tokenBalance:IBalance = await this.getBalanceNep141Token(tokenParams);
                     // push balance data to balance array
                     nep141Balances.push(tokenBalance);
+                    if(onFetch){
+                        onFetch(tokenBalance);
+                    }
                 }
                 catch(e){
+                    if(onFetch){
+                        onFetch(null);
+                    }
                     console.warn(`Unable to fetch balance for ${nep141Db.name} on ${networkDb.fullName}.`)
                 }
             }
@@ -668,13 +717,19 @@ class Web3Service extends BaseService{
     }
 
     // get balances for all spl tokens
-    async getBalanceAllSplTokens(walletUser:IWallet){
+    async getBalanceAllSplTokens(walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void){
         let splBalances:IBalance[] = [];
         for(const splDb of this.splDbs){          
             for(const chainInfo of splDb.chainData){  
                 console.log(`GETTING SPL balance FOR ${chainInfo.ticker}`);
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb) continue;
+                if(!networkDb)
+                {
+                    if(onFetch){
+                        onFetch(null);
+                    }
+                    continue;
+                }
                 let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
                 // get balance for contract
                 let splParams:SplParams = {tokenAddress:chainInfo.address};
@@ -688,9 +743,15 @@ class Web3Service extends BaseService{
                     let tokenBalance:IBalance = await this.getBalanceSplToken(tokenParams);
                     // push balance data to balance array
                     splBalances.push(tokenBalance);
+                    if(onFetch){
+                        onFetch(tokenBalance);
+                    }
                 }
                 catch(e){
                     console.warn(`Unable to fetch balance for ${splDb.name} on ${networkDb.fullName}.`)
+                    if(onFetch){
+                        onFetch(null);
+                    }
                 }
             }
         }
@@ -840,6 +901,43 @@ class Web3Service extends BaseService{
         // gets first address for network
         let firstAddy:string = allAddys[0];
         return firstAddy;
+    }
+
+
+    getTokenAndNetworkFromTickers(networkTicker:string, tokenTicker?:string):TokenAndNetwork{
+        let tokenAndNetwork:TokenAndNetwork = defaultTokenAndNetwork;
+        let networkDb:NetworkDb|null = this.getNetworkDbByTicker(networkTicker);
+        // UPDATE TO THROW ERROR OR RETURN NULL?
+        if(!networkDb) return tokenAndNetwork;
+        tokenAndNetwork.baseNetworkDb = networkDb;
+        // no token... just return obj with base network
+        if(!tokenTicker) return tokenAndNetwork;
+        let networkFamily = NetworkFamilyFromFamilyName(networkDb.networkFamilyName);
+        let tokenDb:TokenDb|null = null;
+        switch(networkFamily){
+            case(NetworkFamily.EVM):{
+                tokenDb = searchTokenListByTicker(this.erc20Dbs, tokenTicker);
+                break;
+            }
+            case(NetworkFamily.Near):{
+                tokenDb = searchTokenListByTicker(this.nep141Dbs, tokenTicker);
+                break;
+            }
+            case(NetworkFamily.Solana):{
+                tokenDb = searchTokenListByTicker(this.splDbs, tokenTicker);
+                break;
+            }
+            default:{
+                tokenDb = null;
+            }
+        }
+        // set token data if it exists
+        if(tokenDb){
+            tokenAndNetwork.tokenData = {
+                tokenDb: tokenDb
+            }
+        }
+        return tokenAndNetwork;
     }
         
 }
