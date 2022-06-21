@@ -6,7 +6,7 @@ import { IWallet } from "../../models/IWallet";
 import Web3Service from "../Web3Service";
 import { defaultNetwork, NetworkDb } from "./network";
 import { KryptikProvider } from "./provider";
-import { TokenAndNetwork, TokenData, TokenParamsEVM, TokenParamsSol } from "./token";
+import { TokenAndNetwork, TokenData, TokenParamsEVM, TokenParamsNep141, TokenParamsSpl } from "./token";
 
 export default interface TransactionFeeData{
     network: Network,
@@ -52,7 +52,17 @@ export interface SolTransactionParams{
     kryptikProvider:KryptikProvider,
     networkDb:NetworkDb,
     valueSol:number,
-    tokenParamsSol?:TokenParamsSol
+    tokenParamsSol?:TokenParamsSpl
+}
+
+export interface NearTransactionParams{
+    sendAccount:string,
+    toAddress: string,
+    decimals: number,
+    kryptikProvider:KryptikProvider,
+    networkDb:NetworkDb,
+    valueNear:number,
+    tokenParamsSol?:TokenParamsNep141
 }
 
 export interface EVMTransactionParams{
