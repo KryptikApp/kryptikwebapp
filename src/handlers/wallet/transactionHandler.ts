@@ -1,10 +1,14 @@
 import { PublicKey, SystemProgram, Transaction as SOLTransaction } from "@solana/web3.js";
 import { createEd25519PubKey, createSolTokenAccount, multByDecimals, solToLamports } from "../../helpers/wallet/utils";
-import { EVMTransactionParams, SolTransactionParams, TransactionRequest } from "../../services/models/transaction"
+import { EVMTransactionParams, NearTransactionParams, SolTransactionParams, TransactionRequest } from "../../services/models/transaction"
 import { NetworkDb } from "../../services/models/network";
 import { ChainData, TokenDb } from "../../services/models/token";
 import * as splToken from "@solana/spl-token"
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { transactions as nearTx, utils as nearUtils} from "near-api-js";
+import { PublicKey as NearPublicKey} from "near-api-js/lib/utils/key_pair";
+import { BigNumber } from "ethers";
+import { BN } from "bn.js";
 
 
 // tx: basic send of base sol coin
@@ -22,6 +26,27 @@ export const createSolTransaction = async function(txIn:SolTransactionParams):Pr
     let lastBlockHash = await txIn.kryptikProvider.solProvider.getLatestBlockhash('finalized');
     transaction.recentBlockhash = lastBlockHash.blockhash;
     transaction.feePayer = fromPubKey;
+    return transaction;
+}
+
+// tx: basic send of base near coin
+export const createNearTransaction = async function(txIn:NearTransactionParams):Promise<nearTx.Transaction>{
+    if(!txIn.kryptikProvider.nearProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
+    let nearProvider = txIn.kryptikProvider.nearProvider;
+    let account = await nearProvider.account(txIn.sendAccount);
+    let amountYocto = multByDecimals(txIn.valueNear, txIn.decimals);
+    const actions = [nearTx.transfer(new BN(amountYocto))];
+    const accessKeyResponse = await account.findAccessKey(txIn.sendAccount, actions);
+    let pubkey = NearPublicKey.fromString(txIn.sendAccount);
+    let recentBlockhash = nearUtils.serialize.base_decode(accessKeyResponse.accessKey.block_hash); 
+    const transaction:nearTx.Transaction =  nearTx.createTransaction(
+        txIn.sendAccount,
+        pubkey,
+        txIn.toAddress,
+        accessKeyResponse.accessKey.nonce,
+        actions,
+        recentBlockhash
+      );
     return transaction;
 }
 
