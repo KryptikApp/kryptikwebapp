@@ -34,9 +34,9 @@ import { CoinGeckoClient, CoinMarketChartResponse } from 'coingecko-api-v3';
     vs_currency: "usd",
     days: days
     }
-
     const marketChartResponse = await client.coinIdMarketChart(input);
     console.log(marketChartResponse);
-    priceSetFunction(marketChartResponse.prices);
+    let prices:number[][] = marketChartResponse.prices
+    priceSetFunction(prices);
     return marketChartResponse;
   }
