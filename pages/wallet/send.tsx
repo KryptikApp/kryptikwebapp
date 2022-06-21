@@ -16,7 +16,7 @@ import TransactionFeeData, { CreateTransactionParameters, defaultTransactionFeeD
 import { formatAmountUi, formatTicker, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from '../../src/helpers/wallet/utils'
 import { createSolTokenTransaction, createSolTransaction } from '../../src/handlers/wallet/transactionHandler'
 import { Transaction} from '@solana/web3.js'
-import { TokenParamsSol } from '../../src/services/models/token'
+import { TokenParamsSpl } from '../../src/services/models/token'
 import {handlePublishTransaction} from '../../src/handlers/wallet/sendHandler'
 
 
@@ -143,7 +143,7 @@ const Send: NextPage = () => {
       // send sol token 
       if(selectedTokenAndNetwork.tokenData && selectedTokenAndNetwork.tokenData.tokenParamsSol){
         // add sol token data to input params
-        let txSolParams:TokenParamsSol = selectedTokenAndNetwork.tokenData.tokenParamsSol;
+        let txSolParams:TokenParamsSpl = selectedTokenAndNetwork.tokenData.tokenParamsSol;
         txIn.tokenParamsSol = txSolParams;
         txSol = await createSolTokenTransaction(txIn);
       }
