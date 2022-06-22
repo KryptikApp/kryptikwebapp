@@ -9,11 +9,13 @@ import {
 } from '@ethersproject/providers';
 import {
     Connection,
-    Keypair,
     PublicKey,
     RpcResponseAndContext,
     TokenAmount,
   } from '@solana/web3.js';
+import { BN } from "bn.js";
+import { transactions as nearTx, utils as nearUtils} from "near-api-js";
+import { PublicKey as NearPublicKey} from "near-api-js/lib/utils/key_pair";
 
 import HDSeedLoop, {Network, NetworkFamily, NetworkFamilyFromFamilyName, NetworkFromTicker, WalletKryptik } from "hdseedloop";
 import { IWallet } from "../models/IWallet";
@@ -21,8 +23,8 @@ import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
 import { BigNumber, Contract, utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
-import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataParameters, FeeDataSolParameters} from "./models/transaction";
-import { createEd25519PubKey, createSolTokenAccount, divByDecimals, isNetworkArbitrum, lamportsToSol, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
+import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataNearParameters, FeeDataParameters, FeeDataSolParameters, TxType} from "./models/transaction";
+import { createEd25519PubKey, createSolTokenAccount, divByDecimals, isNetworkArbitrum, lamportsToSol, multByDecimals, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
 import { UserDB } from "../models/user";
 import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
 import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, TokenData, Nep141Params, TokenAndNetwork } from "./models/token";
@@ -761,6 +763,7 @@ class Web3Service extends BaseService{
     getTransactionFeeData = async(params:FeeDataParameters):Promise<TransactionFeeData|null> => {
         let network:Network =  networkFromNetworkDb(params.networkDb);
         let tokenPriceUsd:number = await getPriceOfTicker(params.networkDb.coingeckoId);
+        console.log(`TX FEE FETCH started for ${network.fullName}`);
         switch(network.networkFamily){
             case (NetworkFamily.EVM): { 
                 let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible({network:params.networkDb, tokenPriceUsd: tokenPriceUsd, tokenData: params.tokenData, amountToken:params.amountToken});
@@ -771,11 +774,13 @@ class Web3Service extends BaseService{
                 if(!params.solTransaction) return null;
                 let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataSolana({tokenPriceUsd:tokenPriceUsd, transaction:params.solTransaction, networkDb:params.networkDb});
                 return transactionFeeData;
+                break;
              }
              case(NetworkFamily.Near):{
-                if(!params.solTransaction) return null;
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataSolana({tokenPriceUsd:tokenPriceUsd, transaction:params.solTransaction, networkDb:params.networkDb});
+                if(!params.nearPubKeyString) return null;
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataNear({tokenPriceUsd:tokenPriceUsd, txType:params.txType, sendAccount:params.sendAccount, nearPubKeyString:params.nearPubKeyString, networkDb:params.networkDb});
                 return transactionFeeData;
+                break;
              }
              default: { 
                 return null;
@@ -784,6 +789,59 @@ class Web3Service extends BaseService{
         }
     }
 
+    getTransactionFeeDataNear = async(params:FeeDataNearParameters)=>{
+        let kryptikProvider:KryptikProvider;
+        kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
+        // validate provider
+        if(!kryptikProvider.nearProvider){
+            throw(new Error(`Error: No provider specified for ${kryptikProvider.network.fullName}`));
+        }
+        console.log(params);
+        let nearProvider:Near = kryptikProvider.nearProvider;
+        let pubkey = NearPublicKey.fromString(params.nearPubKeyString);
+        const accessKeyResponse = await nearProvider.connection.provider.query(
+            `access_key/${params.sendAccount}/${pubkey.toString()}`,
+            ""
+          );
+        // NEAR gas is calculated in TGAS
+        // 1 TGAS = 10^12
+        let gasUsed:number = multByDecimals(1, 12)
+        // hardcoded gas amounts are based on protocol paramters
+        // more info. on NEAR gas here: https://docs.near.org/docs/concepts/gas#thinking-in-gas
+        switch(params.txType){
+            case(TxType.TransferNative):{
+                gasUsed = .45*gasUsed;
+                break;
+            }
+            case(TxType.TransferToken):{
+                gasUsed = 14*gasUsed;
+                break;
+            }
+            default:{
+                // UPDATE DEFAULT... should it be avg. gas required?
+                gasUsed = 10*gasUsed;
+                break;
+            }
+        }
+        // fetch latest gas price
+        let gasPrice:number = Number((await nearProvider.connection.provider.gasPrice(accessKeyResponse.block_hash)).gas_price);
+        console.log(gasPrice);
+        // convert gas to near amount
+        let feeInNear =  divByDecimals((Number(gasPrice)*gasUsed), params.networkDb.decimals); 
+        let feeInUsd:number = params.tokenPriceUsd*feeInNear;
+        let transactionFeeData:TransactionFeeData = {
+            network: kryptikProvider.network,
+            isFresh: true,
+            lowerBoundCrypto: feeInNear,
+            lowerBoundUSD: feeInUsd,
+            upperBoundCrypto: feeInNear,
+            upperBoundUSD: feeInUsd,
+            EVMGas: defaultEVMGas
+        };
+        return transactionFeeData;
+    }
+
+    // fetch tx. fee on the solana blockchain
     getTransactionFeeDataSolana = async(params:FeeDataSolParameters):Promise<TransactionFeeData> =>{
         let kryptikProvider:KryptikProvider;
         kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
@@ -810,6 +868,7 @@ class Web3Service extends BaseService{
         return transactionFeeData;
     }
 
+    // estimate tx. fee for EIP 1559 compatible networks
     getTransactionFeeData1559Compatible = async(params:FeeDataEvmParameters):Promise<TransactionFeeData> =>{
         let kryptikProvider:KryptikProvider;
         kryptikProvider = await this.getKryptikProviderForNetworkDb(params.network);
