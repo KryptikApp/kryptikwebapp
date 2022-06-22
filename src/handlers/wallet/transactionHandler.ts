@@ -7,7 +7,6 @@ import * as splToken from "@solana/spl-token"
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { transactions as nearTx, utils as nearUtils} from "near-api-js";
 import { PublicKey as NearPublicKey} from "near-api-js/lib/utils/key_pair";
-import { BigNumber } from "ethers";
 import { BN } from "bn.js";
 
 
