@@ -115,13 +115,26 @@ export const defaultTxPublishedData:TransactionPublishedData = {
 }
 
 export interface FeeDataParameters{
-    networkDb:NetworkDb, solTransaction?:Transaction, tokenData?:TokenData, amountToken:string
+    networkDb:NetworkDb, sendAccount:string, txType:TxType, nearPubKeyString?:string, solTransaction?:Transaction, tokenData?:TokenData, amountToken:string
 }
 
 export interface FeeDataSolParameters{
     transaction:Transaction,
     tokenPriceUsd:number,
     networkDb:NetworkDb
+}
+
+export enum TxType{
+  TransferNative=0,
+  TransferToken=1
+}
+
+export interface FeeDataNearParameters{
+    tokenPriceUsd:number,
+    networkDb:NetworkDb,
+    sendAccount:string,
+    nearPubKeyString:string,
+    txType:TxType
 }
 
 export interface FeeDataEvmParameters{
