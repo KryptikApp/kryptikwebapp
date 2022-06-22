@@ -79,7 +79,7 @@ const ListBalance:NextPage = () => {
                 {
                     !(isFetchedBalances&&isFetchedERC20&&isFetchedNep141&&isFetchedSpl)&&
                     <div className="max-w-2xl bg-gray-200 rounded-full h-6">
-                        <div id="progressBar" className="bg-sky-400 h-6 rounded-full text-gray-700" style={{width: `0%`, maxWidth:`100%`}}>{roundToDecimals(progressPercent, 2)}%</div>
+                        <div id="progressBar" className="bg-gradient-to-r from-sky-400 to-sky-600 h-6 rounded-full text-gray-700" style={{width: `0%`, maxWidth:`100%`}}>{progressPercent>15?`${roundToDecimals(progressPercent, 2)}%`:""}</div>
                     </div>
                 }
                 
