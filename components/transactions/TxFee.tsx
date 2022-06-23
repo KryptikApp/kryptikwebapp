@@ -8,18 +8,29 @@ import TransactionFeeData from "../../src/services/models/transaction";
 interface Props {
     tokenAndNetwork:TokenAndNetwork,
     txFeeData:TransactionFeeData,
-    feesLoaded:boolean
+    feesLoaded:boolean,
+    feeLabel?:string,
+    style?:string
 }
 
 const TxFee:NextPage<Props> = (props) => {
-    const{tokenAndNetwork, txFeeData, feesLoaded} = props;
+    const{txFeeData, feesLoaded, feeLabel, style} = props;
+    // if no fee label is provided, default is no label
+    let feeLabelDisplay:string;
+    if(feeLabel){
+      feeLabelDisplay = feeLabel
+    }
+    else{
+      feeLabelDisplay = ""
+    }
+
     return(
         <div>
           {/* case: fee data is fresh.... adjust if bounds are same or not */}
           {
               (txFeeData.isFresh)&&
               <div>
-                <p className="text-slate-400 text-sm inline">Fees: ${(txFeeData.lowerBoundUSD == txFeeData.upperBoundUSD)?`${roundUsdAmount(txFeeData.upperBoundUSD)}`:`${roundUsdAmount(txFeeData.lowerBoundUSD)}-$${roundUsdAmount(txFeeData.upperBoundUSD)}`}</p>
+                <p className={`${style?style:"text-slate-400 text-sm"} inline`}>{feeLabelDisplay} ${(txFeeData.lowerBoundUSD == txFeeData.upperBoundUSD)?`${roundUsdAmount(txFeeData.upperBoundUSD)}`:`${roundUsdAmount(txFeeData.lowerBoundUSD)}-$${roundUsdAmount(txFeeData.upperBoundUSD)}`}</p>
                   {/* spinner to show fees are updating */}
                   {
                     !feesLoaded &&
@@ -34,7 +45,7 @@ const TxFee:NextPage<Props> = (props) => {
           {
               (!txFeeData.isFresh) &&
               <div>
-                <p className="text-slate-400 text-sm inline">Fees will be calculated on review</p>
+                <p className={`${style?style:"text-slate-400 text-sm"} inline`}>Fees will be calculated on review</p>
                 {/* spinner to show fees are updating */}
                 {
                     !feesLoaded &&
