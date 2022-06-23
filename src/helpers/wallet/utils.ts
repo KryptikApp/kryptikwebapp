@@ -1,4 +1,5 @@
 import { PublicKey } from "@solana/web3.js";
+import fromExponential from "from-exponential";
 import { Network, NetworkFamily, NetworkFamilyFromFamilyName, NetworkParameters} from "hdseedloop";
 import { NetworkDb } from "../../services/models/network";
 import { TokenAndNetwork } from "../../services/models/token";
@@ -16,14 +17,27 @@ export const roundToDecimals = function(amountIn:number, decimals:number=18){
     return Number(amountIn.toFixed(decimals));
 }
 
-export const multByDecimals = function(amountIn:number, decimals:number){
-    amountIn = roundToDecimals(amountIn, decimals);
-    return amountIn*10**decimals;
+export interface IBigNumber{
+    asNumber:number,
+    asString:string
 }
 
-export const divByDecimals = function(amountIn:number, decimals:number){
+export const multByDecimals = function(amountIn:number, decimals:number):IBigNumber{
     amountIn = roundToDecimals(amountIn, decimals);
-    return amountIn/10**decimals;
+    let numToReturn:IBigNumber = {
+        asNumber: amountIn*10**decimals,
+        asString: fromExponential(amountIn*10**decimals)
+    }
+    return numToReturn;
+}
+
+export const divByDecimals = function(amountIn:number, decimals:number):IBigNumber{
+    amountIn = roundToDecimals(amountIn, decimals);
+    let numToReturn:IBigNumber = {
+        asNumber: amountIn/10**decimals,
+        asString: fromExponential(amountIn/10**decimals)
+    }
+    return numToReturn;
 }
 
 export const lamportsToSol = function(amountIn:number):number{
@@ -73,7 +87,14 @@ export const networkFromNetworkDb = function(nw: NetworkDb):Network{
 }
 
 export const getTransactionExplorerPath = function(network:NetworkDb, txPublishedData:TransactionPublishedData):string|null{
-    let linkPathToReturn:string|null = `${network.blockExplorerURL}tx/${txPublishedData.hash}`;
+    let explorerUrl = network.blockExplorerURL;
+    // add trailing slash if none
+    if(!explorerUrl.endsWith("/")) explorerUrl = explorerUrl + "/";
+    let linkPathToReturn:string|null = `${explorerUrl}tx/${txPublishedData.hash}`;
+    // near explorer has unique transaction path
+    if(network.ticker.toLowerCase() == "near"){
+        linkPathToReturn = `${explorerUrl}transactions/${txPublishedData.hash}`;
+    } 
     return linkPathToReturn;
 }
 
