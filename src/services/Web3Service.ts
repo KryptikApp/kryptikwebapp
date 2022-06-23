@@ -34,6 +34,7 @@ import { Account as NearAccount, Near } from "near-api-js";
 import { parseNearAmount } from "near-api-js/lib/utils/format";
 import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
 import { searchTokenListByTicker } from "../helpers/search";
+import { BlockResult } from "near-api-js/lib/providers/provider";
 
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
@@ -477,7 +478,7 @@ class Web3Service extends BaseService{
                 try{
                     let nearAccount = await nearNetworkProvider.account(params.accountAddress);
                     let nearBalanceObject:NearAccountBalance = await nearAccount.getAccountBalance();
-                    balanceNetwork = divByDecimals(Number(nearBalanceObject.total), params.networkDb.decimals);
+                    balanceNetwork = divByDecimals(Number(nearBalanceObject.total), params.networkDb.decimals).asNumber;
                 }
                 catch(e){
                     balanceNetwork = 0;
@@ -581,7 +582,7 @@ class Web3Service extends BaseService{
             // call token contract balance method
             let response = await nearAccount.viewFunction(params.nep141Params.tokenAddress, "ft_balance_of", 
             {account_id:params.accountAddress});
-            networkBalance = divByDecimals(Number(response), params.tokenDb.decimals) ;
+            networkBalance = divByDecimals(Number(response), params.tokenDb.decimals).asNumber;
         }
         catch(e){
             networkBalance = 0;
@@ -610,7 +611,7 @@ class Web3Service extends BaseService{
         // if no token account exists, value should be 0
         try{
             let repsonse:RpcResponseAndContext<TokenAmount> = await kryptikProvider.solProvider.getTokenAccountBalance(tokenAccount);
-            tokenBalance =  divByDecimals(Number(repsonse.value.amount), repsonse.value.decimals); 
+            tokenBalance =  divByDecimals(Number(repsonse.value.amount), repsonse.value.decimals).asNumber; 
         }
         catch(e){
             tokenBalance = 0;
@@ -763,7 +764,6 @@ class Web3Service extends BaseService{
     getTransactionFeeData = async(params:FeeDataParameters):Promise<TransactionFeeData|null> => {
         let network:Network =  networkFromNetworkDb(params.networkDb);
         let tokenPriceUsd:number = await getPriceOfTicker(params.networkDb.coingeckoId);
-        console.log(`TX FEE FETCH started for ${network.fullName}`);
         switch(network.networkFamily){
             case (NetworkFamily.EVM): { 
                 let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible({network:params.networkDb, tokenPriceUsd: tokenPriceUsd, tokenData: params.tokenData, amountToken:params.amountToken});
@@ -777,8 +777,7 @@ class Web3Service extends BaseService{
                 break;
              }
              case(NetworkFamily.Near):{
-                if(!params.nearPubKeyString) return null;
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataNear({tokenPriceUsd:tokenPriceUsd, txType:params.txType, sendAccount:params.sendAccount, nearPubKeyString:params.nearPubKeyString, networkDb:params.networkDb});
+                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataNear({tokenPriceUsd:tokenPriceUsd, txType:params.txType, networkDb:params.networkDb});
                 return transactionFeeData;
                 break;
              }
@@ -798,19 +797,15 @@ class Web3Service extends BaseService{
         }
         console.log(params);
         let nearProvider:Near = kryptikProvider.nearProvider;
-        let pubkey = NearPublicKey.fromString(params.nearPubKeyString);
-        const accessKeyResponse = await nearProvider.connection.provider.query(
-            `access_key/${params.sendAccount}/${pubkey.toString()}`,
-            ""
-          );
+        let block:BlockResult = await nearProvider.connection.provider.block({ finality: 'final' });
         // NEAR gas is calculated in TGAS
         // 1 TGAS = 10^12
-        let gasUsed:number = multByDecimals(1, 12)
+        let gasUsed:number = multByDecimals(1, 12).asNumber
         // hardcoded gas amounts are based on protocol paramters
         // more info. on NEAR gas here: https://docs.near.org/docs/concepts/gas#thinking-in-gas
         switch(params.txType){
             case(TxType.TransferNative):{
-                gasUsed = .45*gasUsed;
+                gasUsed = 1*gasUsed;
                 break;
             }
             case(TxType.TransferToken):{
@@ -824,10 +819,10 @@ class Web3Service extends BaseService{
             }
         }
         // fetch latest gas price
-        let gasPrice:number = Number((await nearProvider.connection.provider.gasPrice(accessKeyResponse.block_hash)).gas_price);
+        let gasPrice:number = Number((await nearProvider.connection.provider.gasPrice(block.header.hash)).gas_price);
         console.log(gasPrice);
         // convert gas to near amount
-        let feeInNear =  divByDecimals((Number(gasPrice)*gasUsed), params.networkDb.decimals); 
+        let feeInNear:number = divByDecimals((Number(gasPrice)*gasUsed), params.networkDb.decimals).asNumber; 
         let feeInUsd:number = params.tokenPriceUsd*feeInNear;
         let transactionFeeData:TransactionFeeData = {
             network: kryptikProvider.network,
