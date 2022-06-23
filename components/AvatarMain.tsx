@@ -1,4 +1,5 @@
 import { NextPage } from "next";
+
 import { UserDB } from "../src/models/user";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 

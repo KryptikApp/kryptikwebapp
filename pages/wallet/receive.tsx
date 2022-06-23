@@ -1,8 +1,6 @@
 import type { NextPage } from 'next'
 import { useState } from 'react'
 import toast, { Toaster } from 'react-hot-toast'
-import { defaultTokenAndNetwork} from '../../src/services/models/network'
-import DropdownNetworks from '../../components/DropdownNetworks'
 import {AiFillCheckCircle, AiOutlineCopy} from "react-icons/ai"
 import { useQRCode } from 'next-qrcode';
 import { useEffect} from 'react'
@@ -10,6 +8,8 @@ import { useEffect} from 'react'
 // kryptik imports
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import { TokenAndNetwork } from '../../src/services/models/token'
+import { defaultTokenAndNetwork} from '../../src/services/models/network'
+import DropdownNetworks from '../../components/DropdownNetworks'
 
 
 const Recieve: NextPage = () => {

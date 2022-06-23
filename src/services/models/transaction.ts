@@ -140,6 +140,8 @@ export interface FeeDataEvmParameters{
     network:NetworkDb, tokenPriceUsd:number, tokenData?:TokenData, amountToken:string
 }
 
+export type IErrorHandler = (message:string, isFatal?:boolean)=>void
+
 export interface CreateTransactionParameters{
     tokenAndNetwork:TokenAndNetwork,
     amountCrypto: string,
@@ -148,5 +150,13 @@ export interface CreateTransactionParameters{
     wallet: IWallet,
     toAddress:string,
     fromAddress:string,
-    errorHandler: (message:string, isFatal?:boolean)=>void
+    errorHandler: IErrorHandler
+}
+
+export interface ISignAndSendParameters{
+    sendAccount:string,
+    wallet:IWallet,
+    networkDb:NetworkDb,
+    kryptikProvider:KryptikProvider,
+    errorHandler?:IErrorHandler
 }

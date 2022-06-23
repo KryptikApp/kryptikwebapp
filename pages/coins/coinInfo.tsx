@@ -8,9 +8,10 @@ import {Chart} from 'react-chartjs-2';
 import "chartjs-adapter-date-fns"
 import {Chart as ChartJS, LinearScale, PointElement, LineElement, TimeScale, Tooltip} from 'chart.js'
 import { defaultTokenAndNetwork } from '../../src/services/models/network';
-import { formatTicker, roundToDecimals, roundUsdAmount } from '../../src/helpers/wallet/utils';
 import Divider from '../../components/Divider';
 import { removeHttp } from '../../src/helpers/utils';
+import { formatTicker } from '../../src/helpers/utils/networkUtils';
+import { roundToDecimals, roundUsdAmount } from '../../src/helpers/utils/numberUtils';
 
 ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, Tooltip);
 

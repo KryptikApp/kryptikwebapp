@@ -8,7 +8,7 @@ import {
 import { Network, NetworkFamily } from 'hdseedloop';
 import { Near } from 'near-api-js';
 import { NearConfig } from 'near-api-js/lib/near';
-import { networkFromNetworkDb } from '../../helpers/wallet/utils';
+import { networkFromNetworkDb } from '../../helpers/utils/networkUtils';
 import { NetworkDb } from './network';
 
 export class KryptikProvider{

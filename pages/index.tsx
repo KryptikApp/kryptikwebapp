@@ -1,7 +1,8 @@
 import type { NextPage } from 'next'
+import toast, { Toaster } from 'react-hot-toast';
+
 import styles from '../styles/Splash.module.css'
 import { useKryptikAuthContext } from '../components/KryptikAuthProvider';
-import toast, { Toaster } from 'react-hot-toast';
 
 const Home: NextPage = () => {
   const kryptikAuthContext = useKryptikAuthContext();

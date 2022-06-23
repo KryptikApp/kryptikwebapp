@@ -1,11 +1,13 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
+
 import { IBalance } from "../../src/services/Web3Service";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import ListItem from "./ListItem";
-import { formatTicker, roundToDecimals } from "../../src/helpers/wallet/utils";
 import Divider from "../Divider";
 import ListItemLoading from "./ListItemLoading";
+import { formatTicker } from "../../src/helpers/utils/networkUtils";
+import { roundToDecimals } from "../../src/helpers/utils/numberUtils";
 
 const ListBalance:NextPage = () => {
     const {kryptikService, kryptikWallet, authUser} = useKryptikAuthContext();

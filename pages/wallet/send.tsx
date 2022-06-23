@@ -6,19 +6,20 @@ import { defaultTokenAndNetwork, placeHolderSolAddress } from '../../src/service
 import { SendProgress } from '../../src/services/types'
 import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapLine} from "react-icons/ri"
-import { isValidAddress, Network, NetworkFamily, NetworkFamilyFromFamilyName, SignedTransaction, TransactionParameters, truncateAddress } from "hdseedloop"
+import { isValidAddress, Network, NetworkFamily, NetworkFamilyFromFamilyName, truncateAddress } from "hdseedloop"
 
 import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
 import TransactionFeeData, { CreateTransactionParameters, defaultTransactionFeeData, defaultTxPublishedData, FeeDataParameters, SolTransactionParams, TransactionPublishedData, TransactionRequest, TxType } from '../../src/services/models/transaction'
-import { formatAmountUi, formatTicker, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from '../../src/helpers/wallet/utils'
-import { createSolTokenTransaction, createSolTransaction } from '../../src/handlers/wallet/transactionHandler'
+import { createSolTokenTransaction, createSolTransaction } from '../../src/handlers/wallet/transactions/SolTransactions'
 import { Transaction} from '@solana/web3.js'
 import { TokenParamsSpl } from '../../src/services/models/token'
 import {handlePublishTransaction} from '../../src/handlers/wallet/sendHandler'
 import TxFee from '../../components/transactions/TxFee'
+import { networkFromNetworkDb, formatTicker } from '../../src/helpers/utils/networkUtils'
+import { roundUsdAmount, formatAmountUi, roundCryptoAmount } from '../../src/helpers/utils/numberUtils'
 
 
 

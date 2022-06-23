@@ -1,6 +1,6 @@
-import { NetworkFamily } from "hdseedloop";
 import { NextPage } from "next";
-import { networkFromNetworkDb, roundUsdAmount } from "../../src/helpers/wallet/utils";
+
+import { roundUsdAmount } from "../../src/helpers/utils/numberUtils";
 import { TokenAndNetwork } from "../../src/services/models/token";
 import TransactionFeeData from "../../src/services/models/transaction";
 

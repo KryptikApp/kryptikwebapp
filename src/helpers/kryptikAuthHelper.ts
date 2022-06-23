@@ -2,13 +2,14 @@
 import { signInWithCustomToken, updateCurrentUser, updateProfile, User, UserCredential } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { firebaseAuth, firestore, formatAuthUser, readExtraUserData, getUserPhotoPath } from "./firebaseHelper";
+
 import { updateVaultSeedloop } from "../handlers/wallet/vaultHandler";
 import { defaultWallet } from "../models/defaultWallet";
 import { IWallet } from "../models/IWallet";
 import { defaultUser, UserDB, UserExtraData } from "../models/user";
 import Web3Service, { IConnectWalletReturn } from "../services/Web3Service";
-import { firebaseAuth, firestore, formatAuthUser, readExtraUserData, getUserPhotoPath } from "./firebaseHelper";
-import { networkFromNetworkDb } from "./wallet/utils";
+import { networkFromNetworkDb } from "./utils/networkUtils";
 
 
 
@@ -110,12 +111,14 @@ export function useKryptikAuth() {
         setKryptikService(ks);
         ks.onWalletChanged = walletStateChanged;
         let walletKryptik:IWallet;
+        console.log("connecting wallet local and remote");
         if (seed != "") {
             walletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser, seed);
         }
         else {
             walletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser);
         }
+        console.log("finished connecting");
         try{
           console.log("Updating wallet networks;");
           await updateWalletNetworks(walletKryptik, kryptikService, formattedUser, userExtraData);

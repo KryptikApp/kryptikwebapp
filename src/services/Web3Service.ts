@@ -13,28 +13,25 @@ import {
     RpcResponseAndContext,
     TokenAmount,
   } from '@solana/web3.js';
-import { BN } from "bn.js";
-import { transactions as nearTx, utils as nearUtils} from "near-api-js";
-import { PublicKey as NearPublicKey} from "near-api-js/lib/utils/key_pair";
+  import { Account as NearAccount, Near } from "near-api-js";
+import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
+import { BigNumber, Contract, utils } from "ethers";
+import { BlockResult } from "near-api-js/lib/providers/provider";
 
 import HDSeedLoop, {Network, NetworkFamily, NetworkFamilyFromFamilyName, NetworkFromTicker, WalletKryptik } from "hdseedloop";
 import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
-import { BigNumber, Contract, utils } from "ethers";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataNearParameters, FeeDataParameters, FeeDataSolParameters, TxType} from "./models/transaction";
-import { createEd25519PubKey, createSolTokenAccount, divByDecimals, isNetworkArbitrum, lamportsToSol, multByDecimals, networkFromNetworkDb, roundCryptoAmount, roundToDecimals, roundUsdAmount } from "../helpers/wallet/utils";
 import { UserDB } from "../models/user";
-import {getChainDataForNetwork } from "../handlers/wallet/transactionHandler";
-import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, TokenData, Nep141Params, TokenAndNetwork } from "./models/token";
+import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, Nep141Params, TokenAndNetwork } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
-import { Account as NearAccount, Near } from "near-api-js";
-import { parseNearAmount } from "near-api-js/lib/utils/format";
-import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
 import { searchTokenListByTicker } from "../helpers/search";
-import { BlockResult } from "near-api-js/lib/providers/provider";
+import { createEd25519PubKey, createSolTokenAccount } from "../helpers/utils/accountUtils";
+import { networkFromNetworkDb, isNetworkArbitrum, getChainDataForNetwork } from "../helpers/utils/networkUtils";
+import { lamportsToSol, divByDecimals, roundCryptoAmount, roundUsdAmount, multByDecimals, roundToDecimals } from "../helpers/utils/numberUtils";
 
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
