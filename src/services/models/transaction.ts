@@ -57,6 +57,7 @@ export interface SolTransactionParams{
 
 export interface NearTransactionParams{
     sendAccount:string,
+    nearPubKeyString:string,
     toAddress: string,
     decimals: number,
     kryptikProvider:KryptikProvider,
@@ -115,7 +116,7 @@ export const defaultTxPublishedData:TransactionPublishedData = {
 }
 
 export interface FeeDataParameters{
-    networkDb:NetworkDb, sendAccount:string, txType:TxType, nearPubKeyString?:string, solTransaction?:Transaction, tokenData?:TokenData, amountToken:string
+    networkDb:NetworkDb, sendAccount:string, txType:TxType, solTransaction?:Transaction, tokenData?:TokenData, amountToken:string
 }
 
 export interface FeeDataSolParameters{
@@ -132,8 +133,6 @@ export enum TxType{
 export interface FeeDataNearParameters{
     tokenPriceUsd:number,
     networkDb:NetworkDb,
-    sendAccount:string,
-    nearPubKeyString:string,
     txType:TxType
 }
 

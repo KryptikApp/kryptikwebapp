@@ -19,8 +19,6 @@ import { Transaction} from '@solana/web3.js'
 import { TokenParamsSpl } from '../../src/services/models/token'
 import {handlePublishTransaction} from '../../src/handlers/wallet/sendHandler'
 import TxFee from '../../components/transactions/TxFee'
-import { KeyPairEd25519 } from 'near-api-js/lib/utils/key_pair'
-import { baseEncode } from 'borsh'
 
 
 
@@ -113,21 +111,11 @@ const Send: NextPage = () => {
     let nw:Network =  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
     // use instead of from address as react state may not have updated
     let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
-    let nearPubKey:string|undefined;
-    // get special address for near
-    if(nw.networkFamily == NetworkFamily.Near){
-      let tokenWallet = kryptikWallet.seedLoop.getWalletForAddress(nw, accountAddress);
-      if(!tokenWallet) return;
-      let keyPair:nacl.SignKeyPair = tokenWallet.createKeyPair();
-      let nearKey:KeyPairEd25519 = new KeyPairEd25519(baseEncode(keyPair.secretKey));
-      nearPubKey = nearKey.publicKey.toString();
-    }
     let feeDataParams:FeeDataParameters = {
       networkDb: selectedTokenAndNetwork.baseNetworkDb,
       tokenData: selectedTokenAndNetwork.tokenData,
       amountToken: amountCrypto,
       sendAccount: accountAddress,
-      nearPubKeyString: nearPubKey,
       txType: txType,
       solTransaction: solTx
     }
@@ -412,7 +400,7 @@ const Send: NextPage = () => {
                 <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-8xl text-center" id="amount" placeholder="$0" autoComplete="off" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
               </div>
               <br/>
-              <div className="rounded-full border border-gray-400 p-1 max-w-fit inline mr-2 text-slate-400 hover:cursor-pointer hover:bg-slate-100 hover:text-sky-400 hover:font-semibold" onClick={()=>setMaxAmount()}>
+              <div className="rounded-full border border-gray-400 p-1 max-w-fit inline mr-2 mb-1 text-slate-400 hover:cursor-pointer hover:bg-slate-100 hover:text-sky-400 hover:font-semibold" onClick={()=>setMaxAmount()}>
                 <span className="text-xs">MAX</span>
               </div>
               <span className="text-slate-400 text-sm inline">{!isInputCrypto? `${roundCryptoAmount(Number(amountCrypto))} ${selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.symbol:formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}`:`$${amountUSD}`}</span>
@@ -425,7 +413,7 @@ const Send: NextPage = () => {
               {/* show fees when dropdown is loaded */}
               {
                 dropdownLoaded?
-                <TxFee txFeeData={transactionFeeData} tokenAndNetwork={selectedTokenAndNetwork} feesLoaded={feesLoaded}/>:
+                <TxFee txFeeData={transactionFeeData} tokenAndNetwork={selectedTokenAndNetwork} feesLoaded={feesLoaded} feeLabel={"Fees:"}/>:
                 <div className="w-40 h-6 mt-2 truncate bg-gray-300 animate-pulse rounded mx-auto"/>
               }
               
@@ -728,7 +716,7 @@ const Send: NextPage = () => {
                           </div>
                           <div className="flex-1 px-1">
                             {
-                               networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily == NetworkFamily.Solana?
+                               (amountTotalBounds.lowerBoundTotalUsd == amountTotalBounds.upperBoundTotalUsd)?
                               <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>:
                               <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
                             }
