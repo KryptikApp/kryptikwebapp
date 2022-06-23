@@ -7,7 +7,11 @@ import * as splToken from "@solana/spl-token"
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { transactions as nearTx, utils as nearUtils} from "near-api-js";
 import { PublicKey as NearPublicKey} from "near-api-js/lib/utils/key_pair";
-import { BN } from "bn.js";
+import { AccessKeyView, BlockResult } from "near-api-js/lib/providers/provider";
+import { numberToBN } from "../../helpers/utils";
+import { parseNearAmount } from "near-api-js/lib/utils/format";
+import BN from "bn.js";
+import { DEFAULT_NEAR_FUNCTION_CALL_GAS } from "./transactions/constants";
 
 
 // tx: basic send of base sol coin
@@ -32,17 +36,60 @@ export const createSolTransaction = async function(txIn:SolTransactionParams):Pr
 export const createNearTransaction = async function(txIn:NearTransactionParams):Promise<nearTx.Transaction>{
     if(!txIn.kryptikProvider.nearProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
     let nearProvider = txIn.kryptikProvider.nearProvider;
-    let account = await nearProvider.account(txIn.sendAccount);
-    let amountYocto = multByDecimals(txIn.valueNear, txIn.decimals);
-    const actions = [nearTx.transfer(new BN(amountYocto))];
-    const accessKeyResponse = await account.findAccessKey(txIn.sendAccount, actions);
-    let pubkey = NearPublicKey.fromString(txIn.sendAccount);
-    let recentBlockhash = nearUtils.serialize.base_decode(accessKeyResponse.accessKey.block_hash); 
+    // convert near amount to yocto units.. similar to wei for ethereum
+    let amountYocto:string|null = parseNearAmount(txIn.valueNear.toString());
+    if(!amountYocto) throw(new Error("Error: Unable to parse near amount"));
+    // basic transfer type
+    console.log(amountYocto);
+    let bnAmount = numberToBN(amountYocto);
+    const actions:nearTx.Action[] = [nearTx.transfer(bnAmount)];
+    let pubkey = NearPublicKey.fromString(txIn.nearPubKeyString);
+    const accessKeyResponse = await nearProvider.connection.provider.query<AccessKeyView>({
+        request_type: 'view_access_key',
+        account_id: txIn.sendAccount,
+        public_key: pubkey.toString(),
+        finality: 'optimistic'
+    });
+    let block:BlockResult = await nearProvider.connection.provider.block({ finality: 'final' });
+    let recentBlockhash:Buffer = nearUtils.serialize.base_decode(block.header.hash); 
     const transaction:nearTx.Transaction =  nearTx.createTransaction(
         txIn.sendAccount,
         pubkey,
         txIn.toAddress,
-        accessKeyResponse.accessKey.nonce,
+        accessKeyResponse.nonce+1,
+        actions,
+        recentBlockhash
+      );
+    return transaction;
+}
+
+export const createNearTokenTransaction = async function(txIn:NearTransactionParams){
+    if(!txIn.kryptikProvider.nearProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
+    let nearProvider = txIn.kryptikProvider.nearProvider;
+    // convert near amount to yocto units.. similar to wei for ethereum
+    let amountToken:string = multByDecimals(txIn.valueNear, txIn.decimals).asString;
+    // arguments to pass in to function call
+    let callArgs = {receiver_id: txIn.toAddress,
+        amount: amountToken,
+        memo: null}
+    // hardcoded deposit amount of 1 yocto
+    // smallest nonzero amount possible
+    let depositAmount:BN = numberToBN("1");
+    const actions:nearTx.Action[] = [nearTx.functionCall("ft_transfer", callArgs, DEFAULT_NEAR_FUNCTION_CALL_GAS, depositAmount)];
+    let pubkey = NearPublicKey.fromString(txIn.nearPubKeyString);
+    const accessKeyResponse = await nearProvider.connection.provider.query<AccessKeyView>({
+        request_type: 'view_access_key',
+        account_id: txIn.sendAccount,
+        public_key: pubkey.toString(),
+        finality: 'optimistic'
+    });
+    let block:BlockResult = await nearProvider.connection.provider.block({ finality: 'final' });
+    let recentBlockhash:Buffer = nearUtils.serialize.base_decode(block.header.hash); 
+    const transaction:nearTx.Transaction =  nearTx.createTransaction(
+        txIn.sendAccount,
+        pubkey,
+        txIn.toAddress,
+        accessKeyResponse.nonce+1,
         actions,
         recentBlockhash
       );
@@ -71,7 +118,7 @@ export const createSolTokenTransaction = async function(txIn:SolTransactionParam
             splToken.createAssociatedTokenAccountInstruction(fromPubKey, toTokenAccount , toPubkey, mintPubKey)
         );
     }
-    let amountToken = multByDecimals(txIn.valueSol, txIn.decimals);
+    let amountToken:number = multByDecimals(txIn.valueSol, txIn.decimals).asNumber;
     // UPDATE TO USE ACTUAL NUMBER OF DECIMALS
     transaction.add(
         splToken.createTransferInstruction(
