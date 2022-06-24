@@ -12,7 +12,7 @@ const ListItemDropdown:NextPage<Props> = (props) => {
     let title = tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.name:tokenAndNetwork.baseNetworkDb.fullName;
     let imgSrc = tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.logoURI:tokenAndNetwork.baseNetworkDb.iconPath;
     return(
-        <li className="text-gray-900 select-none relative py-2 pl-3 pr-9 hover:bg-gray-100 cursor-pointer" key={title} id={title} role="option" onClick={()=>selectFunction(tokenAndNetwork)}>
+        <li className="text-gray-900 dark:text-gray-100 select-none relative py-2 pl-3 pr-9 hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer" key={title} id={title} role="option" onClick={()=>selectFunction(tokenAndNetwork)}>
             <div className="flex items-center">
             <img src={imgSrc} alt="" className="flex-shrink-0 h-6 w-6 rounded-full inline"/>
             {

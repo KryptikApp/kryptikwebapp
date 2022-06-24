@@ -20,10 +20,10 @@ const Home: NextPage = () => {
         </div>
 
         <div className="text-center max-w-2xl mx-auto content-center">
-          <h1 className="text-5xl font-bold sans ">
+          <h1 className="text-5xl font-bold sans dark:text-white">
               Crypto Made <span className="text-transparent bg-clip-text bg-gradient-to-br from-cyan-500 to-green-500">Easy</span>
           </h1>
-          <h1 className={styles.description}>Send crypto to anyone, anywhere, anytime.</h1>
+          <h1 className="text-center mt-4 dark:text-gray-300">Save, send, and collect with ease.</h1>
           <button onClick={()=>handleGetStarted()} className="bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded my-5">
                             Get Started
           </button>

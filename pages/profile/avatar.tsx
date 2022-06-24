@@ -97,7 +97,7 @@ const Profile: NextPage = () => {
               Kryptik Avatar
           </h5>
 
-                  <label className="form-label inline-block mb-2 text-gray-700 ">
+                  <label className="form-label inline-block mb-2 text-gray-700 dark:text-gray-200">
                     Image Path</label>
                     <input className="form-control
                     block
@@ -114,9 +114,9 @@ const Profile: NextPage = () => {
                     hover:cursor-pointer
                     ease-in-out
                     m-0
-                    focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none" type="file" id="file" name="file" onChange={uploadToClient} required/>         
+                    focus:text-gray-700 focus:bg-white focus:border-sky-600 focus:outline-none dark:bg-[#141414]" type="file" id="file" name="file" onChange={uploadToClient} required/>         
                   
-                  <p className="text-slate-500 text-sm">Your avatar will be shown to other Kryptik users. Square images work best.</p>
+                  <p className="mt-2 text-slate-500 text-sm dark:text-slate-400">Your avatar will be shown to other Kryptik users. Square images work best.</p>
                     {/* upload button */}
                     <div className="item-end">
                       <button onClick={()=>handleClickUpload()} className={`bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 ${loadingUpdate?"hover:cursor-not-allowed":""} border border-green-500 hover:border-transparent rounded-lg my-5`} disabled={loadingUpdate}>

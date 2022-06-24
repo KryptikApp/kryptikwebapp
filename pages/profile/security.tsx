@@ -42,10 +42,10 @@ const Profile: NextPage = () => {
         </div>
 
         <div className="lg:px-[30%]">
-          <h1 className="text-4xl font-bold sans mb-5">
+          <h1 className="text-4xl font-bold sans mb-5 dark:text-white">
                   Security
           </h1>
-          <p className="mb-2 text-lg text-justify">Kryptik improves wallet security by encrypting a serialized wallet on the client and 
+          <p className="mb-2 text-lg text-justify dark:text-white">Kryptik improves wallet security by encrypting a serialized wallet on the client and 
           splitting the encryption key between local storage and the server via shamir secret sharing. </p>
           <Divider/>
           <h2 className="text-xl text-red-600 font-bold sans mb-2">Your Recovery Phrase 
@@ -53,7 +53,7 @@ const Profile: NextPage = () => {
             <AiOutlineEyeInvisible className="inline ml-3 hover:cursor-pointer" size="22" onClick={()=>handleIsVisibleToggle()}/>
             }
           </h2>
-          <p className="text-slate-500 text-sm mb-5">Save these 12 words in a safe place. Do not share them with anyone, even Kryptik. Anyone with your recovery phrase can steal your funds.</p>
+          <p className="text-slate-500 text-sm mb-5 dark:text-slate-300">Save these 12 words in a safe place. Do not share them with anyone, even Kryptik. Anyone with your recovery phrase can steal your funds.</p>
           <textarea disabled className={`${!isVisible && "blur-sm"} mb-4 bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400`} value={getSeedPhrase()}>
           </textarea>
           {

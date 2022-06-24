@@ -387,7 +387,7 @@ const Send: NextPage = () => {
           {
             (progress==SendProgress.SetParamaters)  &&
             <div className="align-left m-7">
-              <AiOutlineArrowLeft className="hover:cursor-pointer" onClick={()=>handleClickBack()} size="30"/>
+              <AiOutlineArrowLeft className="hover:cursor-pointer dark:text-white" onClick={()=>handleClickBack()} size="30"/>
             </div>
           }
           {
@@ -398,7 +398,7 @@ const Send: NextPage = () => {
               </div>
               {/* amount input */}
               <div className="flex justify-start mt-5">
-                <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-8xl text-center" id="amount" placeholder="$0" autoComplete="off" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
+                <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-8xl text-center bg-transparent" id="amount" placeholder="$0" autoComplete="off" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
               </div>
               <br/>
               <div className="rounded-full border border-gray-400 p-1 max-w-fit inline mr-2 mb-1 text-slate-400 hover:cursor-pointer hover:bg-slate-100 hover:text-sky-400 hover:font-semibold" onClick={()=>setMaxAmount()}>
@@ -441,7 +441,7 @@ const Send: NextPage = () => {
                       selectedTokenAndNetwork.tokenData &&
                       <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${selectedTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
                   }
-                  <span className="inline mx-2">${roundUsdAmount(Number(amountUSD))}</span>
+                  <span className="inline mx-2 dark:text-white">${roundUsdAmount(Number(amountUSD))}</span>
                 </div>
                 
                 <div className="px-5 py-5 m-2 rounded mt-0 mb-0">
@@ -449,12 +449,12 @@ const Send: NextPage = () => {
                     <label className="block text-gray-500 font-bold text-left mb-1 md:mb-0 pr-4">
                       To
                     </label>
-                    <input className="bg-white appearance-none border-2 border-gray-400 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" value={toAddress} onChange={(e) => handleToAddressChange(e.target.value)} id="inline-to"/>
+                    <input className="bg-white appearance-none border-2 border-gray-400 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:dark:bg-[#141414] focus:border-blue-400 dark:bg-[#141414] dark:text-white" value={toAddress} onChange={(e) => handleToAddressChange(e.target.value)} id="inline-to"/>
                     {/* for input */}
                     <label className="block text-gray-500 font-bold text-left mb-1 md:mb-0 pr-4">
                       For
                     </label>
-                    <textarea maxLength={150} className="bg-white appearance-none border-2 border-gray-400 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400" id="inline-forMessage" placeholder={"Pizza, rent, etc."} value={forMessage} onChange={(e) => setForMessage(e.target.value)}/>
+                    <textarea maxLength={150} className="bg-white appearance-none border-2 border-gray-400 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:dark:bg-[#141414] focus:border-blue-400 dark:bg-[#141414] dark:text-white" id="inline-forMessage" placeholder={"Pizza, rent, etc."} value={forMessage} onChange={(e) => setForMessage(e.target.value)}/>
                     {/* next button... to review */}
                     <button onClick={()=>handleStartReview()} className={`bg-transparent hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent rounded-lg my-5`} disabled={isLoading}>      
                                   Review
@@ -481,7 +481,7 @@ const Send: NextPage = () => {
                       <AiOutlineArrowLeft className="hover:cursor-pointer" onClick={()=>handleClickBack()} size="25"/>
                     </div>
                     <div className='flex-2'>
-                      <h4 className="font-bold text-lg mx-auto content-center">Review Transaction</h4>
+                      <h4 className="font-bold text-lg mx-auto content-center dark:text-white">Review Transaction</h4>
                     </div>
                     <div className='flex-1'>
                         {/* space filler */}
@@ -489,7 +489,7 @@ const Send: NextPage = () => {
                   </div>
                   
 
-                  <div className="border border-solid border-1 border-gray-300 py-4 rounded-lg mx-2">
+                  <div className="border border-solid border-1 border-gray-300 dark:border-gray-600 py-4 rounded-lg mx-2">
 
                     <div className="flex flex-row">
                       <div className="flex-1">
@@ -503,10 +503,10 @@ const Send: NextPage = () => {
                         <AiOutlineArrowDown className="text-gray-200 pl-2" size="30"/>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-base mx-2">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
+                        <p className="font-semibold text-base mx-2 dark:text-white">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
                       </div>
                       <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900 truncate">
+                          <p className="text-sm font-semibold text-gray-900 truncate dark:text-gray-100">
                             ${amountUSD}
                           </p>
                           <p className="text-sm text-gray-500 truncate dark:text-gray-400">
@@ -520,7 +520,7 @@ const Send: NextPage = () => {
                           <AiOutlineWallet className="text-sky-400 pl-1" size="30"/>
                         </div>
                         <div className="flex-1 px-1">
-                          <p className="italic">{readableToAddress}</p>
+                          <p className="italic dark:text-white">{readableToAddress}</p>
                         </div>
                         <div className='flex-1'>
                           {/* space filler */}
@@ -532,15 +532,15 @@ const Send: NextPage = () => {
                 <div className='mx-3'>
                     <div className="flex">
                           <div className="flex-1">
-                            <p className="text-slate-600 text-left">Wallet Used</p>
+                            <p className="text-slate-600 text-left dark:text-slate-300">Wallet Used</p>
                           </div>
                           <div className="flex-1 px-1">
-                            <p className="text-right">{readableFromAddress}</p>
+                            <p className="text-right dark:text-white">{readableFromAddress}</p>
                           </div>
                     </div>
                     <div className="flex flex-row">
                           <div className="flex-1">
-                            <p className="text-slate-600 text-left">Blockchain</p>
+                            <p className="text-slate-600 text-left dark:text-slate-300">Blockchain</p>
                           </div>
                           <div className="flex-1 px-1">
                             <p className="text-right"><span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-semibold">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span></p>
@@ -548,7 +548,7 @@ const Send: NextPage = () => {
                     </div>
                     <div className="flex flex-row">
                           <div className="flex-1">
-                            <p className="text-slate-600 text-left">Network Fees</p>
+                            <p className="text-slate-600 text-left dark:text-slate-300">Network Fees</p>
                           </div>
                           <div className="flex-1 px-1">
                             <div className='text-right'>
@@ -558,13 +558,13 @@ const Send: NextPage = () => {
                     </div>
                     <div className="flex flex-row">
                           <div className="flex-1">
-                            <p className="text-slate-600 text-left">Total Amount</p>
+                            <p className="text-slate-600 text-left dark:text-slate-300">Total Amount</p>
                           </div>
                           <div className="flex-1 px-1">
                             {
-                               (networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb).networkFamily == NetworkFamily.Solana || amountTotalBounds.lowerBoundTotalUsd == amountTotalBounds.upperBoundTotalUsd)?
-                              <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>:
-                              <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
+                               (amountTotalBounds.lowerBoundTotalUsd == amountTotalBounds.upperBoundTotalUsd)?
+                              <p className="text-right dark:text-white">{`$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>:
+                              <p className="text-right dark:text-white">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
                             }
                           </div>
                     </div>
@@ -612,7 +612,7 @@ const Send: NextPage = () => {
                   </div>
                     {/* error message */}
                     <div className="mx-3 my-20">
-                      <p>{failureMsg}</p>
+                      <p className="dark:text-white">{failureMsg}</p>
                     </div>
                     <Divider/>
                     <div className="flex">
@@ -656,10 +656,10 @@ const Send: NextPage = () => {
                         </div>
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-base mx-2">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
+                        <p className="font-semibold text-base mx-2 dark:text-white">{selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.name:selectedTokenAndNetwork.baseNetworkDb.fullName}</p>
                       </div>
                       <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-900 truncate">
+                          <p className="text-sm font-semibold text-gray-900 truncate dark:text-gray-100">
                             ${roundUsdAmount(Number(amountUSD))}
                           </p>
                           <p className="text-sm text-gray-500 truncate dark:text-gray-400">
@@ -673,7 +673,7 @@ const Send: NextPage = () => {
                           <AiOutlineWallet className="text-sky-400 pl-1" size="30"/>
                         </div>
                         <div className="flex-1 px-1">
-                          <p className="italic">{readableToAddress}</p>
+                          <p className="italic dark:text-white">{readableToAddress}</p>
                         </div>
                         <div className='flex-1'>
                           {/* space filler */}
@@ -685,15 +685,15 @@ const Send: NextPage = () => {
                 <div className='mx-3'>
                     <div className="flex">
                           <div className="flex-1">
-                            <p className="text-slate-600 text-left">Wallet Used</p>
+                            <p className="text-slate-600 text-left dark:text-slate-300">Wallet Used</p>
                           </div>
                           <div className="flex-1 px-1">
-                            <p className="text-right">{readableFromAddress}</p>
+                            <p className="text-right dark:text-white">{readableFromAddress}</p>
                           </div>
                     </div>
                     <div className="flex flex-row">
                           <div className="flex-1">
-                            <p className="text-slate-600 text-left">Blockchain</p>
+                            <p className="text-slate-600 text-left dark:text-slate-300">Blockchain</p>
                           </div>
                           <div className="flex-1 px-1">
                             <p className="text-right"><span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-semibold">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span></p>
@@ -702,7 +702,7 @@ const Send: NextPage = () => {
                     <div className="flex flex-row">
 
                           <div className="flex-1">
-                            <p className="text-slate-600 text-left">Network Fees</p>
+                            <p className="text-slate-600 text-left dark:text-slate-300">Network Fees</p>
                           </div>
 
                           <div className="flex-1 px-1">
@@ -713,13 +713,13 @@ const Send: NextPage = () => {
                     </div>
                     <div className="flex flex-row">
                           <div className="flex-1">
-                            <p className="text-slate-600 text-left">Total Amount</p>
+                            <p className="text-slate-600 text-left dark:text-slate-300">Total Amount</p>
                           </div>
                           <div className="flex-1 px-1">
                             {
                                (amountTotalBounds.lowerBoundTotalUsd == amountTotalBounds.upperBoundTotalUsd)?
-                              <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>:
-                              <p className="text-right">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
+                              <p className="text-right dark:text-white">{`$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>:
+                              <p className="text-right dark:text-white">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
                             }
                           </div>
                     </div>
@@ -744,18 +744,21 @@ const Send: NextPage = () => {
           }
           
           
-          <Divider/>
+          
           {
             progress == SendProgress.Begin &&
-            <div className="mx-auto text-center text-gray-500 text-sm">
-              {
-                (selectedTokenAndNetwork.networkBalance && !selectedTokenAndNetwork.tokenData) &&
-                <p>{isInputCrypto?roundCryptoAmount(Number(selectedTokenAndNetwork.networkBalance.amountCrypto)):`$${roundUsdAmount(Number(selectedTokenAndNetwork.networkBalance.amountUSD))}`} <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-semibold">{formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}</span> available</p>
-              }
-              {
-                (selectedTokenAndNetwork.tokenData && selectedTokenAndNetwork.tokenData.tokenBalance) && 
-                <p>{isInputCrypto?roundCryptoAmount(Number(selectedTokenAndNetwork.tokenData.tokenBalance.amountCrypto)):`$${roundUsdAmount(Number(selectedTokenAndNetwork.tokenData.tokenBalance.amountUSD))}`} <span style={{color:`${selectedTokenAndNetwork.tokenData.tokenDb.hexColor}`}} className="font-semibold">{selectedTokenAndNetwork.tokenData.tokenDb.symbol}</span> available</p>
-              }
+            <div>
+              <Divider/>
+              <div className="mx-auto text-center text-gray-500 text-sm dark:text-gray-400">
+                {
+                  (selectedTokenAndNetwork.networkBalance && !selectedTokenAndNetwork.tokenData) &&
+                  <p>{isInputCrypto?roundCryptoAmount(Number(selectedTokenAndNetwork.networkBalance.amountCrypto)):`$${roundUsdAmount(Number(selectedTokenAndNetwork.networkBalance.amountUSD))}`} <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-semibold">{formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)}</span> available</p>
+                }
+                {
+                  (selectedTokenAndNetwork.tokenData && selectedTokenAndNetwork.tokenData.tokenBalance) && 
+                  <p>{isInputCrypto?roundCryptoAmount(Number(selectedTokenAndNetwork.tokenData.tokenBalance.amountCrypto)):`$${roundUsdAmount(Number(selectedTokenAndNetwork.tokenData.tokenBalance.amountUSD))}`} <span style={{color:`${selectedTokenAndNetwork.tokenData.tokenDb.hexColor}`}} className="font-semibold">{selectedTokenAndNetwork.tokenData.tokenDb.symbol}</span> available</p>
+                }
+              </div>
             </div>
           }
           <div className="h-[7rem]">

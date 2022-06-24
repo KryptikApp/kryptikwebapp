@@ -75,12 +75,12 @@ const ListBalance:NextPage = () => {
         <div>
         <div>
                 <div className="flex justify-start mt-5">
-                    <h2 className="font-medium text-slate-700">Your Network Balances</h2>
+                    <h2 className="font-medium text-slate-700 dark:text-slate-200">Your Network Balances</h2>
                 </div>
                 {/* progress bar */}
                 {
                     !(isFetchedBalances&&isFetchedERC20&&isFetchedNep141&&isFetchedSpl)&&
-                    <div className="max-w-2xl bg-gray-200 rounded-full h-6">
+                    <div className="max-w-2xl bg-gray-200 dark:bg-[#141414] rounded-full h-6">
                         <div id="progressBar" className="bg-gradient-to-r from-sky-400 to-sky-600 h-6 rounded-full text-gray-700" style={{width: `0%`, maxWidth:`100%`}}>{progressPercent>15?`${roundToDecimals(progressPercent, 2)}%`:""}</div>
                     </div>
                 }
@@ -91,7 +91,7 @@ const ListBalance:NextPage = () => {
         {
             !isFetchedBalances?
             
-            <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+            <ul role="list">
             {
                 <div>
                     <ListItemLoading/>
@@ -115,16 +115,18 @@ const ListBalance:NextPage = () => {
                 </ul>
             </div>
         }
-        {/* ERC20 Balances */}
+        {/* TOKEN Balances */}
         <div>
                 <div className="flex justify-start mt-5">
-                    <h2 className="font-medium text-slate-700">Your ERC20 Balances</h2>
+                    <h2 className="font-medium text-slate-700 dark:text-slate-200">Your Token Balances</h2>
                 </div>
                 <Divider/>
         </div>
+        
+        {/* ERC20 Balances */}
         {
             !isFetchedERC20?
-            <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+            <ul role="list">
             {
                 <div>
                     <ListItemLoading/>
@@ -135,7 +137,7 @@ const ListBalance:NextPage = () => {
             </ul>
             :
             <div>
-                <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+                <ul role="list">
                 {balancesERC20.map((balance:IBalance) => (    
                     (balance.amountCrypto!="0") &&     
                     <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
@@ -150,15 +152,9 @@ const ListBalance:NextPage = () => {
             </div>
         }
         {/* SPL Balances */}
-        <div>
-                <div className="flex justify-start mt-5">
-                    <h2 className="font-medium text-slate-700">Your SPL Balances</h2>
-                </div>
-                <Divider/>
-        </div>
         {
             !isFetchedSpl?
-            <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+            <ul role="list">
             {
                 <div>
                     <ListItemLoading/>
@@ -169,7 +165,7 @@ const ListBalance:NextPage = () => {
             </ul>
             :
             <div>
-                <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+                <ul role="list">
                 {balancesSpl.map((balance:IBalance) => (    
                     (balance.amountCrypto!="0") &&     
                     <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
@@ -183,17 +179,10 @@ const ListBalance:NextPage = () => {
                 </ul>
             </div>
         }
-
         {/* NEP141 Balances */}
-        <div>
-                <div className="flex justify-start mt-5">
-                    <h2 className="font-medium text-slate-700">Your Nep141 Balances</h2>
-                </div>
-                <Divider/>
-        </div>
         {
             !isFetchedNep141?
-            <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+            <ul role="list">
             {
                 <div>
                     <ListItemLoading/>
@@ -205,9 +194,6 @@ const ListBalance:NextPage = () => {
             :
             <div>
             {
-                (balancesNep141.length == 0)? 
-                <h2 className="text-slate-700 mx-auto my-8">No NEP141 Token Balances</h2>
-                :
                 <div>
                     <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
                     {balancesNep141.map((balance:IBalance) => (    
@@ -221,6 +207,14 @@ const ListBalance:NextPage = () => {
                         />
                     ))}
                     </ul>
+                </div>
+            }
+            {/* indicate if no token balances vailable */}
+            {
+                (balancesNep141.length == 0 && balancesERC20.length == 0 && balancesSpl.length == 0)? 
+                <h2 className="text-slate-700 mx-auto my-8 dark:text-slate-200">No Token Balances Available!</h2>
+                :
+                <div>
                 </div>
             }
             </div>

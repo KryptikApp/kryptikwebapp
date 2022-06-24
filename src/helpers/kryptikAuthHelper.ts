@@ -137,7 +137,8 @@ export function useKryptikAuth() {
     const updateWalletNetworks = async function(wallet:IWallet, ks:Web3Service, user:UserDB, extraUserData:UserExtraData){
       // flag for if networks are added to seedloop
       let isUpdated:boolean = false;
-      for(const networkDb of ks.getSupportedNetworkDbs()){
+      let supprtedDbs = ks.getSupportedNetworkDbs();
+      for(const networkDb of supprtedDbs){
         let network = networkFromNetworkDb(networkDb);
         if(!wallet.seedLoop.networkOnSeedloop(network)){
           isUpdated = true;

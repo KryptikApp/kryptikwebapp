@@ -198,7 +198,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
 
         {!isFetched?
         <div>
-            <label id="listbox-label" className="block text-sm font-medium text-gray-700 text-left">Token</label>
+            <label id="listbox-label" className="block text-sm font-medium text-gray-700 text-left dark:text-gray-200">Token</label>
             {/* skeleton loader */}
             <div className="mt-1 relative">
                 <div className="relative w-full bg-gray-400 border border-gray-300 rounded-md shadow-sm pl-3 pr-10 h-8 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-sky-500 sm:text-sm animate-pulse"/>
@@ -206,20 +206,20 @@ const DropdownNetworks:NextPage<Props> = (props) => {
         </div>
         :
         <div>
-            <label id="listbox-label" className="block text-sm font-medium text-gray-700 text-left">Token</label>
+            <label id="listbox-label" className="block text-sm font-medium text-gray-700 text-left dark:text-gray-200">Token</label>
             <div className="mt-1 relative" onClick={()=>toggleShowOptions()}>
-                <button type="button" className="relative w-full bg-white border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-sky-500 sm:text-sm" aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
+                <button type="button" className="relative w-full bg-white dark:bg-black border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 sm:text-sm" aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
                 <span className="flex items-center">
                     {
                         selectedTokenAndNetwork.tokenData?
                         <div className="py-1">
                             <img src={selectedTokenAndNetwork.tokenData.tokenDb.logoURI} alt={`${title} icon`} className="flex-shrink-0 h-6 w-6 rounded-full inline"/>
                             <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${title} secondary image`}/>
-                            <span className="ml-3 block truncate inline"> {selectedTokenAndNetwork.tokenData.tokenDb.name}</span>
+                            <span className="ml-3 block truncate inline dark:text-white"> {selectedTokenAndNetwork.tokenData.tokenDb.name}</span>
                         </div>:
                         <div className="py-1">
                             <img src={selectedTokenAndNetwork.baseNetworkDb.iconPath} alt={`${title} icon`} className="flex-shrink-0 h-6 w-6 rounded-full inline"/>
-                            <span className="ml-3 block truncate inline"> {selectedTokenAndNetwork.baseNetworkDb.fullName}</span>
+                            <span className="ml-3 block truncate inline dark:text-white"> {selectedTokenAndNetwork.baseNetworkDb.fullName}</span>
                         </div>
                     }
                     
@@ -232,7 +232,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                 </span>
                 </button>
 
-                <ul className="absolute z-10 mt-1 w-full bg-white opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm" tabIndex={-1} role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3" hidden={!showOptions}>
+                <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-black opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm" tabIndex={-1} role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3" hidden={!showOptions}>
                 {networkAndTokens.map((nt:TokenAndNetwork) => (
                   (!(nt.baseNetworkDb.isTestnet&&!authUser.isAdvanced)) &&
                   <ListItemDropdown selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleOptionClick} tokenAndNetwork={nt}/>

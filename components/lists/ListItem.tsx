@@ -27,7 +27,7 @@ const ListItem:NextPage<Props> = (props) => {
         }
     }
     return(
-      <li key={`${title} ${Math.random()}`} className="py-3 sm:py-4 hover:cursor-pointer" onClick={()=>handleOnClick()}>
+      <li key={`${title} ${Math.random()}`} className="py-3 sm:py-4 hover:cursor-pointer hover:gray-100 hover:dark:bg-[#141414]" onClick={()=>handleOnClick()}>
           <div className="flex items-center space-x-4">
               <div className="flex-shrink-0">
                   <img className="w-8 h-8 rounded-full inline" src={imgSrc} alt={`${title} image`}/>
@@ -39,7 +39,7 @@ const ListItem:NextPage<Props> = (props) => {
               <div className="flex-1 min-w-0">
 
                     <div>
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">
                             {title}
                         </p>
                     </div>
@@ -49,12 +49,12 @@ const ListItem:NextPage<Props> = (props) => {
                   </p>
               </div>
               <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                      {amount}
-                  </p>
-                  <p className="text-sm text-gray-500 truncate dark:text-gray-400">
+                  <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-200">
                       $
                       {amountUSD}
+                  </p>
+                  <p className="text-sm text-gray-500 truncate dark:text-gray-400">
+                      {amount}
                   </p>
               </div>
           </div>

@@ -18,9 +18,9 @@ const HeaderProfile:NextPage<Props> = (props) => {
                 center?
                 <div>
                     <AvatarMain photoPath={getUserPhotoPath(user)}/>
-                    <h1 className="mt-3 font-bold">{user.name}</h1>
+                    <h1 className="mt-3 font-bold dark:text-white">{user.name}</h1>
                     {
-                        showBio && <p className="text-slate-500 text-sm">{user.bio}</p>
+                        showBio && <p className="text-slate-500 text-sm truncate dark:text-white">{user.bio}</p>
                     }
                 </div>
                 :
@@ -28,9 +28,9 @@ const HeaderProfile:NextPage<Props> = (props) => {
                     <AvatarMain photoPath={getUserPhotoPath(user)}/>
                     <div className="w-9/12 flex items-center">
                         <div className="w-10/12 flex flex-col leading-none items-start">
-                            <h1 className="mt-3 font-bold hover:text-transparent bg-clip-text bg-gradient-to-br from-cyan-500 to-green-500">{user.name}</h1>
+                            <h1 className="mt-3 font-bold dark:text-white">{user.name}</h1>
                             {
-                                showBio && <p className="text-slate-500 text-sm">{user.bio}</p>
+                                showBio && <p className="text-slate-500 text-sm dark:text-white">{user.bio}</p>
                             }
                         </div>
                     </div>

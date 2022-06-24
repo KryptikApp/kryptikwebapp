@@ -12,12 +12,14 @@ import Divider from '../../components/Divider';
 import { removeHttp } from '../../src/helpers/utils';
 import { formatTicker } from '../../src/helpers/utils/networkUtils';
 import { roundToDecimals, roundUsdAmount } from '../../src/helpers/utils/numberUtils';
+import { useKryptikThemeContext } from '../../components/ThemeProvider';
 
 ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, Tooltip);
 
 
 const coinInfo: NextPage = () => {
   const {kryptikService} = useKryptikAuthContext();
+  const {isDark} = useKryptikThemeContext();
   const defualtHistoricalData:number[][] = []
   const [historicalData, setHistoricalData] = useState(defualtHistoricalData);
   const defaultDataArray:number[] = [];
@@ -116,7 +118,7 @@ const coinInfo: NextPage = () => {
     const gradient = chart.ctx.createLinearGradient(0, 0, 0, 400);
     // UPDATE FOR DARK SCHEME
     gradient.addColorStop(0, tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.hexColor:tokenAndNetwork.baseNetworkDb.hexColor)
-    gradient.addColorStop(1, "#11161a");
+    gradient.addColorStop(1, `${isDark?"#b5b5b5":"#11161a"}`);
     return gradient;
   }
 
@@ -153,12 +155,12 @@ const coinInfo: NextPage = () => {
               {/* price and percent change */}
               <div className="flex-1 min-w-0 content-start text-left ml-2">
                     <div>
-                        <h1 className="text-2xl font-bold truncate" style={{color:`${tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.hexColor:tokenAndNetwork.baseNetworkDb.hexColor}`}}>
+                        <h1 className="text-2xl font-bold truncate dark:text-white" style={{color:`${tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.hexColor:tokenAndNetwork.baseNetworkDb.hexColor}`}}>
                             {tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.name:tokenAndNetwork.baseNetworkDb.fullName} ({formatTicker(tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.symbol:tokenAndNetwork.baseNetworkDb.ticker)})
                         </h1>
                     </div>
                   <div>
-                        <span className={`text-3xl text-black`}>${roundUsdAmount(currentPrice)}</span> <span className={`text-base font-semibold mt-1 mx-2 ${percentChange>0?"text-green-500":"text-red-600"}`}>{percentChange}%</span>
+                        <span className={`text-3xl text-black dark:text-white`}>${roundUsdAmount(currentPrice)}</span> <span className={`text-base font-semibold mt-1 mx-2 ${percentChange>0?"text-green-500":"text-red-600"}`}>{percentChange}%</span>
                   </div>
               </div>
           </div>
@@ -175,12 +177,14 @@ const coinInfo: NextPage = () => {
                             unit: 'day'
                         },
                         grid: {
-                          display: false
+                          display: false,
+                          borderColor: `${isDark?"#f2f2f0":"#11161a"}`
                         }
                     },
                 y:{
                       grid:{
-                        display:false
+                        display:false,
+                        borderColor: `${isDark?"#f2f2f0":"#11161a"}`
                       }
                 }
                 },
@@ -226,19 +230,19 @@ const coinInfo: NextPage = () => {
 
                         <ul className="flex flex-wrap text-sm font-medium text-center text-gray-500 dark:text-gray-400">
                             <li className="mr-2">
-                                <div onClick={()=>setActiveLookbook("1D")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1D"?`active text-white bg-sky-600`:"hover:bg-gray-400"}`} aria-current="page">1D</div>
+                                <div onClick={()=>setActiveLookbook("1D")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1D"?`active text-white bg-sky-500`:"hover:bg-gray-400"}`} aria-current="page">1D</div>
                             </li>
                             <li className="mr-2">
-                                <div onClick={()=>setActiveLookbook("7D")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="7D"?"active text-white bg-sky-600":"hover:bg-gray-400"}`}>7D</div>
+                                <div onClick={()=>setActiveLookbook("7D")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="7D"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>7D</div>
                             </li>
                             <li className="mr-2">
-                                <div onClick={()=>setActiveLookbook("1M")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1M"?"active text-white bg-sky-600":"hover:bg-gray-400"}`}>1M</div>
+                                <div onClick={()=>setActiveLookbook("1M")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1M"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>1M</div>
                             </li>
                             <li className="mr-2">
-                                <div onClick={()=>setActiveLookbook("3M")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="3M"?"active text-white bg-sky-600":"hover:bg-gray-400"}`}>3M</div>
+                                <div onClick={()=>setActiveLookbook("3M")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="3M"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>3M</div>
                             </li>
                             <li>
-                                <div onClick={()=>setActiveLookbook("1Y")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1Y"?"active text-white bg-sky-600":"hover:bg-gray-400"}`}>1Y</div>
+                                <div onClick={()=>setActiveLookbook("1Y")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1Y"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>1Y</div>
                             </li>
                         </ul>
 
@@ -249,12 +253,12 @@ const coinInfo: NextPage = () => {
             loaded &&
             <div>
 
-              <div className="text-left mt-4 mb-20 text-lg">
+              <div className="text-left mt-4 mb-20 text-lg text-white dark:text-white">
                 <h2 className="font-semibold">About</h2>
                 <p>{tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.extensions.description:tokenAndNetwork.baseNetworkDb.about}</p>
               </div>
 
-              <div className="border border-solid border-1 border-gray-500 py-4 rounded-lg">
+              <div className="border border-solid border-1 border-gray-500 dark:border-gray-400 py-4 rounded-lg">
                 <div className="flex flex-row">
                       <div className="flex-1">
                         <div className="flex-1 content-end">
@@ -263,7 +267,7 @@ const coinInfo: NextPage = () => {
                       </div>
                       <a href={tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.extensions.link:tokenAndNetwork.baseNetworkDb.whitePaperPath} target="_blank" rel="noopener noreferrer">
                         <div className="flex-1 content-end">
-                          <div className="rounded hover:bg-sky-400 hover:text-white text-black font-semibold border border-solid border-gray-400 py-1 mx-4 px-2">
+                          <div className="rounded hover:bg-sky-500 hover:text-white text-black dark:text-white font-semibold border border-solid border-gray-400 hover:border-white dark:border-gray-500 py-1 mx-4 px-2">
                             <span>{tokenAndNetwork.tokenData?`${removeHttp(tokenAndNetwork.tokenData.tokenDb.extensions.link)}`:"Whitepaper"}</span>
                           </div>
                         </div>
