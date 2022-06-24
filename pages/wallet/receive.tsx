@@ -67,18 +67,8 @@ const Recieve: NextPage = () => {
           {/* padding div for space between top and main elements */}
         </div>
         
-        <div className="max-w-lg mx-auto content-center rounded-lg border border-solid border-grey-600 py-10 hover:border-grey-800">
-          <h1 className="text-center text-3xl font-bold lg:mb-2">Recieve  <img src="/kryptikBrand/kryptikEyez.png" alt="Kryptik Eyes" className="rounded-full w-10 inline max-h-sm h-auto align-middle border-none" /></h1> 
-          {
-            selectedTokenAndNetwork.tokenData?
-            <p className="mx-auto text-center text-slate-500 text-sm px-4">Easily receive <span style={{color:`${selectedTokenAndNetwork.tokenData.tokenDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.tokenData.tokenDb.name}</span> on <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span> by having someone scan the code below.</p>:
-            <p className="mx-auto text-center text-slate-500 text-sm px-4">Easily receive money on <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span> by having someone scan the code below.</p> 
-          }
-          
-           {/* network dropdown */}
-          <div className="max-w-xs mx-auto">
-                      <DropdownNetworks selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleTokenAndNetworkChange}/>
-          </div>
+        <div className="max-w-lg mx-auto content-center rounded-lg border border-solid border-gray-600 py-10 hover:border-gray-800 dark:border-gray-400 dark:hover:border-gray-200">
+          <h1 className="text-center text-3xl font-bold lg:mb-2 dark:text-white">Recieve  <img src="/kryptikBrand/kryptikEyez.png" alt="Kryptik Eyes" className="rounded-full w-10 inline max-h-sm h-auto align-middle border-none" /></h1> 
           {/* QR CODE */}
           <div className="flex">
             <div className="flex-1"/>
@@ -105,12 +95,22 @@ const Recieve: NextPage = () => {
               {
                 isCopied?
                 <p className="font-bold text-green-600 hover:cursor-pointer" onClick={()=>handleIsCopiedToggle()}><AiFillCheckCircle className="inline mr-3"/>Copied to Clipboard</p>:
-                <p className="hover:cursor-pointer" onClick={()=>handleIsCopiedToggle()}><AiOutlineCopy className="inline mr-3"/>Copy address to clipboard</p>
+                <p className="hover:cursor-pointer dark:text-white" onClick={()=>handleIsCopiedToggle()}><AiOutlineCopy className="inline mr-3"/>Copy address to clipboard</p>
               }
+          {/* network dropdown */}
+          <div className="max-w-xs mx-auto">
+                      <DropdownNetworks selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleTokenAndNetworkChange}/>
           </div>
+          </div>
+          {
+            selectedTokenAndNetwork.tokenData?
+            <p className="mx-auto text-center text-slate-500 text-sm px-4 dark:text-slate-400 mt-3">Easily receive <span style={{color:`${selectedTokenAndNetwork.tokenData.tokenDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.tokenData.tokenDb.name}</span> on <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span> by having someone scan the code below.</p>:
+            <p className="mx-auto text-center text-slate-500 text-sm px-4 dark:text-slate-400 mt-3">Easily receive money on <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span> by having someone scan the code below.</p> 
+          }
+          
         </div>
 
-        <div className="h-[3rem]">
+        <div className="h-[12rem]">
           {/* padding div for space between bottom and main elements */}
         </div>
 
