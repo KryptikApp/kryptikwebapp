@@ -46,6 +46,7 @@ export function useKryptikTheme() {
     }
 
     const updateHideBalances = function(newHideBalances:boolean){
+        console.log("updating hide balances...");
         let newTheme:ITheme = {
             isDark: isDark,
             hideBalances: newHideBalances,

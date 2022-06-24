@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import { IBalance } from "../../src/services/Web3Service";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
-import ListItem from "./ListItem";
+import ListItemBalance from "./ListItemBalance";
 import Divider from "../Divider";
 import ListItemLoading from "./ListItemLoading";
 import { formatTicker } from "../../src/helpers/utils/networkUtils";
@@ -105,7 +105,7 @@ const ListBalance:NextPage = () => {
                 <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
                 {balances.map((balance:IBalance) => (
                     (balance.amountCrypto!="0") &&        
-                    <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
+                    <ListItemBalance title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
                     amount={balance.amountCrypto} amountUSD={balance.amountUSD} coinGeckoId={balance.coinGeckoId}
                     imgSrcSecondary={balance.iconPathSecondary}
                     infoLink={true}
@@ -122,7 +122,7 @@ const ListBalance:NextPage = () => {
                 </div>
                 <Divider/>
         </div>
-        
+
         {/* ERC20 Balances */}
         {
             !isFetchedERC20?
@@ -140,7 +140,7 @@ const ListBalance:NextPage = () => {
                 <ul role="list">
                 {balancesERC20.map((balance:IBalance) => (    
                     (balance.amountCrypto!="0") &&     
-                    <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
+                    <ListItemBalance title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
                     amount={balance.amountCrypto} amountUSD={balance.amountUSD} coinGeckoId={balance.coinGeckoId}
                     imgSrcSecondary={balance.iconPathSecondary}
                     infoLink={true}
@@ -168,7 +168,7 @@ const ListBalance:NextPage = () => {
                 <ul role="list">
                 {balancesSpl.map((balance:IBalance) => (    
                     (balance.amountCrypto!="0") &&     
-                    <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
+                    <ListItemBalance title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
                     amount={balance.amountCrypto} amountUSD={balance.amountUSD} coinGeckoId={balance.coinGeckoId}
                     imgSrcSecondary={balance.iconPathSecondary}
                     infoLink={true}
@@ -198,7 +198,7 @@ const ListBalance:NextPage = () => {
                     <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
                     {balancesNep141.map((balance:IBalance) => (    
                         (balance.amountCrypto!="0") &&     
-                        <ListItem title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
+                        <ListItemBalance title={balance.fullName} imgSrc={balance.iconPath} subtitle={formatTicker(balance.ticker)}
                         amount={balance.amountCrypto} amountUSD={balance.amountUSD} coinGeckoId={balance.coinGeckoId}
                         imgSrcSecondary={balance.iconPathSecondary}
                         infoLink={true}

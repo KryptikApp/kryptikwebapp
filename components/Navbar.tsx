@@ -2,15 +2,20 @@ import { NextPage } from "next"
 import Link from 'next/link'
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 
 // wallet SDK helpers
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 import { getUserPhotoPath } from "../src/helpers/firebaseHelper";
+import { useKryptikThemeContext } from "./ThemeProvider";
+import { update } from "lodash";
+import toast, { Toaster } from "react-hot-toast";
 
 
 const Navbar:NextPage = () => {
     const [isMenuMobile, setMenuMobile] = useState(false);
     const {kryptikWallet, authUser} = useKryptikAuthContext();
+    const {hideBalances, updateHideBalances} = useKryptikThemeContext();
     const router = useRouter();
     console.log("Router path (Navbar):")
     console.log(router.pathname)
@@ -19,6 +24,16 @@ const Navbar:NextPage = () => {
     const menuWrapperClassName = isMenuMobile
         ? "md:flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0"
         : "hidden md:flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0";
+
+    const handleHideBalances = function(isHideBalances:boolean){
+        updateHideBalances(isHideBalances);
+        if(isHideBalances){
+            toast("Your balances will now be HIDDEN while browsing")
+        }
+        else{
+            toast("Your balances will now be VISIBLE while browsing")
+        }
+    }
         
     return(
         <nav className="py-2 md:py-4">
@@ -35,6 +50,13 @@ const Navbar:NextPage = () => {
                 </button>
             </div>
             <div id="menu" className={menuWrapperClassName}>
+                {
+                    hideBalances?
+                    <RiEyeCloseLine className="dark:text-white hover:cursor-pointer mt-2 mr-2 hover:animate-pulse" size="25" onClick={()=>handleHideBalances(false)}/>:
+                    <RiEyeLine className="dark:text-white hover:cursor-pointer mt-2 mr-2 hover:animate-pulse" size="25" onClick={()=>handleHideBalances(true)}/>
+                    
+                }
+                <a href="#"></a>
                 {kryptikWallet.connected && authUser? 
                 <Link href="../profile"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/profile" ? "font-bold" : ""} `}>Profile</span></Link>
                 :<Link href="../about"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/about" ? "font-bold" : ""} `}>About</span></Link>
@@ -47,7 +69,7 @@ const Navbar:NextPage = () => {
                 :<Link href="../wallet/createWallet"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 text-center border border-solid border-gray-300 dark:border-gray-600 dark:hover:border-sky-200 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}>Connect</span></Link>}
             </div>
             </div>
-
+        <Toaster/>
         </nav>
     )
     

@@ -1,5 +1,6 @@
 import { NextPage } from "next";
 import { useRouter } from "next/router";
+import { useKryptikThemeContext } from "../ThemeProvider";
 
 interface Props{
     title:string,
@@ -16,10 +17,11 @@ interface Props{
 }
 
 
-const ListItem:NextPage<Props> = (props) => {
-    
+const ListItemBalance:NextPage<Props> = (props) => {
     const router = useRouter();
     const {title, subtitle, imgSrc, amount, amountUSD, infoLink, imgSrcSecondary, networkTicker, tokenTicker} = props;
+    const {hideBalances} = useKryptikThemeContext();
+
     // redirect to asset info page if infolink provided
     const handleOnClick = function(){
         if(infoLink){
@@ -39,7 +41,7 @@ const ListItem:NextPage<Props> = (props) => {
               <div className="flex-1 min-w-0">
 
                     <div>
-                        <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">
+                        <p className="text-md font-medium text-gray-900 truncate dark:text-gray-100">
                             {title}
                         </p>
                     </div>
@@ -49,11 +51,11 @@ const ListItem:NextPage<Props> = (props) => {
                   </p>
               </div>
               <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-200">
+                  <p className={`text-lg font-medium text-gray-900 truncate dark:text-gray-200 ${hideBalances?"font-bold blur-sm":""}`}>
                       $
                       {amountUSD}
                   </p>
-                  <p className="text-sm text-gray-500 truncate dark:text-gray-400">
+                  <p className={`text-sm text-gray-500 truncate dark:text-gray-400 ${hideBalances?"font-bold blur-sm":""}`}>
                       {amount}
                   </p>
               </div>
@@ -62,4 +64,4 @@ const ListItem:NextPage<Props> = (props) => {
     )   
 }
 
-export default ListItem;
+export default ListItemBalance;
