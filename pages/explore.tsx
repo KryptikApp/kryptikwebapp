@@ -9,7 +9,7 @@ const Explore: NextPage = () => {
           {/* padding div for space between top and main elements */}
         </div>
       
-        <div className="text-center max-w-2xl mx-auto content-center">
+        <div className="text-center max-w-2xl mx-auto content-center dark:text-white">
            <p>Hey, this is an explore page!</p>
         </div>
 
