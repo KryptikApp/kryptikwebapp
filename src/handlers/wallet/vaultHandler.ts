@@ -73,7 +73,9 @@ export const unlockVault = function(uid:string, remoteShare:string, seedloopUpda
     let passwordRecovered:string = combineShares(shareArray).toString();
     let seedloopDeciphered = crypt.AES.decrypt(vaultRecovered.seedloopSerlializedCipher, passwordRecovered).toString(crypt.enc.Utf8);
     let seedloopSerialized:SerializedSeedLoop = JSON.parse(seedloopDeciphered);
+    console.log("deserializing seedloop");
     let seedloopRecovered = HDSeedLoop.deserialize(seedloopSerialized)
+    console.log("done!");
     // update vault seedloop if updated seedloop is provided
     if(seedloopUpdated){
         let seedloopSerialized:SerializedSeedLoop = seedloopUpdated.serializeSync();
