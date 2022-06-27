@@ -5,6 +5,7 @@
         bio: string,
         photoUrl:string
         isAdvanced:boolean
+        isLoggedIn:boolean
 }
 
 export const defaultUser:UserDB = {
@@ -13,13 +14,13 @@ export const defaultUser:UserDB = {
         name: "",
         bio: "",
         photoUrl: "",
-        isAdvanced: false
+        isAdvanced: false,
+        isLoggedIn:false 
 }
 
 // interface for extra user data
 export interface UserExtraData{
         isTwoFactorAuth: boolean,
-        isAdvanced: boolean
         remoteShare: string,
         bio:string
 }
