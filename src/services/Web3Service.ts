@@ -18,7 +18,7 @@ import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
 import { BigNumber, Contract, utils } from "ethers";
 import { BlockResult } from "near-api-js/lib/providers/provider";
 
-import HDSeedLoop, {Network, NetworkFamily, NetworkFamilyFromFamilyName, NetworkFromTicker, WalletKryptik } from "hdseedloop";
+import HDSeedLoop, {Network, NetworkFamily, NetworkFamilyFromFamilyName, NetworkFromTicker, Options, WalletKryptik } from "hdseedloop";
 import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
@@ -32,6 +32,7 @@ import { searchTokenListByTicker } from "../helpers/search";
 import { createEd25519PubKey, createSolTokenAccount } from "../helpers/utils/accountUtils";
 import { networkFromNetworkDb, isNetworkArbitrum, getChainDataForNetwork } from "../helpers/utils/networkUtils";
 import { lamportsToSol, divByDecimals, roundCryptoAmount, roundUsdAmount, multByDecimals, roundToDecimals } from "../helpers/utils/numberUtils";
+
 
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
@@ -64,6 +65,7 @@ class Web3Service extends BaseService{
     private wallet:IWallet|null = null;
     public isWalletSet:boolean = false;
     public NetworkDbs:NetworkDb[] = [];
+    public TickerToNetworkDbs:{[ticker:string]:NetworkDb} = {}
     public erc20Dbs:TokenDb[] = [];
     public nep141Dbs:TokenDb[] = [];
     public splDbs:TokenDb[] = [];
@@ -97,12 +99,21 @@ class Web3Service extends BaseService{
 
     createSeedloop(seed?:string):HDSeedLoop{
         let seedloopKryptik:HDSeedLoop;
+        let networkDbsToAdd:NetworkDb[] = this.getSupportedNetworkDbs();
+        let networksFormatted:Network[] = [];
+        // create list of seedloop conforming networks
+        for(const nw of networkDbsToAdd){
+            const network:Network = networkFromNetworkDb(nw);
+            networksFormatted.push(network)
+        }
+        let seedloopOptions:Options = {}
         if(seed){
             // create new seedloop from imported seed
-            seedloopKryptik = new HDSeedLoop({mnemonic:seed})
+            seedloopOptions.mnemonic = seed;
+            seedloopKryptik = new HDSeedLoop(seedloopOptions, networksFormatted)
         }
         else{
-            seedloopKryptik = new HDSeedLoop();
+            seedloopKryptik = new HDSeedLoop(seedloopOptions, networksFormatted);
         }
         return seedloopKryptik;
     }
@@ -114,7 +125,9 @@ class Web3Service extends BaseService{
         if(remoteShare){
           remoteShareReturn = remoteShare;
           // access existing wallet from local storage vault
+          console.log("Unlocking vault...")
           let vaultSeedloop:HDSeedLoop|null = unlockVault(uid, remoteShare);
+          console.log("vault unlocked!");
           // if there is already a seedloop available... use it!
           if(vaultSeedloop){
               seedloopKryptik = vaultSeedloop;
@@ -328,6 +341,7 @@ class Web3Service extends BaseService{
                     isTestnet: docData.isTestnet?docData.isTestnet:false
                 }
                 NetworkDbsResult.push(NetworkDbToAdd);
+                this.TickerToNetworkDbs[NetworkDbToAdd.ticker] = NetworkDbToAdd;
             }
         });
         this.NetworkDbs = NetworkDbsResult;
@@ -436,9 +450,8 @@ class Web3Service extends BaseService{
 
     //TODO: change to simple dictionary lookup
     getNetworkDbByTicker(ticker:string):NetworkDb|null{
-        for(const nw of this.NetworkDbs){
-            if(nw.ticker == ticker) return nw;
-        }
+        let networkDbRes:NetworkDb = this.TickerToNetworkDbs[ticker];
+        if(networkDbRes) return networkDbRes;
         return null;
     }
 
@@ -508,13 +521,13 @@ class Web3Service extends BaseService{
 
 
     // TODO: Update to support tx. based networks
-    getBalanceAllNetworks = async(walletUser:IWallet, user?:UserDB, onFetch?:(balance:IBalance|null)=>void):Promise<IBalance[]> =>{
+    getBalanceAllNetworks = async(walletUser:IWallet, isAdvanced?:boolean, onFetch?:(balance:IBalance|null)=>void):Promise<IBalance[]> =>{
         let networksFromDb = this.getSupportedNetworkDbs();
         // initialize return array
         let balances:IBalance[] = [];
         for(const nw of networksFromDb){
             // only show testnets to advanced users
-            if(nw.isTestnet && user && !user.isAdvanced){
+            if(nw.isTestnet && !isAdvanced){
                 if(onFetch){
                     onFetch(null);
                 }
