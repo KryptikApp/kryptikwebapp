@@ -8,9 +8,11 @@ import Divider from "../Divider";
 import ListItemLoading from "./ListItemLoading";
 import { formatTicker } from "../../src/helpers/utils/networkUtils";
 import { roundToDecimals } from "../../src/helpers/utils/numberUtils";
+import { useKryptikThemeContext } from "../ThemeProvider";
 
 const ListBalance:NextPage = () => {
     const {kryptikService, kryptikWallet, authUser} = useKryptikAuthContext();
+    const {isAdvanced} = useKryptikThemeContext()
     const initBalances:IBalance[] = [];
     const[isFetchedBalances, setIsFetchedBalances] = useState(false);
     const[isFetchedERC20, setIsFetchedERC20] = useState(false);
@@ -49,7 +51,7 @@ const ListBalance:NextPage = () => {
     // retrieves wallet balances
     const fetchBalances = async() =>{
         // fetch network balances
-        let bals:IBalance[] = await kryptikService.getBalanceAllNetworks(kryptikWallet, authUser, incrementLoadProgress);
+        let bals:IBalance[] = await kryptikService.getBalanceAllNetworks(kryptikWallet, isAdvanced, incrementLoadProgress);
         setBalances(bals);
         setIsFetchedBalances(true);
         // fetch erc0 balances
