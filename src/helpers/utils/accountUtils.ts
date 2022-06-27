@@ -1,4 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
+import { isValidEVMAddress, NetworkFamily } from "hdseedloop";
+import { NetworkDb } from "../../services/models/network";
+import { networkFromNetworkDb } from "./networkUtils";
 
 
 
@@ -26,6 +29,19 @@ export const createSolTokenAccount = async function(accountAddress:string, token
     return pubKey;
 }
 
+
+export const isValidAddress = function(address:NamedCurve, networkDB:NetworkDb){
+    let network = networkFromNetworkDb(networkDB);
+    switch(network.networkFamily){
+        case(NetworkFamily.EVM):{
+            return isValidEVMAddress(address);
+        }
+        // for now just return true
+        default:{
+            return true;
+        }
+    }
+}
 
 
 
