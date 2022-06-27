@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { deleteUser, getAuth, updateCurrentUser } from "firebase/auth";
-import { getStorage } from "firebase/storage";
+import { getStorage, ref } from "firebase/storage";
 import { deleteDoc, doc, DocumentData, DocumentSnapshot, getDoc, getFirestore, setDoc} from 'firebase/firestore';
 // set your own firebase secrets to access db
 import { firebaseConfig } from "../../secrets";
@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 
 import { defaultUser, UserDB, UserExtraData } from "../models/user"
 import { deleteVault } from "../handlers/wallet/vaultHandler";
+import { EMAIL_TO_ACCOUNT_DB_LOCATION, IBlockchainAccounts } from "./resolvers/kryptikResolver";
 
 
 const firebaseApp = initializeApp(firebaseConfig);
@@ -33,7 +34,8 @@ export const formatAuthUser = function(user:any):UserDB
         name: user.displayName,
         bio: user.bio,
         photoUrl: user.photoURL,
-        isAdvanced: user.isAdvanced
+        isAdvanced: user.isAdvanced,
+        isLoggedIn: true
       };
 };
 
@@ -43,7 +45,6 @@ export const formatUserExtraData = function(docIn:DocumentSnapshot<DocumentData>
     if(dataIn){
       formatted = {
         isTwoFactorAuth: dataIn.isTwoFactorAuth,
-        isAdvanced: dataIn.isAdvanced?dataIn.isAdvanced:false,
         remoteShare: dataIn.remoteShare,
         bio: dataIn.bio
       }
@@ -51,7 +52,6 @@ export const formatUserExtraData = function(docIn:DocumentSnapshot<DocumentData>
     else{
       formatted = {
         isTwoFactorAuth: false,
-        isAdvanced: false,
         remoteShare: "",
         bio: ""
       }
@@ -85,14 +85,38 @@ export const writeExtraUserData = async function(user:UserDB, data:UserExtraData
   await setDoc(doc(firestore, "users", user.uid), data);
 }
 
-export const removeUser = async function(user:UserDB){
+export const removeUserAndWallet = async function(){
   let firebaseUser = firebaseAuth.currentUser;
   if(!firebaseUser){
     throw(new Error("Error: User is not assigned. Unable to delete."))
   }
-  deleteVault(user.email);
-  deleteDoc(doc(firestore, "users", user.uid));
-  deleteUser(firebaseUser);
+  // delete local wallet
+  deleteVault(firebaseUser.uid);
+  // TODO: delete avatar folder
+  // delete address store
+  await deleteDoc(doc(firestore, EMAIL_TO_ACCOUNT_DB_LOCATION, firebaseUser.uid));
+  // delete extra user data
+  await deleteDoc(doc(firestore, "users", firebaseUser.uid));
+  // delete firebase user
+  await deleteUser(firebaseUser);
+}
+
+export const addUserBlockchainAccountsDB = async function(blockchainAccounts:any){
+  // push blockchain account data to firestore db
+  let firebaseUser = firebaseAuth.currentUser;
+  if(!firebaseUser){
+    throw(new Error("Error: User is not assigned. Unable to delete."))
+  }
+  await setDoc(doc(firestore, EMAIL_TO_ACCOUNT_DB_LOCATION,firebaseUser.uid), blockchainAccounts)
+}
+
+export const deleteUserBlockchainAccountsDB = async function(){
+  let firebaseUser = firebaseAuth.currentUser;
+  if(!firebaseUser){
+    throw(new Error("Error: User is not assigned. Unable to delete."))
+  }
+  // delete blockchain accounts db doc
+  await deleteDoc(doc(firestore, EMAIL_TO_ACCOUNT_DB_LOCATION, firebaseUser.uid));
 }
 
 // TODO: ADD SUPPORT FOR RANDOM AVATAR
