@@ -16,14 +16,13 @@ const Profile: NextPage = () => {
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loading && !authUser)
+    if (!loading && !authUser.isLoggedIn)
       router.push('/')
   }, [authUser, loading])
 
   const [name, setName] = useState(authUser.name);
   const[bio, setBio] = useState(authUser.bio);
   const [loadingUpdate, setloadingUpdate] = useState(false);
-
 
   const handleClickUpdate = async function(){
     // make sure name has desired length
@@ -51,7 +50,7 @@ const Profile: NextPage = () => {
     <div>
          <Toaster/>
         <div className="text-center max-w-2xl mx-auto content-center">
-          <HeaderProfile user={authUser} showBio={true} center={false}/>
+          <HeaderProfile showBio={true} center={false}/>
           <Divider/>
         </div>
         <div className="container mt-5 mx-auto grid grid-cols-1 max-w-2xl">

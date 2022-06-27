@@ -17,7 +17,7 @@ const Profile: NextPage = () => {
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loading && !authUser)
+    if (!loading && !authUser.isLoggedIn)
       router.push('/')
   }, [authUser, loading])
 

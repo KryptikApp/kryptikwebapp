@@ -6,7 +6,7 @@ import { defaultTokenAndNetwork, placeHolderSolAddress } from '../../src/service
 import { SendProgress } from '../../src/services/types'
 import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapLine} from "react-icons/ri"
-import { isValidAddress, Network, NetworkFamily, NetworkFamilyFromFamilyName, truncateAddress } from "hdseedloop"
+import { Network, NetworkFamily, NetworkFamilyFromFamilyName, truncateAddress } from "hdseedloop"
 
 import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
@@ -20,6 +20,7 @@ import {handlePublishTransaction} from '../../src/handlers/wallet/sendHandler'
 import TxFee from '../../components/transactions/TxFee'
 import { networkFromNetworkDb, formatTicker } from '../../src/helpers/utils/networkUtils'
 import { roundUsdAmount, formatAmountUi, roundCryptoAmount } from '../../src/helpers/utils/numberUtils'
+import { isValidAddress } from '../../src/helpers/utils/accountUtils'
 
 
 
@@ -54,7 +55,7 @@ const Send: NextPage = () => {
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loading && !authUser) router.push('/');
+    if (!loading && !authUser.isLoggedIn) router.push('/');
   }, [authUser, loading])
 
   useEffect(()=>{
@@ -325,7 +326,7 @@ const Send: NextPage = () => {
       return;
     }
     // format recipient address
-    if(!isValidAddress(toAddress, nw)){
+    if(!isValidAddress(toAddress, selectedTokenAndNetwork.baseNetworkDb)){
        toast.error("Invalid address.");
        setisLoading(false);
        return;
