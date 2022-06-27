@@ -31,7 +31,7 @@ export class KryptikProvider{
                 break;
             }
             case(NetworkFamily.EVM):{
-                this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: networkDb.fullName, chainId: networkDb.chainIdEVM });
+                this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: networkDb.fullName.toLowerCase()=="ethereum"?"homestead":networkDb.fullName, chainId: networkDb.chainIdEVM });
                 break;
             }
             case(NetworkFamily.Solana):{
