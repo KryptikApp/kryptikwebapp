@@ -43,7 +43,9 @@ export function useKryptikAuth() {
     // connects wallet with local service and updates remote share on server if necessary
     const ConnectWalletLocalandRemote = async function(ks:Web3Service, user:UserDB, seed?:string):Promise<IWallet>{
       let UserExtraData:UserExtraData = await readExtraUserData(user)
+      console.log("running kryptik connect method...");
       let kryptikConnectionObject:IConnectWalletReturn = await ks.connectKryptikWallet(user.uid, UserExtraData.remoteShare, seed);
+      console.log("finished kryptik connect!")
         // update remote share on db if value generated on local computer is different
         if(!UserExtraData.remoteShare || kryptikConnectionObject.remoteShare!=UserExtraData.remoteShare){
           console.log("UPDATING REMOTE SHARE ON DB");
@@ -51,10 +53,8 @@ export function useKryptikAuth() {
           let updatedUserExtraData:UserExtraData = {
             remoteShare: kryptikConnectionObject.remoteShare,
             isTwoFactorAuth: UserExtraData.isTwoFactorAuth,
-            isAdvanced: UserExtraData.isAdvanced,
             bio: UserExtraData.bio
           }
-
           try{
             // write updated extra user data to DB
             await writeExtraUserData(user, updatedUserExtraData);
@@ -74,20 +74,22 @@ export function useKryptikAuth() {
       // get current extra user data
       let extraUserData:UserExtraData = await readExtraUserData(user);
       let extraUserDataUpdated:UserExtraData = {remoteShare: extraUserData.remoteShare, 
-        bio: user.bio, isTwoFactorAuth:extraUserData.isTwoFactorAuth, isAdvanced:user.isAdvanced};
+        bio: user.bio, isTwoFactorAuth:extraUserData.isTwoFactorAuth};
       await writeExtraUserData(user, extraUserDataUpdated);
       await updateProfile(userFirebase, {displayName:user.name, photoURL:user.photoUrl});
     }
 
     // sign in with external auth token
-    const signInWithToken = async(customToken:string, seed?:string) =>
+    const signInWithToken = async(customToken:string,seed?:string, isRefresh?:boolean) =>
     {   
-        // this value is used to prevent auth state changed from updating auth context...
+        // this value is used to prevent auth state from being changed from updating auth context...
         // when signing in with custom seed
         sessionStorage.setItem("isSigniningInWithToken", "true");
         let userCred:UserCredential = await signInWithCustomToken(firebaseAuth, customToken);
         sessionStorage.removeItem("isSigniningInWithToken")
-        //now we are updating the context and connecting the wallet
+        if(isRefresh) return;
+        // now we are manually updating the context and connecting the wallet
+        // only done when not a refresh of authentication
         updateAuthContext(userCred.user, seed, "sign in with token function call");
         // note: auth state changed will run after the line above
     }
@@ -105,7 +107,6 @@ export function useKryptikAuth() {
         // read extra user data from db
         let userExtraData = await readExtraUserData(formattedUser);
         formattedUser.bio = userExtraData.bio;
-        formattedUser.isAdvanced = userExtraData.isAdvanced;
         // start web3 kryptik service
         let ks = await initServiceState.StartSevice();
         setKryptikService(ks);
@@ -120,8 +121,9 @@ export function useKryptikAuth() {
         }
         console.log("finished connecting");
         try{
-          console.log("Updating wallet networks;");
-          await updateWalletNetworks(walletKryptik, kryptikService, formattedUser, userExtraData);
+          console.log("Updating wallet networks:");
+          walletKryptik = updateWalletNetworks(walletKryptik, kryptikService, formattedUser, userExtraData);
+          // UPDATE: TO DO if wallet is set as visible update remote addresses
           console.log("wallet up to date");
         }
         catch(e){
@@ -134,7 +136,7 @@ export function useKryptikAuth() {
     }
 
     // update wallets on local seedloop to match networks supported by app.
-    const updateWalletNetworks = async function(wallet:IWallet, ks:Web3Service, user:UserDB, extraUserData:UserExtraData){
+    const updateWalletNetworks = function(wallet:IWallet, ks:Web3Service, user:UserDB, extraUserData:UserExtraData):IWallet{
       // flag for if networks are added to seedloop
       let isUpdated:boolean = false;
       let supprtedDbs = ks.getSupportedNetworkDbs();
@@ -143,7 +145,7 @@ export function useKryptikAuth() {
         if(!wallet.seedLoop.networkOnSeedloop(network)){
           isUpdated = true;
           console.log(`Adding ${network.fullName} to wallet.`);
-          wallet.seedLoop.addKeyRingByNetwork(network);;
+          wallet.seedLoop.addKeyRingByNetwork(network);
         }
       }
       // save updated seedloop in local vault
@@ -157,6 +159,7 @@ export function useKryptikAuth() {
           throw(new Error("Error: Unable to update vault with network synchronized seedloop"));
         }
       }
+      return wallet;
     }
 
     const writeExtraUserData = async function(user:UserDB, data:UserExtraData) {
@@ -181,7 +184,6 @@ export function useKryptikAuth() {
     
     // clear current kryptik web 3 service state
     const clear = () => {
-      console.log("Clearing!");
       setAuthUser(defaultUser);
       setKryptikWallet(defaultWallet);
       setKryptikService(new Web3Service());
