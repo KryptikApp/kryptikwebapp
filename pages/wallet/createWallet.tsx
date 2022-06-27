@@ -7,6 +7,7 @@ import toast, { Toaster } from 'react-hot-toast'
 
 // kryptik imports
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
+import { ILoginUserParams, loginUser } from '../../src/handlers/profile/loginHandler'
 
 const CreateWallet: NextPage = () => {
   const {signInWithToken, kryptikWallet} = useKryptikAuthContext();
@@ -14,43 +15,36 @@ const CreateWallet: NextPage = () => {
   const [isLoading, setisLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   
-  const loginUser = async () => {
-      setisLoading(true);
-      /* Step 4.1: Generate a DID token with Magic */
-      let magicKey:string = process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY? process.env.NEXT_PUBLIC_MAGIC_PUBLISHABLE_KEY : "";
-      const magic = new Magic(magicKey)
-      setLoadingMessage("Fetching authentication token.");
-      const didToken = await magic.auth.loginWithMagicLink({ email });
-      setLoadingMessage("Authenticating with server.");
 
-      // hitting login API
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${didToken}`
-        },
-        body: JSON.stringify({ email })
-      })
-    
-      if (res.status === 200) {
-        setLoadingMessage("Connecting wallet on device.");
-        let resDecoded = await res.json();
-        let customTokenDB:string = resDecoded.dbToken;
-        await signInWithToken(customTokenDB);
-        // If we reach this line, it means our
-        // authentication succeeded, so we'll
-        // redirect to the home page!
-        toast.success("Kryptik Wallet connected.");
-        setisLoading(false);
-        router.push('/')
-      } 
-      else {
-        toast.error("Unable to connect Kryptik wallet. Please contact support.");
-        setisLoading(false);
-        throw new Error(await res.text())
+  const handleLoginUser = async function(){
+    setisLoading(true);
+    try{
+      // login user with undefined seed
+      // seed will be created when wallet is created
+      const loginParams:ILoginUserParams = {
+        email:email,
+        signInWithTokenFunc:signInWithToken,
+        progressFunc: handleStatusUpdate
       }
+      await loginUser(loginParams);
+      toast.success("Kryptik Wallet connected.");
+      // If we reach this line, it means our
+      // authentication succeeded, so we'll
+      // redirect to the home page!
+      setisLoading(false);
+      router.push('/')
+      setisLoading(false);
+    }
+    catch(e){
+      toast.error("Unable to connect Kryptik wallet. Please contact support.");
+      setisLoading(false);
+    }
   }
+
+  const handleStatusUpdate = function(msg:string, progress?:number){
+    setLoadingMessage(msg);
+  }
+
 
 
   return (
@@ -62,7 +56,7 @@ const CreateWallet: NextPage = () => {
         {
             // INDICATE CONNECTED
             kryptikWallet.connected ? 
-          <div className="textCenter max-w-md mx-auto content-center">
+          <div className="textCenter max-w-md mx-auto content-center dark:text-white">
             <h1 className="text-3xl font-bold sans ">
               Your wallet is connected.
             </h1>
@@ -77,7 +71,7 @@ const CreateWallet: NextPage = () => {
         <div className="text-center max-w-md mx-auto content-center">
 
         <div className="rounded-md border border-solid border-grey-600 py-10 hover:border-grey-800 shadow-md hover:shadow-lg">
-        <div className="text-center max-w-2xl mx-auto content-center">
+        <div className="text-center max-w-2xl mx-auto content-center dark:text-white">
 
           <div className="flex flex-wrap justify-center">
             <div className="w-6/12 sm:w-4/12 px-4 lg:w-32">
@@ -108,7 +102,7 @@ const CreateWallet: NextPage = () => {
           <div className="text-center max-w-2xl mx-auto content-center">
           
               <div className="flex flex-wrap justify-center">
-                <button onClick={()=>loginUser()} className={`bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 ${isLoading?"hover:cursor-not-allowed":""} border border-green-500 hover:border-transparent rounded-lg my-5`} disabled={isLoading}>      
+                <button onClick={()=>handleLoginUser()} className={`bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 ${isLoading?"hover:cursor-not-allowed":""} border border-green-500 hover:border-transparent rounded-lg my-5`} disabled={isLoading}>      
                             Create Wallet
                             {
                                     !isLoading?"":
