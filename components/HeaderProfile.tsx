@@ -20,8 +20,9 @@ interface Props {
 const HeaderProfile:NextPage<Props> = (props) => {
     const{center, showBio} = props;
     const {authUser, kryptikWallet, kryptikService} = useKryptikAuthContext();
-const [loadingResolvedAccount, setLoadingResolvedAccount] = useState(false);
-const [resolvedAccount, setResolvedAccount] = useState(defaultResolvedAccount);
+    const [loadingResolvedAccount, setLoadingResolvedAccount] = useState(false);
+    const [resolvedAccount, setResolvedAccount] = useState(defaultResolvedAccount);
+    const [nameToDisplay, setNameToDisplay] = useState("");
 
 const fetchAccountName = async function(){
     setLoadingResolvedAccount(true);
@@ -34,6 +35,12 @@ const fetchAccountName = async function(){
     }
     let newResolvedAccount:IResolvedAccount|null = await resolveEVMAccount(resolverParams);
     if(!newResolvedAccount) return;
+    if(authUser.name){
+        setNameToDisplay(authUser.name)
+    }
+    else{
+        setNameToDisplay(newResolvedAccount.names?newResolvedAccount.names[0]:truncateAddress(newResolvedAccount.address, networkFromNetworkDb(defaultNetworkDb)))
+    }
     setResolvedAccount(newResolvedAccount);
     setLoadingResolvedAccount(false);
 }
@@ -49,7 +56,7 @@ useEffect(()=>{
                     <AvatarMain photoPath={getUserPhotoPath(authUser)}/>
                     {/* show kryptik name if available... otherwise show ens name or truncated eth address */}
                     <div>
-                    <h1 className="mt-3 font-bold dark:text-white inline">{authUser.name!=""?authUser.name:(resolvedAccount.name?resolvedAccount.name:truncateAddress(resolvedAccount.address, networkFromNetworkDb(defaultNetworkDb)))}</h1>
+                    <h1 className="mt-3 font-bold dark:text-white inline">{nameToDisplay}</h1>
                     {
                                             loadingResolvedAccount &&
                                             <svg role="status" className="inline w-4 h-4 ml-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -70,7 +77,7 @@ useEffect(()=>{
                     <div className="w-9/12 flex items-center">
                         <div className="w-10/12 flex flex-col leading-none items-start">
                             <div>
-                            <h1 className="mt-3 font-bold dark:text-white inline">{authUser.name!=""?authUser.name:(resolvedAccount.name?resolvedAccount.name:truncateAddress(resolvedAccount.address, networkFromNetworkDb(defaultNetworkDb)))}</h1>
+                            <h1 className="mt-3 font-bold dark:text-white inline">{nameToDisplay}</h1>
                             {
                                             loadingResolvedAccount &&
                                             <svg role="status" className="inline w-4 h-4 ml-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

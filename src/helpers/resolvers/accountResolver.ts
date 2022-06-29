@@ -18,7 +18,7 @@ export interface IResolvedAccount{
     address:string,
     isResolved:boolean,
     avatarPath?:string,
-    name?:string
+    names?:string[]
 }
 
 
