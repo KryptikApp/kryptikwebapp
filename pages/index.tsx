@@ -8,6 +8,7 @@ import { defaultNetworkDb } from '../src/services/models/network';
 import { ServiceState } from '../src/services/types';
 import { KryptikProvider } from '../src/services/models/provider';
 import { networkFromNetworkDb } from '../src/helpers/utils/networkUtils';
+import Link from 'next/link';
 
 const Home: NextPage = () => {
   const {kryptikWallet, kryptikService, authUser} = useKryptikAuthContext();
@@ -61,7 +62,9 @@ const Home: NextPage = () => {
           <button onClick={()=>handleGetStarted()} className="bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded my-5">
                             Get Started
           </button>
-
+          <div className="text-green-500">
+            <Link href="../wallet/createName">Create Near Name</Link>
+          </div>
           <div className="dark:text-white">
             <p>UID: {authUser.uid}</p>
             <p>Wallet Connected: {kryptikWallet.connected?"True":"False"}</p>
