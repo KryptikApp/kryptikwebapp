@@ -10,6 +10,7 @@ import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import { TokenAndNetwork } from '../../src/services/models/token'
 import { defaultTokenAndNetwork} from '../../src/services/models/network'
 import DropdownNetworks from '../../components/DropdownNetworks'
+import { getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils';
 
 
 const Recieve: NextPage = () => {
@@ -25,7 +26,7 @@ const Recieve: NextPage = () => {
     }, []);
 
     const fetchFromAddress = async() =>{
-        let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
+        let accountAddress = await getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
          // handle empty address
          if(accountAddress == ""){
            toast.error(`Error: no address found for ${selectedTokenAndNetwork.baseNetworkDb.fullName}. Please contact the Kryptik team or try refreshing your page.`);
