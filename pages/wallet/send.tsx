@@ -20,7 +20,7 @@ import {handlePublishTransaction} from '../../src/handlers/wallet/sendHandler'
 import TxFee from '../../components/transactions/TxFee'
 import { networkFromNetworkDb, formatTicker } from '../../src/helpers/utils/networkUtils'
 import { roundUsdAmount, formatAmountUi, roundCryptoAmount } from '../../src/helpers/utils/numberUtils'
-import { isValidAddress } from '../../src/helpers/utils/accountUtils'
+import { getAddressForNetworkDb, isValidAddress } from '../../src/helpers/utils/accountUtils'
 import { defaultResolvedAccount, IAccountResolverParams, resolveAccount } from '../../src/helpers/resolvers/accountResolver'
 
 
@@ -85,7 +85,7 @@ const Send: NextPage = () => {
 
   // retrieves wallet balances
   const fetchFromAddress = async():Promise<string> =>{
-     let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
+     let accountAddress = await getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
      let network:Network = networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
       // handle empty address
       if(accountAddress == ""){
@@ -115,7 +115,7 @@ const Send: NextPage = () => {
     let txType:TxType = selectedTokenAndNetwork.tokenData?TxType.TransferToken:TxType.TransferNative;
     let nw:Network =  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
     // use instead of from address as react state may not have updated
-    let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
+    let accountAddress = await getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
     let feeDataParams:FeeDataParameters = {
       networkDb: selectedTokenAndNetwork.baseNetworkDb,
       tokenData: selectedTokenAndNetwork.tokenData,
@@ -146,7 +146,7 @@ const Send: NextPage = () => {
       if(nw.networkFamily != NetworkFamily.Solana){
         return;
       }
-      let accountAddress:string = await kryptikService.getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
+      let accountAddress:string = await getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
       
       let txIn:SolTransactionParams = {
         sendAccount: accountAddress,
@@ -549,9 +549,9 @@ const Send: NextPage = () => {
                         </div>
                         <div className="flex-1 px-1">
                           {
-                            toResolvedAccount.name?
+                            toResolvedAccount.names?
                             <div>
-                              <p className="dark:text-white">{toResolvedAccount.name}</p>
+                              <p className="dark:text-white">{toResolvedAccount.names[0]}</p>
                               <p className="italic text-sm text-gray-500 dark:text-gray-400">({readableToAddress})</p>
                             </div>:
                             <div>
