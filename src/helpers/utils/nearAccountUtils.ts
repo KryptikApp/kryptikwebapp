@@ -1,6 +1,6 @@
 import BN from "bn.js";
 import { baseEncode } from "borsh";
-import { Network } from "hdseedloop";
+import { defaultNetworks, Network } from "hdseedloop";
 import { AccessKeyView, BlockResult } from "near-api-js/lib/providers/provider";
 import { Action, addKey, createAccount, createTransaction, fullAccessKey, functionCall, Transaction, transfer } from "near-api-js/lib/transaction";
 import { serialize } from "near-api-js/lib/utils";
@@ -14,9 +14,31 @@ import { numberToBN } from "../utils";
 import { networkFromNetworkDb } from "./networkUtils";
 import {ISignAndSendNearParameters, signAndSendNEARTransaction} from "../../handlers/wallet/transactions/NearTransactions"
 import { IErrorHandler, TransactionPublishedData } from "../../services/models/transaction";
-import { DEFAULT_NEAR_FUNCTION_CALL_GAS } from "../../handlers/wallet/transactions/constants";
+import { DEFAULT_NEAR_FUNCTION_CALL_GAS } from "../../constants/nearConstants";
+import { listNearAccountsByAddress } from "../../requests/nearIndexApi";
+import { IKryptikFetchResponse } from "../../kryptikFetch";
+import { validateNearImplicitAddress } from "../resolvers/nearResolver";
+
 
 const ACCOUNT_ID_REGEX = /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
+
+export interface INearReservationParams{
+    wallet:IWallet,
+    fromAddress:string,
+    newAccountId:string,
+    kryptikService: Web3Service,
+    errorHandler:IErrorHandler
+}
+
+export interface INearNameTxParams{
+    kryptikProvider:KryptikProvider, 
+    newAccountPublicKeyBase58:string, 
+    newAccountId:string,
+    amount: BN, 
+    sendAccount:string, 
+    sendAccountPubKey:PublicKey, 
+    toAccount:string,
+}
 
 export const isLegitNEARAccountId = function(accountId:string) {
     return ACCOUNT_ID_REGEX.test(accountId);
@@ -73,42 +95,33 @@ export const checkNEARAccountAvailable = async(params:INEARAccountAvailableParam
     }
 }
 
-export interface INearReservationParams{
-    wallet:IWallet,
-    fromAddress:string,
-    newAccountId:string,
-    kryptikService: Web3Service,
-    errorHandler:IErrorHandler
-}
-
-export interface INearNameTxParams{
-    kryptikProvider:KryptikProvider, 
-    newAccountPublicKeyBase58:string, 
-    newAccountId:string,
-    amount: BN, 
-    sendAccount:string, 
-    sendAccountPubKey:PublicKey, 
-    toAccount:string,
-}
-
 export const reserveNearAccountName = async function(params:INearReservationParams):Promise<TransactionPublishedData|null>{
-    console.log("Running reserve name method....");
     const{kryptikService, newAccountId, wallet, fromAddress, errorHandler} = {...params};
     let nearNetworkDb:NetworkDb|null = kryptikService.getNetworkDbByTicker("near");
     if(!nearNetworkDb){
-        throw(new Error("Error: Unable to retrieve near network from web3service"));
+        errorHandler("Error: Unable to retrieve near network from web3service");
+        return null;
+    }
+    let kryptikProvider:KryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(nearNetworkDb);
+    if(!checkNEARAccountAvailable({accountId: newAccountId, accountIdCurrent: fromAddress, kryptikProvider:kryptikProvider})){
+        errorHandler("Error: Address not available!");
+        return null;
     }
     let nearNetwork:Network = networkFromNetworkDb(nearNetworkDb);
     let tokenWallet = wallet.seedLoop.getWalletForAddress(nearNetwork, fromAddress);
-    if(!tokenWallet) throw(new Error("Error: Unable to retrieve neartoken wallet from seedloop"));
-    let kryptikProvider:KryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(nearNetworkDb);
+    if(!tokenWallet){
+        errorHandler("Error: Unable to retrieve neartoken wallet from seedloop");
+        return null;
+    }
+
     let keyPair:nacl.SignKeyPair = tokenWallet.createKeyPair();
     let nearKey:KeyPairEd25519 = new KeyPairEd25519(baseEncode(keyPair.secretKey));
     // get amount in BN 
     let amountYocto:string|null = parseNearAmount("0.1");
-    if(!amountYocto) throw(new Error("Error: Unable to parse near amount"));
-    // basic transfer type
-    console.log(amountYocto);
+    if(!amountYocto){
+        errorHandler("Error: Unable to parse near amount");
+        return null;
+    }
     let bnAmount = numberToBN(amountYocto);
     // for now we'll just hardcode to account to be the from account
     let createTxParams:INearNameTxParams = {
@@ -147,8 +160,6 @@ export const reserveNearAccountName = async function(params:INearReservationPara
 // creates a near transaction to reserve an account name
 export const createNearReservationTx = async function(params:INearNameTxParams){
     const{amount, kryptikProvider, newAccountPublicKeyBase58, sendAccount, sendAccountPubKey, newAccountId} = {...params};
-    console.log("New pub key address:");
-    console.log(newAccountPublicKeyBase58);
     if(!kryptikProvider.nearProvider) throw(new Error(`No provider set for Near. Unable to create transaction.`));
     let nearProvider = kryptikProvider.nearProvider;
     const accessKeyResponse = await nearProvider.connection.provider.query<AccessKeyView>({
@@ -157,8 +168,6 @@ export const createNearReservationTx = async function(params:INearNameTxParams){
         public_key: sendAccountPubKey.toString(),
         finality: 'optimistic'
     });
-    console.log("Access key response");
-    console.log(accessKeyResponse);
     let block:BlockResult = await nearProvider.connection.provider.block({ finality: 'final' });
     let recentBlockhash:Buffer = serialize.base_decode(block.header.hash); 
     // create function call action
@@ -173,4 +182,57 @@ export const createNearReservationTx = async function(params:INearNameTxParams){
         recentBlockhash
     );
     return nearTX;
+}
+
+
+//creates near key...BUT address must correspond to a key on the seedloop
+export const createNearKey = function(wallet:IWallet, address:string){
+    let nearNetwork:Network = defaultNetworks["near"];
+    let tokenWallet = wallet.seedLoop.getWalletForAddress(nearNetwork, address);
+    if(!tokenWallet) throw(new Error("Error: Unable to retrieve near token wallet from seedloop"));
+    let keyPair:nacl.SignKeyPair = tokenWallet.createKeyPair();
+    let nearKey:KeyPairEd25519 = new KeyPairEd25519(baseEncode(keyPair.secretKey));
+    return nearKey;
+}
+
+export interface INearAccountsLists{
+    customAccounts:string[],
+    implicitAccounts:string[]
+}
+
+export const defaultNearAccountsLists:INearAccountsLists = {
+    customAccounts: [],
+    implicitAccounts: []
+}
+// returns an object with seperate lists for implicit (64 character hex pubkey string) 
+// and custom (something.near) accounts
+export const getNearAccounts = async function(nearPubKey:PublicKey):Promise<INearAccountsLists|null>{
+    try{
+        // fetch accounts belonging to pub key from near indexer
+        let response:IKryptikFetchResponse|null = await listNearAccountsByAddress(nearPubKey.toString()); 
+        if(!response) return null;
+        let accountsToReturn:INearAccountsLists = {customAccounts:[], implicitAccounts:[]};
+        // filter returned accounts based on type
+        for(const accountId of response.data){
+            console.log("id:");
+            console.log(accountId);
+            if(validateNearImplicitAddress(accountId)){
+                accountsToReturn.implicitAccounts.push(accountId);
+            }
+            else{
+                accountsToReturn.customAccounts.push(accountId);
+            }
+        }
+        return accountsToReturn;
+    }
+    catch(e){
+        return null;
+    }
+    
+}
+
+export const NearPubKeyFromHex = function(hexAddress:string):PublicKey{
+    let buff = Buffer.from(hexAddress, "hex");
+    let pubkKey = PublicKey.fromString(baseEncode(buff));
+    return pubkKey;
 }
