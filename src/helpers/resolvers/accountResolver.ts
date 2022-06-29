@@ -32,7 +32,6 @@ export const resolveAccount = async function(params:IAccountResolverParams):Prom
     console.log("Resolving account....");
     const {networkDB} = params;
     let network = networkFromNetworkDb(networkDB);
-    // try resolving w/ email address
     const kryptikResolved:IResolvedAccount|null = await resolveKryptikAccount(params);
     if(kryptikResolved) return kryptikResolved;
     switch(network.networkFamily){
