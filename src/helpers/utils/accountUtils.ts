@@ -1,5 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
-import { isValidEVMAddress, NetworkFamily } from "hdseedloop";
+
+import { isValidEVMAddress, Network, NetworkFamily } from "hdseedloop";
+import { IWallet } from "../../models/IWallet";
 import { NetworkDb } from "../../services/models/network";
 import { networkFromNetworkDb } from "./networkUtils";
 
@@ -41,6 +43,22 @@ export const isValidAddress = function(address:NamedCurve, networkDB:NetworkDb){
             return true;
         }
     }
+}
+
+
+// returns blockchain address for a given networkdb
+export const getAddressForNetworkDb = async(wallet:IWallet, networkDb:NetworkDb):Promise<string>=>{
+    let network = networkFromNetworkDb(networkDb);
+    let addy = await getAddressForNetwork(wallet, network);
+    return addy;
+}
+
+export const getAddressForNetwork = async(wallet:IWallet, network:Network):Promise<string>=>{
+    // gets all addresses for network
+    let allAddys:string[] = await wallet.seedLoop.getAddresses(network);
+    // gets first address for network
+    let firstAddy:string = allAddys[0];
+    return firstAddy;
 }
 
 

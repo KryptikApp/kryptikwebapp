@@ -9,6 +9,7 @@ import { Contract } from "ethers";
 import { IBalance } from "../src/services/Web3Service";
 import { title } from "process";
 import { useKryptikThemeContext } from "./ThemeProvider";
+import { getAddressForNetworkDb } from "../src/helpers/utils/accountUtils";
 
 interface Props{
     onlyWithValue?:boolean
@@ -40,7 +41,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             // skip testnets if not advanced
             if(nw.isTestnet && !isAdvanced) continue;
             if(onlyWithValue){
-                let accountAddress:string = await kryptikService.getAddressForNetworkDb(kryptikWallet, nw);
+                let accountAddress:string = await getAddressForNetworkDb(kryptikWallet, nw);
                 let NetworkBalanceParams:NetworkBalanceParameters = {
                     accountAddress: accountAddress,
                     networkDb: nw
@@ -82,7 +83,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                 let tokenBalance:IBalance|undefined = undefined;
                 let erc20Params:ERC20Params = {erc20Contract:erc20Contract};
                 if(onlyWithValue){
-                    let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, networkDb);
+                    let accountAddress = await getAddressForNetworkDb(kryptikWallet, networkDb);
                     // get balance for contract
                     let tokenBalanceParams:TokenBalanceParameters = {
                         erc20Params: erc20Params,
@@ -123,7 +124,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                     contractAddress: chainInfo.address
                 }
                 if(onlyWithValue){
-                    let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, networkDb);
+                    let accountAddress = await getAddressForNetworkDb(kryptikWallet, networkDb);
                     let splParams:SplParams = {tokenAddress:chainInfo.address};
                     let tokenBalanceParams:TokenBalanceParameters = {
                         tokenDb: splDb,
@@ -162,7 +163,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                      contractAddress: chainInfo.address
                  }
                  if(onlyWithValue){
-                     let accountAddress = await kryptikService.getAddressForNetworkDb(kryptikWallet, networkDb);
+                     let accountAddress = await getAddressForNetworkDb(kryptikWallet, networkDb);
                      let nep141Params:SplParams = {tokenAddress:chainInfo.address};
                      let tokenBalanceParams:TokenBalanceParameters = {
                          tokenDb: nep141Db,

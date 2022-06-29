@@ -29,7 +29,7 @@ import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
 import { searchTokenListByTicker } from "../helpers/search";
-import { createEd25519PubKey, createSolTokenAccount } from "../helpers/utils/accountUtils";
+import { createEd25519PubKey, createSolTokenAccount, getAddressForNetworkDb } from "../helpers/utils/accountUtils";
 import { networkFromNetworkDb, isNetworkArbitrum, getChainDataForNetwork } from "../helpers/utils/networkUtils";
 import { lamportsToSol, divByDecimals, roundCryptoAmount, roundUsdAmount, multByDecimals, roundToDecimals } from "../helpers/utils/numberUtils";
 
@@ -534,7 +534,7 @@ class Web3Service extends BaseService{
                 continue;
             }
             // gets all addresses for network
-            let accountAddress:string = await this.getAddressForNetworkDb(walletUser, nw);
+            let accountAddress:string = await getAddressForNetworkDb(walletUser, nw);
             let NetworkBalanceParams:NetworkBalanceParameters = {
                 accountAddress: accountAddress,
                 networkDb: nw
@@ -664,7 +664,7 @@ class Web3Service extends BaseService{
                     }
                     continue;
                 }
-                let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
+                let accountAddress = await getAddressForNetworkDb(walletUser, networkDb);
                 let erc20Params:ERC20Params = {
                     erc20Contract: erc20Contract
                 };
@@ -701,7 +701,7 @@ class Web3Service extends BaseService{
                     }
                     continue;
                 }
-                let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
+                let accountAddress = await getAddressForNetworkDb(walletUser, networkDb);
                 // get balance for contract
                 let nep141Params:Nep141Params = {tokenAddress:chainInfo.address};
                 let tokenParams:TokenBalanceParameters = {
@@ -743,7 +743,7 @@ class Web3Service extends BaseService{
                     }
                     continue;
                 }
-                let accountAddress = await this.getAddressForNetworkDb(walletUser, networkDb);
+                let accountAddress = await getAddressForNetworkDb(walletUser, networkDb);
                 // get balance for contract
                 let splParams:SplParams = {tokenAddress:chainInfo.address};
                 let tokenParams:TokenBalanceParameters = {
@@ -945,7 +945,7 @@ class Web3Service extends BaseService{
         let provider = await this.getKryptikProviderForNetworkDb(params.networkDb);
         if(!provider.ethProvider) return null;
         let ethProvider:JsonRpcProvider = provider.ethProvider;
-        let accountAddress:string = await this.getAddressForNetworkDb(params.wallet, params.networkDb);
+        let accountAddress:string = await getAddressForNetworkDb(params.wallet, params.networkDb);
         // connect provider and signer and attach to contract
         let walletKryptik:WalletKryptik|null = params.wallet.seedLoop.getWalletForAddress(network, accountAddress);
         if(!walletKryptik) return null;;
@@ -955,16 +955,6 @@ class Web3Service extends BaseService{
         let erc20Contract = new Contract(erc20ChainData.address, erc20Abi);
         let contractConnected = erc20Contract.connect(ProviderAndSigner);
         return contractConnected;
-    }
-
-    // returns blockchain address for a given networkdb
-    getAddressForNetworkDb = async(wallet:IWallet, networkDb:NetworkDb):Promise<string>=>{
-        let network = networkFromNetworkDb(networkDb);
-        // gets all addresses for network
-        let allAddys:string[] = await wallet.seedLoop.getAddresses(network);
-        // gets first address for network
-        let firstAddy:string = allAddys[0];
-        return firstAddy;
     }
 
 
