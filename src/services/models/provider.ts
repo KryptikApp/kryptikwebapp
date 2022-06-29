@@ -9,7 +9,9 @@ import { Network, NetworkFamily } from 'hdseedloop';
 import { Near } from 'near-api-js';
 import { NearConfig } from 'near-api-js/lib/near';
 import { networkFromNetworkDb } from '../../helpers/utils/networkUtils';
-import { NetworkDb } from './network';
+import { defaultNetworkDb, NetworkDb } from './network';
+
+
 
 export class KryptikProvider{
     public ethProvider: StaticJsonRpcProvider|undefined;
@@ -44,3 +46,6 @@ export class KryptikProvider{
         }
     }
 }
+
+
+export const defaultKryptikProvider = new KryptikProvider(defaultNetworkDb.provider, defaultNetworkDb);
