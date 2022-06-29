@@ -21,14 +21,18 @@ export interface IBlockchainAccounts{
 //tries to convert registered email address to blockchain address
 export const resolveKryptikAccount = async function(params:IAccountResolverParams):Promise<IResolvedAccount|null>{
     const {account, networkDB} = params;
+    console.log(`resolving kryptik account w/ id: ${account}`);
     // if not a valid email return null
     if(!isValidEmailAddress(account)) return null;
+    console.log(`is valid email addy`);
     let docRef = doc(firestore, EMAIL_TO_ACCOUNT_DB_LOCATION, account);
     let dbRes = await getDoc(docRef);
     let dbResData = dbRes.data();
      //maps ticker to blockchain address
     const tickerToAddress:{ [ticker: string]: string } = {};
     for (const ticker in dbResData) {
+        console.log(`Checking resolver for: ${ticker}`)
+        console.log(dbResData[ticker]);
         const addressDb:string = dbResData[ticker];
         tickerToAddress[ticker.toLowerCase()] = addressDb;
         // now key and value are the property name and value
@@ -45,6 +49,7 @@ export const resolveKryptikAccount = async function(params:IAccountResolverParam
 
 
 export const isValidEmailAddress = function(email:string){
-    let regex = new RegExp(' /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/')
-    return regex.test(email);
+    /* Checks for anystring@anystring.anystring */
+    let re = /\S+@\S+\.\S+/;
+    return re.test(email);
 }
