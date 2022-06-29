@@ -12,9 +12,9 @@ import { parseNearAmount } from "near-api-js/lib/utils/format";
 
 import { numberToBN } from "../../../helpers/utils";
 import { multByDecimals } from "../../../helpers/utils/numberUtils";
-import { DEFAULT_NEAR_FUNCTION_CALL_GAS } from "./constants";
 import { networkFromNetworkDb, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
 import { CreateTransactionParameters, TransactionPublishedData, defaultTxPublishedData, NearTransactionParams, ISignAndSendParameters } from "../../../services/models/transaction";
+import { DEFAULT_NEAR_FUNCTION_CALL_GAS } from "../../../constants/nearConstants";
 
 
 
