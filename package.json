@@ -31,7 +31,7 @@
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.19.0",
     "from-exponential": "^1.1.1",
-    "hdseedloop": "^0.5.2",
+    "hdseedloop": "^0.5.3",
     "jose": "^4.6.2",
     "lodash": "^4.17.21",
     "magic-sdk": "^8.1.0",
