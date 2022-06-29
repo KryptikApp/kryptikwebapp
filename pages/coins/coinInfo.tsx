@@ -253,7 +253,7 @@ const coinInfo: NextPage = () => {
             loaded &&
             <div>
 
-              <div className="text-left mt-4 mb-20 text-lg text-white dark:text-white">
+              <div className="text-left mt-4 mb-20 text-lg dark:text-white">
                 <h2 className="font-semibold">About</h2>
                 <p>{tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.extensions.description:tokenAndNetwork.baseNetworkDb.about}</p>
               </div>
