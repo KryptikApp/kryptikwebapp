@@ -8,6 +8,7 @@ import ListItemDropdown from "./lists/ListItemDropwdown";
 import { Contract } from "ethers";
 import { IBalance } from "../src/services/Web3Service";
 import { title } from "process";
+import { useKryptikThemeContext } from "./ThemeProvider";
 
 interface Props{
     onlyWithValue?:boolean
@@ -18,6 +19,7 @@ interface Props{
 const DropdownNetworks:NextPage<Props> = (props) => {
     const {selectedTokenAndNetwork, selectFunction, onlyWithValue, onLoadedFunction} = props;
     const {kryptikService, authUser, kryptikWallet} = useKryptikAuthContext();
+    const {isAdvanced} = useKryptikThemeContext();
     const[networkAndTokens, setNetworkAndTokens] = useState<TokenAndNetwork[]>([]);
     const[isFetched, setIsFetched] = useState(false);
     const[showOptions, setShowOptions] = useState(false);
@@ -35,17 +37,24 @@ const DropdownNetworks:NextPage<Props> = (props) => {
         // add networks
         for(const nw of networks){
             let networkBalance:IBalance|undefined = undefined;
+            // skip testnets if not advanced
+            if(nw.isTestnet && !isAdvanced) continue;
             if(onlyWithValue){
                 let accountAddress:string = await kryptikService.getAddressForNetworkDb(kryptikWallet, nw);
                 let NetworkBalanceParams:NetworkBalanceParameters = {
                     accountAddress: accountAddress,
                     networkDb: nw
                 }
-                let nwBalance = await kryptikService.getBalanceNetwork(NetworkBalanceParams);
-                tickerToNetworkBalance[nw.ticker] == nwBalance;
-                if(nwBalance) networkBalance = nwBalance;
-                // exclude networks with zero balance
-                if(networkBalance?.amountCrypto == "0") continue;
+                try{
+                    let nwBalance = await kryptikService.getBalanceNetwork(NetworkBalanceParams);
+                    tickerToNetworkBalance[nw.ticker] == nwBalance;
+                    if(nwBalance) networkBalance = nwBalance;
+                    // exclude networks with zero balance
+                    if(networkBalance?.amountCrypto == "0") continue;
+                }
+               catch(e){
+                console.warn(`Unable to get dropdown balance for ${nw.fullName}`);
+               }
             }
             let tokenAndNetworkToAdd:TokenAndNetwork = {
                 baseNetworkDb: nw,
@@ -61,6 +70,8 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             for(const chainInfo of erc20Db.chainData){
                 let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
                 if(!networkDb) continue;
+                // skip testnets if not advanced
+                if(networkDb.isTestnet && !isAdvanced) continue;
                 let erc20ContractParams:CreateEVMContractParameters = {
                     wallet: kryptikWallet,
                     networkDb: networkDb,
@@ -105,6 +116,8 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             for(const chainInfo of splDb.chainData){
                 let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
                 if(!networkDb) continue;
+                // skip testnets if not advanced
+                if(networkDb.isTestnet && !isAdvanced) continue;
                 let tokenBalance:IBalance|undefined = undefined;
                 let solParams:TokenParamsSpl = {
                     contractAddress: chainInfo.address
@@ -142,6 +155,8 @@ const DropdownNetworks:NextPage<Props> = (props) => {
              for(const chainInfo of nep141Db.chainData){
                  let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
                  if(!networkDb) continue;
+                 // skip testnets if not advanced
+                 if(networkDb.isTestnet && !isAdvanced) continue;
                  let tokenBalance:IBalance|undefined = undefined;
                  let nep141Params:TokenParamsNep141 = {
                      contractAddress: chainInfo.address
