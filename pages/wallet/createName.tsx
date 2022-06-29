@@ -15,6 +15,8 @@ import { defaultKryptikProvider } from '../../src/services/models/provider'
 import { Network, truncateAddress } from 'hdseedloop'
 import { networkFromNetworkDb } from '../../src/helpers/utils/networkUtils'
 import { TransactionPublishedData } from '../../src/services/models/transaction'
+import { getAddressForNetwork, getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils'
+import { defaultResolvedAccount, IAccountResolverParams, IResolvedAccount, resolveAccount } from '../../src/helpers/resolvers/accountResolver'
 
 
 const CreateName: NextPage = () => {
@@ -23,6 +25,8 @@ const CreateName: NextPage = () => {
   const [nameIsAvailable, setNameIsAvailable] = useState(false);
   const [updateMsg, setUpdateMsg] = useState<string|null>(null);
   const [name, setName] = useState("");
+  const [isResolveLoading, setIsResolveLoading] = useState(true);
+  const [resolvedAccount, setResolvedAccount] = useState(defaultResolvedAccount);
   const [currentAddress, setCurrentAddress] = useState("");
   const [readableCurrentAddress, setReadableCurrentADdress] = useState("");
   const [kryptikProvider, setKryptikProvider] = useState(defaultKryptikProvider)
@@ -34,16 +38,32 @@ const CreateName: NextPage = () => {
       router.push('/')
   }, [authUser, loading])
 
+
+  useEffect(()=>{
+    setIsResolveLoading(false);
+    console.log("HIT RESOLVED!");
+  }, [resolvedAccount])
+
   const fetchNameData = async function(){
+    setIsResolveLoading(true);
     let networkDb:NetworkDb|null = kryptikService.getNetworkDbByTicker("near");
     if(!networkDb) return;
     let network:Network = networkFromNetworkDb(networkDb);
+    let nearAddy:string = await getAddressForNetwork(kryptikWallet, network);
     let newKryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(networkDb);
     if(!newKryptikProvider) return;
-    let newCurrentAddy = await kryptikService.getAddressForNetworkDb(kryptikWallet, networkDb);
-    if(!newCurrentAddy) return;
-    setCurrentAddress(newCurrentAddy);
-    setReadableCurrentADdress(truncateAddress(newCurrentAddy, network));
+    let resolverParams:IAccountResolverParams = {
+      account: nearAddy,
+      kryptikProvider: newKryptikProvider,
+      networkDB: networkDb
+    }
+    let newResolvedAccount:IResolvedAccount|null = await resolveAccount(resolverParams);
+    console.log("resolved:");
+    console.log(newResolvedAccount);
+    if(!newResolvedAccount) return;
+    setResolvedAccount(newResolvedAccount);
+    setCurrentAddress(newResolvedAccount.address);
+    setReadableCurrentADdress(truncateAddress(newResolvedAccount.address, network));
     setKryptikProvider(newKryptikProvider);
   }
 
@@ -58,7 +78,6 @@ const CreateName: NextPage = () => {
         updateMessageHandler: updateMessageManager
      }
      let isNameValid = await checkNEARAccountAvailable(checkAccountParams);
-     console.log(`Is name valid? ${isNameValid}`);
      setNameIsAvailable(isNameValid);
      setIsUpdateLoading(false);
   }
@@ -108,7 +127,6 @@ const CreateName: NextPage = () => {
         kryptikProvider: kryptikProvider
      }
      let isNameValid = await checkNEARAccountAvailable(checkAccountParams);
-     console.log(`Is name valid reservation? ${isNameValid}`);
      if(!isNameValid){
         setIsReservationLoading(false);
         return;
@@ -138,22 +156,38 @@ const CreateName: NextPage = () => {
                     Add Custom NEAR Name
             </h1>
             <Divider/>
-            <p className="text-slate-700 mb-2 dark:text-white">Create a unique name on Near Protocol. Your custom name will be used for all actions on the NEAR Protocol blockchain.</p>
-            <p className="mb-2 text-justify text-sm text-gray-500 dark:text-gray-400">Current name: <span className="italic">{readableCurrentAddress}</span></p>
+            <p className="text-slate-700 mb-2 dark:text-white">Create a unique Near name. Your custom name will be used for all actions on the NEAR Protocol blockchain.</p> 
+            
+            {/* current near address and names */}
+            {
+              !isResolveLoading &&
+              <div>
+              <p className="mb-2 text-justify text-sm text-gray-500 dark:text-gray-400">Current name{resolvedAccount.names?"s":""}:</p>
+                <div>
+                  <span className="inline bg-sky-400 text-white font-semibold rounded-full py-1 px-2 mr-1">{readableCurrentAddress}</span>
+                  {
+                    resolvedAccount.names &&
+                    <span className="inline bg-sky-400 text-white font-semibold rounded-full py-1 px-2 ml-1 mr-1">{resolvedAccount.names[0]}</span>
+                  }
+                  
+                </div>
+              </div>
+            }
+            
             <div className="py-5 rounded mb-0 ">
               <label className="block text-gray-500 font-bold md:text-left mb-2 md:mb-0 pr-4">
                Account Name
               </label>
               <input maxLength={64} className={`bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight font-semibold focus:outline-none focus:bg-white ${(name.length>=2)?(nameIsAvailable?"focus:border-green-400":"focus:border-red-400"):"focus:border-blue-400"} dark:bg-[#141414] dark:text-white`} id="inline-full-name" placeholder={"myname.near"} value={name} onChange={(e) => handleUpdateNearName(e.target.value)}/>
-             {
+              {
                  (!isUpdateLoading && name.length>=2)?
                 <p className={`text-sm font-semibold ${nameIsAvailable?`text-green-500`:`text-red-500`}`}>{nameIsAvailable?"Woohoo! Your name is available.":updateMsg}</p>
                 :
                 <p className="mt-1 text-sm text-gray-400 dark:text-gray-500 italic">Be fun, be fresh!</p>
-            }
+             }
             </div>
             <div className="content-center mx-auto text-center">
-                <button onClick={()=>handleClickFinalizeName()} className={`bg-transparent hover:bg-sky-500 text-sky-500 font-semibold text-xl rounded-full hover:text-white py-2 px-14 mx-auto ${isUpdateLoading?"hover:cursor-not-allowed":""} border border-sky-500 hover:border-transparent rounded-lg my-5 transition-colors duration-100`} disabled={isUpdateLoading}>
+                <button onClick={()=>handleClickFinalizeName()} className={`bg-transparent text-sky-500 ${!nameIsAvailable?"bg-gray-100 dark:bg-gray-900 hover:cursor-not-allowed hover:bg-gray-200 dark:bg-gray-800":"hover:bg-sky-500"} font-semibold text-xl rounded-full hover:text-white py-2 px-14 mx-auto ${isUpdateLoading?"hover:cursor-not-allowed":""} border border-sky-500 hover:border-transparent rounded-lg my-5 transition-colors duration-100`} disabled={isUpdateLoading || !nameIsAvailable}>
                             Reserve My Name
                             {
                                         !isReservationLoading?"":
