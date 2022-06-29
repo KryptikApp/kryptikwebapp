@@ -5,13 +5,19 @@ export interface KryptikFetchRequestOpts extends RequestInit {
   timeout?: number;
 }
 
+export interface IKryptikFetchResponse{
+  data:any,
+  headers:Headers,
+  status:number
+}
+
 /**
  * KryptikFetch fetches data and handles response edge cases and error handling.
  */
 export async function KryptikFetch(
   url: RequestInfo,
   opts: KryptikFetchRequestOpts
-) {
+):Promise<IKryptikFetchResponse> {
   opts = {
     headers: {},
     method: 'get',
