@@ -70,7 +70,7 @@ const CreateWallet: NextPage = () => {
         :
         <div className="text-center max-w-md mx-auto content-center">
 
-        <div className="rounded-md border border-solid border-grey-600 py-10 hover:border-grey-800 shadow-md hover:shadow-lg">
+        <div className="rounded-md border border-solid border-gray-600 py-10 hover:border-grey-800 shadow-md hover:shadow-lg">
         <div className="text-center max-w-2xl mx-auto content-center dark:text-white">
 
           <div className="flex flex-wrap justify-center">
