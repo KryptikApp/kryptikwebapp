@@ -1,6 +1,4 @@
-import { PublicKey } from "@solana/web3.js";
 import { Network, NetworkFamily } from "hdseedloop";
-import { createEd25519PubKey } from "../utils/accountUtils";
 import { networkFromNetworkDb } from "../utils/networkUtils";
 import { IAccountResolverParams, IResolvedAccount } from "./accountResolver";
 
@@ -34,6 +32,6 @@ export const resolveNEARAccount = async function(params:IAccountResolverParams):
 
 // update to run thorough validation
 const validateNearImplicitAddress = function(address:string){
-    if(address.length!=65) return false;
-    return true;
+    if(address.length === 64 && !address.includes('.')) return true;
+    return false;
 }
