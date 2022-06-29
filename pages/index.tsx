@@ -9,39 +9,14 @@ import { ServiceState } from '../src/services/types';
 import { KryptikProvider } from '../src/services/models/provider';
 import { networkFromNetworkDb } from '../src/helpers/utils/networkUtils';
 import Link from 'next/link';
+import { getAddressForNetworkDb } from '../src/helpers/utils/accountUtils';
+import { listNearAccountsByAddress } from '../src/requests/nearIndexApi';
+import { createNearKey, getNearAccounts } from '../src/helpers/utils/nearAccountUtils';
+import { defaultNetworks, Network } from 'hdseedloop';
 
 const Home: NextPage = () => {
-  const {kryptikWallet, kryptikService, authUser} = useKryptikAuthContext();
-  const [resolvedAccount, setResolvedAccount] = useState<IResolvedAccount>(defaultResolvedAccount);
+  const {kryptikWallet, authUser} = useKryptikAuthContext();
 
- const fetchResolvedAccount = async function(){
-    // make sure service is started
-    if(kryptikService.serviceState != ServiceState.started) return;
-    let nearNetworkDb = kryptikService.getNetworkDbByTicker("near");
-    if(!nearNetworkDb) return;
-    let network = networkFromNetworkDb(nearNetworkDb);
-    let provider = await kryptikService.getKryptikProviderForNetworkDb(nearNetworkDb)
-    let addys = await kryptikWallet.seedLoop.getAddresses(network);
-    console.log(addys[0]);
-    let resolveParams:IAccountResolverParams ={
-      account: addys[0],
-      networkDB: nearNetworkDb,
-      kryptikProvider: provider
-    }
-    let newResolvedAccount:IResolvedAccount|null = await resolveAccount(resolveParams)
-    if(newResolvedAccount && newResolvedAccount.isResolved){
-      setResolvedAccount(newResolvedAccount);
-    }
-  }
-
-  useEffect(() => {
-    fetchResolvedAccount();
-  }, [authUser])
-
-  useEffect(()=>{
-    fetchResolvedAccount();
-  }, [])
-  
   const handleGetStarted = async() =>{
     console.log("Handle get started!");
     toast('Handle get started');
@@ -69,7 +44,6 @@ const Home: NextPage = () => {
             <p>UID: {authUser.uid}</p>
             <p>Wallet Connected: {kryptikWallet.connected?"True":"False"}</p>
             <p>Ethereum Address: {kryptikWallet.ethAddress}</p>
-            <p>Resolved ETH Name: {resolvedAccount.name?resolvedAccount.name:"Not Set"}</p>
           </div>
 
         </div>
