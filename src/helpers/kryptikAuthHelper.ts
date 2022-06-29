@@ -86,6 +86,7 @@ export function useKryptikAuth() {
         // when signing in with custom seed
         sessionStorage.setItem("isSigniningInWithToken", "true");
         let userCred:UserCredential = await signInWithCustomToken(firebaseAuth, customToken);
+        // remove temporary session flag
         sessionStorage.removeItem("isSigniningInWithToken")
         if(isRefresh) return;
         // now we are manually updating the context and connecting the wallet
