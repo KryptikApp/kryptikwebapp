@@ -54,7 +54,7 @@ export const resolveEVMAccount = async function(params:IAccountResolverParams):P
         address: address,
         isResolved: true,
         avatarPath: avatarPath?avatarPath:undefined,
-        name: name?name:undefined
+        names: name?[name]:undefined
     }
     return resolvedAccount;
 }

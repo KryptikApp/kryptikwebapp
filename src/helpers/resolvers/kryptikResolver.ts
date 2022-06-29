@@ -42,7 +42,7 @@ export const resolveKryptikAccount = async function(params:IAccountResolverParam
     let resolvedAccount:IResolvedAccount = {
         address: addressMatched,
         isResolved: true,
-        name: account
+        names: [account]
     }
     return resolvedAccount;
 }
