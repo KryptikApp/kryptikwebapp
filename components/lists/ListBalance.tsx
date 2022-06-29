@@ -11,7 +11,7 @@ import { roundToDecimals } from "../../src/helpers/utils/numberUtils";
 import { useKryptikThemeContext } from "../ThemeProvider";
 
 const ListBalance:NextPage = () => {
-    const {kryptikService, kryptikWallet, authUser} = useKryptikAuthContext();
+    const {kryptikService, kryptikWallet} = useKryptikAuthContext();
     const {isAdvanced} = useKryptikThemeContext()
     const initBalances:IBalance[] = [];
     const[isFetchedBalances, setIsFetchedBalances] = useState(false);
@@ -211,16 +211,15 @@ const ListBalance:NextPage = () => {
                     </ul>
                 </div>
             }
-            {/* indicate if no token balances vailable */}
-            {
+            </div>
+            
+        }
+          {/* indicate if no token balances available */}
+        {
                 (balancesNep141.length == 0 && balancesERC20.length == 0 && balancesSpl.length == 0)? 
                 <h2 className="text-slate-700 mx-auto my-8 dark:text-slate-200">No Token Balances Available!</h2>
                 :
-                <div>
-                </div>
-            }
-            </div>
-            
+                <p>Balances available</p>
         }
         
         </div>
