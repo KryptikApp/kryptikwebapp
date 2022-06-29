@@ -69,7 +69,9 @@ const Recieve: NextPage = () => {
         </div>
         
         <div className="max-w-lg mx-auto content-center rounded-lg border border-solid border-gray-600 py-10 hover:border-gray-800 dark:border-gray-400 dark:hover:border-gray-200">
-          <h1 className="text-center text-3xl font-bold lg:mb-2 dark:text-white">Recieve  <img src="/kryptikBrand/kryptikEyez.png" alt="Kryptik Eyes" className="rounded-full w-10 inline max-h-sm h-auto align-middle border-none" /></h1> 
+        
+          <h1 className="text-center text-3xl font-bold lg:mb-2 dark:text-white">Recieve<img src="/kryptikBrand/kryptikEyez.png" alt="Kryptik Eyes" className="rounded-full w-10 inline max-h-sm h-auto align-middle border-none" /></h1> 
+          
           {/* QR CODE */}
           <div className="flex">
             <div className="flex-1"/>
@@ -106,7 +108,7 @@ const Recieve: NextPage = () => {
           {
             selectedTokenAndNetwork.tokenData?
             <p className="mx-auto text-center text-slate-500 text-sm px-4 dark:text-slate-400 mt-3">Easily receive <span style={{color:`${selectedTokenAndNetwork.tokenData.tokenDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.tokenData.tokenDb.name}</span> on <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span> by having someone scan the code below.</p>:
-            <p className="mx-auto text-center text-slate-500 text-sm px-4 dark:text-slate-400 mt-3">Easily receive money on <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span> by having someone scan the code below.</p> 
+            <p className="mx-auto text-center text-slate-500 text-sm px-4 dark:text-slate-400 mt-3">Easily receive money on <span style={{color:`${selectedTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-medium">{selectedTokenAndNetwork.baseNetworkDb.fullName}</span> by having someone scan the code above.</p> 
           }
           
         </div>
