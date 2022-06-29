@@ -10,6 +10,8 @@ export const resolveSOLAccount = async function(params:IAccountResolverParams):P
     let network:Network = networkFromNetworkDb(networkDB);
     if(network.networkFamily != NetworkFamily.Solana) return null;
     // validate solana address
+    // pubkey should be between 32 and 44 characters
+    if(account.length<32 || account.length>44) return null;
     let solPubKey:PublicKey = createEd25519PubKey(account);
     if(!PublicKey.isOnCurve(solPubKey.toBuffer())){
         return null;
