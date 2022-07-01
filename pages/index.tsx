@@ -2,17 +2,8 @@ import type { NextPage } from 'next'
 import toast, { Toaster } from 'react-hot-toast';
 
 import { useKryptikAuthContext } from '../components/KryptikAuthProvider';
-import { useEffect, useState } from 'react';
-import { IAccountResolverParams, IResolvedAccount, resolveAccount, defaultResolvedAccount } from '../src/helpers/resolvers/accountResolver';
-import { defaultNetworkDb } from '../src/services/models/network';
-import { ServiceState } from '../src/services/types';
-import { KryptikProvider } from '../src/services/models/provider';
-import { networkFromNetworkDb } from '../src/helpers/utils/networkUtils';
 import Link from 'next/link';
-import { getAddressForNetworkDb } from '../src/helpers/utils/accountUtils';
-import { listNearAccountsByAddress } from '../src/requests/nearIndexApi';
-import { createNearKey, getNearAccounts } from '../src/helpers/utils/nearAccountUtils';
-import { defaultNetworks, Network } from 'hdseedloop';
+
 
 const Home: NextPage = () => {
   const {kryptikWallet, authUser} = useKryptikAuthContext();
@@ -39,6 +30,8 @@ const Home: NextPage = () => {
           </button>
           <div className="text-green-500">
             <Link href="../wallet/createName">Create Near Name</Link>
+            <br/>
+            <Link href="launch">Launch Page</Link>
           </div>
           <div className="dark:text-white">
             <p>UID: {authUser.uid}</p>
