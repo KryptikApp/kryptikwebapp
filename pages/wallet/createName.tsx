@@ -167,9 +167,10 @@ const CreateName: NextPage = () => {
                   <span className="inline bg-sky-400 text-white font-semibold rounded-full py-1 px-2 mr-1">{readableCurrentAddress}</span>
                   {
                     resolvedAccount.names &&
-                    <span className="inline bg-sky-400 text-white font-semibold rounded-full py-1 px-2 ml-1 mr-1">{resolvedAccount.names[0]}</span>
+                    resolvedAccount.names.map((name:string)=>(
+                      <span className="inline bg-sky-400 text-white font-semibold rounded-full py-1 px-2 ml-1 mr-1">{name}</span>
+                    ))
                   }
-                  
                 </div>
               </div>
             }
