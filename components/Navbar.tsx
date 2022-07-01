@@ -26,7 +26,7 @@ const Navbar:NextPage = () => {
         : "hidden md:flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0";
 
     const handleHideBalances = function(isHideBalances:boolean){
-        updateHideBalances(isHideBalances);
+        updateHideBalances(isHideBalances, authUser.uid);
         if(isHideBalances){
             toast("Your balances will now be HIDDEN while browsing")
         }
