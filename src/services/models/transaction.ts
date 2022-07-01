@@ -45,32 +45,20 @@ export const defaultTransactionFeeData:TransactionFeeData = {
     EVMGas: defaultEVMGas
 }
 
-export interface SolTransactionParams{
-    sendAccount:string,
-    toAddress: string,
+export interface SolTransactionParams extends TransactionParams{
     decimals: number,
-    kryptikProvider:KryptikProvider,
-    networkDb:NetworkDb,
     valueSol:number,
     tokenParamsSol?:TokenParamsSpl
 }
 
-export interface NearTransactionParams{
-    sendAccount:string,
+export interface NearTransactionParams extends TransactionParams{
+    contractAddress?:string,
     nearPubKeyString:string,
-    toAddress: string,
     decimals: number,
-    kryptikProvider:KryptikProvider,
-    networkDb:NetworkDb,
-    valueNear:number,
-    tokenParamsSol?:TokenParamsNep141
+    valueNear:number
 }
 
-export interface EVMTransactionParams{
-    sendAccount:string,
-    kryptikProvider:KryptikProvider,
-    networkDb:NetworkDb
-    toAddress:string,
+export interface EVMTransactionParams extends TransactionParams{
     gasPrice: BigNumberish,
     // how much gas we're willing to use
     gasLimit: BigNumberish,
@@ -80,6 +68,13 @@ export interface EVMTransactionParams{
     maxPriorityFeePerGas: BigNumberish,
     // value in token we are sending
     value: BigNumberish
+}
+
+export interface TransactionParams{
+    sendAccount:string,
+    kryptikProvider:KryptikProvider,
+    networkDb:NetworkDb
+    toAddress:string,
 }
 
 export type TransactionRequest = {
@@ -150,6 +145,7 @@ export interface CreateTransactionParameters{
     wallet: IWallet,
     toAddress:string,
     fromAddress:string,
+    contractAddress?:string,
     errorHandler: IErrorHandler
 }
 
