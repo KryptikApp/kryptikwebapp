@@ -2,20 +2,20 @@ import { TransactionParameters } from "hdseedloop";
 import { KeyPairEd25519 } from "near-api-js/lib/utils";
 import { Transaction, SCHEMA, SignedTransaction, Signature, Action, createTransaction, functionCall, transfer } from "near-api-js/lib/transaction";
 import {baseEncode} from "borsh"
-import { utils as nearUtils } from "near-api-js";
+import { Near, utils as nearUtils } from "near-api-js";
 import * as sha256 from "fast-sha256"
 import { FinalExecutionOutcome } from "near-api-js/lib/providers";
 import { KeyType, PublicKey } from "near-api-js/lib/utils/key_pair";
 import BN from "bn.js";
-import { AccessKeyView, BlockResult } from "near-api-js/lib/providers/provider";
+import { AccessKeyView, BlockResult, ExecutionStatusBasic, FinalExecutionStatusBasic } from "near-api-js/lib/providers/provider";
 import { parseNearAmount } from "near-api-js/lib/utils/format";
+import { FinalExecutionStatus } from "near-api-js/lib/providers/provider";
 
 import { numberToBN } from "../../../helpers/utils";
 import { multByDecimals } from "../../../helpers/utils/numberUtils";
 import { networkFromNetworkDb, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
 import { CreateTransactionParameters, TransactionPublishedData, defaultTxPublishedData, NearTransactionParams, ISignAndSendParameters } from "../../../services/models/transaction";
-import { DEFAULT_NEAR_FUNCTION_CALL_GAS } from "../../../constants/nearConstants";
-
+import { DEFAULT_NEAR_FUNCTION_CALL_GAS, FT_MINIMUM_STORAGE_BALANCE_LARGE, FT_STORAGE_DEPOSIT_GAS } from "../../../constants/nearConstants";
 
 
 export interface ISignAndSendNearParameters extends ISignAndSendParameters{
@@ -56,6 +56,11 @@ export const signAndSendNEARTransaction = async function(params:ISignAndSendNear
   // publish transaction to the blockchain
   try{
       const txPostResult:FinalExecutionOutcome = await nearProvider.connection.provider.sendTransaction(signedTransaction)
+      console.log("NEAR POST RESULT");
+      console.log(txPostResult);
+      if(typeof txPostResult.status === 'object' && typeof txPostResult.status.Failure === 'object'){
+        throw(new Error(`Error: NEAR transaction failed with error: ${txPostResult.status.Failure.error_message}`));
+      }
       txDoneData.hash = txPostResult.transaction.hash;
   }
   catch(e:any){
@@ -71,6 +76,7 @@ export const signAndSendNEARTransaction = async function(params:ISignAndSendNear
 export const PublishNEARTransferTx = async function(params:CreateTransactionParameters){
     const {tokenAndNetwork,
         amountCrypto,
+        contractAddress,
         kryptikService,
         wallet,
         toAddress,
@@ -94,6 +100,7 @@ export const PublishNEARTransferTx = async function(params:CreateTransactionPara
       sendAccount: fromAddress,
       nearPubKeyString: nearPubKeyString,
       toAddress: toAddress,
+      contractAddress: contractAddress,
       valueNear: Number(amountCrypto),
       kryptikProvider: kryptikProvider,
       decimals: tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.decimals:tokenAndNetwork.baseNetworkDb.decimals,
@@ -102,9 +109,11 @@ export const PublishNEARTransferTx = async function(params:CreateTransactionPara
     let txNear:Transaction;
     // create near token tx.
     if(tokenAndNetwork.tokenData && tokenAndNetwork.tokenData.tokenParamsNep141){
+      // add contract address
+      txIn.contractAddress = tokenAndNetwork.tokenData.tokenParamsNep141.contractAddress;
       txNear = await createNearTokenTransaction(txIn);
     }
-    // create base layer sol tx.
+    // create base layer near tx.
     else{
       txNear = await createNearTransaction(txIn);
     }
@@ -161,17 +170,35 @@ export const createNearTransaction = async function(txIn:NearTransactionParams):
 
 export const createNearTokenTransaction = async function(txIn:NearTransactionParams){
   if(!txIn.kryptikProvider.nearProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
+  if(!txIn.contractAddress) throw(new Error("Error: No contract address provided for Near Token Transfer."));
   let nearProvider = txIn.kryptikProvider.nearProvider;
   // convert near amount to yocto units.. similar to wei for ethereum
   let amountToken:string = multByDecimals(txIn.valueNear, txIn.decimals).asString;
   // arguments to pass in to function call
-  let callArgs = {receiver_id: txIn.toAddress,
-      amount: amountToken,
-      memo: null}
+  let callArgs = {amount: amountToken,
+      receiver_id: txIn.toAddress}
   // hardcoded deposit amount of 1 yocto
   // smallest nonzero amount possible
   let depositAmount:BN = numberToBN("1");
-  const actions:Action[] = [functionCall("ft_transfer", callArgs, DEFAULT_NEAR_FUNCTION_CALL_GAS, depositAmount)];
+  let actions:Action[] = [];
+  let storageAvailable = await isStorageBalanceAvailable(nearProvider, txIn.sendAccount, txIn.contractAddress);
+  console.log("Storage Available boolean");
+  console.log(storageAvailable);
+  // add contract storage if needed
+  if(!storageAvailable){
+    console.log("Adding deposit transfer action");
+    let storageTransferAction = functionCall(
+      'storage_deposit',
+      {
+          account_id: txIn.toAddress,
+          registration_only: true,
+      },
+      new BN(FT_STORAGE_DEPOSIT_GAS),
+      new BN(FT_MINIMUM_STORAGE_BALANCE_LARGE)
+     )
+     actions.push(storageTransferAction);
+  }
+  actions.push(functionCall("ft_transfer", callArgs, DEFAULT_NEAR_FUNCTION_CALL_GAS, depositAmount))
   let pubkey = PublicKey.fromString(txIn.nearPubKeyString);
   const accessKeyResponse = await nearProvider.connection.provider.query<AccessKeyView>({
       request_type: 'view_access_key',
@@ -184,10 +211,23 @@ export const createNearTokenTransaction = async function(txIn:NearTransactionPar
   const transaction:Transaction =  createTransaction(
       txIn.sendAccount,
       pubkey,
-      txIn.toAddress,
+      txIn.contractAddress,
       accessKeyResponse.nonce+1,
       actions,
       recentBlockhash
     );
   return transaction;
+}
+
+const getStorageBalance = async function(nearProvider:Near, accountId:string, contractAddress:string){
+  let nearAccount = await nearProvider.account(accountId);
+  let storageBalance = await nearAccount.viewFunction(contractAddress, 'storage_balance_of', 
+            {account_id:accountId});
+  return storageBalance;
+}
+
+const isStorageBalanceAvailable = async function(nearProvider:Near, accountId:string, contractAddress:string){
+  const storageBalance = await getStorageBalance(nearProvider, accountId, contractAddress);
+  console.log(storageBalance);
+  return storageBalance?.available == storageBalance?.total;
 }
