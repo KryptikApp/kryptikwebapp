@@ -2,7 +2,7 @@ import { NextPage } from "next";
 import { useContext, useState } from "react";
 import { INFTMetadata, ITraitType } from "../../src/parsers/nftMetaData";
 import { useKryptikThemeContext } from "../ThemeProvider";
-import CardDivider from "./cardDivider";
+import CardDivider from "./CardDivider";
 
 interface Props {
     nftMetaData: INFTMetadata
@@ -34,7 +34,7 @@ const NftDisplay:NextPage<Props> = (props) => {
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>  
             </button>
             {/* flex with card and image */}
-            <div className="flex flex-col md:flex-row flex-wrap opacity-100 m-4 md:min-w-[60%] max-w-[90%] md:max-w-[900px] max-h-screen">
+            <div className="flex flex-col md:flex-row opacity-100 m-4 md:min-w-[60%] max-w-[90%] md:max-w-[900px] max-h-screen">
                 <div className="md:hidden min-h-[2rem] dark:text-white">
                         
                         {/* padding div for space between top and main elements */}
