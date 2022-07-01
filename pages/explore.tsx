@@ -1,7 +1,7 @@
 import type { NextPage } from 'next'
 import { useEffect, useState } from 'react';
 import { useKryptikAuthContext } from '../components/KryptikAuthProvider'
-import NftDisplay from '../components/nfts/nftDisplay';
+import NftDisplay from '../components/nfts/NftDisplay';
 import ProfileName from '../components/ProfileName';
 import { getUserPhotoPath } from '../src/helpers/firebaseHelper';
 import { INFTMetadata } from '../src/parsers/nftMetaData';
