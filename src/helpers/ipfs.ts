@@ -1,11 +1,14 @@
 import pinataClient, { PinataClient } from "@pinata/sdk";
 import axios from "axios";
 import { ReadStream } from "fs";
-import {pinataConfig} from "../../secrets"
 
 const urlPinataFile:string = "https://api.pinata.cloud/pinning/pinFileToIPFS";
 
-let pinata = pinataClient(pinataConfig.apiKey, pinataConfig.apiKeySecret);
+if(!process.env.PINATA_PUBLIC_KEY || !process.env.PINATA_PRIVATE_KEY){
+    throw(new Error("Error: PInata api keys not set as environment variable."));
+}
+
+let pinata = pinataClient(process.env.PINATA_PUBLIC_KEY, process.env.PINATA_PRIVATE_KEY);
 
 
 export interface IUploadResult {
@@ -33,11 +36,14 @@ const urlFromHash = (hash:string) =>{
 // uploads filestream to Ipfs via pinata
 export const uploadStreamToIpfs = async (readableStreamForFile:ReadStream): Promise<IUploadResult> => {
     let newIpfsResult = defaultUploadFileResult;
+    if(!process.env.PINATA_PUBLIC_KEY || !process.env.PINATA_PRIVATE_KEY){
+        throw(new Error("Error: PInata api keys not set as environment variable."));
+    }
     axios
     .post(urlPinataFile, readableStreamForFile, {
         headers: {
-            pinata_api_key: pinataConfig.apiKey,
-            pinata_secret_api_key: pinataConfig.apiKeySecret,
+            pinata_api_key: process.env.PINATA_PUBLIC_KEY,
+            pinata_secret_api_key: process.env.PINATA_PRIVATE_KEY,
         }
     }).then((result)=>{
         //handle results here

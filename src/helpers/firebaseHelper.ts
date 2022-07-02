@@ -1,18 +1,32 @@
-import { initializeApp } from "firebase/app";
+import { FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import { deleteUser, getAuth, updateCurrentUser } from "firebase/auth";
 import { getStorage, ref } from "firebase/storage";
 import { deleteDoc, doc, DocumentData, DocumentSnapshot, getDoc, getFirestore, setDoc} from 'firebase/firestore';
 // set your own firebase secrets to access db
-import { firebaseConfig } from "../../secrets";
-import { signInWithCustomToken, User, UserCredential } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { User } from "firebase/auth";
+import { useState } from "react";
 
 import { defaultUser, UserDB, UserExtraData } from "../models/user"
 import { deleteVault } from "../handlers/wallet/vaultHandler";
-import { EMAIL_TO_ACCOUNT_DB_LOCATION, IBlockchainAccounts } from "./resolvers/kryptikResolver";
+import { EMAIL_TO_ACCOUNT_DB_LOCATION} from "./resolvers/kryptikResolver";
+
+const firebaseCredentials = {apiKey: process.env.NEXT_PUBLIC_FIREBASE_PUBLIC_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID};
+
+console.log(firebaseCredentials);
 
 
-const firebaseApp = initializeApp(firebaseConfig);
+let firebaseApp:FirebaseApp;
+
+if(!getApps().length){
+  firebaseApp = initializeApp(firebaseCredentials);
+}
+else{
+  firebaseApp = getApp();
+}
+
+
 const firebaseAuth = getAuth(firebaseApp);
 const firestore = getFirestore(firebaseApp);
 
