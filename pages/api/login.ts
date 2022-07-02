@@ -1,7 +1,7 @@
 import {Magic} from '@magic-sdk/admin'
 import { NextApiRequest, NextApiResponse } from 'next';
-
-import { createCustomFirebaseToken } from '../../src/helpers/utils';
+import * as jose from "jose"
+import * as crypto from "crypto"
 
 type Data = {
   done:boolean,
@@ -40,3 +40,22 @@ export default async( req: NextApiRequest, res: NextApiResponse<Data> )=>
     // return success status
     res.status(200).json({ done: true,  dbToken: customToken})
   }
+
+// creates custom token for firebase auth 
+const createCustomFirebaseToken = async(uid:string):Promise<string> => {
+  console.log("Creating custom firebase token....");
+  // let arrayKey:Uint8Array = pemToArray(firebaseserviceKey.private_key);
+  if(!process.env.FIREBASE_PRIVATE_KEY) throw(new Error("Error: Firebase private key not provided. Unable to create custom database token."));
+  if(!process.env.FIREBASE_CLIENT_EMAIL) throw(new Error("Error: Firebase client email not provided. Unable to create custom database token."));
+  let keyObj = crypto.createPrivateKey(process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'));
+  // create jwt
+  const jwt = await new jose.SignJWT({ 'uid': uid })
+  .setProtectedHeader({ alg: 'RS256' })
+  .setIssuedAt()
+  .setSubject(process.env.FIREBASE_CLIENT_EMAIL)
+  .setIssuer(process.env.FIREBASE_CLIENT_EMAIL)
+  .setAudience('https://identitytoolkit.googleapis.com/google.identity.identitytoolkit.v1.IdentityToolkit')
+  .setExpirationTime('1h')
+  .sign(keyObj);
+  return jwt;
+}
