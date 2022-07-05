@@ -20,5 +20,11 @@ enum SendProgress{
     Failure = 4
 }
 
-export{ServiceState, Status, SendProgress}
+enum WaitlistProgress{
+    Begin=0,
+    Complete=1,
+    Failure=2
+}
+
+export{ServiceState, Status, SendProgress, WaitlistProgress}
 
