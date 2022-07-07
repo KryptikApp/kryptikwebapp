@@ -1,5 +1,5 @@
 import { KryptikFetch } from "../../kryptikFetch";
-import { INFTMetadata } from "../../parsers/nftMetaData";
+import { INFTMetadata } from "../../parsers/nftEthereum";
 import { parsePoaps } from "../../parsers/poap";
 
 
