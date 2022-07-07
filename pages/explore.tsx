@@ -1,46 +1,72 @@
 import type { NextPage } from 'next'
 import { useEffect, useState } from 'react';
+import { AiOutlineRightCircle } from 'react-icons/ai';
 import { useKryptikAuthContext } from '../components/KryptikAuthProvider'
 import NftDisplay from '../components/nfts/NftDisplay';
 import ProfileName from '../components/ProfileName';
 import { getUserPhotoPath } from '../src/helpers/firebaseHelper';
-import { INFTMetadata } from '../src/parsers/nftMetaData';
-import { listNftsByAddress } from '../src/requests/nfts/openSeaApi';
+import { getAddressForNetworkDb } from '../src/helpers/utils/accountUtils';
+import { INFTMetadata } from '../src/parsers/nftEthereum';
+import { listNearNftsByAddress } from '../src/requests/nearIndexApi';
+import { listNftsByAddress } from '../src/requests/nfts/ethereumApi';
 import { listPoapsByAddress } from '../src/requests/nfts/poapApi';
+import { listSolanaNftsByAddress } from '../src/requests/nfts/solanaApi';
 
 
 const Explore: NextPage = () => {
   const enum ActiveCategory{
     all=0,
-    poaps=1
+    poaps=1,
+    sol=2,
+    eth=3,
+    near=4
   }
-  const {authUser, kryptikWallet} = useKryptikAuthContext();
+
+  const {authUser, kryptikWallet, kryptikService} = useKryptikAuthContext();
   const [activeCategory, setActiveCategory] = useState(ActiveCategory.all);
   const [isNFTFetched, setIsNFTFetched] = useState(true);
-  const [nftMetaDataList, setNftMetadataList] = useState<INFTMetadata[]>([]);
+  const [nftList, setNftList] = useState<INFTMetadata[]>([]);
   const [poapMetaDataList, setPoapMetadataList] = useState<INFTMetadata[]>([]);
-  
+  const solImagePath = "https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/sol.png?alt=media&token=6d6e8337-79bb-45c6-bb31-47e49c7ce763"
+  const nearImagePath = "https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/near%20logo.png?alt=media&token=244c738f-e138-4e28-bf23-c991b99050c7"
+
   const fetchNFTData = async function(){
     setIsNFTFetched(false);
+    let solanaNetworkDb = kryptikService.getNetworkDbByTicker("sol");
+    if(!solanaNetworkDb) return;
+    let solanaAddress:string = await getAddressForNetworkDb(kryptikWallet, solanaNetworkDb);
+    let newNftMetadataList:INFTMetadata[] = []
+    let solNfts:INFTMetadata[]|null = await listSolanaNftsByAddress(solanaAddress);
     // fetch eth nfts
-    let newNftMetadataList = await listNftsByAddress(kryptikWallet.ethAddress);
-    if(!newNftMetadataList){
-      setIsNFTFetched(true);
-      return;
-    }
-    // update eth state
-    setNftMetadataList(newNftMetadataList);
+    let ethNfts:INFTMetadata[]|null = await listNftsByAddress(kryptikWallet.ethAddress);
 
+    // push eth nfts to main list
+    if(ethNfts){
+      newNftMetadataList.push(...ethNfts)
+    }
+    // push sol nfts to main list
+    if(solNfts){
+      newNftMetadataList.push(...solNfts)
+    }
+    let nearNetworkDb = kryptikService.getNetworkDbByTicker("near");
+    if(!nearNetworkDb) return;
+    // fetch near nfts
+    let nearAddress = await getAddressForNetworkDb(kryptikWallet, nearNetworkDb)
+    let nearKryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(nearNetworkDb);
+    if(nearKryptikProvider.nearProvider){
+      let nearNfts = await listNearNftsByAddress(nearAddress, nearKryptikProvider.nearProvider);
+      if(nearNfts){
+        console.log("pushing...")
+        newNftMetadataList.push(...nearNfts);
+      }
+    }
     // fetch poaps
     let poapsList = await listPoapsByAddress(kryptikWallet.ethAddress);
-    console.log("POAPS:");
-    console.log(poapsList);
-    if(!poapsList){
-      setIsNFTFetched(true);
-      return;
+    if(poapsList){
+      newNftMetadataList.push(...poapsList);
     }
-    // update poap state
-    setPoapMetadataList(poapsList);
+    // update eth state
+    setNftList(newNftMetadataList);
     setIsNFTFetched(true);
   }
 
@@ -67,15 +93,35 @@ const Explore: NextPage = () => {
             <div className="flex flex-col mx-6">
 
               <div onClick={()=>setActiveCategory(ActiveCategory.all)} className={`${activeCategory == ActiveCategory.all?"bg-gradient-to-r from-gray-100 to-white dark:from-gray-900 dark:to-black":""} flex flex-row text-lg hover:cursor-pointer outline-0 transition ease-in-out hover:scale-110 text-slate-800 dark:text-slate-100 font-semibold rounded py-2 px-2`}>
-                <span className='w-5 min-w-5 mr-2'>🎨</span>
+                <span className='w-5 mr-2'>🎨</span>
                 <h3 className="">All NFTs</h3>
-                <span className="grow text-right">{nftMetaDataList.length+poapMetaDataList.length}</span>
+                <div className={`ml-1 grow text-right`}>
+                    <span className={`${activeCategory == ActiveCategory.all && "bg-slate-400 dark:bg-slate-700 rounded-full w-fit pl-2 pr-2 -mr-2"}`}>{nftList.length}</span> 
+                </div>
+              </div>
+
+              <div onClick={()=>setActiveCategory(ActiveCategory.sol)} className={`${activeCategory == ActiveCategory.sol?"bg-gradient-to-r from-gray-100 to-white dark:from-gray-900 dark:to-black":""} flex flex-row text-lg hover:cursor-pointer outline-0 transition ease-in-out hover:scale-110 text-slate-800 dark:text-slate-100 font-semibold rounded py-2 px-2`}>
+                <img className='w-5 h-5 mt-1 rounded-full mr-2 flex-shrink-0' src={solImagePath}/>
+                <h3 className="">Solana NFTs</h3>
+                  <div className={`ml-1 grow text-right`}>
+                    <span className={`${activeCategory == ActiveCategory.sol && "bg-slate-400 dark:bg-slate-700 rounded-full w-fit pl-2 pr-2 -mr-2"}`}>{nftList.filter(nft=>nft.networkTicker=="sol").length}</span> 
+                  </div>
+              </div>
+
+              <div onClick={()=>setActiveCategory(ActiveCategory.near)} className={`${activeCategory == ActiveCategory.near?"bg-gradient-to-r from-gray-100 to-white dark:from-gray-900 dark:to-black":""} flex flex-row text-lg hover:cursor-pointer outline-0 transition ease-in-out hover:scale-110 text-slate-800 dark:text-slate-100 font-semibold rounded py-2 px-2`}>
+                <img className='w-5 h-5 mt-1 rounded-full mr-2 flex-shrink-0' src={nearImagePath}/>
+                <h3 className="">Near NFTs</h3>
+                  <div className={`ml-1 grow text-right`}>
+                    <span className={`${activeCategory == ActiveCategory.near && "bg-slate-400 dark:bg-slate-700 rounded-full w-fit pl-2 pr-2 -mr-2"}`}>{nftList.filter(nft=>nft.networkTicker=="near").length}</span> 
+                  </div>
               </div>
 
               <div onClick={()=>setActiveCategory(ActiveCategory.poaps)} className={`${activeCategory == ActiveCategory.poaps?"bg-gradient-to-r from-gray-100 to-white dark:from-gray-900 dark:to-black":""} flex flex-row text-lg hover:cursor-pointer outline-0 transition ease-in-out hover:scale-110 text-slate-800 dark:text-slate-100 font-semibold rounded py-2 px-2`}>
-                 <span className='w-5 min-w-5 mr-2'>🏷️</span>
+                 <span className='w-5 mr-2'>🏷️</span>
                  <h3 className="">Proof of Attendance</h3>
-                 <span className="grow text-right">{poapMetaDataList.length}</span>
+                 <div className={`ml-1 grow text-right`}>
+                    <span className={`${activeCategory == ActiveCategory.poaps && "bg-slate-400 dark:bg-slate-700 rounded-full w-fit pl-2 pr-2 -mr-2"}`}>{nftList.filter(nft=>nft.isPoap).length}</span> 
+                  </div>
               </div>
 
             </div>             
@@ -87,14 +133,28 @@ const Explore: NextPage = () => {
             {
               activeCategory == ActiveCategory.all &&
               <div className="font-bold text-2xl ml-20 mb-6">
-                <span className='w-10 min-w-10 mr-2 inline'>🎨</span>
+                <span className='w-10 mr-2 inline'>🎨</span>
                 <h1 className="inline">All</h1>
               </div>
             }
-             {
+            {
+              activeCategory == ActiveCategory.sol &&
+              <div className="font-bold text-2xl ml-20 mb-6">
+                <img className='w-10 mr-2 inline' src={solImagePath}/>
+                <h1 className="inline">Solana NFts</h1>
+              </div>
+            }
+            {
+              activeCategory == ActiveCategory.near &&
+              <div className="font-bold text-2xl ml-20 mb-6">
+                <img className='w-10 mr-2 inline' src={nearImagePath}/>
+                <h1 className="inline">Near NFts</h1>
+              </div>
+            }
+            {
               activeCategory == ActiveCategory.poaps &&
               <div className="font-bold text-2xl ml-20 mb-6">
-                <span className='w-10 min-w-10 mr-2 inline'>🏷️</span>
+                <span className='w-10 mr-2 inline'>🏷️</span>
                 <h1 className="inline">Proof of Attendance</h1>
               </div>
             }
@@ -111,12 +171,13 @@ const Explore: NextPage = () => {
                     </svg>
                 </div>
             }
+            
             {/* nft gallery */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mx-auto place-items-center">
               {/* all category */}
               {
-                (activeCategory == ActiveCategory.all && isNFTFetched && nftMetaDataList.length !=0)?
-                nftMetaDataList.map((nftData:INFTMetadata)=>
+                (activeCategory == ActiveCategory.all && isNFTFetched && nftList.length !=0)?
+                nftList.map((nftData:INFTMetadata)=>
                 (
                   <NftDisplay nftMetaData={nftData}/>
                 )):
@@ -129,12 +190,51 @@ const Explore: NextPage = () => {
                   </div>
                 }
                 </div>
-                
               }
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mx-auto place-items-center">
+              {/* solana category */}
+              {
+                (activeCategory == ActiveCategory.sol && isNFTFetched && nftList.filter(nft=>nft.networkTicker=="sol").length !=0)?
+                (nftList.filter(nft=>nft.networkTicker=="sol")).map((nftData:INFTMetadata)=>
+                (
+                  <NftDisplay nftMetaData={nftData}/>
+                )):
+                <div>
+                {
+                  (isNFTFetched && activeCategory == ActiveCategory.sol)&&
+                  <div className="text-lg font-semibold text-lg dark:text-white text-center mt-40">
+                    <span className='w-5 min-w-5 mr-2 inline'>👻</span>
+                    <p className="inline">Nothing here!!</p>
+                  </div>
+                }
+                </div>
+              }
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mx-auto place-items-center">
+              {/* near category */}
+              {
+                (activeCategory == ActiveCategory.near && isNFTFetched && nftList.filter(nft=>nft.networkTicker=="near").length !=0)?
+                (nftList.filter(nft=>nft.networkTicker=="near")).map((nftData:INFTMetadata)=>
+                (
+                  <NftDisplay nftMetaData={nftData}/>
+                )):
+                <div>
+                {
+                  (isNFTFetched && activeCategory == ActiveCategory.near)&&
+                  <div className="text-lg font-semibold text-lg dark:text-white text-center mt-40">
+                    <span className='w-5 min-w-5 mr-2 inline'>👻</span>
+                    <p className="inline">Nothing here!!</p>
+                  </div>
+                }
+                </div>
+              }
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mx-auto place-items-center">
               {/* poap category */}
               {
-                ((activeCategory == ActiveCategory.poaps || activeCategory == ActiveCategory.all) && isNFTFetched && poapMetaDataList.length !=0)?
-                poapMetaDataList.map((poapData:INFTMetadata)=>
+                ((activeCategory == ActiveCategory.poaps) && isNFTFetched && nftList.filter(nft=>nft.isPoap).length !=0)?
+                (nftList.filter(nft=>nft.isPoap)).map((poapData:INFTMetadata)=>
                 (
                   <NftDisplay nftMetaData={poapData}/>
                 )):
@@ -150,6 +250,7 @@ const Explore: NextPage = () => {
                 
               }
             </div>
+
            </div>
            <div className="md:hidden min-h-[4rem] dark:text-white">
             
