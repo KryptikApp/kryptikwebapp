@@ -1,6 +1,6 @@
 // poap parser adapted from rainbowme wallet
 import { get } from 'lodash';
-import { INFTMetadata } from './nftMetaData';
+import { INFTMetadata } from './nftEthereum';
 
 /**
  * @desc parse poaps
