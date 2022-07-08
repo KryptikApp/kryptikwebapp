@@ -4,8 +4,8 @@ import { useRouter } from 'next/router'
 import {AiOutlineEye, AiOutlineEyeInvisible, AiFillCheckCircle, AiOutlineCopy} from "react-icons/ai"
 
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
-import NavProfile from '../../components/NavProfile'
 import Divider from '../../components/Divider'
+import NavProfile from '../../components/navbars/NavProfile'
 
 
 const Profile: NextPage = () => {
