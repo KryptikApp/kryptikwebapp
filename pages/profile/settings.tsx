@@ -2,11 +2,11 @@ import type { NextPage } from 'next'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
-import NavProfile from '../../components/NavProfile'
 import toast, { Toaster } from 'react-hot-toast'
 import Divider from '../../components/Divider'
 import { useKryptikThemeContext } from '../../components/ThemeProvider'
 import Link from 'next/link'
+import NavProfile from '../../components/navbars/NavProfile'
 
 
 const Settings: NextPage = () => {

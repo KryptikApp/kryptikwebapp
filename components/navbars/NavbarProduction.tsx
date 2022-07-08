@@ -5,14 +5,14 @@ import { useRouter } from "next/router";
 import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 
 // wallet SDK helpers
-import { useKryptikAuthContext } from "./KryptikAuthProvider";
-import { getUserPhotoPath } from "../src/helpers/firebaseHelper";
-import { useKryptikThemeContext } from "./ThemeProvider";
+import { useKryptikAuthContext } from "../KryptikAuthProvider";
+import { getUserPhotoPath } from "../../src/helpers/firebaseHelper";
+import { useKryptikThemeContext } from "../ThemeProvider";
 import { update } from "lodash";
 import toast, { Toaster } from "react-hot-toast";
 
 
-const Navbar:NextPage = () => {
+const NavbarProduction:NextPage = () => {
     const [isMenuMobile, setMenuMobile] = useState(false);
     const {kryptikWallet, authUser} = useKryptikAuthContext();
     const {hideBalances, updateHideBalances} = useKryptikThemeContext();
@@ -75,4 +75,4 @@ const Navbar:NextPage = () => {
     
 }
 
-export default Navbar
+export default NavbarProduction

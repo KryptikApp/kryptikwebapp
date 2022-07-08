@@ -6,9 +6,9 @@ import { getDownloadURL, ref, StorageReference, uploadBytes } from 'firebase/sto
 
 import { generateStoragePath, storage } from '../../src/helpers/firebaseHelper'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
-import NavProfile from '../../components/NavProfile'
 import { getFileName } from '../../src/helpers/utils'
 import toast, { Toaster } from 'react-hot-toast'
+import NavProfile from '../../components/navbars/NavProfile'
 
 
 

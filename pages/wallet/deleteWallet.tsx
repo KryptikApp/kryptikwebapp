@@ -2,13 +2,12 @@ import type { NextPage } from 'next'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
-import NavProfile from '../../components/NavProfile'
 import toast, { Toaster } from 'react-hot-toast'
 import Divider from '../../components/Divider'
 import {removeUserAndWallet } from '../../src/helpers/firebaseHelper'
-import { useKryptikThemeContext } from '../../components/ThemeProvider'
 import { ILoginUserParams, loginUser } from '../../src/handlers/profile/loginHandler'
 import { defaultWallet } from '../../src/models/defaultWallet'
+import NavProfile from '../../components/navbars/NavProfile'
 
 
 const DeleteWallet: NextPage = () => {

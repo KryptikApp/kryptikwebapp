@@ -5,8 +5,8 @@ import toast, { Toaster } from 'react-hot-toast';
 
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
-import NavProfile from '../../components/NavProfile'
 import HeaderProfile from '../../components/HeaderProfile'
+import NavProfile from '../../components/navbars/NavProfile';
 
 
 
