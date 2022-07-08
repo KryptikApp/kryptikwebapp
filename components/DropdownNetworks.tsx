@@ -13,12 +13,14 @@ import { getAddressForNetworkDb } from "../src/helpers/utils/accountUtils";
 
 interface Props{
     onlyWithValue?:boolean
+    onlyNetworks?:boolean
     selectedTokenAndNetwork:TokenAndNetwork
     selectFunction:any
     onLoadedFunction?:any
+    hideLabel?:boolean
 }
 const DropdownNetworks:NextPage<Props> = (props) => {
-    const {selectedTokenAndNetwork, selectFunction, onlyWithValue, onLoadedFunction} = props;
+    const {selectedTokenAndNetwork, selectFunction, onlyWithValue, onLoadedFunction, hideLabel, onlyNetworks} = props;
     const {kryptikService, authUser, kryptikWallet} = useKryptikAuthContext();
     const {isAdvanced} = useKryptikThemeContext();
     const[networkAndTokens, setNetworkAndTokens] = useState<TokenAndNetwork[]>([]);
@@ -64,6 +66,15 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             tokensAndNetworks.push(tokenAndNetworkToAdd);
             // make eth network default option
             if(nw.ticker == "eth") selectFunction(tokenAndNetworkToAdd);
+        }
+        // if we only wnat networks... we are done here, so we return
+        if(onlyNetworks){
+            setNetworkAndTokens(tokensAndNetworks);
+            setIsFetched(true);
+            if(onLoadedFunction){
+                onLoadedFunction();
+            }
+            return;
         }
         // add all erc20 tokens
         let erc20Dbs:TokenDb[] = kryptikService.erc20Dbs;
@@ -222,8 +233,10 @@ const DropdownNetworks:NextPage<Props> = (props) => {
         </div>
         :
         <div>
-            <label id="listbox-label" className="block text-sm font-medium text-gray-700 text-left dark:text-gray-200">Token</label>
-            <div className="mt-1 relative" onClick={()=>toggleShowOptions()}>
+            {
+                !hideLabel && <label id="listbox-label" className="block text-sm font-medium text-gray-700 text-left dark:text-gray-200 mb-1">{onlyNetworks?"Network":"Token"}</label>
+            }
+            <div className="relative" onClick={()=>toggleShowOptions()}>
                 <button type="button" className="relative w-full bg-white dark:bg-black border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 sm:text-sm" aria-haspopup="listbox" aria-expanded="true" aria-labelledby="listbox-label">
                 <span className="flex items-center">
                     {
@@ -248,7 +261,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                 </span>
                 </button>
 
-                <ul className="absolute z-10 mt-1 w-full bg-white dark:bg-black opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:border dark:border-slate-500" tabIndex={-1} role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3" hidden={!showOptions}>
+                <ul className="no-scrollbar absolute z-10 mt-1 w-full bg-white dark:bg-black opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:border dark:border-slate-500" tabIndex={-1} role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3" hidden={!showOptions}>
                 {networkAndTokens.map((nt:TokenAndNetwork) => (
                   (!(nt.baseNetworkDb.isTestnet&&!authUser.isAdvanced)) &&
                   <ListItemDropdown selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleOptionClick} tokenAndNetwork={nt}/>
