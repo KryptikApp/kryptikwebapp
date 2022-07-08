@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useKryptikThemeContext } from "./ThemeProvider";
-import Navbar from "./Navbar";
+import Navbar from "./navbars/Navbar";
 
 // TODO: Update to support dynamic headers
 export default function Layout({children}) {
