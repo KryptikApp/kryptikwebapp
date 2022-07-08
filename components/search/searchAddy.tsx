@@ -37,10 +37,10 @@ const SearchAddy:NextPage = () => {
        
             {
                 searchresults.length && 
-                <div className="ml-[12%] my-2 rounded-xl px-2 py-2 bg-white text-slate-500 divide-y divide-gray-200 dark:divide-gray-200 overflow-auto no-scrollbar">
+                <div className="ml-[12%] relative z-10 my-2 rounded-xl px-2 py-2 bg-white text-slate-500 dark:bg-gray-700 dark:text-slate-200 divide-y divide-gray-200 dark:divide-gray-200 overflow-auto no-scrollbar">
                     {
                         searchresults.map((searchResult:string)=>(
-                            <p className="z-40 font-bold text-lg">{searchResult}</p>
+                            <p className="font-bold text-lg">{searchResult}</p>
                         ))
                     }
                 </div>
