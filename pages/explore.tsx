@@ -1,4 +1,5 @@
 import type { NextPage } from 'next'
+import router from 'next/router';
 import { useEffect, useState } from 'react';
 import { AiOutlineRightCircle } from 'react-icons/ai';
 import { useKryptikAuthContext } from '../components/KryptikAuthProvider'
@@ -12,6 +13,10 @@ import { listNftsByAddress } from '../src/requests/nfts/ethereumApi';
 import { listPoapsByAddress } from '../src/requests/nfts/poapApi';
 import { listSolanaNftsByAddress } from '../src/requests/nfts/solanaApi';
 
+interface IRouterParams{
+  account:string,
+  networkTicker:string
+}
 
 const Explore: NextPage = () => {
   const enum ActiveCategory{
@@ -21,16 +26,22 @@ const Explore: NextPage = () => {
     eth=3,
     near=4
   }
-
+  let routerParams:IRouterParams|null = null
+  // pull network ticker from route
+  if ((typeof(router.query["networkTicker"]) == "string") && router.query["account"] && (typeof(router.query["account"]) == "string")) {
+    routerParams = {account:router.query["account"], networkTicker:router.query["networkTicker"]}
+  }
   const {authUser, kryptikWallet, kryptikService} = useKryptikAuthContext();
   const [activeCategory, setActiveCategory] = useState(ActiveCategory.all);
   const [isNFTFetched, setIsNFTFetched] = useState(true);
   const [nftList, setNftList] = useState<INFTMetadata[]>([]);
   const [poapMetaDataList, setPoapMetadataList] = useState<INFTMetadata[]>([]);
+
   const solImagePath = "https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/sol.png?alt=media&token=6d6e8337-79bb-45c6-bb31-47e49c7ce763"
   const nearImagePath = "https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/near%20logo.png?alt=media&token=244c738f-e138-4e28-bf23-c991b99050c7"
 
-  const fetchNFTData = async function(){
+  const fetchNFTDataKryptik = async function(){
+    if(!kryptikWallet.connected || !authUser.isLoggedIn) return;
     setIsNFTFetched(false);
     let solanaNetworkDb = kryptikService.getNetworkDbByTicker("sol");
     if(!solanaNetworkDb) return;
@@ -65,16 +76,73 @@ const Explore: NextPage = () => {
     if(poapsList){
       newNftMetadataList.push(...poapsList);
     }
-    // update eth state
+    // update nft state
     setNftList(newNftMetadataList);
     setIsNFTFetched(true);
   }
 
-  useEffect(()=>{
-    
-    fetchNFTData();
-    
-  },[])
+  const fetchNftDataAccount = async function(account:string, networkTicker:string){
+    console.log("fetching nfts via account");
+    setIsNFTFetched(false);
+    let networkDb = kryptikService.getNetworkDbByTicker(networkTicker);
+    if(!networkDb){
+      setIsNFTFetched(true);
+      return;
+    }
+    let newNftMetadataList:INFTMetadata[] = []
+    switch(networkDb.ticker){
+      case("eth"):{
+        let ethNfts:INFTMetadata[]|null = await listNftsByAddress(account);
+        // push eth nfts to main list
+        if(ethNfts){
+          newNftMetadataList.push(...ethNfts)
+        }
+        // fetch poaps
+        let poapsList = await listPoapsByAddress(account);
+        if(poapsList){
+          newNftMetadataList.push(...poapsList);
+        }
+        break;
+      }
+      case("sol"):{
+        let solNfts:INFTMetadata[]|null = await listSolanaNftsByAddress(account);
+        // push sol nfts to main list
+        if(solNfts){
+          newNftMetadataList.push(...solNfts)
+        }
+        break;
+      }
+      case("near"):{
+        let nearNetworkDb = kryptikService.getNetworkDbByTicker("near");
+        if(!nearNetworkDb) return;
+        let nearKryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(nearNetworkDb);
+        if(nearKryptikProvider.nearProvider){
+          let nearNfts = await listNearNftsByAddress(account, nearKryptikProvider.nearProvider);
+          if(nearNfts){
+            newNftMetadataList.push(...nearNfts);
+          }
+        }
+        break;
+      }
+      default:{
+        break;
+      }
+    }
+    // update nft list state
+    setNftList(newNftMetadataList);
+    setIsNFTFetched(true);
+  }
+
+
+    // get nfts on page load
+    useEffect(() => {
+      if(routerParams){
+        fetchNftDataAccount(routerParams.account, routerParams.networkTicker);
+      }
+      else{
+        fetchNFTDataKryptik();
+      }
+    }, [])
 
   return (
     <div>
@@ -86,7 +154,12 @@ const Explore: NextPage = () => {
            <div className='flex-1'>
             <div className="mx-auto text-center">
               <img src={getUserPhotoPath(authUser)} alt="Profile Image" className="object-cover w-20 h-20 rounded-full mx-auto mb-2"/>
-              <ProfileName/>
+              {
+                routerParams?
+                <ProfileName account={routerParams.account}/>:
+                <ProfileName/>
+              }
+              
             </div>
             <br/>
 
@@ -127,7 +200,9 @@ const Explore: NextPage = () => {
             </div>             
            </div>
 
-           <div className="flex-9 md:w-[80%]">
+           <div className="flex-9 md:w-[80%]"> 
+
+
             {/* show active category name */}
             <div className="invisible md:visible dark:text-white">
             {
@@ -252,7 +327,7 @@ const Explore: NextPage = () => {
             </div>
 
            </div>
-           <div className="md:hidden min-h-[4rem] dark:text-white">
+           <div className="md:hidden min-h-[4rem] h-[4rem] dark:text-white">
             
                     {/* padding div for space between top and main elements */}
             </div>
