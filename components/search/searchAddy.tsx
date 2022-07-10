@@ -1,16 +1,21 @@
 import { NextPage } from "next";
 import { useState } from "react";
+import { fetchEnsSuggestions } from "../../src/handlers/ens/suggestions";
+import { getAccountSearchSuggestions } from "../../src/handlers/search/accounts";
+import { ISearchResult } from "../../src/handlers/search/types";
 import { formatTicker } from "../../src/helpers/utils/networkUtils";
 import { defaultTokenAndNetwork } from "../../src/services/models/network";
-import Divider from "../Divider";
 import DropdownNetworks from "../DropdownNetworks";
+import SearchResultItem from "./searchResultItem";
+
 
 const SearchAddy:NextPage = () => {
     const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
     const[showDarkener, setShowDarkener] = useState(false);
     const[query, setQuery] = useState("");
-    const[searchresults, setSearchResults] = useState<string[]>([]);
+    const[searchresults, setSearchResults] = useState<ISearchResult[]>([]);
     const[showNetworkModal, setShowNetworkModal] = useState(false)
+    
 
     const handleQueryChange = async function(newQuery:string){
         setQuery(newQuery);
@@ -19,9 +24,8 @@ const SearchAddy:NextPage = () => {
             setSearchResults([])
             return;
         }
-        let newSearchresults:string[] = [];
-        newSearchresults.push(newQuery);
-        setSearchResults(newSearchresults);
+        let newSearchResults:ISearchResult[] = await getAccountSearchSuggestions(newQuery, selectedTokenAndNetwork.baseNetworkDb);
+        setSearchResults(newSearchResults);
     }
 
     return(
@@ -32,15 +36,15 @@ const SearchAddy:NextPage = () => {
             <div onClick={()=>setShowNetworkModal(true)} className="flex-grow p-4 bg-transparent hover:dark:bg-[#1c1c1c] hover:cursor-pointer rounded-l-xl border border-slate-700">
                 <img className="rounded-lg w-8 h-8 dropshadow-lg" src={`${selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath}`}/>
             </div>
-            <input onFocus={()=>setShowDarkener(true)} type="search" id="search-dropdown" className="w-[88%] p-4 z-20 text-gray-900 text-lg bg-gray-50 border rounded-r-xl border-gray-300 dark:bg-gray-700 dark:border-l-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white outline-none" placeholder={`Search ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)} name or address`} value={query} onChange={(e) => handleQueryChange(e.target.value)}  required/>
+            <input onFocus={()=>setShowDarkener(true)} type="search" id="search-dropdown" className="w-[88%] p-4 z-20 text-gray-900 text-lg bg-gray-50 border rounded-r-xl border-gray-300 dark:bg-gray-700 dark:border-l-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-bold outline-none" placeholder={`Search ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)} name or address`} value={query} onChange={(e) => handleQueryChange(e.target.value)}  required/>
             </div>
        
             {
                 searchresults.length && 
-                <div className="ml-[12%] relative z-10 my-2 rounded-xl px-2 py-2 bg-white text-slate-500 dark:bg-gray-700 dark:text-slate-200 divide-y divide-gray-200 dark:divide-gray-200 overflow-auto no-scrollbar">
+                <div className="ml-[12%] relative z-10 max-h-80 my-2 rounded-xl px-2 py-2 bg-white text-slate-500 dark:bg-gray-700 dark:text-slate-200 divide-y divide-gray-200 dark:divide-gray-600 overflow-auto no-scrollbar">
                     {
-                        searchresults.map((searchResult:string)=>(
-                            <p className="font-bold text-lg">{searchResult}</p>
+                        searchresults.map((searchResult:ISearchResult)=>(
+                            <SearchResultItem searchResult={searchResult}/>
                         ))
                     }
                 </div>
