@@ -3,6 +3,7 @@ import toast, { Toaster } from 'react-hot-toast';
 
 import { useKryptikAuthContext } from '../components/KryptikAuthProvider';
 import Link from 'next/link';
+import SearchAddy from '../components/search/searchAddy';
 
 
 const Home: NextPage = () => {
@@ -21,7 +22,7 @@ const Home: NextPage = () => {
         </div>
 
         <div className="text-center max-w-2xl mx-auto content-center">
-          <h1 className="text-5xl font-bold sans dark:text-white">
+          {/* <h1 className="text-5xl font-bold sans dark:text-white">
               Crypto Made <span className="text-transparent bg-clip-text bg-gradient-to-br from-cyan-500 to-green-500">Easy</span>
           </h1>
           <h1 className="text-center mt-4 dark:text-gray-300">Save, send, and collect with ease.</h1>
@@ -37,10 +38,12 @@ const Home: NextPage = () => {
             <p>UID: {authUser.uid}</p>
             <p>Wallet Connected: {kryptikWallet.connected?"True":"False"}</p>
             <p>Ethereum Address: {kryptikWallet.ethAddress}</p>
-          </div>
-
+          </div> */}
+          <SearchAddy/>
         </div>
-
+        <div className="h-[10rem]">
+          {/* padding div for space between top and main elements */}
+        </div>
     </div>
  
   )

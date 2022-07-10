@@ -1,9 +1,7 @@
 import {
     ApolloClient,
-    ApolloQueryResult,
     HttpLink,
     InMemoryCache,
-    QueryOptions,
   } from '@apollo/client'
 
 // this code is adapted from rainbow wallet at: https://github.com/rainbow-me/rainbow/blob/develop/src/apollo/client.ts

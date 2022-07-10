@@ -1,10 +1,10 @@
 import { createContext, useContext} from 'react'
 
 import { defaultWallet } from '../src/models/defaultWallet';
-import { IWallet } from '../src/models/IWallet';
 import { defaultUser, UserDB } from '../src/models/user';
 import { useKryptikAuth } from '../src/helpers/kryptikAuthHelper';
 import Web3Service from '../src/services/Web3Service';
+import { IWallet } from '../src/models/KryptikWallet';
 
 
 const kryptikAuthContext = createContext({

@@ -1,7 +1,7 @@
 import { createContext, useContext} from 'react'
+
 import { useKryptikTheme } from '../src/helpers/kryptikThemeHelper';
-import { IWallet } from '../src/models/IWallet';
-import { UserDB } from '../src/models/user';
+import { IWallet } from '../src/models/KryptikWallet';
 
 
 const kryptikThemeContext = createContext({

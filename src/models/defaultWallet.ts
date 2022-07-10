@@ -1,13 +1,14 @@
 import HDSeedLoop from "hdseedloop"
-import { IWallet } from "./IWallet";
+import { defaultResolvedAccount } from "../helpers/resolvers/accountResolver";
+import { IWallet } from "./KryptikWallet";
+
 
 
 // extends Iwallet interface
-export const defaultWallet: IWallet = {
+export const defaultWallet:IWallet = new IWallet({ 
   walletProviderName: "",
   balance: 0,
   connected: false,
   seedLoop: new HDSeedLoop(),
-  ethAddress: "",
-  uid: ""
-};
+  resolvedEthAccount: defaultResolvedAccount,
+  uid: ""})

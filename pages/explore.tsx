@@ -49,7 +49,7 @@ const Explore: NextPage = () => {
     let newNftMetadataList:INFTMetadata[] = []
     let solNfts:INFTMetadata[]|null = await listSolanaNftsByAddress(solanaAddress);
     // fetch eth nfts
-    let ethNfts:INFTMetadata[]|null = await listNftsByAddress(kryptikWallet.ethAddress);
+    let ethNfts:INFTMetadata[]|null = await listNftsByAddress(kryptikWallet.resolvedEthAccount.address);
 
     // push eth nfts to main list
     if(ethNfts){
@@ -72,7 +72,7 @@ const Explore: NextPage = () => {
       }
     }
     // fetch poaps
-    let poapsList = await listPoapsByAddress(kryptikWallet.ethAddress);
+    let poapsList = await listPoapsByAddress(kryptikWallet.resolvedEthAccount.address);
     if(poapsList){
       newNftMetadataList.push(...poapsList);
     }

@@ -9,7 +9,6 @@ import { KeyType, PublicKey } from "near-api-js/lib/utils/key_pair";
 import BN from "bn.js";
 import { AccessKeyView, BlockResult, ExecutionStatusBasic, FinalExecutionStatusBasic } from "near-api-js/lib/providers/provider";
 import { parseNearAmount } from "near-api-js/lib/utils/format";
-import { FinalExecutionStatus } from "near-api-js/lib/providers/provider";
 
 import { numberToBN } from "../../../helpers/utils";
 import { multByDecimals } from "../../../helpers/utils/numberUtils";

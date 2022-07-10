@@ -1,5 +1,5 @@
 import {firestore} from "../helpers/firebaseHelper"
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query } from "firebase/firestore";
 import { ServiceState } from './types';
 import BaseService from './BaseService';
 import {defaultNetworkDb, defaultTokenAndNetwork, NetworkBalanceParameters, NetworkDb, placeHolderEVMAddress} from './models/network'
@@ -13,18 +13,16 @@ import {
     RpcResponseAndContext,
     TokenAmount,
   } from '@solana/web3.js';
-  import { Account as NearAccount, Near } from "near-api-js";
+  import { Near } from "near-api-js";
 import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
 import { BigNumber, Contract, utils } from "ethers";
 import { BlockResult } from "near-api-js/lib/providers/provider";
 
 import HDSeedLoop, {Network, NetworkFamily, NetworkFamilyFromFamilyName, NetworkFromTicker, Options, WalletKryptik } from "hdseedloop";
-import { IWallet } from "../models/IWallet";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
 import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataNearParameters, FeeDataParameters, FeeDataSolParameters, TxType} from "./models/transaction";
-import { UserDB } from "../models/user";
 import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, Nep141Params, TokenAndNetwork } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
@@ -32,6 +30,7 @@ import { searchTokenListByTicker } from "../helpers/search";
 import { createEd25519PubKey, createSolTokenAccount, getAddressForNetworkDb } from "../helpers/utils/accountUtils";
 import { networkFromNetworkDb, isNetworkArbitrum, getChainDataForNetwork } from "../helpers/utils/networkUtils";
 import { lamportsToSol, divByDecimals, roundCryptoAmount, roundUsdAmount, multByDecimals, roundToDecimals } from "../helpers/utils/numberUtils";
+import { IWallet } from "../models/KryptikWallet";
 
 
 const NetworkDbsRef = collection(firestore, "networks");
@@ -145,18 +144,21 @@ class Web3Service extends BaseService{
         }
 
         let ethNetwork = NetworkFromTicker("eth");
-        // get all ethereum addreses for wallet
+        // get primary ethereum addreses for kryptik wallet
         let etheAddysAll = await seedloopKryptik.getAddresses(ethNetwork);
         let ethAddyFirst = etheAddysAll[0];
+        // reolve eth
+        
         // set values for new wallet
-        let newKryptikWallet:IWallet = {
+        let newKryptikWallet:IWallet = new IWallet({
             ...defaultWallet,
             walletProviderName: "kryptik",
             connected: true,
             seedLoop: seedloopKryptik,
-            ethAddress: ethAddyFirst,
+            resolvedEthAccount: {address:ethAddyFirst, isResolved:false},
             uid: uid
-        };
+        });
+
         // set return values
         let connectionReturnObject:IConnectWalletReturn = {
             wallet:newKryptikWallet,

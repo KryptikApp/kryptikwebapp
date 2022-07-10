@@ -1,13 +1,13 @@
 import { PublicKey } from "@solana/web3.js";
 
 import { isValidEVMAddress, Network, NetworkFamily } from "hdseedloop";
-import { IWallet } from "../../models/IWallet";
+import { IWallet } from "../../models/KryptikWallet";
 import { NetworkDb } from "../../services/models/network";
 import { networkFromNetworkDb } from "./networkUtils";
 
 
 
-// generate a publci key from a given address, using the 
+// generate a public key from a given address, using the sol web3 library
 export const createEd25519PubKey = function(address:string):PublicKey{
     let pubKey:PublicKey|null = new PublicKey(address);
     if(!pubKey){

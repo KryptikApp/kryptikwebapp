@@ -6,7 +6,7 @@ import { Action, addKey, createAccount, createTransaction, fullAccessKey, functi
 import { serialize } from "near-api-js/lib/utils";
 import { parseNearAmount } from "near-api-js/lib/utils/format";
 import { KeyPairEd25519, PublicKey } from "near-api-js/lib/utils/key_pair";
-import { IWallet } from "../../models/IWallet";
+
 import { NetworkDb } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
 import Web3Service from "../../services/Web3Service";
@@ -18,6 +18,7 @@ import { DEFAULT_NEAR_FUNCTION_CALL_GAS } from "../../constants/nearConstants";
 import { listNearAccountsByAddress } from "../../requests/nearIndexApi";
 import { IKryptikFetchResponse } from "../../kryptikFetch";
 import { validateNearImplicitAddress } from "../resolvers/nearResolver";
+import { IWallet } from "../../models/KryptikWallet";
 
 
 const ACCOUNT_ID_REGEX = /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;

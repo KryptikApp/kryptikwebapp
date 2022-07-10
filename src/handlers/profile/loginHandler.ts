@@ -1,5 +1,4 @@
 import { Magic } from "magic-sdk";
-import { useKryptikAuthContext } from "../../../components/KryptikAuthProvider";
 
 
 export interface ILoginUserParams{

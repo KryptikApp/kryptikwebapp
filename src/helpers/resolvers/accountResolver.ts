@@ -23,7 +23,7 @@ export interface IResolvedAccount{
 
 
 export const defaultResolvedAccount:IResolvedAccount = {
-    address: defaultWallet.ethAddress,
+    address: defaultWallet.resolvedEthAccount.address,
     isResolved: false
 }
 

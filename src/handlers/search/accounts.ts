@@ -1,4 +1,3 @@
-import { stringLength } from "@firebase/util";
 import { Network, NetworkFamily, truncateAddress } from "hdseedloop";
 import router from "next/router";
 import { IResolvedAccount } from "../../helpers/resolvers/accountResolver";

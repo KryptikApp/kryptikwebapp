@@ -1,12 +1,8 @@
 import type { NextPage } from 'next'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import {AiFillDownCircle, AiFillUpCircle, AiFillPayCircle} from "react-icons/ai"
-import Link from 'next/link'
 
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
-import ListBalance from '../../components/lists/ListBalance'
-import HeaderProfile from '../../components/HeaderProfile'
 import Divider from '../../components/Divider'
 import toast, { Toaster } from 'react-hot-toast'
 import { checkNEARAccountAvailable, INEARAccountAvailableParams, INearReservationParams, isLegitNEARAccountId, reserveNearAccountName } from '../../src/helpers/utils/nearAccountUtils'

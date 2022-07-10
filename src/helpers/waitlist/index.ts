@@ -1,6 +1,5 @@
 
 import { setDoc, doc, collection, query, getDocs, orderBy, getDoc } from "firebase/firestore";
-import { connectStorageEmulator } from "firebase/storage";
 import { firestore } from "../firebaseHelper";
 import { isValidEmailAddress } from "../resolvers/kryptikResolver";
 

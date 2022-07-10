@@ -1,7 +1,8 @@
 import { randomBytes } from "crypto"
 import * as crypt from "crypto-js"
 import HDSeedLoop, { SerializedSeedLoop } from "hdseedloop"
-import { IWallet } from "../../models/IWallet"
+import { IWallet } from "../../models/KryptikWallet"
+
 import { combineShares, createShares } from "./shareHandler"
 
 

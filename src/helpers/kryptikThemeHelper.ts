@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
-import { IWallet } from "../models/IWallet";
+import { IWallet } from "../models/KryptikWallet";
 import { addUserBlockchainAccountsDB, deleteUserBlockchainAccountsDB } from "./firebaseHelper";
 
 export function useKryptikTheme() {

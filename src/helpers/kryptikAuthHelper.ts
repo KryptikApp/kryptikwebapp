@@ -6,10 +6,10 @@ import { firebaseAuth, firestore, formatAuthUser, readExtraUserData, getUserPhot
 
 import { updateVaultSeedloop } from "../handlers/wallet/vaultHandler";
 import { defaultWallet } from "../models/defaultWallet";
-import { IWallet } from "../models/IWallet";
 import { defaultUser, UserDB, UserExtraData } from "../models/user";
 import Web3Service, { IConnectWalletReturn } from "../services/Web3Service";
 import { networkFromNetworkDb } from "./utils/networkUtils";
+import { IWallet } from "../models/KryptikWallet";
 
 
 
@@ -157,7 +157,8 @@ export function useKryptikAuth() {
           console.log("Vault updated");
         }
         catch(e){
-          throw(new Error("Error: Unable to update vault with network synchronized seedloop"));
+          console.warn("Error: Unable to update vault with network synchronized seedloop");
+          // throw(new Error("Error: Unable to update vault with network synchronized seedloop"));
         }
       }
       return wallet;
