@@ -11,7 +11,12 @@ import { KryptikProvider } from "../src/services/models/provider";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 
 
-const ProfileName:NextPage = (props) => {
+interface Props{
+    account?:string
+}
+
+const ProfileName:NextPage<Props> = (props) => {
+    const accountPassedIn = props.account;
     const {authUser, kryptikWallet, kryptikService} = useKryptikAuthContext();
     const [loadingResolvedAccount, setLoadingResolvedAccount] = useState(false);
     const [resolvedAccount, setResolvedAccount] = useState(defaultResolvedAccount);
@@ -20,15 +25,16 @@ const ProfileName:NextPage = (props) => {
 const fetchAccountName = async function(){
     setLoadingResolvedAccount(true);
     let provider:KryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(defaultNetworkDb);
+    console.log(`account name with: ${accountPassedIn}`)
     // note default networkdb should be eth
     let resolverParams:IAccountResolverParams = {
-        account: kryptikWallet.ethAddress,
+        account: accountPassedIn?accountPassedIn:kryptikWallet.ethAddress,
         kryptikProvider: provider,
         networkDB: defaultNetworkDb
     }
     let newResolvedAccount:IResolvedAccount|null = await resolveEVMAccount(resolverParams);
     if(!newResolvedAccount) return;
-    if(authUser.name && !newResolvedAccount.names){
+    if(authUser.isLoggedIn && authUser.name && !newResolvedAccount.names){
         setNameToDisplay(authUser.name)
     }
     else{
