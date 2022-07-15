@@ -52,14 +52,12 @@ export const listNearNftsByAddress = async function(address:string, nearProvider
   // first.. we get likelty nfts for address 
   let likelyNfts = await listNearLikelyNfts(address);
   if(!likelyNfts) return null;
-  console.log("Near likely nfts");
-  console.log(likelyNfts);
   let nearAccount = await nearProvider.account(address);
-  let dataToParse:NearParseData[] = []
+  let dataToParse:NearParseData[] = [];
+  // iterate through likely nfts and get data
   for(const contractName of likelyNfts.data){
     const collectionData:INearCollectionData = await getCollectionMetaData(contractName, nearAccount);
     const tokens = await getTokens(contractName, address, nearAccount);
-    console.log(tokens);
     for(const token of tokens){
       let tokenDataToAdd:NearParseData = {
         token: token,
@@ -76,12 +74,10 @@ export const listNearNftsByAddress = async function(address:string, nearProvider
       // if(tokenMetaData){
       //   tokenDataToAdd.tokenMetaData = tokenMetaData;
       // }
-      console.log(tokenDataToAdd);
       dataToParse.push(tokenDataToAdd);
     }
   }
   let parsedNfts = parseNearNFTMetaData(dataToParse);
-  console.log(parsedNfts);
   return parsedNfts;
 }
 
