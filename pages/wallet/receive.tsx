@@ -30,8 +30,8 @@ const Recieve: NextPage = () => {
          // handle empty address
          if(accountAddress == ""){
            toast.error(`Error: no address found for ${selectedTokenAndNetwork.baseNetworkDb.fullName}. Please contact the Kryptik team or try refreshing your page.`);
-           setToAddress(kryptikWallet.ethAddress);
-           setReadableFromAddress(kryptikWallet.ethAddress);
+           setToAddress(kryptikWallet.resolvedEthAccount.address);
+           setReadableFromAddress(kryptikWallet.resolvedEthAccount.address);
            setSelectedTokenAndNetwork(defaultTokenAndNetwork);
            return;
          }
