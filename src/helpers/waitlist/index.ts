@@ -12,13 +12,18 @@ const WaitlistDbRef = collection(firestore, "waitlist");
 export const addEmailToWaitlist = async function(newEmail:string, errorHandler:(msg:string)=>void):Promise<number|null>{
     let isAlreadyAdded: boolean = await isEmailInWaitlist(newEmail);
     if(!isValidEmailAddress(newEmail)) errorHandler(`${newEmail} is not a valid email.`);
-    if(isAlreadyAdded) errorHandler("You're already in the waitlist. We're glad you're excited to join Kryptik!");
+    if(isAlreadyAdded) 
+    {
+        let position:number|null = await getWaitlistPosition(newEmail);
+        return position;
+        // errorHandler("You're already on the waitlist. We're glad you're excited to join Kryptik!");
+    }
+    // add to waitlist on remote db
     let waitlistData:IWaitlistData = {
         timeAdded: Date.now()
     }
     await setDoc(doc(firestore, "waitlist", newEmail), waitlistData);
     let position:number|null = await getWaitlistPosition(newEmail);
-    console.log(`position inside: ${position}`);
     return position;
 }
 
