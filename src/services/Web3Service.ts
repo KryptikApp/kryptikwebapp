@@ -26,11 +26,11 @@ import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataNearPara
 import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, Nep141Params, TokenAndNetwork } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
-import { searchTokenListByTicker } from "../helpers/search";
 import { createEd25519PubKey, createSolTokenAccount, getAddressForNetworkDb } from "../helpers/utils/accountUtils";
 import { networkFromNetworkDb, isNetworkArbitrum, getChainDataForNetwork } from "../helpers/utils/networkUtils";
 import { lamportsToSol, divByDecimals, roundCryptoAmount, roundUsdAmount, multByDecimals, roundToDecimals } from "../helpers/utils/numberUtils";
 import { IWallet } from "../models/KryptikWallet";
+import { searchTokenListByTicker } from "../handlers/search/token";
 
 
 const NetworkDbsRef = collection(firestore, "networks");
