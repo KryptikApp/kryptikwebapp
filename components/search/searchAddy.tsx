@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { useState } from "react";
-import { fetchEnsSuggestions } from "../../src/handlers/ens/suggestions";
+
 import { getAccountSearchSuggestions } from "../../src/handlers/search/accounts";
 import { ISearchResult } from "../../src/handlers/search/types";
 import { formatTicker } from "../../src/helpers/utils/networkUtils";
