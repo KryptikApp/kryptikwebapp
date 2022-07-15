@@ -1,5 +1,6 @@
 import { Connection } from "@solana/web3.js";
 import { Contract } from "ethers";
+import { IWallet } from "../../models/KryptikWallet";
 import { IBalance } from "../Web3Service";
 import { NetworkDb } from "./network";
 
