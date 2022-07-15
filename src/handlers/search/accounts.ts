@@ -8,12 +8,13 @@ import { ISearchResult } from "./types";
 
 export interface IAccountClickHandlerParams{
     account:string,
+    name?:string,
     networkTicker:string
 }
 
 const accountOnclickFunction = function(params:IAccountClickHandlerParams){
-    const {account, networkTicker} = {...params};
-    router.push({ pathname: '../explore', query:{account:account, networkTicker:networkTicker}});
+    const {account, networkTicker, name} = {...params};
+    router.push({ pathname: '../gallery', query:{account:account, networkTicker:networkTicker, name:name}});
 }
 
 export const getAccountSearchSuggestions = async function(query:string, networkDb:NetworkDb):Promise<ISearchResult[]>{
@@ -39,7 +40,7 @@ const getEnsSuggestions = async function(query:string, networkDb:NetworkDb):Prom
         let ensSuggestions:IResolvedAccount[] = await fetchEnsSuggestions(query);
         for(const ensAccount of ensSuggestions){
             let name = (ensAccount.names && ensAccount.names[0]!="")?ensAccount.names[0]:ensAccount.address;
-            let onClickParams:IAccountClickHandlerParams = {account:ensAccount.address, networkTicker:networkDb.ticker};
+            let onClickParams:IAccountClickHandlerParams = {account:ensAccount.address, name:ensAccount.names?ensAccount.names[0]:undefined, networkTicker:networkDb.ticker};
             suggestions.push({resultString:name, iconPath:ensAccount.avatarPath, onClickFunction:accountOnclickFunction, onClickParams:onClickParams})
         }
         return suggestions;
