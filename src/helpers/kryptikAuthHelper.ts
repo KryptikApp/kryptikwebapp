@@ -32,12 +32,21 @@ export function useKryptikAuth() {
     // routine to run when auth. state changes
     const authStateChanged = async (user:any, seed?:string) => {
         console.log("Running auth. state changed!");
+        // TODO: ADD CONDITION FOR INTERNET CONNECTION
+        // if(window && window.)
         if (!user) {
           setAuthUser(defaultUser)
           setLoading(false)
           return;
         }
-        await updateAuthContext(user);
+        try{
+          await updateAuthContext(user);
+        }
+        catch(e){
+          // TODO: ADD BETTER ERROR HANDLER... redirect?
+          console.warn("Error: unable to update kryptik auth context")
+        }
+        
     };
 
     // connects wallet with local service and updates remote share on server if necessary
@@ -109,7 +118,7 @@ export function useKryptikAuth() {
         let userExtraData = await readExtraUserData(formattedUser);
         formattedUser.bio = userExtraData.bio;
         // start web3 kryptik service
-        let ks = await initServiceState.StartSevice();
+        let ks = await kryptikService.StartSevice();
         setKryptikService(ks);
         ks.onWalletChanged = walletStateChanged;
         let walletKryptik:IWallet;
