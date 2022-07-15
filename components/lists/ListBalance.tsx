@@ -9,9 +9,15 @@ import ListItemLoading from "./ListItemLoading";
 import { formatTicker } from "../../src/helpers/utils/networkUtils";
 import { roundToDecimals } from "../../src/helpers/utils/numberUtils";
 import { useKryptikThemeContext } from "../ThemeProvider";
+import router from "next/router";
+import { ServiceState } from "../../src/services/types";
 
 const ListBalance:NextPage = () => {
     const {kryptikService, kryptikWallet} = useKryptikAuthContext();
+    // ensure service is started
+    if(kryptikService.serviceState != ServiceState.started){
+        router.push('/')
+    }
     const {isAdvanced} = useKryptikThemeContext()
     const initBalances:IBalance[] = [];
     const[isFetchedBalances, setIsFetchedBalances] = useState(false);
