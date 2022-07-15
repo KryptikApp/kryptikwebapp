@@ -11,7 +11,6 @@ import { isValidEmailAddress } from '../src/helpers/resolvers/kryptikResolver';
 
 
 const LaunchPage: NextPage = () => {
-  const {kryptikWallet, authUser} = useKryptikAuthContext();
   const [email, setEmail] = useState("");
   const [waitlistPosition, setWaitlistPosition] = useState(0);
   const [failureMsg, setFailureMsg] = useState("");
@@ -30,7 +29,6 @@ const LaunchPage: NextPage = () => {
   const handleAddEmailToWaitlist = async function(){
     setIsLoading(true);
     if(!isValidEmailAddress(email)){
-      toast.error("Invalid email.")
       setIsLoading(false);
       return;
     }
@@ -95,7 +93,7 @@ const LaunchPage: NextPage = () => {
                     </div>
                 </div>
                 <div className="graphPaper">
-                  <div className="phoneBackground">
+                  <div className="colorFadeGreenCenter">
                     <div className="flex-1 px-10 ml-[7%] lg:pl-10">
                         <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="w-[150%] max-w-[400px] lg:max-w-[300px] h-auto border-none"></img>
                     </div>
@@ -111,7 +109,7 @@ const LaunchPage: NextPage = () => {
           <div>
             <div className="flex flex-col lg:flex-row">
             <div className="min-w-[50%] min-h-screen graphPaper -mx-3">
-              <div className="min-w-[40%] min-h-screen colorFade">
+              <div className="min-w-[40%] min-h-screen colorFadeGreen">
                 <div className="place-items-center max-w-[60%] md:min-w-[300px] md:max-w-[40%] mx-auto pt-20">
                   <img src="kryptikBrand/journey begins.png"/>
                 </div>
