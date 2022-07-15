@@ -2,8 +2,9 @@ import { NextPage } from "next";
 import Link from 'next/link';
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 
+// component provides a button that links to autopopulated "ramp.network"
 const BuyEth:NextPage = () => {
-    const {kryptikService, authUser, kryptikWallet} = useKryptikAuthContext();
+    const {authUser, kryptikWallet} = useKryptikAuthContext();
     return(
         <div>
 <Link href={`https://buy.ramp.network/?userAddress=${kryptikWallet.resolvedEthAccount.address}&userEmailAddress=${authUser.uid}&defaultAsset=ETH_ETH&fiatCurrency=USD&fiatValue=25`}>
