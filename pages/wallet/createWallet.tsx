@@ -61,7 +61,7 @@ const CreateWallet: NextPage = () => {
               Your wallet is connected.
             </h1>
             <p>
-              Eth Address: <span className="bg-clip-text text-green-400">{kryptikWallet.ethAddress}</span>
+              Eth Address: <span className="bg-clip-text text-green-400">{kryptikWallet.resolvedEthAccount.address}</span>
             </p>
             <p>
               Balance: <span className="bg-clip-text text-green-400">{kryptikWallet.balance}</span>
