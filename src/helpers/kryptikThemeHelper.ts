@@ -14,7 +14,7 @@ export function useKryptikTheme() {
     
     const defaultTheme:ITheme = {
         isAdvanced:false,
-        isDark: false,
+        isDark: true,
         isVisible: false,
         hideBalances:false,
         lastUpdated: Date.now()
