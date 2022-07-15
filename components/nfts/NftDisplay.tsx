@@ -61,7 +61,7 @@ const NftDisplay:NextPage<Props> = (props) => {
                 <div className="flex-1 opacity-100">
                         {
                         (nftMetaData.image_original_url||nftMetaData.image_url)?
-                        <img src={nftMetaData.image_original_url?nftMetaData.image_original_url:nftMetaData.image_url} className="w-full h-fit rounded-lg drop-shadow-xl object-cover border border-gray-200 dark:border-gray-800"/>:            
+                        <img src={nftMetaData.image_original_url?nftMetaData.image_original_url:nftMetaData.image_url?nftMetaData.image_url:nftMetaData.image_preview_url} className="w-full h-fit min-h-[30rem] md:min-h-[25rem] rounded-lg drop-shadow-xl object-cover border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900" placeholder="blur"/>:            
                         <div className="w-full min-h-[10rem] max-h-[20rem] pt-[3rem] rounded-md bg-gradient-to-r from-gray-100 to-white drop-shadow-lg dark:from-gray-900 dark:to-black text-lg dark:text-white text-center px-1 font-semibold overflow-y-auto no-scrollbar">
                         {nftMetaData.name}
                         </div>
