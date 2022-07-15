@@ -18,7 +18,6 @@ export const resolveEVMAccount = async function(params:IAccountResolverParams):P
     let name:string|null = null;
     // default ENS is ethereum... other chains are text records 
     if(networkDB.ticker.toLowerCase() == "eth"){
-        console.log("made it");
         address = await evmProvider.resolveName(account);
         avatarPath = await evmProvider.getAvatar(account);
     }
