@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
 import { defaultTokenAndNetwork, placeHolderSolAddress } from '../../src/services/models/network'
-import { SendProgress } from '../../src/services/types'
+import { SendProgress, ServiceState } from '../../src/services/types'
 import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapLine} from "react-icons/ri"
 import { Network, NetworkFamily, NetworkFamilyFromFamilyName, truncateAddress } from "hdseedloop"
@@ -33,6 +33,11 @@ const Send: NextPage = () => {
   }
   const defaultAmountTotalBounds = {lowerBoundTotalUsd: "0", upperBoundTotalUsd: "0"};
   const { authUser, loading, kryptikWallet, kryptikService } = useKryptikAuthContext();
+  const router = useRouter();
+  // ensure service is started
+  if(kryptikService.serviceState != ServiceState.started){
+    router.push('/')
+}
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [isInputCrypto, setIsInputCrypto] = useState(false);
   const [amountUSD, setAmountUSD] = useState("0");
@@ -42,7 +47,7 @@ const Send: NextPage = () => {
   const [transactionFeeData, setTransactionFeedata] = useState(defaultTransactionFeeData)
   const [txPubData, setTxPubData] = useState<TransactionPublishedData>(defaultTxPublishedData);
   const [tokenPrice, setTokenPrice] = useState(0);
-  const [fromAddress, setFromAddress] = useState(kryptikWallet.ethAddress);
+  const [fromAddress, setFromAddress] = useState(kryptikWallet.resolvedEthAccount.address);
   const [toAddress, setToAddress] = useState("");
   const [toResolvedAccount, setToResolvedAccount] = useState(defaultResolvedAccount);
   const [isResolverLoading, setIsResolverLoading] = useState(false);
@@ -54,8 +59,6 @@ const Send: NextPage = () => {
   const [progress, setProgress] = useState<SendProgress>(SendProgress.Begin);
   const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
 
-
-  const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
     if (!loading && !authUser.isLoggedIn) router.push('/');
@@ -90,10 +93,10 @@ const Send: NextPage = () => {
       // handle empty address
       if(accountAddress == ""){
         toast.error(`Error: no address found for ${selectedTokenAndNetwork.baseNetworkDb.fullName}. Please contact the Kryptik team or try refreshing your page.`);
-        setFromAddress(kryptikWallet.ethAddress);      
-        setReadableFromAddress(truncateAddress(kryptikWallet.ethAddress, network));
+        setFromAddress(kryptikWallet.resolvedEthAccount.address);      
+        setReadableFromAddress(truncateAddress(kryptikWallet.resolvedEthAccount.address, network));
         setSelectedTokenAndNetwork(defaultTokenAndNetwork);
-        return kryptikWallet.ethAddress;
+        return kryptikWallet.resolvedEthAccount.address;
       }
       setFromAddress(accountAddress);
       setReadableFromAddress(truncateAddress(accountAddress, network));
@@ -363,7 +366,7 @@ const Send: NextPage = () => {
     setFromAddress("");
     setToAddress("");
     setAmountTotalbounds(defaultAmountTotalBounds);
-    setReadableFromAddress(truncateAddress(kryptikWallet.ethAddress, nw));
+    setReadableFromAddress(truncateAddress(kryptikWallet.resolvedEthAccount.address, nw));
     setReadableToAddress("");
     setTxPubData(defaultTxPublishedData);
     setSelectedTokenAndNetwork(defaultTokenAndNetwork);
