@@ -43,7 +43,7 @@ const NftDisplay:NextPage<Props> = (props) => {
         <div id={`${nftMetaData.id}Modal`} tabIndex={-1} aria-hidden={showModal?"false":"true"} className={`${!showModal && "hidden"} modal fixed w-full h-full top-0 left-0 z-50 flex items-center justify-center overflow-y-auto`} style={{backgroundColor:`${isDark?"rgba(0, 0, 0, 0.9)":"rgba(0, 0, 0, 0.9)"}`}}>
             {/* top right fixed close button  */}
             <button type="button" className="invisible md:visible text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto fixed top-4 right-5 items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={()=>setShowModal(false)}>
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>  
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>  
             </button>
             {/* flex with card and image */}
             <div className="flex flex-col md:flex-row opacity-100 m-4 md:min-w-[60%] max-w-[90%] md:max-w-[900px] max-h-screen">
@@ -54,7 +54,7 @@ const NftDisplay:NextPage<Props> = (props) => {
 
                 {/* close button shown on small screens */}
                 <button type="button" className="md:hidden mb-2 text-black bg-white rounded-full font-bold text-sm p-1.5 ml-auto items-center dark:bg-white dark:text-black transition ease-in-out hover:scale-110" onClick={()=>setShowModal(false)}>
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>  
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>  
                 </button>
 
                 {/* nft main image */}
@@ -123,12 +123,12 @@ const NftDisplay:NextPage<Props> = (props) => {
                                         <h2 className="text-lg dark:text-white font-bold">Attributes</h2>
                                         <div className="flex flex-wrap">
                                         {
-                                             nftMetaData.traits.map((trait:ITraitType)=>(
-                                                <div className="hover:cursor-pointer transition ease-in-out hover:scale-110 bg-gray-200 dark:bg-[#111112] border border-gray-300 w-fit my-1 max-w-4 px-1 mx-2 rounded drop-shadow-lg">
+                                             nftMetaData.traits.map((trait:ITraitType)=>
+                                                <div className="hover:cursor-pointer transition ease-in-out hover:scale-110 hover:z-10 bg-gray-200 dark:bg-[#111112] border border-gray-300 w-fit my-1 max-w-4 px-1 mx-2 rounded drop-shadow-lg">
                                                     <p className="text-sm text-gray-400 dark:text-slate-300 font-bold">{trait.trait_type}</p>
                                                     <p className="text-sm text-gray-400 dark:text-slate-300 truncate ...">{trait.value}</p>
                                                 </div>
-                                            ))
+                                            )
                                         }
                                         </div>
                                     </div>

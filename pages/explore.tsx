@@ -1,9 +1,6 @@
 import type { NextPage } from 'next'
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
-import { useKryptikAuthContext } from '../components/KryptikAuthProvider';
-import Link from 'next/link';
-import SearchAddy from '../components/search/searchAddy';
 import SearchNetwork from '../components/search/searchNetwork';
 
 

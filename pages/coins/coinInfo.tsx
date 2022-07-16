@@ -17,7 +17,7 @@ import { useKryptikThemeContext } from '../../components/ThemeProvider';
 ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, Tooltip);
 
 
-const coinInfo: NextPage = () => {
+const CoinInfo: NextPage = () => {
   const {kryptikService} = useKryptikAuthContext();
   const {isDark} = useKryptikThemeContext();
   const defualtHistoricalData:number[][] = []
@@ -290,4 +290,4 @@ const coinInfo: NextPage = () => {
   )
 }
 
-export default coinInfo
+export default CoinInfo

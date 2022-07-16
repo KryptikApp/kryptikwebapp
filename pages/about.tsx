@@ -79,8 +79,9 @@ const About: NextPage = () => {
               plugins:{
                 legend: {
                   display: true,
-                  labels:{
-                    
+                  position: 'bottom',
+                  labels: {
+                    color: "#000080",
                   }
                 },
                 tooltip: {

@@ -14,7 +14,7 @@ export interface ITokenClickHandlerParams{
 
 const tokenOnclickFunction = function(params:ITokenClickHandlerParams){
     const {tokenTicker, networkTicker} = {...params};
-    router.push( { pathname: '../coins/coinInfo', query:{networkTicker:networkTicker, tokenTicker:tokenTicker?tokenTicker:undefined} } );
+    router.push( { pathname: '../coins/CoinInfo', query:{networkTicker:networkTicker, tokenTicker:tokenTicker?tokenTicker:undefined} } );
 }
 
 export const getTokenSearchSuggestions = function(query:string, networkDb:NetworkDb, kryptikService:Web3Service):ISearchResult[]{

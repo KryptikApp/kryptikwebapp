@@ -22,7 +22,7 @@ const Vision: NextPage = () => {
             <li>
                 <div className="content">
                 <h3 className="text-5xl">Integrated Savings </h3>
-                <p>Saving crypto should be easy, so we’re integrating yield bearing protocols directly within the Kryptik wallet.</p>
+                <p>Saving crypto should be easy, so we&apos;re integrating yield bearing protocols directly within the Kryptik wallet.</p>
                 </div>
                 <div className="time">
                 <h4>Summer 2022</h4>
