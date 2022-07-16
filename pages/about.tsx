@@ -1,8 +1,8 @@
 import type { NextPage } from 'next'
-import {Chart as ChartJS, LinearScale, PointElement, LineElement, TimeScale, Tooltip, ArcElement} from 'chart.js'
+import {Chart as ChartJS, LinearScale, PointElement, LineElement, TimeScale, Tooltip, ArcElement, DoughnutController} from 'chart.js'
 import {Chart} from 'react-chartjs-2';
 
-ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, ArcElement, Tooltip);
+ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, ArcElement, DoughnutController, Tooltip);
 
 const About: NextPage = () => {
   return (
