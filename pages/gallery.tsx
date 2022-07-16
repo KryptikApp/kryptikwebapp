@@ -1,6 +1,6 @@
 import { truncateAddress } from 'hdseedloop';
 import type { NextPage } from 'next'
-import router from 'next/router';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 import { useKryptikAuthContext } from '../components/KryptikAuthProvider'
@@ -34,6 +34,7 @@ const Gallery: NextPage = () => {
   let routerParams:IRouterParams|null = null
   // pull network ticker from route
   const {authUser, kryptikWallet, kryptikService} = useKryptikAuthContext();
+  const router = useRouter();
   if ((typeof(router.query["networkTicker"]) == "string") && router.query["account"] && (typeof(router.query["account"]) == "string")) {
     let networkTicker:string = router.query["networkTicker"];
     let networkDb:NetworkDb|null = kryptikService.getNetworkDbByTicker(networkTicker);

@@ -1,6 +1,5 @@
 import { NextPage } from "next";
-import router from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getAllNetworkSearchSuggestions } from "../../src/handlers/search";
 import { ISearchResult } from "../../src/handlers/search/types";
@@ -16,10 +15,6 @@ import SearchResultItem from "./searchResultItem";
 const SearchNetwork:NextPage = () => {
     const {kryptikService} = useKryptikAuthContext();
     // ensure service is started
-    if(kryptikService.serviceState != ServiceState.started){
-        router.push('/');
-    }
-
     const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
     const[showDarkener, setShowDarkener] = useState(false);
     const[query, setQuery] = useState("");

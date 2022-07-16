@@ -14,18 +14,17 @@ import NavProfile from '../../components/navbars/NavProfile'
 
 const Profile: NextPage = () => {
   const { authUser, loading, getUserPhotoPath, updateCurrentUserKryptik } = useKryptikAuthContext();
-  const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
+    const router = useRouter();
     if (!loading && !authUser.isLoggedIn)
       router.push('/')
   }, [authUser, loading])
 
   const imageUrlInit:string = getUserPhotoPath(authUser);
   const [imageUrl, setImageUrl] = useState(imageUrlInit);
-  let fileInit:Blob = new Blob();
   //UNCOMMENT for file uploads
-  const [imageFile, setImageFile] = useState(fileInit);
+  const [imageFile, setImageFile] = useState<Blob|null>(null);
   const [loadingUpdate, setloadingUpdate] = useState(false);
 
   // uploads file to device
@@ -56,6 +55,9 @@ const Profile: NextPage = () => {
     // placeholder for upload return url
     let imageUploadUrl:string = imageUrl;
     // upload file to db
+    if(!imageFile){
+      return "";
+    }
     await uploadBytes(storageRef, imageFile);
     // get url for upload
     imageUploadUrl = await urlFromRef(storageRef);

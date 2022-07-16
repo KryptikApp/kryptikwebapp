@@ -32,12 +32,9 @@ const Send: NextPage = () => {
     upperBoundTotalUsd: string
   }
   const defaultAmountTotalBounds = {lowerBoundTotalUsd: "0", upperBoundTotalUsd: "0"};
-  const { authUser, loading, kryptikWallet, kryptikService } = useKryptikAuthContext();
-  const router = useRouter();
-  // ensure service is started
-  if(kryptikService.serviceState != ServiceState.started){
-    router.push('/')
-}
+  const { authUser, loading, kryptikWallet, kryptikService } = useKryptikAuthContext();  
+
+
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [isInputCrypto, setIsInputCrypto] = useState(false);
   const [amountUSD, setAmountUSD] = useState("0");
@@ -61,7 +58,12 @@ const Send: NextPage = () => {
 
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
+    const router = useRouter();
     if (!loading && !authUser.isLoggedIn) router.push('/');
+    // ensure service is started
+    if(kryptikService.serviceState != ServiceState.started){
+      router.push('/')
+    }
   }, [authUser, loading])
 
   useEffect(()=>{

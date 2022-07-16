@@ -6,14 +6,11 @@ import toast, { Toaster } from 'react-hot-toast'
 
 
 const CreateNft: NextPage = () => {
-
- 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("media/imgPlaceholder.png");
-  let fileInit:Blob = new Blob();
   //UNCOMMENT for file uploads
-  const [image, setImage] = useState(fileInit);
+  const [image, setImage] = useState<Blob|null>(null);
 
 
   const uploadToClient = (event:any) => {
@@ -61,6 +58,9 @@ const CreateNft: NextPage = () => {
     // placeholder for upload return url
     let imageUploadUrl:string = "https://picsum.photos/200";
     // upload image to firebase
+    if(!image){
+      return "";
+    }
     uploadBytes(storageRef, image).then(async (snapshot) => {
       console.log("Snapshot:");
       console.log(snapshot);
