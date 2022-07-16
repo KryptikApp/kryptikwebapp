@@ -65,7 +65,7 @@ const About: NextPage = () => {
               data: [500, 45000, 20000],
               backgroundColor:[
                 "#c41230",
-                "#ffffff",
+                "#A7A7A7",
                 "#00FFA3"
               ]
             }],  
