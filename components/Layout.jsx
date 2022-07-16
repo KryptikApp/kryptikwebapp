@@ -6,7 +6,7 @@ import Navbar from "./navbars/Navbar";
 export default function Layout({children}) {
   const {isDark} = useKryptikThemeContext();
     return (
-        <div className={`min-h-screen bg-white dark:bg-black`}>
+        <div className={`min-h-screen ${isDark?"dark":""} ${isDark?"bg-black":"bg-white"}`}>
         <Head>
           <title>Kryptik Wallet</title>
           <meta name="description" content="Crypto made simple." />
