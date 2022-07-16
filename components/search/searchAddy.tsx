@@ -5,6 +5,7 @@ import { getAccountSearchSuggestions } from "../../src/handlers/search/accounts"
 import { ISearchResult } from "../../src/handlers/search/types";
 import { formatTicker } from "../../src/helpers/utils/networkUtils";
 import { defaultTokenAndNetwork } from "../../src/services/models/network";
+import { TokenAndNetwork } from "../../src/services/models/token";
 import DropdownNetworks from "../DropdownNetworks";
 import SearchResultItem from "./searchResultItem";
 
@@ -26,6 +27,13 @@ const SearchAddy:NextPage = () => {
         }
         let newSearchResults:ISearchResult[] = await getAccountSearchSuggestions(newQuery, selectedTokenAndNetwork.baseNetworkDb);
         setSearchResults(newSearchResults);
+    }
+
+    const handleSelectedNetworkChange = function(newSelectedTokenAndNetwork:TokenAndNetwork){
+        // reset search results
+        setSearchResults([]);
+        // update token and network
+        setSelectedTokenAndNetwork(newSelectedTokenAndNetwork);
     }
 
     return(
@@ -94,7 +102,7 @@ const SearchAddy:NextPage = () => {
                     </div>
                     
                     <div className="max-w-[90%] mx-auto">
-                      <DropdownNetworks onlyNetworks={true}  selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={setSelectedTokenAndNetwork}/>
+                      <DropdownNetworks onlyNetworks={true}  selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleSelectedNetworkChange}/>
                     </div>
                     <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">You will now be able to search and find {selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)} names.</p>
                     

@@ -6,6 +6,7 @@ import { getAllNetworkSearchSuggestions } from "../../src/handlers/search";
 import { ISearchResult } from "../../src/handlers/search/types";
 import { formatTicker } from "../../src/helpers/utils/networkUtils";
 import { defaultTokenAndNetwork } from "../../src/services/models/network";
+import { TokenAndNetwork } from "../../src/services/models/token";
 import { ServiceState } from "../../src/services/types";
 import DropdownNetworks from "../DropdownNetworks";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
@@ -16,8 +17,9 @@ const SearchNetwork:NextPage = () => {
     const {kryptikService} = useKryptikAuthContext();
     // ensure service is started
     if(kryptikService.serviceState != ServiceState.started){
-        router.push('/')
+        router.push('/');
     }
+
     const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
     const[showDarkener, setShowDarkener] = useState(false);
     const[query, setQuery] = useState("");
@@ -34,6 +36,13 @@ const SearchNetwork:NextPage = () => {
         }
         let newSearchResults:ISearchResult[] = await getAllNetworkSearchSuggestions(newQuery, selectedTokenAndNetwork.baseNetworkDb, kryptikService);
         setSearchResults(newSearchResults);
+    }
+
+    const handleSelectedNetworkChange = function(newSelectedTokenAndNetwork:TokenAndNetwork){
+        // reset search results
+        setSearchResults([]);
+        // update token and network
+        setSelectedTokenAndNetwork(newSelectedTokenAndNetwork);
     }
 
     return(
@@ -102,7 +111,7 @@ const SearchNetwork:NextPage = () => {
                     </div>
                     
                     <div className="max-w-[90%] mx-auto">
-                      <DropdownNetworks onlyNetworks={true}  selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={setSelectedTokenAndNetwork}/>
+                      <DropdownNetworks onlyNetworks={true}  selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleSelectedNetworkChange}/>
                     </div>
                     <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">You will now be able to search and find {selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)} names.</p>
                     
