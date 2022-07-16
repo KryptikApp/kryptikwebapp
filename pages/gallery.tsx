@@ -330,7 +330,11 @@ const Gallery: NextPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mx-auto place-items-center">
                     {
                         (activeCategoryNftList).map((nftData:INFTMetadata)=>
-                          <NftDisplay nftMetaData={nftData}/>
+                        {
+                          return(
+                            <NftDisplay nftMetaData={nftData}/>
+                          )
+                        }
                         )
                     }
                 </div>:

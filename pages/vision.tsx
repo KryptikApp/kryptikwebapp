@@ -42,7 +42,7 @@ const Vision: NextPage = () => {
             <li>
                 <div className="content">
                 <h3 className="text-5xl">Bitcoin</h3>
-                <p>Bitcoin was the first, but it’s often forgotten. Kryptik will make it simple to interact with Bitcoin and the lightning network.</p>
+                <p>Bitcoin was the first, but it&apos;s often forgotten. Kryptik will make it simple to interact with Bitcoin and the lightning network.</p>
                 </div>
                 <div className="time">
                 <h4>Early 2022</h4>
@@ -52,7 +52,7 @@ const Vision: NextPage = () => {
             <li>
                 <div className="content">
                 <h3 className="text-5xl">Mobile App</h3>
-                <p>The future of crypto is mobile, so we're building a powerful mobile app to accompany our convenient web wallet.</p>
+                <p>The future of crypto is mobile, so we&apos;re building a powerful mobile app to accompany our convenient web wallet.</p>
                 </div>
                 <div className="time">
                 <h4>Winter 2023</h4>

@@ -61,7 +61,11 @@ const SearchNetwork:NextPage = () => {
                 <div className="ml-[12%] relative z-10 max-h-80 my-2 rounded-xl px-2 py-2 bg-white text-slate-500 dark:bg-gray-700 dark:text-slate-200 divide-y divide-gray-200 dark:divide-gray-600 overflow-auto no-scrollbar">
                     {
                         searchresults.map((searchResult:ISearchResult)=>
-                            <SearchResultItem searchResult={searchResult}/>
+                        {
+                            return(
+                                <SearchResultItem searchResult={searchResult}/>
+                            )
+                        }   
                         )
                     }
                 </div>
@@ -78,7 +82,7 @@ const SearchNetwork:NextPage = () => {
         <div className={`${!showNetworkModal && "hidden"} modal fixed w-full h-full top-0 left-0 z-50 flex items-center justify-center overflow-y-auto`} style={{backgroundColor:`rgba(0, 0, 0, 0.9)`}}>
              {/* top right fixed close button  */}
             <button type="button" className="invisible md:visible text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto fixed top-4 right-5 items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={()=>setShowNetworkModal(false)}>
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>  
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>  
             </button>
              {/* flex with card and image */}
              <div className="flex flex-col md:flex-row opacity-100 m-4 md:min-w-[60%] max-w-[90%] md:max-w-[900px] max-h-screen">
