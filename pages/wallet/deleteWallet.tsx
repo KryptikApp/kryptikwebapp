@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import { useEffect, useState } from 'react'
+import { useEffect} from 'react'
 import { useRouter } from 'next/router'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import toast, { Toaster } from 'react-hot-toast'
