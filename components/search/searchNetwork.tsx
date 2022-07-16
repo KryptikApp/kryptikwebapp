@@ -1,4 +1,5 @@
 import { NextPage } from "next";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 import { getAllNetworkSearchSuggestions } from "../../src/handlers/search";
@@ -20,7 +21,14 @@ const SearchNetwork:NextPage = () => {
     const[query, setQuery] = useState("");
     const[searchresults, setSearchResults] = useState<ISearchResult[]>([]);
     const[showNetworkModal, setShowNetworkModal] = useState(false)
-    
+    const router = useRouter();
+    // ensure service is started
+    useEffect(() => {
+        if(kryptikService.serviceState != ServiceState.started){
+            router.push('/')
+        }
+    }, []);
+
 
     const handleQueryChange = async function(newQuery:string){
         setQuery(newQuery);
