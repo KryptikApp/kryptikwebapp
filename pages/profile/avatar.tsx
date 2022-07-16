@@ -14,9 +14,9 @@ import NavProfile from '../../components/navbars/NavProfile'
 
 const Profile: NextPage = () => {
   const { authUser, loading, getUserPhotoPath, updateCurrentUserKryptik } = useKryptikAuthContext();
+  const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    const router = useRouter();
     if (!loading && !authUser.isLoggedIn)
       router.push('/')
   }, [authUser, loading])

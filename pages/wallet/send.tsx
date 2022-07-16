@@ -56,9 +56,9 @@ const Send: NextPage = () => {
   const [progress, setProgress] = useState<SendProgress>(SendProgress.Begin);
   const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
 
+  const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    const router = useRouter();
     if (!loading && !authUser.isLoggedIn) router.push('/');
     // ensure service is started
     if(kryptikService.serviceState != ServiceState.started){

@@ -12,8 +12,8 @@ import HeaderProfile from '../../components/HeaderProfile'
 const Profile: NextPage = () => {
   const { authUser, loading } = useKryptikAuthContext();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
+  const router = useRouter();
   useEffect(() => {
-    const router = useRouter();
     if (!loading && !authUser.isLoggedIn)
       router.push('/')
   }, [authUser, loading])
