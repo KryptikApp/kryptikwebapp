@@ -124,15 +124,10 @@ const NftDisplay:NextPage<Props> = (props) => {
                                         <div className="flex flex-wrap">
                                         {
                                              nftMetaData.traits.map((trait:ITraitType)=>
-                                             {
-                                                return(
-                                                    <div className="hover:cursor-pointer transition ease-in-out hover:scale-110 hover:z-10 bg-gray-200 dark:bg-[#111112] border border-gray-300 w-fit my-1 max-w-4 px-1 mx-2 rounded drop-shadow-lg">
-                                                        <p className="text-sm text-gray-400 dark:text-slate-300 font-bold">{trait.trait_type}</p>
-                                                        <p className="text-sm text-gray-400 dark:text-slate-300 truncate ...">{trait.value}</p>
-                                                    </div>
-                                                )
-                                             }
-                                                
+                                                <div className="hover:cursor-pointer transition ease-in-out hover:scale-110 hover:z-10 bg-gray-200 dark:bg-[#111112] border border-gray-300 w-fit my-1 max-w-4 px-1 mx-2 rounded drop-shadow-lg" key={trait.value}>
+                                                    <p className="text-sm text-gray-400 dark:text-slate-300 font-bold">{trait.trait_type}</p>
+                                                    <p className="text-sm text-gray-400 dark:text-slate-300 truncate ...">{trait.value}</p>
+                                                </div>
                                             )
                                         }
                                         </div>

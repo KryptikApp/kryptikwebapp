@@ -63,7 +63,7 @@ const SearchNetwork:NextPage = () => {
                         searchresults.map((searchResult:ISearchResult)=>
                         {
                             return(
-                                <SearchResultItem searchResult={searchResult}/>
+                                <SearchResultItem searchResult={searchResult} key={searchResult.resultString}/>
                             )
                         }   
                         )
