@@ -6,7 +6,7 @@ import { getHistoricalPriceForTicker } from "../../src/helpers/coinGeckoHelper";
 import React from 'react';
 import {Chart} from 'react-chartjs-2';
 import "chartjs-adapter-date-fns"
-import {Chart as ChartJS, LinearScale, PointElement, LineElement, TimeScale, Tooltip} from 'chart.js'
+import {Chart as ChartJS, LinearScale, PointElement, LineElement, TimeScale, Tooltip, LineController} from 'chart.js'
 import { defaultTokenAndNetwork } from '../../src/services/models/network';
 import Divider from '../../components/Divider';
 import { removeHttp } from '../../src/helpers/utils';
@@ -14,7 +14,7 @@ import { formatTicker } from '../../src/helpers/utils/networkUtils';
 import { roundToDecimals, roundUsdAmount } from '../../src/helpers/utils/numberUtils';
 import { useKryptikThemeContext } from '../../components/ThemeProvider';
 
-ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, Tooltip);
+ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, LineController, Tooltip);
 
 
 const CoinInfo: NextPage = () => {
