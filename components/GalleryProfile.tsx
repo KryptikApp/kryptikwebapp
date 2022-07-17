@@ -46,7 +46,7 @@ const fetchAccountName = async function(){
         setNameToDisplay(authUser.name)
     }
     else{
-        setNameToDisplay(newResolvedAccount.names?newResolvedAccount.names[0]:truncateAddress(newResolvedAccount.address, networkFromNetworkDb(defaultNetworkDb)))
+        setNameToDisplay(newResolvedAccount.names?newResolvedAccount.names[0]:truncateAddress(newResolvedAccount.address, networkFromNetworkDb(networkDb?networkDb:defaultNetworkDb)))
     }
     console.log(newResolvedAccount);
     setAvatarToDisplay(newResolvedAccount.avatarPath?newResolvedAccount.avatarPath:getUserPhotoPath(authUser));
