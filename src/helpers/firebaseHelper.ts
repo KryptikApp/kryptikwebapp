@@ -131,6 +131,16 @@ export const deleteUserBlockchainAccountsDB = async function(){
   await deleteDoc(doc(firestore, EMAIL_TO_ACCOUNT_DB_LOCATION, firebaseUser.uid));
 }
 
+const avatarPathList = ["/media/avatars/defaultAvatar1.jpg", "/media/avatars/defaultAvatar2.jpg", "/media/avatars/defaultAvatar3.jpg", "/media/avatars/defaultAvatar4.jpg"]
+/**
+ * Returns a random number between min (inclusive) and max (exclusive)
+ */
+ function getRandomIntArbitrary(min:number, max:number):number{
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 // TODO: ADD SUPPORT FOR RANDOM AVATAR
 export const getUserPhotoPath = function(user:UserDB):string{
   // if user has a proper photo url, return it
@@ -138,7 +148,8 @@ export const getUserPhotoPath = function(user:UserDB):string{
     return user.photoUrl;
   }
   // if not... return a default avatar icon
-  let photoUrl:string = "/media/avatars/defaultAvatar1.jpg"
+  let randomIndex:number = getRandomIntArbitrary(0, avatarPathList.length-1);
+  let photoUrl:string = avatarPathList[randomIndex];
   return photoUrl;
 }
 
