@@ -35,7 +35,6 @@ export const resolveEVMAccount = async function(params:IAccountResolverParams):P
     // otherwise... no ens name set for account, check if account is valid address
     // if so.. set as address
     if(address && address.toLowerCase()!=account.toLowerCase() && isValidEVMAddress(address)){
-       console.log("setting account name");
        address = address;
        name = account;
     }
@@ -43,7 +42,7 @@ export const resolveEVMAccount = async function(params:IAccountResolverParams):P
         if(isValidEVMAddress(account)){
             address = account;
             // try reverse lookup
-            name = await evmProvider.lookupAddress(account)
+            name = await evmProvider.lookupAddress(account);
         }
         else{
             return null;
