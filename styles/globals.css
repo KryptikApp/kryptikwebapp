@@ -205,7 +205,7 @@ a {
 }
 
 /* radial green to transparent black gradient */
-.colorFadeGreen{
+.colorFadeGreenBlack{
      
     /* ff 3.6+ */
     background:-moz-radial-gradient(circle at 50% 41%, rgba(34, 255, 164, 0.54) 1%, rgba(0, 0, 0, 1) 63%);
@@ -225,8 +225,50 @@ a {
 
 }
 
+/* radial green to transparent white gradient */
+.colorFadeGreenBlack{
+     
+  /* ff 3.6+ */
+  background:-moz-radial-gradient(circle at 50% 41%, rgba(34, 255, 164, 0.54) 1%, rgb(255, 255, 255) 63%);
+
+  /* safari 5.1+,chrome 10+ */
+  background:-webkit-radial-gradient(circle at 50% 41%, rgba(34, 255, 164, 0.54) 1%, rgb(255, 255, 255) 63%);
+
+  /* opera 11.10+ */
+  background:-o-radial-gradient(circle at 50% 41%, rgba(34, 255, 164, 0.54) 1%, rgb(255, 255, 255) 63%);
+
+  /* ie 10+ */
+  background:-ms-radial-gradient(circle at 50% 41%, rgba(34, 255, 164, 0.54) 1%, rgb(255, 255, 255) 63%);
+
+  /* global 92%+ browsers support */
+  background:radial-gradient(circle at 50% 41%, rgba(34, 255, 164, 0.54) 1%, rgb(255, 255, 255) 63%);
+
+
+}
+
+/* radial green to transparent white gradient... centered */
+.colorFadeGreenWhiteCenter
+{
+
+        /* ff 3.6+ */
+    background:-moz-radial-gradient(circle at 50% 50%, rgba(34, 255, 164, 0.54) 0%, rgb(255, 255, 255) 73%);
+
+    /* safari 5.1+,chrome 10+ */
+    background:-webkit-radial-gradient(circle at 50% 50%, rgba(34, 255, 164, 0.54) 0%, rgb(255, 255, 255) 73%);
+
+    /* opera 11.10+ */
+    background:-o-radial-gradient(circle at 50% 50%, rgba(34, 255, 164, 0.54) 0%, rgb(255, 255, 255) 73%);
+
+    /* ie 10+ */
+    background:-ms-radial-gradient(circle at 50% 50%, rgba(34, 255, 164, 0.54) 0%, rgb(255, 255, 255) 73%);
+
+    /* global 92%+ browsers support */
+    background:radial-gradient(circle at 50% 50%, rgba(34, 255, 164, 0.54) 0%, rgb(255, 255, 255) 73%);
+
+}
+
 /* radial green to transparent black gradient... centered */
-.colorFadeGreenCenter
+.colorFadeGreenBlackCenter
 {
 
         /* ff 3.6+ */
