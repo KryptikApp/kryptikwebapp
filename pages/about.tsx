@@ -1,10 +1,12 @@
 import type { NextPage } from 'next'
-import {Chart as ChartJS, LinearScale, PointElement, LineElement, TimeScale, Tooltip, ArcElement, DoughnutController} from 'chart.js'
+import {Chart as ChartJS, LinearScale, PointElement, LineElement, TimeScale, Tooltip, ArcElement, DoughnutController, Legend} from 'chart.js'
 import {Chart} from 'react-chartjs-2';
+import { useKryptikThemeContext } from '../components/ThemeProvider';
 
-ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, ArcElement, DoughnutController, Tooltip);
+ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, ArcElement, DoughnutController, Legend, Tooltip);
 
 const About: NextPage = () => {
+  const {isDark} = useKryptikThemeContext();
   return (
 
     <div>
@@ -81,7 +83,10 @@ const About: NextPage = () => {
                   display: true,
                   position: 'bottom',
                   labels: {
-                    color: "#000080",
+                    font:{
+                      size: 16
+                    },
+                    color: isDark?"#f5f5f5":"#1c1c1c"
                   }
                 },
                 tooltip: {
