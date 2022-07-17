@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { WaitlistProgress } from '../src/services/types';
 import { addEmailToWaitlist } from '../src/helpers/waitlist';
 import { isValidEmailAddress } from '../src/helpers/resolvers/kryptikResolver';
+import { useKryptikThemeContext } from './ThemeProvider';
 
 
 const LaunchPage: NextPage = () => {
@@ -16,6 +17,7 @@ const LaunchPage: NextPage = () => {
   const [failureMsg, setFailureMsg] = useState("");
   const [progress, setProgress] = useState(WaitlistProgress.Begin);
   const [isLoading, setIsLoading] = useState(false);
+  const{isDark} = useKryptikThemeContext();
 
   const errorhandler = function(msg:string){
     setFailureMsg(msg);
@@ -69,15 +71,15 @@ const LaunchPage: NextPage = () => {
         {/* begin launch screen */}
         {
           progress == WaitlistProgress.Begin && 
-          <div className="max-w-[98%] md:max-w-[1000px] content-center mx-auto">
+          <div className="md:max-w-[1000px] content-center mx-auto">
             <div className="flex flex-col lg:flex-row">
-
                 <div className="flex-4 text-center content-center pt-10 lg:pt-20">
                     <h1 className="text-7xl font-bold sans dark:text-white transition ease-in-out hover:scale-110">
                         Crypto Made <span className="text-transparent bg-clip-text bg-gradient-to-br from-sky-400 via-emerald-600 to-green-500 background-animate">Easy</span>
                     </h1>
                     <h1 className="text-xl text-center mt-4 dark:text-gray-300 dark:hover:text-gray-200 transition-colors duration-500">Save, send, and collect with ease.</h1>
-                    <div className="px-5 py-5 m-2 rounded mb-0 ">
+                    {/* email input */}
+                    <div className="lg:px-5 py-5 lg:m-2 rounded mb-0 ">
                       <div className="flex md:w-[70%]  border border-green-600 mx-auto rounded">
                        <input maxLength={40} className="w-[70%] bg-gray-200 appearance-none rounded py-4 px-4 text-gray-700 focus:outline-none focus:bg-white focus:border-sky-400 dark:bg-[#141414] dark:text-white" placeholder="joinwaitlist@gmail.com" value={email} onChange={(e) => handleUpdateEmail(e.target.value)}/>
                        <button className="hover:bg-transparent grow bg-green-500 font-semibold bg:text-green-500 hover:text-white py-2 border border-green-500 rounded-sm" onClick={()=>handleAddEmailToWaitlist()}>
@@ -92,10 +94,11 @@ const LaunchPage: NextPage = () => {
                       </div>
                     </div>
                 </div>
+                {/* kryptik display */}
                 <div className="graphPaper">
-                  <div className="colorFadeGreenCenter">
-                    <div className="flex-1 px-10 ml-[7%] lg:pl-10">
-                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="w-[150%] max-w-[400px] lg:max-w-[300px] h-auto border-none"></img>
+                  <div className={`${isDark?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
+                    <div className="">
+                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="w-[150%] pl-[22%] md:ml-[20%] lg:ml-0 lg:pl-10 max-w-[400px] lg:max-w-[300px] h-auto border-none"></img>
                     </div>
                   </div>
                 </div>
@@ -109,7 +112,7 @@ const LaunchPage: NextPage = () => {
           <div>
             <div className="flex flex-col lg:flex-row">
             <div className="min-w-[50%] min-h-screen graphPaper -mx-3">
-              <div className="min-w-[40%] min-h-screen colorFadeGreen">
+              <div className={`min-w-[40%] min-h-screen ${isDark?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
                 <div className="place-items-center max-w-[60%] md:min-w-[300px] md:max-w-[40%] mx-auto pt-20">
                   <img src="kryptikBrand/journey begins.png"/>
                 </div>
