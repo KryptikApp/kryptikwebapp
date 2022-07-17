@@ -20,7 +20,7 @@ export const fetchEnsSuggestions = async (query: string):Promise<IResolvedAccoun
     for(const domain of result.data.domains){
         let resolvedAccount:IResolvedAccount = {
             names: [domain.name],
-            address: domain.owner.id,
+            address: domain.resolver.addr.id,
             isResolved: true
         }
         resolvedSuggestions.push(resolvedAccount);
