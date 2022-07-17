@@ -2,6 +2,7 @@ import { truncateAddress } from 'hdseedloop';
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import GalleryProfile from '../components/GalleryProfile';
 
 import { useKryptikAuthContext } from '../components/KryptikAuthProvider'
 import NftDisplay from '../components/nfts/NftDisplay';
@@ -161,6 +162,7 @@ const Gallery: NextPage = () => {
 
   const handleActiveCategoryChange = function(newCategory:ActiveCategory){
     setActiveCategory(newCategory);
+    setActiveCategoryNftList([]);
     switch(newCategory){
         case(ActiveCategory.all):{
             setActiveCategoryNftList(nftList);
@@ -211,15 +213,11 @@ const Gallery: NextPage = () => {
         <div className="flex flex-col md:flex-row">
 
            <div className='flex-1'>
-            <div className="mx-auto text-center">
-              <img src={getUserPhotoPath(authUser)} alt="Profile Image" className="object-cover w-20 h-20 rounded-full mx-auto mb-2"/>
-              {
+             {
                 routerParams?
-                <ProfileName account={routerParams.name?routerParams.name:routerParams.account}/>:
-                <ProfileName/>
+                <GalleryProfile account={routerParams.account} networkDb={routerParams.networkDb}/>:
+                <GalleryProfile/>
               }
-              
-            </div>
             <br/>
 
             <div className="flex flex-col mx-6">
@@ -327,11 +325,11 @@ const Gallery: NextPage = () => {
               isNFTFetched &&
               <div>
               {
-                (activeCategoryNftList.length !=0)?
+                (activeCategoryNftList.length!=0)?
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mx-auto place-items-center">
                     {
-                        (activeCategoryNftList).map((nftData:INFTMetadata)=>
-                          <NftDisplay nftMetaData={nftData} key={nftData.asset_contract.address}/>
+                        (activeCategoryNftList).map((nftData:INFTMetadata, index:number)=>
+                          <NftDisplay nftMetaData={nftData} key={index}/>
                         )
                     }
                 </div>:
