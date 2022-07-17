@@ -4,9 +4,9 @@ import Navbar from "./navbars/Navbar";
 
 // TODO: Update to support dynamic headers
 export default function Layout({children}) {
-  const {isDark} = useKryptikThemeContext();
+  const {isDark, themeLoading} = useKryptikThemeContext();
     return (
-        <div className={`min-h-screen ${isDark?"dark":""} ${isDark?"bg-black":"bg-white"}`}>
+        <div className={`min-h-screen ${(themeLoading || isDark)?"dark":""} ${(themeLoading || isDark)?"bg-black":"bg-white"}`}>
         <Head>
           <title>Kryptik Wallet</title>
           <meta name="description" content="Crypto made simple." />
