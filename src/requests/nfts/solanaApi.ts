@@ -7,9 +7,9 @@ import { parseSolNFTMetaData } from "../../parsers/nftSolana";
 export const listSolanaNftsByAddress = async function(address:string, next=""):Promise<INFTMetadata[]|null>{
   console.log("Fetching solana data....");
     try { //add support for multiple pages
-        const url = `https://api-mainnet.magiceden.dev/v2/wallets/${address}/tokens`;
+        const url = `https://thingproxy.freeboard.io/fetch/https://api-mainnet.magiceden.dev/v2/wallets/${address}/tokens`;
         const dataResponse = await KryptikFetch(url, {
-          headers: {"Access-Control-Allow-Origin": "*"},
+          headers: {"Access-Control-Allow-Origin": "http://localhost:3000/", "Host":"http://localhost:3000/"},
           timeout: 10000, // 10 secs
         });
         if(!dataResponse || !dataResponse.data) return null;
