@@ -95,7 +95,7 @@ const LaunchPage: NextPage = () => {
                     </div>
                 </div>
                 {/* kryptik display */}
-                <div className="graphPaper">
+                <div className="graphPaper -mx-2">
                   <div className={`${isDark?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
                     <div className="">
                         <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="md:w-[150%] pl-[15%] md:ml-[20%] lg:ml-0 lg:pl-10 max-w-[400px] lg:max-w-[300px] h-auto border-none"></img>
