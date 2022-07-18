@@ -9,7 +9,7 @@ export const listSolanaNftsByAddress = async function(address:string, next=""):P
     try { //add support for multiple pages
         const url = `https://thingproxy.freeboard.io/fetch/https://api-mainnet.magiceden.dev/v2/wallets/${address}/tokens`;
         const dataResponse = await KryptikFetch(url, {
-          headers: {"Access-Control-Allow-Origin": "http://localhost:3000/", "Host":"http://localhost:3000/"},
+          headers: {"Access-Control-Allow-Origin": "*"},
           timeout: 10000, // 10 secs
         });
         if(!dataResponse || !dataResponse.data) return null;
