@@ -98,7 +98,7 @@ const LaunchPage: NextPage = () => {
                 <div className="graphPaper">
                   <div className={`${isDark?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
                     <div className="">
-                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="w-[150%] pl-[22%] md:ml-[20%] lg:ml-0 lg:pl-10 max-w-[400px] lg:max-w-[300px] h-auto border-none"></img>
+                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="md:w-[150%] pl-[15%] md:ml-[20%] lg:ml-0 lg:pl-10 max-w-[400px] lg:max-w-[300px] h-auto border-none"></img>
                     </div>
                   </div>
                 </div>
@@ -113,7 +113,7 @@ const LaunchPage: NextPage = () => {
             <div className="flex flex-col lg:flex-row">
             <div className="min-w-[50%] min-h-screen graphPaper -mx-3">
               <div className={`min-w-[40%] min-h-screen ${isDark?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
-                <div className="place-items-center max-w-[60%] md:min-w-[300px] md:max-w-[40%] mx-auto pt-20">
+                <div className="place-items-center max-w-[80%] md:max-w-[60%] md:min-w-[300px] md:max-w-[40%] mx-auto pt-56 md:pt-20">
                   <img src="kryptikBrand/journey begins.png"/>
                 </div>
               </div>
