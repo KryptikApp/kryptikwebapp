@@ -12,7 +12,7 @@ const Vision: NextPage = () => {
       
         <div className="dark:text-white">
         <div className="max-w-2xl mx-auto px-4 md:px-0 min-h-[100vh]">
-        <div className="min-h-[6rem]">
+        <div className="min-h-[5rem]">
             {/* padding div for space between top and main elements */}
           </div>
           <h1 className="text-5xl font-bold sans mb-5">
