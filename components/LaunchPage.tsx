@@ -1,8 +1,6 @@
 import type { NextPage } from 'next'
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
-
-import { useKryptikAuthContext } from './KryptikAuthProvider';
 import Link from 'next/link';
 import { useState } from 'react';
 import { WaitlistProgress } from '../src/services/types';
@@ -17,7 +15,7 @@ const LaunchPage: NextPage = () => {
   const [failureMsg, setFailureMsg] = useState("");
   const [progress, setProgress] = useState(WaitlistProgress.Begin);
   const [isLoading, setIsLoading] = useState(false);
-  const{isDark} = useKryptikThemeContext();
+  const{isDark, themeLoading} = useKryptikThemeContext();
 
   const errorhandler = function(msg:string){
     setFailureMsg(msg);
@@ -73,7 +71,7 @@ const LaunchPage: NextPage = () => {
           progress == WaitlistProgress.Begin && 
           <div className="md:max-w-[1000px] content-center mx-auto">
             <div className="flex flex-col lg:flex-row">
-                <div className="flex-4 text-center content-center pt-10 lg:pt-20">
+                <div className="text-center content-center pt-10 lg:pt-20">
                     <h1 className="text-7xl font-bold sans dark:text-white transition ease-in-out hover:scale-110">
                         Crypto Made <span className="text-transparent bg-clip-text bg-gradient-to-br from-sky-400 via-emerald-600 to-green-500 background-animate">Easy</span>
                     </h1>
@@ -81,7 +79,7 @@ const LaunchPage: NextPage = () => {
                     {/* email input */}
                     <div className="lg:px-5 py-5 lg:m-2 rounded mb-0 ">
                       <div className="flex md:w-[70%]  border border-green-600 mx-auto rounded">
-                       <input maxLength={40} className="w-[70%] bg-gray-200 appearance-none rounded py-4 px-4 text-gray-700 focus:outline-none focus:bg-white focus:border-sky-400 dark:bg-[#141414] dark:text-white" placeholder="joinwaitlist@gmail.com" value={email} onChange={(e) => handleUpdateEmail(e.target.value)}/>
+                       <input maxLength={40} className="w-[70%] bg-gray-200 appearance-none rounded py-4 px-4 text-gray-700 text-xl focus:outline-none focus:bg-white focus:border-sky-400 dark:bg-[#141414] dark:text-white" placeholder="joinwaitlist@gmail.com" value={email} onChange={(e) => handleUpdateEmail(e.target.value)}/>
                        <button className="hover:bg-transparent grow bg-green-500 font-semibold bg:text-green-500 hover:text-white py-2 border border-green-500 rounded-sm" onClick={()=>handleAddEmailToWaitlist()}>
                        {
                         !isLoading?"Get Started":
@@ -95,10 +93,10 @@ const LaunchPage: NextPage = () => {
                     </div>
                 </div>
                 {/* kryptik display */}
-                <div className="graphPaper -mx-2">
-                  <div className={`${isDark?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
+                <div className="graphPaper -mx-4 md:mx-0 flex-grow">
+                  <div className={`${(isDark || themeLoading)?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
                     <div className="">
-                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="md:w-[150%] pl-[15%] md:ml-[20%] lg:ml-0 lg:pl-10 max-w-[400px] lg:max-w-[300px] h-auto border-none"></img>
+                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="ml-[15%] max-w-[100%] md:max-w-[280px] md:mx-auto"></img>
                     </div>
                   </div>
                 </div>
@@ -111,14 +109,14 @@ const LaunchPage: NextPage = () => {
           progress == WaitlistProgress.Complete && 
           <div>
             <div className="flex flex-col lg:flex-row">
-            <div className="min-w-[50%] min-h-screen graphPaper -mx-3">
+            <div className="min-w-[50%] min-h-[100vh] graphPaper -mx-4">
               <div className={`min-w-[40%] min-h-screen ${isDark?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
-                <div className="place-items-center max-w-[80%] md:max-w-[60%] md:min-w-[300px] md:max-w-[40%] mx-auto pt-56 md:pt-20">
+                <div className="place-items-center max-w-[300px] max-w-[80%] md:min-w-[300px] mx-auto pt-48 lg:pt-40">
                   <img src="kryptikBrand/journey begins.png"/>
                 </div>
               </div>
             </div>
-              <div className="-mt-20 md:mt-0 mx-auto">
+              <div className="-mt-20 lg:mt-8 mx-auto">
                 <div className="lg:h-[8rem]">
                   {/* padding div for space between top and main elements */}
                 </div>
