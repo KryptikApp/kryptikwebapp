@@ -50,6 +50,7 @@ const Gallery: NextPage = () => {
   const [isNFTFetched, setIsNFTFetched] = useState(true);
   const [nftList, setNftList] = useState<INFTMetadata[]>([]);
   const [activeCategoryNftList, setActiveCategoryNftList] = useState<INFTMetadata[]>([]);
+  const [activeCategoryNetworkDb, setActiveCategoryNetworkDb] = useState<NetworkDb|null>(defaultNetworkDb);
 
   const solImagePath = "https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/sol.png?alt=media&token=6d6e8337-79bb-45c6-bb31-47e49c7ce763"
   const nearImagePath = "https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/near%20logo.png?alt=media&token=244c738f-e138-4e28-bf23-c991b99050c7"
@@ -163,24 +164,39 @@ const Gallery: NextPage = () => {
   const handleActiveCategoryChange = function(newCategory:ActiveCategory){
     setActiveCategory(newCategory);
     setActiveCategoryNftList([]);
+    let newNetworkDB:NetworkDb|null = null;
     switch(newCategory){
         case(ActiveCategory.all):{
             setActiveCategoryNftList(nftList);
             break;
         }
         case(ActiveCategory.eth):{
+            newNetworkDB = kryptikService.getNetworkDbByTicker("eth");
+            // if unable to get selected network db... return
+            // TODO: UPDATE NETWORKDB ERROR HANDLER
+            if(!newNetworkDB) return;
+            setActiveCategoryNetworkDb(newNetworkDB);
             let newNftList = nftList.filter(nft=>nft.networkTicker=="eth")
             setActiveCategoryNftList(newNftList);
             break;
         }
         case(ActiveCategory.near):{
+            newNetworkDB = kryptikService.getNetworkDbByTicker("near");
+            // if unable to get selected network db... return
+            // TODO: UPDATE NETWORKDB ERROR HANDLER
+            if(!newNetworkDB) return;
+            setActiveCategoryNetworkDb(newNetworkDB);
             let newNftList = nftList.filter(nft=>nft.networkTicker=="near")
             setActiveCategoryNftList(newNftList);
             break;
         }
         case(ActiveCategory.sol):{
-            let newNftList = nftList.filter(nft=>nft.networkTicker=="sol")
-            setActiveCategoryNftList(newNftList);
+            newNetworkDB = kryptikService.getNetworkDbByTicker("sol");
+            // if unable to get selected network db... return
+            // TODO: UPDATE NETWORKDB ERROR HANDLER
+            if(!newNetworkDB) return;
+            setActiveCategoryNetworkDb(newNetworkDB);
+            setActiveCategoryNetworkDb(newNetworkDB);
             break;
         }
         case(ActiveCategory.poaps):{
@@ -278,31 +294,17 @@ const Gallery: NextPage = () => {
               </div>
             }
             {
-              activeCategory == ActiveCategory.eth &&
-              <div className="font-bold text-2xl ml-20 mb-6">
-                <img className='w-10 mr-2 inline' src={ethImagePath}/>
-                <h1 className="inline">Ethereum Nfts</h1>
-              </div>
-            }
-            {
-              activeCategory == ActiveCategory.sol &&
-              <div className="font-bold text-2xl ml-20 mb-6">
-                <img className='w-10 mr-2 inline' src={solImagePath}/>
-                <h1 className="inline">Solana NFts</h1>
-              </div>
-            }
-            {
-              activeCategory == ActiveCategory.near &&
-              <div className="font-bold text-2xl ml-20 mb-6">
-                <img className='w-10 mr-2 inline' src={nearImagePath}/>
-                <h1 className="inline">Near NFts</h1>
-              </div>
-            }
-            {
               activeCategory == ActiveCategory.poaps &&
               <div className="font-bold text-2xl ml-20 mb-6">
                 <span className='w-10 mr-2 inline'>🏷️</span>
                 <h1 className="inline">Proof of Attendance</h1>
+              </div>
+            }
+            {
+              (activeCategory!=ActiveCategory.poaps && activeCategory!=ActiveCategory.all && activeCategoryNetworkDb) &&
+              <div className="font-bold text-2xl ml-20 mb-6">
+                <img className='w-10 mr-2 inline' src={activeCategoryNetworkDb.iconPath}/>
+                <h1 className="inline">{activeCategoryNetworkDb.fullName} Nfts</h1>
               </div>
             }
             </div>
