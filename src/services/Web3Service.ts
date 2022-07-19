@@ -31,6 +31,7 @@ import { networkFromNetworkDb, isNetworkArbitrum, getChainDataForNetwork } from 
 import { lamportsToSol, divByDecimals, roundCryptoAmount, roundUsdAmount, multByDecimals, roundToDecimals } from "../helpers/utils/numberUtils";
 import { IWallet } from "../models/KryptikWallet";
 import { searchTokenListByTicker } from "../handlers/search/token";
+import { RiContactsBookLine } from "react-icons/ri";
 
 
 const NetworkDbsRef = collection(firestore, "networks");
@@ -580,7 +581,9 @@ class Web3Service extends BaseService{
     }
 
     async getBalanceNep141Token(params:TokenBalanceParameters):Promise<IBalance>{
-        if(!params.nep141Params) throw(new Error("Error: Contract must be provided to fetch erc20 token balance."))
+        console.log("NEP141 balance error:");
+        console.log(params);
+        if(!params.nep141Params) throw(new Error("Error: Contract must be provided to fetch nep141 token balance."))
         let kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
         if(!kryptikProvider.nearProvider) throw(new Error(`Error: no provider specified for ${params.networkDb.fullName}`));
         let nearNetworkProvider:Near = kryptikProvider.nearProvider;
@@ -772,173 +775,6 @@ class Web3Service extends BaseService{
         }
         return splBalances;
     }
-
-    getTransactionFeeData = async(params:FeeDataParameters):Promise<TransactionFeeData|null> => {
-        let network:Network =  networkFromNetworkDb(params.networkDb);
-        let tokenPriceUsd:number = await getPriceOfTicker(params.networkDb.coingeckoId);
-        switch(network.networkFamily){
-            case (NetworkFamily.EVM): { 
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeData1559Compatible({network:params.networkDb, tokenPriceUsd: tokenPriceUsd, tokenData: params.tokenData, amountToken:params.amountToken});
-                return transactionFeeData;
-                break; 
-             } 
-             case(NetworkFamily.Solana):{
-                if(!params.solTransaction) return null;
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataSolana({tokenPriceUsd:tokenPriceUsd, transaction:params.solTransaction, networkDb:params.networkDb});
-                return transactionFeeData;
-                break;
-             }
-             case(NetworkFamily.Near):{
-                let transactionFeeData:TransactionFeeData = await this.getTransactionFeeDataNear({tokenPriceUsd:tokenPriceUsd, txType:params.txType, networkDb:params.networkDb});
-                return transactionFeeData;
-                break;
-             }
-             default: { 
-                return null;
-                break; 
-             } 
-        }
-    }
-
-    getTransactionFeeDataNear = async(params:FeeDataNearParameters)=>{
-        let kryptikProvider:KryptikProvider;
-        kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
-        // validate provider
-        if(!kryptikProvider.nearProvider){
-            throw(new Error(`Error: No provider specified for ${kryptikProvider.network.fullName}`));
-        }
-        console.log(params);
-        let nearProvider:Near = kryptikProvider.nearProvider;
-        let block:BlockResult = await nearProvider.connection.provider.block({ finality: 'final' });
-        // NEAR gas is calculated in TGAS
-        // 1 TGAS = 10^12
-        let gasUsed:number = multByDecimals(1, 12).asNumber
-        // hardcoded gas amounts are based on protocol paramters
-        // more info. on NEAR gas here: https://docs.near.org/docs/concepts/gas#thinking-in-gas
-        switch(params.txType){
-            case(TxType.TransferNative):{
-                gasUsed = 1*gasUsed;
-                break;
-            }
-            case(TxType.TransferToken):{
-                gasUsed = 14*gasUsed;
-                break;
-            }
-            default:{
-                // UPDATE DEFAULT... should it be avg. gas required?
-                gasUsed = 10*gasUsed;
-                break;
-            }
-        }
-        // fetch latest gas price
-        let gasPrice:number = Number((await nearProvider.connection.provider.gasPrice(block.header.hash)).gas_price);
-        console.log(gasPrice);
-        // convert gas to near amount
-        let feeInNear:number = divByDecimals((Number(gasPrice)*gasUsed), params.networkDb.decimals).asNumber; 
-        let feeInUsd:number = params.tokenPriceUsd*feeInNear;
-        let transactionFeeData:TransactionFeeData = {
-            network: kryptikProvider.network,
-            isFresh: true,
-            lowerBoundCrypto: feeInNear,
-            lowerBoundUSD: feeInUsd,
-            upperBoundCrypto: feeInNear,
-            upperBoundUSD: feeInUsd,
-            EVMGas: defaultEVMGas
-        };
-        return transactionFeeData;
-    }
-
-    // fetch tx. fee on the solana blockchain
-    getTransactionFeeDataSolana = async(params:FeeDataSolParameters):Promise<TransactionFeeData> =>{
-        let kryptikProvider:KryptikProvider;
-        kryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
-        // validate provider
-        if(!kryptikProvider.solProvider){
-            throw(new Error(`Error: No provider specified for ${kryptikProvider.network.fullName}`));
-        }
-        let solNetworkProvider:Connection = kryptikProvider.solProvider;
-        const feeData = await solNetworkProvider.getFeeForMessage(
-            params.transaction.compileMessage(),
-            'confirmed',
-        );
-        let feeInSol:number = lamportsToSol(feeData.value);
-        let feeInUsd:number = params.tokenPriceUsd*feeInSol;
-        let transactionFeeData:TransactionFeeData = {
-            network: kryptikProvider.network,
-            isFresh: true,
-            lowerBoundCrypto: feeInSol,
-            lowerBoundUSD: feeInUsd,
-            upperBoundCrypto: feeInSol,
-            upperBoundUSD: feeInUsd,
-            EVMGas: defaultEVMGas
-        };
-        return transactionFeeData;
-    }
-
-    // estimate tx. fee for EIP 1559 compatible networks
-    getTransactionFeeData1559Compatible = async(params:FeeDataEvmParameters):Promise<TransactionFeeData> =>{
-        let kryptikProvider:KryptikProvider;
-        kryptikProvider = await this.getKryptikProviderForNetworkDb(params.network);
-        // validate provider
-        if(!kryptikProvider.ethProvider){
-            throw(new Error(`No provider specified for ${kryptikProvider.network.fullName}`));
-        }
-        let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
-        let feeData = await ethNetworkProvider.getFeeData();
-        // FIX ASAP
-        // ARTIFICIALLY INFLATING ARBITRUM BASE GAS LIMIT, BECAUSE OG VALUE IS TOO SMALL
-        let gasLimit:number = isNetworkArbitrum(params.network)?500000:21000;
-        if(params.tokenData && params.tokenData.tokenParamsEVM){
-            let amount = roundToDecimals(Number(params.amountToken), params.tokenData.tokenDb.decimals);
-            // get gaslimit for nonzero amount
-            if(amount == 0) amount = 2;
-            // get estimated gas limit for token transfer
-            gasLimit = Number(await params.tokenData.tokenParamsEVM.tokenContractConnected.estimateGas.transfer(placeHolderEVMAddress, amount));
-            console.log("Token gas limit:")
-            console.log(gasLimit);
-        }
-        // validate fee data response
-        if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
-            // arbitrum uses pre EIP-1559 fee structure
-            if(isNetworkArbitrum(params.network)){
-                let baseGas = await ethNetworkProvider.getGasPrice();
-                feeData.gasPrice = baseGas;
-                feeData.maxFeePerGas = baseGas;
-                feeData.maxPriorityFeePerGas = BigNumber.from(0);
-            }
-            else{
-                throw(new Error(`No fee data returned for ${kryptikProvider.network.fullName}`));
-            }
-        }
-        // calculate fees in token amount
-        let baseFeePerGas:number = Number(utils.formatEther(feeData.gasPrice));
-        let maxFeePerGas:number = Number(utils.formatEther(feeData.maxFeePerGas));
-        let maxTipPerGas:number = Number(utils.formatEther(feeData.maxPriorityFeePerGas));
-        let baseTipPerGas:number = maxTipPerGas*.3;
-        // amount hardcoded to gas required to transfer ether to someone else
-        let lowerBoundCrypto:number = gasLimit*(baseFeePerGas+baseTipPerGas);
-        let lowerBoundUSD:number = lowerBoundCrypto*params.tokenPriceUsd;
-        let upperBoundCrypto:number = gasLimit*(maxFeePerGas+maxTipPerGas);
-        let upperBoundUsd:number = upperBoundCrypto*params.tokenPriceUsd;
-        // create new fee data object
-        let transactionFeeData:TransactionFeeData = {
-            network: kryptikProvider.network,
-            isFresh: true,
-            lowerBoundCrypto: lowerBoundCrypto,
-            lowerBoundUSD: lowerBoundUSD,
-            upperBoundCrypto: upperBoundCrypto,
-            upperBoundUSD: upperBoundUsd,
-            EVMGas:{
-                // add inputs in original wei amount
-                gasLimit: gasLimit,
-                gasPrice: feeData.gasPrice,
-                maxFeePerGas: feeData.maxFeePerGas,
-                maxPriorityFeePerGas: feeData.maxPriorityFeePerGas 
-            }
-        }
-        return transactionFeeData;
-    }
-    
 
     // creates and returns a connected erc20 contract 
     createERC20Contract = async(params:CreateEVMContractParameters):Promise<Contract|null> =>{
