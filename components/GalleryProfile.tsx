@@ -1,4 +1,4 @@
-import { truncateAddress } from "hdseedloop";
+import { Network, truncateAddress } from "hdseedloop";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { getUserPhotoPath } from "../src/helpers/firebaseHelper";
@@ -21,6 +21,7 @@ const GalleryProfile:NextPage<Props> = (props) => {
     const [loadingResolvedAccount, setLoadingResolvedAccount] = useState(false);
     const [resolvedAccount, setResolvedAccount] = useState(defaultResolvedAccount);
     const [nameToDisplay, setNameToDisplay] = useState("");
+    const [addytoDisplay, setAddyToDisplay] = useState<string|null>(null);
     const [avatarToDisplay, setAvatarToDisplay] = useState("");
 
 const fetchAccountName = async function(){
@@ -42,11 +43,24 @@ const fetchAccountName = async function(){
     if(!newResolvedAccount){
         newResolvedAccount = defaultResolvedAccount
     }
+    let network:Network = networkFromNetworkDb(networkDb?networkDb:defaultNetworkDb);
     if(authUser.isLoggedIn && authUser.name && !newResolvedAccount.names && !account){
         setNameToDisplay(authUser.name)
+        let newAddy = truncateAddress(newResolvedAccount.address, network);
+        setAddyToDisplay(newAddy);
     }
     else{
-        setNameToDisplay(newResolvedAccount.names?newResolvedAccount.names[0]:truncateAddress(newResolvedAccount.address, networkFromNetworkDb(networkDb?networkDb:defaultNetworkDb)))
+        // TODO: UPDATE TO REMOVE NESTED IF STATEMENT
+        if(newResolvedAccount.names)
+        {
+            let newAddy = truncateAddress(newResolvedAccount.address, network);
+            setAddyToDisplay(newAddy);
+            setNameToDisplay(newResolvedAccount.names[0]);
+        }
+        else{
+            setNameToDisplay(truncateAddress(newResolvedAccount.address, networkFromNetworkDb(networkDb?networkDb:defaultNetworkDb)))
+        }
+       
     }
     console.log(newResolvedAccount);
     setAvatarToDisplay(newResolvedAccount.avatarPath?newResolvedAccount.avatarPath:getUserPhotoPath(authUser));
@@ -61,12 +75,18 @@ const fetchAccountName = async function(){
         <div className="mx-auto text-center">
               {
                 loadingResolvedAccount?
-                <div className="w-20 h-20 min-w-20 min-h-20 rounded-full mx-auto mb-2 bg-gray-50 dark:bg-gray-900"/>:
-                <img src={avatarToDisplay} alt="Profile Image" className="object-cover w-20 h-20 rounded-full mx-auto mb-2"/>
+                <div className="w-28 h-28 md:w-24 md:h-24 min-w-20 min-h-20 rounded-full mx-auto mb-2 bg-gray-50 dark:bg-gray-900"/>:
+                <img src={avatarToDisplay} alt="Profile Image" className="object-cover w-28 h-28 md:w-24 md:h-24 rounded-full mx-auto mb-2"/>
               }
               
               <div>
-                    <h1 className="mt-3 font-bold text-xl dark:text-white inline">{nameToDisplay}</h1>
+                 <div>
+                    <h1 className="mt-3 font-bold text-3xl dark:text-white inline">{nameToDisplay}</h1>
+                    {
+                        addytoDisplay &&
+                        <h1 className="mt-3 font-bold text-xl dark:text-slate-600">{addytoDisplay}</h1>
+                    }
+                 </div>
                     {
                                             loadingResolvedAccount &&
                                             <svg role="status" className="inline w-4 h-4 ml-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
