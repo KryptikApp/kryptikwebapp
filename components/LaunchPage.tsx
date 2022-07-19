@@ -110,7 +110,7 @@ const LaunchPage: NextPage = () => {
           <div>
             <div className="flex flex-col lg:flex-row">
             <div className="min-w-[50%] min-h-[100vh] graphPaper -mx-4">
-              <div className={`min-w-[40%] min-h-screen ${isDark?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
+              <div className={`min-w-[40%] min-h-screen ${(isDark || themeLoading)?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
                 <div className="place-items-center max-w-[300px] max-w-[80%] md:min-w-[300px] mx-auto pt-48 lg:pt-40">
                   <img src="kryptikBrand/journey begins.png"/>
                 </div>
