@@ -22,7 +22,7 @@ const About: NextPage = () => {
             <p className="leading-loose mb-2 text-xl text-justify dark:text-gray-400">Kryptik is a simple wallet that lets you save, send, and collect value across the internet. With Kryptik you can access a world of possibilities across 10+ blockchains from a single app. One <span className="text-purple-500">secure</span> wallet. One <span className="text-green-500">simple</span> interface. One <span className="text-sky-500">magical</span> future. </p>
           </div>
           
-          <div className="min-h-[100vh] -mx-4 dark:bg-[#171716]">
+          <div className="min-h-[100vh] -mx-4 dark:bg-[#0f0f0f]">
             <div className="max-w-2xl mx-auto">
             <h2 className="text-5xl text-center md:text-left font-bold sans pt-4 md:pt-20 mb-5 md:mb-20">The Kryptik Way</h2>
             </div>
