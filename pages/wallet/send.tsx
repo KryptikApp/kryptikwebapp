@@ -12,7 +12,7 @@ import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
-import TransactionFeeData, { CreateTransactionParameters, defaultTransactionFeeData, defaultTxPublishedData, FeeDataParameters, SolTransactionParams, TransactionPublishedData, TransactionRequest, TxType } from '../../src/services/models/transaction'
+import TransactionFeeData, { CreateTransactionParameters, defaultTransactionFeeData, defaultTxPublishedData, SolTransactionParams, TransactionPublishedData, TransactionRequest, TxType } from '../../src/services/models/transaction'
 import { createSolTokenTransaction, createSolTransaction } from '../../src/handlers/wallet/transactions/SolTransactions'
 import { Transaction} from '@solana/web3.js'
 import { TokenParamsSpl } from '../../src/services/models/token'
@@ -22,6 +22,7 @@ import { networkFromNetworkDb, formatTicker } from '../../src/helpers/utils/netw
 import { roundUsdAmount, formatAmountUi, roundCryptoAmount } from '../../src/helpers/utils/numberUtils'
 import { getAddressForNetworkDb, isValidAddress } from '../../src/helpers/utils/accountUtils'
 import { defaultResolvedAccount, IAccountResolverParams, resolveAccount } from '../../src/helpers/resolvers/accountResolver'
+import { getTransactionFeeData, IFeeDataParameters } from '../../src/handlers/fees'
 
 
 
@@ -121,7 +122,9 @@ const Send: NextPage = () => {
     let nw:Network =  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
     // use instead of from address as react state may not have updated
     let accountAddress = await getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
-    let feeDataParams:FeeDataParameters = {
+    let kryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
+    let feeDataParams:IFeeDataParameters = {
+      kryptikProvider: kryptikProvider,
       networkDb: selectedTokenAndNetwork.baseNetworkDb,
       tokenData: selectedTokenAndNetwork.tokenData,
       amountToken: amountCrypto,
@@ -130,7 +133,7 @@ const Send: NextPage = () => {
       solTransaction: solTx
     }
     // fee data returned from service
-    let transactionFeeDataFresh:TransactionFeeData|null = await kryptikService.getTransactionFeeData(feeDataParams);
+    let transactionFeeDataFresh:TransactionFeeData|null = await getTransactionFeeData(feeDataParams);
     console.log("Transaction fee data received");
     console.log(transactionFeeDataFresh);
     if(transactionFeeDataFresh){
