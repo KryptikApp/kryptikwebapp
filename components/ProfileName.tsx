@@ -38,12 +38,13 @@ const fetchAccountName = async function(){
     }
     else{
         newResolvedAccount = await kryptikWallet.getResolvedAccount(provider);
+        // update shared name state
+        kryptikWallet.resolvedEthAccount = newResolvedAccount;
     }
 
     if(!newResolvedAccount){
         newResolvedAccount = defaultResolvedAccount
     }
-    
     if(authUser.isLoggedIn && authUser.name && !newResolvedAccount.names && !accountPassedIn){
         setNameToDisplay(authUser.name)
     }
@@ -60,7 +61,7 @@ useEffect(()=>{
     return(
         <div>
             <div>
-                    <h1 className="mt-3 font-bold text-xl dark:text-white inline">{nameToDisplay}</h1>
+                    <h1 className="mt-3 font-bold text-2xl dark:text-white inline">{nameToDisplay}</h1>
                     {
                                             loadingResolvedAccount &&
                                             <svg role="status" className="inline w-4 h-4 ml-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -39,6 +39,8 @@ const fetchAccountName = async function(){
     }
     else{
         newResolvedAccount = await kryptikWallet.getResolvedAccount(provider);
+        // update shared name state
+        kryptikWallet.resolvedEthAccount = newResolvedAccount;
     }
     if(!newResolvedAccount){
         newResolvedAccount = defaultResolvedAccount
