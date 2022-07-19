@@ -96,7 +96,7 @@ const LaunchPage: NextPage = () => {
                 <div className="graphPaper -mx-4 md:mx-0 flex-grow">
                   <div className={`${(isDark || themeLoading)?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
                     <div className="">
-                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="ml-[15%] max-w-[100%] md:max-w-[280px] md:mx-auto"></img>
+                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="ml-[15%] max-w-[100%] md:max-w-[280px] lg:ml-[20%] md:mx-auto"></img>
                     </div>
                   </div>
                 </div>
