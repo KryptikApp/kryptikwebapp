@@ -24,9 +24,11 @@ const NavbarPrelaunch:NextPage = () => {
             <div className="container px-4 mx-auto md:flex md:items-center">
 
             <div className="flex justify-between items-center hover:cursor-pointer">
-                <Link href="/">
-                <span className="font-extrabold text-3xl text-transparent bg-clip-text bg-gradient-to-br from-blue-500 to-green-500 hover:outline-4 hover:outline-blue-400 dark:hover:text-white transition-colors duration-1500">Kryptik</span>
-                </Link>
+                <div onClick={()=>setMenuMobile(false)}>
+                    <Link href="/">
+                    <span className="font-extrabold text-3xl text-transparent bg-clip-text bg-gradient-to-br from-blue-500 to-green-500 hover:outline-4 hover:outline-blue-400 dark:hover:text-white transition-colors duration-1500">Kryptik</span>
+                    </Link>
+                </div>
                 <button id="nav-icon" onClick={()=>setMenuMobile(!isMenuMobile)} type="button" className={`inline-flex ${isMenuMobile && "open"} items-center ml-3 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:hover:bg-gray-700 dark:focus:ring-gray-600`} aria-controls="mobile-menu" aria-expanded="false">
                 <span className="bg-gray-500 dark:bg-gray-400"></span>
                 <span className="bg-gray-500 dark:bg-gray-400"></span>
