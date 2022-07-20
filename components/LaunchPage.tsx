@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import { Toaster } from 'react-hot-toast';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { WaitlistProgress } from '../src/services/types';
 import { addEmailToWaitlist } from '../src/helpers/waitlist';
 import { isValidEmailAddress } from '../src/helpers/resolvers/kryptikResolver';
@@ -50,10 +50,11 @@ const LaunchPage: NextPage = () => {
     setEmail("");
     setIsLoading(false);
   }
-
-  const handleContinueExploring = async function(){
-    
-  }
+  
+  useEffect(() => {
+    console.log("heyyyy")
+}, []);
+  
 
   return (
     <div>
@@ -111,7 +112,7 @@ const LaunchPage: NextPage = () => {
             <div className="flex flex-col lg:flex-row">
             <div className="min-w-[50%] min-h-[100vh] graphPaper -mx-4">
               <div className={`min-w-[40%] min-h-screen ${(isDark || themeLoading)?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
-                <div className="place-items-center max-w-[300px] max-w-[80%] md:min-w-[300px] mx-auto pt-48 lg:pt-40">
+                <div className="place-items-center max-w-[200px] w-[80%] md:max-w-[300px] mx-auto pt-48 lg:pt-40">
                   <img src="kryptikBrand/journey begins.png"/>
                 </div>
               </div>
