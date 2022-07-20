@@ -123,7 +123,7 @@ const LaunchPage: NextPage = () => {
                 <p className="text-white text-6xl mb-2">You&apos;re #{waitlistPosition} on the list.</p>
                 <p className="text-slate-500 dark:text-slate-400 text-xl ">A Web3 Wallet full of <span className="text-transparent font-semibold bg-clip-text bg-gradient-to-br from-green-200 to-sky-500 background-animate">magical</span> powers. Coming soon.</p>
                 <Link href="/explore">
-                 <p className="text-md dark:text-white hover:cursor-pointer hover:text-sky-500 mt-4">Keep exploring?</p>
+                 <p className="text-md dark:text-white hover:cursor-pointer dark:hover:text-sky-500 transition-colors duration-1500 mt-4">Keep exploring?</p>
                 </Link>
               </div>
             </div>
