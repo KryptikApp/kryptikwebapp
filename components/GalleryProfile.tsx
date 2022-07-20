@@ -64,7 +64,6 @@ const fetchAccountName = async function(){
         }
        
     }
-    console.log(newResolvedAccount);
     setAvatarToDisplay(newResolvedAccount.avatarPath?newResolvedAccount.avatarPath:getUserPhotoPath(authUser));
     setResolvedAccount(newResolvedAccount);
     setLoadingResolvedAccount(false);
