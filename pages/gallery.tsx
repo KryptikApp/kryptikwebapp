@@ -197,7 +197,8 @@ const Gallery: NextPage = () => {
             // TODO: UPDATE NETWORKDB ERROR HANDLER
             if(!newNetworkDB) return;
             setActiveCategoryNetworkDb(newNetworkDB);
-            setActiveCategoryNetworkDb(newNetworkDB);
+            let newNftList = nftList.filter(nft=>nft.networkTicker=="sol")
+            setActiveCategoryNftList(newNftList);
             break;
         }
         case(ActiveCategory.poaps):{
