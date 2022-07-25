@@ -37,7 +37,6 @@ const CreateName: NextPage = () => {
 
   useEffect(()=>{
     setIsResolveLoading(false);
-    console.log("HIT RESOLVED!");
   }, [resolvedAccount])
 
   const fetchNameData = async function(){
