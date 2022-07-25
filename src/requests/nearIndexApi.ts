@@ -23,12 +23,12 @@ export const listNearLikelyNfts = async function(address:string):Promise<IKrypti
   try {
     const url = `${NEAR_INDEXER_URL}/account/${address}/likelyNFTs`;
     const data = await KryptikFetch(url, {
-      timeout: 10000, // 10 secs
+      timeout: 7000, // 7 secs
     });
     return data;
   }
   catch(e){
-    console.log("Error while fetching near likely nfts:");
+    console.log("Error while fetching likely NEAR nfts:");
     console.warn(e);
     return null; 
   }
