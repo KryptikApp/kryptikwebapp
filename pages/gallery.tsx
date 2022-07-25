@@ -61,7 +61,10 @@ const Gallery: NextPage = () => {
     if(!kryptikWallet.connected || !authUser.isLoggedIn) return;
     setIsNFTFetched(false);
     let solanaNetworkDb = kryptikService.getNetworkDbByTicker("sol");
-    if(!solanaNetworkDb) return;
+    if(!solanaNetworkDb){
+      setIsNFTFetched(true);
+      return;
+    }
     let solanaAddress:string = await getAddressForNetworkDb(kryptikWallet, solanaNetworkDb);
     let newNftMetadataList:INFTMetadata[] = []
     let solNfts:INFTMetadata[]|null = await fetchServerSolNfts(solanaAddress);
@@ -77,7 +80,10 @@ const Gallery: NextPage = () => {
       newNftMetadataList.push(...solNfts)
     }
     let nearNetworkDb = kryptikService.getNetworkDbByTicker("near");
-    if(!nearNetworkDb) return;
+    if(!nearNetworkDb){
+      setIsNFTFetched(true);
+      return;
+    }
     // fetch near nfts
     let nearAddress = await getAddressForNetworkDb(kryptikWallet, nearNetworkDb)
     let nearKryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(nearNetworkDb);
