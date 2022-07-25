@@ -56,20 +56,18 @@ const LaunchPage: NextPage = () => {
   }
 
   return (
-    <div>
+    <div className="">
         <Toaster/>
         {
-          progress != WaitlistProgress.Complete && 
-          <div className="h-[4rem]">
+          <div className="h-[6vh] md:h-[20vh]">
             {/* padding div for space between top and main elements */}
           </div>
         }
         
-
         {/* begin launch screen */}
         {
           progress == WaitlistProgress.Begin && 
-          <div className="md:max-w-[1000px] content-center mx-auto">
+          <div className="md:max-w-[1000px] mx-auto">
             <div className="flex flex-col lg:flex-row">
                 <div className="text-center content-center pt-10 lg:pt-20">
                     <h1 className="text-7xl font-bold sans dark:text-white transition ease-in-out hover:scale-110">
@@ -103,21 +101,24 @@ const LaunchPage: NextPage = () => {
             </div>
           </div>
         }
+        
 
         {/* complete screen */}
         {
           progress == WaitlistProgress.Complete && 
           <div>
             <div className="flex flex-col lg:flex-row">
-            <div className="min-w-[50%] min-h-[100vh] graphPaper -mx-4">
-              <div className={`min-w-[40%] min-h-screen ${(isDark || themeLoading)?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
-                <div className="place-items-center max-w-[300px] max-w-[80%] md:min-w-[300px] mx-auto pt-48 lg:pt-40">
+
+            <div className="min-w-[50%] max-h-[400px] graphPaper -mx-4">
+              <div className={`min-w-[40%] max-h-[800px] ${(isDark || themeLoading)?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
+                <div className="place-items-center max-w-[400px] mx-auto pt-48 lg:pt-40">
                   <img src="kryptikBrand/journey begins.png"/>
                 </div>
               </div>
             </div>
-              <div className="-mt-20 lg:mt-8 mx-auto">
-                <div className="lg:h-[8rem]">
+
+              <div className="mx-auto">
+                <div className="h-[400px] md:h-[200px]">
                   {/* padding div for space between top and main elements */}
                 </div>
                 <p className="text-white text-6xl mb-2">You&apos;re #{waitlistPosition} on the list.</p>
@@ -126,6 +127,7 @@ const LaunchPage: NextPage = () => {
                  <p className="text-md dark:text-white hover:cursor-pointer hover:text-sky-500 mt-4">Keep exploring?</p>
                 </Link>
               </div>
+
             </div>
           </div>
          }
@@ -140,9 +142,9 @@ const LaunchPage: NextPage = () => {
          }
         
 
-        <div className="h-[8rem]">
-          {/* padding div for space between top and main elements */}
-        </div>
+        <div className="h-[18vh] md:h-[20vh]">
+            {/* padding div for space between top and main elements */}
+          </div>
 
     </div>
  
