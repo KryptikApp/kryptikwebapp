@@ -30,7 +30,7 @@ const listSolanaNftsByAddress = async function(address:string):Promise<INFTMetad
           return nftDataToReturn;
         }
       catch(e){
-        console.log("Error while fetching Solana NFT data.");
+        console.log("Error while fetching Solana NFT data:");
         console.warn(e);
         return null; 
       }
