@@ -8,7 +8,7 @@ import Divider from '../../components/Divider'
 import NavProfile from '../../components/navbars/NavProfile'
 
 
-const Profile: NextPage = () => {
+const Security: NextPage = () => {
   const {authUser, loading, getSeedPhrase} = useKryptikAuthContext();
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
@@ -72,4 +72,4 @@ const Profile: NextPage = () => {
   )
 }
 
-export default Profile
+export default Security
