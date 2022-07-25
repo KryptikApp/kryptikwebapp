@@ -26,7 +26,7 @@ const About: NextPage = () => {
             <div className="max-w-2xl mx-auto">
             <h2 className="text-5xl text-center md:text-left font-bold sans pt-4 md:pt-20 mb-5 md:mb-20">The Kryptik Way</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 flex-overflow place-items-center my-6 pb-6 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 place-items-center my-6 pb-6 max-w-3xl mx-auto">
               <div className="hover:cursor-pointer hover:z-10 transition ease-in-out hover:scale-110 bg-gray-200 dark:bg-[#111112] border border-gray-300 my-2 px-2 rounded drop-shadow-lg max-w-[50%] min-h-[120px]">
                   <h2 className="text-xl font-semibold">💻 Transparent</h2>
                   <p className="text-gray-500 dark:text-gray-400">Kryptik is <span className="text-green-500">100%</span> open source. View the code <a className="hover:cursor-pointer hover:text-sky-500 text-sky-400" href={`https://github.com/KryptikApp/kryptikwebapp`} target="_blank" rel="noopener noreferrer">here</a>.</p>

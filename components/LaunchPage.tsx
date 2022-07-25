@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import { Toaster } from 'react-hot-toast';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { WaitlistProgress } from '../src/services/types';
 import { addEmailToWaitlist } from '../src/helpers/waitlist';
 import { isValidEmailAddress } from '../src/helpers/resolvers/kryptikResolver';
@@ -50,10 +50,7 @@ const LaunchPage: NextPage = () => {
     setEmail("");
     setIsLoading(false);
   }
-
-  const handleContinueExploring = async function(){
-    
-  }
+  
 
   return (
     <div className="">
@@ -94,7 +91,7 @@ const LaunchPage: NextPage = () => {
                 <div className="graphPaper -mx-4 md:mx-0 flex-grow">
                   <div className={`${(isDark || themeLoading)?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
                     <div className="">
-                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="ml-[15%] max-w-[100%] md:max-w-[280px] md:mx-auto"></img>
+                        <img src="/kryptikBrand/kryptik balance screen.svg" alt="Kryptik Eyes" className="ml-[15%] max-w-[100%] md:max-w-[280px] lg:ml-[20%] md:mx-auto"></img>
                     </div>
                   </div>
                 </div>
@@ -124,7 +121,7 @@ const LaunchPage: NextPage = () => {
                 <p className="text-white text-6xl mb-2">You&apos;re #{waitlistPosition} on the list.</p>
                 <p className="text-slate-500 dark:text-slate-400 text-xl ">A Web3 Wallet full of <span className="text-transparent font-semibold bg-clip-text bg-gradient-to-br from-green-200 to-sky-500 background-animate">magical</span> powers. Coming soon.</p>
                 <Link href="/explore">
-                 <p className="text-md dark:text-white hover:cursor-pointer hover:text-sky-500 mt-4">Keep exploring?</p>
+                 <p className="text-md dark:text-white hover:cursor-pointer dark:hover:text-sky-500 transition-colors duration-1500 mt-4">Keep exploring?</p>
                 </Link>
               </div>
 

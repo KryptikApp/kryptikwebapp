@@ -14,8 +14,9 @@ import { INFTMetadata } from '../src/parsers/nftEthereum';
 import { listNearNftsByAddress } from '../src/requests/nearIndexApi';
 import { listNftsByAddress } from '../src/requests/nfts/ethereumApi';
 import { listPoapsByAddress } from '../src/requests/nfts/poapApi';
-import { listSolanaNftsByAddress } from '../src/requests/nfts/solanaApi';
+import { fetchServerSolNfts, listSolanaNftsByAddress } from '../src/requests/nfts/solanaApi';
 import { defaultNetworkDb, NetworkDb } from '../src/services/models/network';
+import { ServiceState } from '../src/services/types';
 
 interface IRouterParams{
   account:string,
@@ -63,7 +64,7 @@ const Gallery: NextPage = () => {
     if(!solanaNetworkDb) return;
     let solanaAddress:string = await getAddressForNetworkDb(kryptikWallet, solanaNetworkDb);
     let newNftMetadataList:INFTMetadata[] = []
-    let solNfts:INFTMetadata[]|null = await listSolanaNftsByAddress(solanaAddress);
+    let solNfts:INFTMetadata[]|null = await fetchServerSolNfts(solanaAddress);
     // fetch eth nfts
     let ethNfts:INFTMetadata[]|null = await listNftsByAddress(kryptikWallet.resolvedEthAccount.address);
 
@@ -126,7 +127,7 @@ const Gallery: NextPage = () => {
         break;
       }
       case("sol"):{
-        let solNfts:INFTMetadata[]|null = await listSolanaNftsByAddress(account);
+        let solNfts:INFTMetadata[]|null = await fetchServerSolNfts(account);
         // push sol nfts to main list
         if(solNfts){
           newNftMetadataList.push(...solNfts)
@@ -196,7 +197,8 @@ const Gallery: NextPage = () => {
             // TODO: UPDATE NETWORKDB ERROR HANDLER
             if(!newNetworkDB) return;
             setActiveCategoryNetworkDb(newNetworkDB);
-            setActiveCategoryNetworkDb(newNetworkDB);
+            let newNftList = nftList.filter(nft=>nft.networkTicker=="sol")
+            setActiveCategoryNftList(newNftList);
             break;
         }
         case(ActiveCategory.poaps):{
@@ -213,6 +215,9 @@ const Gallery: NextPage = () => {
 
   // get nfts on page load
   useEffect(() => {
+      if(kryptikService.serviceState != ServiceState.started){
+        router.push("/");
+      }
       if(routerParams){
         fetchNftDataAccount(routerParams.account, routerParams.networkTicker);
       }
