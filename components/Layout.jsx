@@ -13,7 +13,7 @@ export default function Layout({children}) {
           <link rel="icon" href="/favicon.ico" />
         </Head>
         
-      <main className={`container px-4 mx-auto `}>
+      <main className={`px-4 mx-auto`}>
           <Navbar></Navbar>
         {children}
           

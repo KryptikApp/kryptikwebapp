@@ -21,7 +21,7 @@ const NavbarPrelaunch:NextPage = () => {
         
     return(
         <nav className="py-2 md:py-4">
-            <div className="container px-4 mx-auto md:flex md:items-center">
+            <div className="px-4 mx-auto md:flex md:items-center">
 
             <div className="flex justify-between items-center hover:cursor-pointer">
                 <div onClick={()=>setMenuMobile(false)}>
