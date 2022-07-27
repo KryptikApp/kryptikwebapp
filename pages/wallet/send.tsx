@@ -22,7 +22,7 @@ import { networkFromNetworkDb, formatTicker } from '../../src/helpers/utils/netw
 import { roundUsdAmount, formatAmountUi, roundCryptoAmount } from '../../src/helpers/utils/numberUtils'
 import { getAddressForNetworkDb, isValidAddress } from '../../src/helpers/utils/accountUtils'
 import { defaultResolvedAccount, IAccountResolverParams, resolveAccount } from '../../src/helpers/resolvers/accountResolver'
-import { getTransactionFeeData, IFeeDataParameters } from '../../src/handlers/fees'
+import { getSendTransactionFeeData, IFeeDataParameters } from '../../src/handlers/fees'
 
 
 
@@ -133,7 +133,7 @@ const Send: NextPage = () => {
       solTransaction: solTx
     }
     // fee data returned from service
-    let transactionFeeDataFresh:TransactionFeeData|null = await getTransactionFeeData(feeDataParams);
+    let transactionFeeDataFresh:TransactionFeeData|null = await getSendTransactionFeeData(feeDataParams);
     console.log("Transaction fee data received");
     console.log(transactionFeeDataFresh);
     if(transactionFeeDataFresh){
