@@ -37,7 +37,7 @@ const SearchNetwork:NextPage = () => {
             setSearchResults([])
             return;
         }
-        let newSearchResults:ISearchResult[] = await getAllNetworkSearchSuggestions(newQuery, selectedTokenAndNetwork.baseNetworkDb, kryptikService);
+        let newSearchResults:ISearchResult[] = await getAllNetworkSearchSuggestions(newQuery, selectedTokenAndNetwork.baseNetworkDb, kryptikService.tokenDbs);
         setSearchResults(newSearchResults);
     }
 
