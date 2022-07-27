@@ -17,12 +17,15 @@ const SearchResultItem:NextPage<Props> = (props) => {
                 searchResult.iconPath?
                 <div>
                     <img className="w-8 h-8 rounded-full inline" src={searchResult.iconPath} alt={`${searchResult.resultString} image`}/>
+                    {
+                    searchResult.iconPathSecondary &&
+                    <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={searchResult.iconPathSecondary} alt={`${searchResult.resultString} secondary image`}/>
+                    }
                     <span className="inline ml-2">{searchResult.resultString}</span>
                 </div>
                 :
                 <span className="ml">{searchResult.resultString}</span>
             }
-            
         </div>
         
     )   
