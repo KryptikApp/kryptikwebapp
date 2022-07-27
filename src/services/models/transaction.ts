@@ -8,6 +8,7 @@ import { defaultNetwork, NetworkDb } from "./network";
 import { KryptikProvider } from "./provider";
 import { TokenAndNetwork, TokenData, TokenParamsEVM, TokenParamsNep141, TokenParamsSpl } from "./token";
 
+// TODO: UPDATE TO BE CLASS WITH PERSISTENT CHECKS FOR FRESHNESS
 export default interface TransactionFeeData{
     network: Network,
     // gas price denominated in network token, e.g. eth for Ethereum
@@ -21,6 +22,7 @@ export default interface TransactionFeeData{
 }
 
 
+// all units should be in wei or wei equivalent
 export interface EVMGas{
     gasPrice:BigNumberish,
     gasLimit:BigNumberish,
