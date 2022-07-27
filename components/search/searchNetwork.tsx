@@ -32,7 +32,7 @@ const SearchNetwork:NextPage = () => {
 
     const handleQueryChange = async function(newQuery:string){
         setQuery(newQuery);
-        if(newQuery == "" || newQuery.length<3)
+        if(newQuery == "" || newQuery.length<2)
         {
             setSearchResults([])
             return;
