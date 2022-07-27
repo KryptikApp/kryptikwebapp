@@ -37,7 +37,7 @@ const SearchNetwork:NextPage = () => {
             setSearchResults([])
             return;
         }
-        let newSearchResults:ISearchResult[] = await getAllNetworkSearchSuggestions(newQuery, selectedTokenAndNetwork.baseNetworkDb, kryptikService.tokenDbs);
+        let newSearchResults:ISearchResult[] = await getAllNetworkSearchSuggestions(newQuery, selectedTokenAndNetwork.baseNetworkDb, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs);
         setSearchResults(newSearchResults);
     }
 
@@ -73,6 +73,7 @@ const SearchNetwork:NextPage = () => {
                     }
                 </div>
             }
+            
             
         </div>
 
