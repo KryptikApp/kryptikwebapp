@@ -10,7 +10,7 @@ export interface IFeeDataSolParams extends INetworkFeeDataParams{
     transaction:Transaction,
 }
 
-    // fetch tx. fee on the solana blockchain
+// fetch tx. fee on the solana blockchain
 export async function getTransactionFeeDataSolana(params:IFeeDataSolParams):Promise<TransactionFeeData>{
         let kryptikProvider:KryptikProvider = params.kryptikProvider;
         // validate provider

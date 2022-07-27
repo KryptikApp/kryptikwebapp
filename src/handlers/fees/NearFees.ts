@@ -16,7 +16,6 @@ export async function getTransactionFeeDataNear(params:FeeDataNearParameters){
     if(!kryptikProvider.nearProvider){
         throw(new Error(`Error: No provider specified for ${kryptikProvider.network.fullName}`));
     }
-    console.log(params);
     let nearProvider:Near = kryptikProvider.nearProvider;
     let block:BlockResult = await nearProvider.connection.provider.block({ finality: 'final' });
     // NEAR gas is calculated in TGAS
