@@ -18,9 +18,11 @@ export class KryptikProvider{
     public solProvider: Connection|undefined;
     public nearProvider: Near|undefined;
     public network:Network;
+    public networkDb:NetworkDb;
     constructor(rpcEndpoint:string, networkDb:NetworkDb){
         let network = networkFromNetworkDb(networkDb);
         this.network = network;
+        this.networkDb = networkDb;
         switch(this.network.networkFamily){
             case(NetworkFamily.Near):{
                 // UPDATE: sonetwork id is flexible (testnet or mainnet, etc.)
