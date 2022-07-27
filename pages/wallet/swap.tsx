@@ -1,4 +1,5 @@
 import { Network, truncateAddress } from 'hdseedloop';
+import { toUpper } from 'lodash';
 import type { NextPage } from 'next'
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
@@ -8,13 +9,17 @@ import SearchResultItem from '../../components/search/searchResultItem';
 import { useKryptikThemeContext } from '../../components/ThemeProvider';
 import { getTokenSearchSuggestions } from '../../src/handlers/search/token';
 import { ISearchResult } from '../../src/handlers/search/types';
+import { BuildSwapTokenTransaction, IBuildSwapParams } from '../../src/handlers/swaps';
+import { SwapValidator } from '../../src/handlers/swaps/utils';
 import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper';
 import { defaultResolvedAccount } from '../../src/helpers/resolvers/accountResolver';
 import { getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils';
 import { formatTicker, networkFromNetworkDb } from '../../src/helpers/utils/networkUtils';
 import { formatAmountUi, multByDecimals, roundCryptoAmount } from '../../src/helpers/utils/numberUtils';
+import { KryptikTransaction } from '../../src/models/transactions';
 import { fetch0xSwapOptions } from '../../src/requests/swaps/0xSwaps';
 import { defaultTokenAndNetwork } from '../../src/services/models/network';
+import { KryptikProvider } from '../../src/services/models/provider';
 import { TokenAndNetwork } from '../../src/services/models/token';
 
 
@@ -27,8 +32,10 @@ const Swap: NextPage = () => {
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [isInputCrypto, setIsInputCrypto] = useState(false);
   const [amountUSD, setAmountUSD] = useState("0");
+
   const [sellTokenAndNetwork, setSellTokenAndNetwork] = useState(defaultTokenAndNetwork);
   const [buyTokenAndNetwork, setBuyTokenAndNetwork] = useState(defaultTokenAndNetwork);
+
   const [fromAddress, setFromAddress] = useState(kryptikWallet.resolvedEthAccount.address);
   const [toAddress, setToAddress] = useState("");
   const [toResolvedAccount, setToResolvedAccount] = useState(defaultResolvedAccount);
@@ -37,24 +44,48 @@ const Swap: NextPage = () => {
   const [readableFromAddress, setReadableFromAddress] = useState("");
   const [showAssetSearch, setShowAssetSearch] = useState(false);
   const [isSearchSellToken, setIsSearchSellToken] = useState(false);
+  const [builtTx, setBuiltTx] = useState<KryptikTransaction|null>(null);
+  // swap validator state
+  const defaultSwapValidator = new SwapValidator(defaultTokenAndNetwork);
+  const [currentSwapValidator, setCurrentSwapValidator] = useState<SwapValidator>(defaultSwapValidator)
+
+
 
   //search state
   const[query, setQuery] = useState("");
-  const defaultSearchResults = getTokenSearchSuggestions(query, sellTokenAndNetwork.baseNetworkDb, kryptikService.tokenDbs, true);
-  const[searchresults, setSearchResults] = useState<ISearchResult[]>(defaultSearchResults);
+
+  const[searchresults, setSearchResults] = useState<ISearchResult[]>([]);
 
   const handleToggleIsCrypto = function(){
     setIsInputCrypto(!isInputCrypto);
   }
 
+  const validateAmount = function():boolean{
+    if(amountCrypto == "0"){
+      toast.error("Please enter a nonzero amount.");
+      setIsLoading(false);
+      return false;
+    }
+    return true;
+  }
+
   const handleSwapRequest = async function(){
     setIsLoading(true);
-    let tokenDecimals:number = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.decimals:sellTokenAndNetwork.baseNetworkDb.decimals;
-    let swapAmount = multByDecimals(Number(amountCrypto), tokenDecimals);
-    let sellTicker = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.symbol:sellTokenAndNetwork.baseNetworkDb.ticker;
-    let buyTicker = buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.symbol:buyTokenAndNetwork.baseNetworkDb.ticker;
-    console.log(swapAmount);
-    await fetch0xSwapOptions(buyTicker, sellTicker, swapAmount.asNumber);
+    let isValidAmount = validateAmount();
+    if(!isValidAmount) return;
+    let kryptikProvider:KryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(sellTokenAndNetwork.baseNetworkDb);
+    let swapParams:IBuildSwapParams = {
+      sellNetworkTokenPriceUsd: tokenPrice,
+      sellTokenAndNetwork: sellTokenAndNetwork,
+      buyTokenAndNetwork: buyTokenAndNetwork,
+      fromAccount: fromAddress,
+      tokenAmount: Number(amountCrypto),
+      kryptikProvider: kryptikProvider
+    }
+    let newBuiltTx = await BuildSwapTokenTransaction(swapParams);
+    console.log("New Built tx:");
+    console.log(newBuiltTx);
+    setBuiltTx(newBuiltTx);
     setIsLoading(false);
   }
 
@@ -108,34 +139,54 @@ const Swap: NextPage = () => {
   }
 
   const updateSellToken = function(newTokenAndNetwork:TokenAndNetwork){
+    let newSwapValidator:SwapValidator = new SwapValidator(newTokenAndNetwork);
+    setCurrentSwapValidator(newSwapValidator);
     setSellTokenAndNetwork(newTokenAndNetwork);
     setShowAssetSearch(false);
   }
 
   const updateBuyToken = function(newTokenAndNetwork:TokenAndNetwork){
-    setBuyTokenAndNetwork(newTokenAndNetwork);
+    if(!currentSwapValidator?.isValidSwapPair(newTokenAndNetwork)){
+      toast.error(`${toUpper(sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.symbol:sellTokenAndNetwork.baseNetworkDb.ticker)}-${toUpper(newTokenAndNetwork.tokenData?newTokenAndNetwork.tokenData.tokenDb.symbol:newTokenAndNetwork.baseNetworkDb.ticker)} are not yet supported`)
+    }
+    else{
+      setBuyTokenAndNetwork(newTokenAndNetwork);
+    }
+    
     setShowAssetSearch(false);
   }
 
+  const setDefaultSearchResults = function(isSellToken:boolean){
+    let defaultSearchResults:ISearchResult[];
+    if(isSellToken){
+      defaultSearchResults = getTokenSearchSuggestions(query, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs, true, updateSellToken);
+    }
+    else{
+      defaultSearchResults = getTokenSearchSuggestions(query, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs, true, updateBuyToken, currentSwapValidator);
+    }
+    setSearchResults(defaultSearchResults);
+  }
+
   const startAssetSearch = function(isSellToken:boolean){
+    setDefaultSearchResults(isSellToken)
     setShowAssetSearch(true);
     setIsSearchSellToken(isSellToken);
   }
 
   const handleQueryChange = async function(newQuery:string){
     setQuery(newQuery);
-    if(newQuery == "" || newQuery.length<1)
+    if(newQuery == "")
     {
-        setSearchResults([])
+        setDefaultSearchResults(isSearchSellToken);
         return;
     }
     let newSearchResults:ISearchResult[];
     // pass in different onclick function depending on whether we are updating buy or sell token
     if(isSearchSellToken){
-      newSearchResults = getTokenSearchSuggestions(query, sellTokenAndNetwork.baseNetworkDb, kryptikService.tokenDbs, false, updateSellToken);
+      newSearchResults = getTokenSearchSuggestions(query, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs, false, updateSellToken);
     }
     else{
-      newSearchResults = getTokenSearchSuggestions(query, sellTokenAndNetwork.baseNetworkDb, kryptikService.tokenDbs, false, updateBuyToken);
+      newSearchResults = getTokenSearchSuggestions(query, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs, false, updateBuyToken, currentSwapValidator);
     }
     
     setSearchResults(newSearchResults);
@@ -215,7 +266,7 @@ const Swap: NextPage = () => {
                     <div className="mx-auto">
                           <button onClick={()=>handleSwapRequest()} className={`bg-transparent rounded-full hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent my-5`} disabled={isLoading}>      
                                   {
-                                          !isLoading?"Convert":
+                                          !isLoading?"Review Swap":
                                           <svg role="status" className="inline w-4 h-4 ml-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
                                           <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
                                           <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
@@ -273,6 +324,23 @@ const Swap: NextPage = () => {
                                 }   
                                 )
                             }
+                        </div>
+                      }
+
+                      {
+                        (searchresults.length == 0 && !isSearchSellToken)&&
+                        <div className="mt-[4rem] text-center">
+                          {
+                            sellTokenAndNetwork.tokenData?
+                            <p>No valid pairs for {sellTokenAndNetwork.tokenData.tokenDb.name} on {sellTokenAndNetwork.baseNetworkDb.fullName}</p>:
+                            <p>No valid pairs for {sellTokenAndNetwork.baseNetworkDb.fullName}</p>
+                          }
+                        </div>
+                      }
+                      {
+                        (searchresults.length == 0 && isSearchSellToken)&&
+                        <div className="mt-[4rem] text-center">
+                          <p>No search results for "{query}"</p>
                         </div>
                       }
                     
