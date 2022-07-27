@@ -10,6 +10,7 @@ import { IBalance } from "../src/services/Web3Service";
 import { title } from "process";
 import { useKryptikThemeContext } from "./ThemeProvider";
 import { getAddressForNetworkDb } from "../src/helpers/utils/accountUtils";
+import { NetworkFamily, NetworkFamilyFromFamilyName } from "hdseedloop";
 
 interface Props{
     onlyWithValue?:boolean
@@ -77,11 +78,11 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             return;
         }
         // add all erc20 tokens
-        let erc20Dbs:TokenDb[] = kryptikService.erc20Dbs;
+        let erc20Dbs:TokenDb[] = kryptikService.tokenDbs;
         for(const erc20Db of erc20Dbs){
             for(const chainInfo of erc20Db.chainData){
                 let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb) continue;
+                if(!networkDb || NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) != NetworkFamily.EVM) continue;
                 // skip testnets if not advanced
                 if(networkDb.isTestnet && !isAdvanced) continue;
                 let erc20ContractParams:CreateEVMContractParameters = {
@@ -123,11 +124,11 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             }
         }
         // add all spl tokens
-        let splDbs:TokenDb[] = kryptikService.splDbs;
+        let splDbs:TokenDb[] = kryptikService.tokenDbs;
         for(const splDb of splDbs){
             for(const chainInfo of splDb.chainData){
                 let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb) continue;
+                if(!networkDb || NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) != NetworkFamily.Solana) continue;
                 // skip testnets if not advanced
                 if(networkDb.isTestnet && !isAdvanced) continue;
                 let tokenBalance:IBalance|undefined = undefined;
@@ -162,11 +163,11 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             }
         }
          // add all nep141
-         let nep141Dbs:TokenDb[] = kryptikService.nep141Dbs;
+         let nep141Dbs:TokenDb[] = kryptikService.tokenDbs;
          for(const nep141Db of nep141Dbs){
              for(const chainInfo of nep141Db.chainData){
                  let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
-                 if(!networkDb) continue;
+                 if(!networkDb || NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) != NetworkFamily.Near) continue;
                  // skip testnets if not advanced
                  if(networkDb.isTestnet && !isAdvanced) continue;
                  let tokenBalance:IBalance|undefined = undefined;

@@ -28,8 +28,7 @@ const ListBalance:NextPage = () => {
     const[balancesNep141, setBalancesNep141] = useState<IBalance[]>(initBalances);
     const[balancesSpl, setBalancesSpl] = useState<IBalance[]>(initBalances);
     const[progressPercent, setProgressPercent] = useState(0);
-    const totalToFetch = kryptikService.NetworkDbs.length + kryptikService.erc20Dbs.length + 
-    kryptikService.nep141Dbs.length + kryptikService.splDbs.length;
+    const totalToFetch = kryptikService.NetworkDbs.length + kryptikService.tokenDbs.length;
     const stepSize:number = Number(((1/totalToFetch)*100));
 
     const incrementLoadProgress = function(balance:IBalance|null){

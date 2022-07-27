@@ -3,7 +3,7 @@ import router from "next/router";
 
 import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
 import { defaultNetworkDb, NetworkDb } from "../../services/models/network";
-import { TokenDb } from "../../services/models/token";
+import { TokenAndNetwork, TokenDb } from "../../services/models/token";
 import Web3Service from "../../services/Web3Service";
 import { ISearchResult } from "./types";
 
@@ -17,42 +17,30 @@ const tokenOnclickFunction = function(params:ITokenClickHandlerParams){
     router.push( { pathname: '../coins/coinInfo', query:{networkTicker:networkTicker, tokenTicker:tokenTicker?tokenTicker:undefined} } );
 }
 
-export const getTokenSearchSuggestions = function(query:string, networkDb:NetworkDb, kryptikService:Web3Service):ISearchResult[]{
+// to do: update to support any passed in click handler
+export const getTokenSearchSuggestions = function(query:string, networkDb:NetworkDb, tokensToSearch:TokenDb[], returnAll=false, clickHandler?:(selectedToken:TokenAndNetwork)=>void):ISearchResult[]{
     let suggestions:ISearchResult[] = [];
-    let network:Network = networkFromNetworkDb(networkDb);
-    let tokenList:TokenDb[] = [];
-    let baseNetwork:NetworkDb;
-    switch(network.networkFamily){
-        case(NetworkFamily.EVM):{
-            let tokensToSearch = kryptikService.erc20Dbs;
-            tokenList = filterTokenListByQuery(tokensToSearch, query);
-            baseNetwork = defaultNetworkDb;
-            break;
-        }
-        case(NetworkFamily.Near):{
-            let tokensToSearch = kryptikService.nep141Dbs;
-            tokenList = filterTokenListByQuery(tokensToSearch, query);
-            let nearNetwork = kryptikService.getNetworkDbByTicker("near");
-            if(!nearNetwork) return [];
-            baseNetwork = nearNetwork;
-            break;
-        }
-        case(NetworkFamily.Solana):{
-            let tokensToSearch = kryptikService.splDbs;
-            tokenList = filterTokenListByQuery(tokensToSearch, query);
-            let solNetwork = kryptikService.getNetworkDbByTicker("sol");
-            if(!solNetwork) return [];
-            baseNetwork = solNetwork;
-            break;
-        }
-        default:{
-            return [];
-        }
+    let tokenList:TokenDb[];
+    if(returnAll){
+        tokenList = tokensToSearch;
     }
+    else{
+        tokenList = filterTokenListByQuery(tokensToSearch, query);
+    }
+    
+    let baseNetwork:NetworkDb = networkDb;
 
     for(const token of tokenList){
-        let queryOnClickParams:ITokenClickHandlerParams = {networkTicker:baseNetwork.ticker, tokenTicker:token.symbol}
-        let newSuggestion:ISearchResult = {resultString:token.name, iconPath:token.logoURI, onClickFunction:tokenOnclickFunction, onClickParams:queryOnClickParams};
+        let newSuggestion:ISearchResult
+        // use specified click handler
+        if(clickHandler){
+            let tokenAndNetwork:TokenAndNetwork = {baseNetworkDb:baseNetwork, tokenData:{tokenDb:token}};
+            newSuggestion = {resultString:token.name, iconPath:token.logoURI, onClickFunction:clickHandler, onClickParams:tokenAndNetwork};
+        }
+        else{
+            let queryOnClickParams:ITokenClickHandlerParams = {networkTicker:baseNetwork.ticker, tokenTicker:token.symbol}
+            newSuggestion = {resultString:token.name, iconPath:token.logoURI, onClickFunction:tokenOnclickFunction, onClickParams:queryOnClickParams};
+        }
         suggestions.push(newSuggestion);
     }
 

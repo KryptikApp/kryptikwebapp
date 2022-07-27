@@ -2,7 +2,7 @@ import {firestore} from "../helpers/firebaseHelper"
 import { collection, getDocs, query } from "firebase/firestore";
 import { ServiceState } from './types';
 import BaseService from './BaseService';
-import {defaultNetworkDb, defaultTokenAndNetwork, NetworkBalanceParameters, NetworkDb, placeHolderEVMAddress} from './models/network'
+import {defaultNetworkDb, defaultTokenAndNetwork, NetworkBalanceParameters, NetworkDb} from './models/network'
 import {
     JsonRpcProvider,
     StaticJsonRpcProvider,
@@ -15,29 +15,27 @@ import {
   } from '@solana/web3.js';
   import { Near } from "near-api-js";
 import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
-import { BigNumber, Contract, utils } from "ethers";
-import { BlockResult } from "near-api-js/lib/providers/provider";
+import { Contract, utils } from "ethers";
 
 import HDSeedLoop, {Network, NetworkFamily, NetworkFamilyFromFamilyName, NetworkFromTicker, Options, WalletKryptik } from "hdseedloop";
 import { defaultWallet } from "../models/defaultWallet";
 import { createVault, unlockVault, VaultAndShares } from "../handlers/wallet/vaultHandler";
 import { getPriceOfTicker } from "../helpers/coinGeckoHelper";
-import TransactionFeeData, {defaultEVMGas, FeeDataEvmParameters, FeeDataNearParameters, FeeDataParameters, FeeDataSolParameters, TxType} from "./models/transaction";
 import { CreateEVMContractParameters, TokenBalanceParameters, ChainData, TokenDb, ERC20Params, SplParams, Nep141Params, TokenAndNetwork } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
 import { createEd25519PubKey, createSolTokenAccount, getAddressForNetworkDb } from "../helpers/utils/accountUtils";
-import { networkFromNetworkDb, isNetworkArbitrum, getChainDataForNetwork } from "../helpers/utils/networkUtils";
-import { lamportsToSol, divByDecimals, roundCryptoAmount, roundUsdAmount, multByDecimals, roundToDecimals } from "../helpers/utils/numberUtils";
+import { networkFromNetworkDb, getChainDataForNetwork } from "../helpers/utils/networkUtils";
+import { lamportsToSol, divByDecimals, roundCryptoAmount, roundUsdAmount } from "../helpers/utils/numberUtils";
 import { IWallet } from "../models/KryptikWallet";
 import { searchTokenListByTicker } from "../handlers/search/token";
-import { RiContactsBookLine } from "react-icons/ri";
 
 
 const NetworkDbsRef = collection(firestore, "networks");
 const ERC20DbRef = collection(firestore, "erc20tokens");
 const SplDbRef = collection(firestore, "spltokens");
 const Nep141Ref = collection(firestore, "nep141tokens")
+const ALLTOKENSRef = collection(firestore, "tokens");
 
 
 
@@ -66,9 +64,7 @@ class Web3Service extends BaseService{
     public isWalletSet:boolean = false;
     public NetworkDbs:NetworkDb[] = [];
     public TickerToNetworkDbs:{[ticker:string]:NetworkDb} = {}
-    public erc20Dbs:TokenDb[] = [];
-    public nep141Dbs:TokenDb[] = [];
-    public splDbs:TokenDb[] = [];
+    public tokenDbs:TokenDb[] = [];
     // NetworkDb is referenced by its BIP44 chain id
     public rpcEndpoints: { [ticker:string]: string } = {};
     public web3Provider: StaticJsonRpcProvider = (null as unknown) as StaticJsonRpcProvider;
@@ -176,27 +172,14 @@ class Web3Service extends BaseService{
         catch{
             throw(Error("Error: Unable to populate NetworkDbs when starting web3 service."))
         }
-        // fetch erc20 data
+        // fetch token data
         try{
-            await this.populateErc20DbsAsync();
+            await this.populateTokenDbsAsync();
         }
         catch{
-            throw(new Error("Error: Unable to populate ERC20 array from database when starting web3 service."));
+            throw(new Error("Error: Unable to populate TokenDb array from database when starting web3 service."));
         }
-        // fetch nep141 data
-        try{
-            await this.populateNep141DbsAsync();
-        }
-        catch{
-            throw(new Error("Error: Unable to populate Nep141 array from database when starting web3 service."));
-        }
-        // fetch spl data
-        try{
-            await this.populateSplDbsAsync();
-        }
-        catch{
-            throw(new Error("Error: Unable to populate SPL array from database when starting web3 service."));
-        }
+
         this.setRpcEndpoints();
         this.setSupportedProviders();
         // console logs for debugging
@@ -239,14 +222,14 @@ class Web3Service extends BaseService{
         return newKryptikProvider;
     }
 
-    private async populateErc20DbsAsync():Promise<TokenDb[]>{
+    private async populateTokenDbsAsync():Promise<TokenDb[]>{
         console.log("Populating erc20 data from db");
-        const q = query(ERC20DbRef);
+        const q = query(ALLTOKENSRef);
         const querySnapshot = await getDocs(q);
-        let erc20DbsResult:TokenDb[] = [];
+        let tokenDbsResult:TokenDb[] = [];
         querySnapshot.forEach((doc) => {
             let docData = doc.data();
-            let erc20DbToAdd:TokenDb = {
+            let tokenDbToAdd:TokenDb = {
                 name: docData.name,
                 coingeckoId: docData.coingeckoId,
                 symbol: docData.symbol,
@@ -257,58 +240,10 @@ class Web3Service extends BaseService{
                 extensions: docData.extensions,
                 tags:docData.tags
             }
-            erc20DbsResult.push(erc20DbToAdd);
+            tokenDbsResult.push(tokenDbToAdd);
         });
-        this.erc20Dbs = erc20DbsResult;
-        return this.erc20Dbs;
-    }
-
-    private async populateSplDbsAsync():Promise<TokenDb[]>{
-        console.log("Populating spl data from db");
-        const q = query(SplDbRef);
-        const querySnapshot = await getDocs(q);
-        let splDbsResult:TokenDb[] = [];
-        querySnapshot.forEach((doc) => {
-            let docData = doc.data();
-            let splDbToAdd:TokenDb = {
-                name: docData.name,
-                coingeckoId: docData.coingeckoId,
-                symbol: docData.symbol,
-                decimals: docData.decimals,
-                hexColor: docData.hexColor?docData.hexColor:"#000000",
-                chainData:docData.chainData,
-                logoURI: docData.logoURI,
-                extensions: docData.extensions,
-                tags:docData.tags
-            }
-            splDbsResult.push(splDbToAdd);
-        });
-        this.splDbs = splDbsResult;
-        return this.splDbs;
-    }
-
-    private async populateNep141DbsAsync():Promise<TokenDb[]>{
-        console.log("Populating nep141 data from db");
-        const q = query(Nep141Ref);
-        const querySnapshot = await getDocs(q);
-        let nep141DbsResult:TokenDb[] = [];
-        querySnapshot.forEach((doc) => {
-            let docData = doc.data();
-            let nep141DbToAdd:TokenDb = {
-                name: docData.name,
-                coingeckoId: docData.coingeckoId,
-                symbol: docData.symbol,
-                decimals: docData.decimals,
-                hexColor: docData.hexColor?docData.hexColor:"#000000",
-                chainData:docData.chainData,
-                logoURI: docData.logoURI,
-                extensions: docData.extensions,
-                tags:docData.tags
-            }
-            nep141DbsResult.push(nep141DbToAdd);
-        });
-        this.nep141Dbs = nep141DbsResult;
-        return this.nep141Dbs;
+        this.tokenDbs = tokenDbsResult;
+        return this.tokenDbs;
     }
 
     private async populateNetworkDbsAsync():Promise<NetworkDb[]>{
@@ -642,14 +577,16 @@ class Web3Service extends BaseService{
         return newBalanceObj;
     }
 
+    // TODO: UPDATE TOKEN BALANCE FUNCS TO FILTER ON FAMILY
+
     // get balances for all erc20 networks
     async getBalanceAllERC20Tokens(walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void){
         let erc20balances:IBalance[] = [];
-        for(const erc20Db of this.erc20Dbs){
+        for(const erc20Db of this.tokenDbs){
             for(const chainInfo of erc20Db.chainData){
                 // get ethereum network db
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb){
+                if(!networkDb || NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) != NetworkFamily.EVM){
                     if(onFetch){
                         onFetch(null);
                     }
@@ -695,11 +632,11 @@ class Web3Service extends BaseService{
      async getBalanceAllNep141Tokens(walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void){
         console.log("getting nep141 balances");
         let nep141Balances:IBalance[] = [];
-        for(const nep141Db of this.nep141Dbs){          
+        for(const nep141Db of this.tokenDbs){          
             for(const chainInfo of nep141Db.chainData){  
                 console.log(`GETTING Nep141 balance FOR ${chainInfo.ticker}`);
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb)
+                if(!networkDb || NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) != NetworkFamily.Near)
                 {
                     if(onFetch){
                         onFetch(null);
@@ -737,11 +674,11 @@ class Web3Service extends BaseService{
     // get balances for all spl tokens
     async getBalanceAllSplTokens(walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void){
         let splBalances:IBalance[] = [];
-        for(const splDb of this.splDbs){          
+        for(const splDb of this.tokenDbs){          
             for(const chainInfo of splDb.chainData){  
                 console.log(`GETTING SPL balance FOR ${chainInfo.ticker}`);
                 let networkDb:NetworkDb|null = this.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb)
+                if(!networkDb  || NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) != NetworkFamily.Solana)
                 {
                     if(onFetch){
                         onFetch(null);
@@ -795,7 +732,7 @@ class Web3Service extends BaseService{
         return contractConnected;
     }
 
-
+    // TODO: UPDATE TO FILTER ON FAMILY
     getTokenAndNetworkFromTickers(networkTicker:string, tokenTicker?:string):TokenAndNetwork{
         let tokenAndNetwork:TokenAndNetwork = defaultTokenAndNetwork;
         let networkDb:NetworkDb|null = this.getNetworkDbByTicker(networkTicker);
@@ -808,15 +745,15 @@ class Web3Service extends BaseService{
         let tokenDb:TokenDb|null = null;
         switch(networkFamily){
             case(NetworkFamily.EVM):{
-                tokenDb = searchTokenListByTicker(this.erc20Dbs, tokenTicker);
+                tokenDb = searchTokenListByTicker(this.tokenDbs, tokenTicker);
                 break;
             }
             case(NetworkFamily.Near):{
-                tokenDb = searchTokenListByTicker(this.nep141Dbs, tokenTicker);
+                tokenDb = searchTokenListByTicker(this.tokenDbs, tokenTicker);
                 break;
             }
             case(NetworkFamily.Solana):{
-                tokenDb = searchTokenListByTicker(this.splDbs, tokenTicker);
+                tokenDb = searchTokenListByTicker(this.tokenDbs, tokenTicker);
                 break;
             }
             default:{
