@@ -7,7 +7,7 @@ import { NetworkDb } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
 import { TokenData } from "../../services/models/token";
 import TransactionFeeData, {TxType } from "../../services/models/transaction";
-import { getTransactionFeeData1559Compatible } from "./EVMFees";
+import { getSendTransactionFeeData1559Compatible} from "./EVMFees";
 import { getTransactionFeeDataNear } from "./NearFees";
 import { getTransactionFeeDataSolana } from "./SolanaFees";
 
@@ -22,13 +22,14 @@ export interface INetworkFeeDataParams{
     kryptikProvider:KryptikProvider
 }
 
-
-export async function getTransactionFeeData(params:IFeeDataParameters):Promise<TransactionFeeData|null>{
+// TODO: UPDATE AS BOTH NEAR AND SOLANA WORK FOR GENERAL FEES, EVM ONLY CALCULATES FOR SEND
+// gets tx. fee for sending a fungible token
+export async function getSendTransactionFeeData(params:IFeeDataParameters):Promise<TransactionFeeData|null>{
     let network:Network =  networkFromNetworkDb(params.networkDb);
     let tokenPriceUsd:number = await getPriceOfTicker(params.networkDb.coingeckoId);
     switch(network.networkFamily){
         case (NetworkFamily.EVM): { 
-            let transactionFeeData:TransactionFeeData = await getTransactionFeeData1559Compatible({kryptikProvider:params.kryptikProvider, networkDb:params.networkDb, tokenPriceUsd: tokenPriceUsd, tokenData: params.tokenData, amountToken:params.amountToken});
+            let transactionFeeData:TransactionFeeData = await getSendTransactionFeeData1559Compatible({kryptikProvider:params.kryptikProvider, networkDb:params.networkDb, tokenPriceUsd: tokenPriceUsd, tokenData: params.tokenData, amountToken:params.amountToken});
             return transactionFeeData;
             break; 
          } 
