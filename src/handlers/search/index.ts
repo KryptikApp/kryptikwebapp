@@ -6,9 +6,9 @@ import { getTokenSearchSuggestions } from "./token";
 import { ISearchResult } from "./types";
 
 // aggregates blockchain search methods
-export const getAllNetworkSearchSuggestions = async function(query:string, networkDb:NetworkDb, tokensToSearch:TokenDb[]):Promise<ISearchResult[]>{
+export const getAllNetworkSearchSuggestions = async function(query:string, networkDb:NetworkDb, tickerToNetworkDict:{[ticker:string]:NetworkDb}, networkToSearch:NetworkDb[], tokensToSearch:TokenDb[]):Promise<ISearchResult[]>{
     let suggestions:ISearchResult[] = [];
-    let tokenResults = getTokenSearchSuggestions(query, networkDb, tokensToSearch);
+    let tokenResults = getTokenSearchSuggestions(query, tickerToNetworkDict, networkToSearch, tokensToSearch);
     let accountResults = await getAccountSearchSuggestions(query, networkDb);
     suggestions.push(...tokenResults);
     suggestions.push(...accountResults);
