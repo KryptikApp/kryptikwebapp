@@ -3,5 +3,6 @@ export interface ISearchResult{
     onClickParams?:any,
     onClickFunction?: (params:any)=>void,
     iconPath?:string
+    iconPathSecondary?:string
 }
 
