@@ -144,7 +144,7 @@ const CoinInfo: NextPage = () => {
         {
           loaded &&
           <div className="flex flex-row mb-4">
-             {/* icon and token name */}
+             {/* icon */}
              <div className="flex-shrink-0">
                   <img className="w-8 h-8 rounded-full inline" src={tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.logoURI:tokenAndNetwork.baseNetworkDb.iconPath} alt={`Token image`}/>
                   {
@@ -152,8 +152,8 @@ const CoinInfo: NextPage = () => {
                     <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={tokenAndNetwork.baseNetworkDb.iconPath} alt={`Base network image`}/>
                   }
               </div>
-              {/* price and percent change */}
-              <div className="flex-1 min-w-0 content-start text-left ml-2">
+              {/* token name and... price and percent change */}
+              <div className="flex-1 min-w-0 text-left md:ml-2">
                     <div>
                         <h1 className="text-2xl font-bold truncate dark:text-white" style={{color:`${tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.hexColor:tokenAndNetwork.baseNetworkDb.hexColor}`}}>
                             {tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.name:tokenAndNetwork.baseNetworkDb.fullName} ({formatTicker(tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.symbol:tokenAndNetwork.baseNetworkDb.ticker)})
