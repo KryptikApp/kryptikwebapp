@@ -734,13 +734,11 @@ class Web3Service extends BaseService{
 
     // TODO: UPDATE TO FILTER ON FAMILY
     getTokenAndNetworkFromTickers(networkTicker:string, tokenTicker?:string):TokenAndNetwork{
-        let tokenAndNetwork:TokenAndNetwork = defaultTokenAndNetwork;
         let networkDb:NetworkDb|null = this.getNetworkDbByTicker(networkTicker);
         // UPDATE TO THROW ERROR OR RETURN NULL?
-        if(!networkDb) return tokenAndNetwork;
-        tokenAndNetwork.baseNetworkDb = networkDb;
+        if(!networkDb) return defaultTokenAndNetwork;
         // no token... just return obj with base network
-        if(!tokenTicker) return tokenAndNetwork;
+        if(!tokenTicker) return {baseNetworkDb:networkDb};
         let networkFamily = NetworkFamilyFromFamilyName(networkDb.networkFamilyName);
         let tokenDb:TokenDb|null = null;
         switch(networkFamily){
@@ -762,11 +760,9 @@ class Web3Service extends BaseService{
         }
         // set token data if it exists
         if(tokenDb){
-            tokenAndNetwork.tokenData = {
-                tokenDb: tokenDb
-            }
+            return {baseNetworkDb:networkDb, tokenData:{tokenDb:tokenDb}}
         }
-        return tokenAndNetwork;
+        return {baseNetworkDb:networkDb};
     }
         
 }
