@@ -43,6 +43,7 @@ export interface TokenData{
     tokenParamsEVM?:TokenParamsEVM,
     tokenParamsNep141?:TokenParamsNep141,
     tokenBalance?:IBalance
+    selectedAddress?: string
     tokenDb: TokenDb
 }
 
