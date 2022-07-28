@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
 import { defaultTokenAndNetwork, placeHolderSolAddress } from '../../src/services/models/network'
-import { SendProgress, ServiceState } from '../../src/services/types'
+import { TxProgress, ServiceState } from '../../src/services/types'
 import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapLine} from "react-icons/ri"
 import { Network, NetworkFamily, NetworkFamilyFromFamilyName, truncateAddress } from "hdseedloop"
@@ -54,7 +54,7 @@ const Send: NextPage = () => {
   const [forMessage, setForMessage] = useState("");
   const [failureMsg, setFailureMsg] = useState("Unable to complete transaction");
   const [isLoading, setisLoading] = useState(false);
-  const [progress, setProgress] = useState<SendProgress>(SendProgress.Begin);
+  const [progress, setProgress] = useState<TxProgress>(TxProgress.Begin);
   const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
 
   const router = useRouter();
@@ -73,7 +73,7 @@ const Send: NextPage = () => {
 
   // get solana tx. fees upon review
   useEffect(()=>{
-    if(progress != SendProgress.Rewiew){
+    if(progress != TxProgress.Rewiew){
       return;
     }
     setFeesLoaded(false);
@@ -240,7 +240,7 @@ const Send: NextPage = () => {
     // typically used for errors when pushing to blockchain
     if(isFatal){
       setFailureMsg(message);
-      setProgress(SendProgress.Failure)
+      setProgress(TxProgress.Failure)
       return;
     }
     toast.error(message);
@@ -273,20 +273,20 @@ const Send: NextPage = () => {
 
   const handleClickBack = function(){
     switch(progress) { 
-      case SendProgress.SetParamaters: { 
-         setProgress(SendProgress.Begin); 
+      case TxProgress.SetParamaters: { 
+         setProgress(TxProgress.Begin); 
          break; 
       } 
-      case SendProgress.Rewiew: { 
-         setProgress(SendProgress.SetParamaters);
+      case TxProgress.Rewiew: { 
+         setProgress(TxProgress.SetParamaters);
          break; 
       } 
-      case SendProgress.Complete:{
+      case TxProgress.Complete:{
          handleCancelTransaction();
          break; 
       }
       default: { 
-         setProgress(SendProgress.Begin);
+         setProgress(TxProgress.Begin);
          break; 
       } 
    } 
@@ -324,7 +324,7 @@ const Send: NextPage = () => {
     let isValidAmount = validateAmount();
     if(!isValidAmount) return;
     // VERIFICATION COMPLETE
-    setProgress(SendProgress.SetParamaters);
+    setProgress(TxProgress.SetParamaters);
     setisLoading(false);
   }
 
@@ -358,7 +358,7 @@ const Send: NextPage = () => {
     setToAddress(newResolvedAccount.address);
     setReadableToAddress(truncateAddress(newResolvedAccount.address, nw));
     // change progress state
-    setProgress(SendProgress.Rewiew);
+    setProgress(TxProgress.Rewiew);
     setisLoading(false);
   };
 
@@ -375,7 +375,7 @@ const Send: NextPage = () => {
     setReadableToAddress("");
     setTxPubData(defaultTxPublishedData);
     setSelectedTokenAndNetwork(defaultTokenAndNetwork);
-    if(!isComplete) setProgress(SendProgress.Begin);
+    if(!isComplete) setProgress(TxProgress.Begin);
     setisLoading(false);
   };
 
@@ -400,7 +400,7 @@ const Send: NextPage = () => {
       return;
     }
     setTxPubData(txResult);
-    setProgress(SendProgress.Complete);
+    setProgress(TxProgress.Complete);
     setisLoading(false);
   }
 
@@ -411,13 +411,13 @@ const Send: NextPage = () => {
           <Toaster/>
           <div className="text-center max-w-xl mx-auto content-center">
           {
-            (progress==SendProgress.SetParamaters)  &&
+            (progress==TxProgress.SetParamaters)  &&
             <div className="align-left m-7">
               <AiOutlineArrowLeft className="hover:cursor-pointer dark:text-white" onClick={()=>handleClickBack()} size="30"/>
             </div>
           }
           {
-            progress == SendProgress.Begin && 
+            progress == TxProgress.Begin && 
             <div>
               <div className="h-[5rem]">
                 {/* padding div for space between top and main elements */}
@@ -458,7 +458,7 @@ const Send: NextPage = () => {
             </div>
           }
           {
-            progress == SendProgress.SetParamaters &&
+            progress == TxProgress.SetParamaters &&
             <div>
                {/* amount indicator */}
                 <div className="border rounded border-solid border-grey-600 w-40 mx-7 py-3">
@@ -506,7 +506,7 @@ const Send: NextPage = () => {
             </div>
           }
           {
-            progress == SendProgress.Rewiew &&
+            progress == TxProgress.Rewiew &&
             <div>
                 <div className="h-[4rem]">
                   {/* padding div for space between top and main elements */}
@@ -639,7 +639,7 @@ const Send: NextPage = () => {
             </div>
           }
           {
-            progress == SendProgress.Failure &&
+            progress == TxProgress.Failure &&
             <div>
               <div className="h-[4rem]">
                   {/* padding div for space between top and main elements */}
@@ -673,7 +673,7 @@ const Send: NextPage = () => {
             </div>
           }
           {
-            progress == SendProgress.Complete &&
+            progress == TxProgress.Complete &&
             <div>
               <div className="h-[4rem]">
                   {/* padding div for space between top and main elements */}
@@ -792,7 +792,7 @@ const Send: NextPage = () => {
           
           
           {
-            progress == SendProgress.Begin &&
+            progress == TxProgress.Begin &&
             <div>
               <Divider/>
               <div className="mx-auto text-center text-gray-500 text-sm dark:text-gray-400">

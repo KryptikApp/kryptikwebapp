@@ -12,7 +12,7 @@ enum Status
     Done = 3
 }
 
-enum SendProgress{
+enum TxProgress{
     Begin = 0,
     SetParamaters = 1,
     Rewiew = 2,
@@ -20,11 +20,12 @@ enum SendProgress{
     Failure = 4
 }
 
+
 enum WaitlistProgress{
     Begin=0,
     Complete=1,
     Failure=2
 }
 
-export{ServiceState, Status, SendProgress, WaitlistProgress}
+export{ServiceState, Status, TxProgress, WaitlistProgress}
 
