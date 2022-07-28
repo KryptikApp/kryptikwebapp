@@ -23,9 +23,8 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
     // use address for token and symbol for base network coin. Will return undefined if token and network selected address is undefined
     const sellTokenId:string|undefined = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.selectedAddress:toUpper(sellTokenAndNetwork.baseNetworkDb.ticker);
     const buyTokenId:string|undefined = buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.selectedAddress:toUpper(buyTokenAndNetwork.baseNetworkDb.ticker);
-    if(!sellTokenId || !buyTokenId) return null;
-    const swapData:IEVMSwapData|null = await fetch0xSwapOptions(buyTokenId, sellTokenId, swapAmount.asNumber);
-    
+    if(!sellTokenId || !buyTokenId || !sellTokenAndNetwork.baseNetworkDb.evmData || !sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl) return null;
+    const swapData:IEVMSwapData|null = await fetch0xSwapOptions(sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl, buyTokenId, sellTokenId, swapAmount.asNumber);
     if(!swapData) return null;
     if(!kryptikProvider.ethProvider){
         throw(new Error(`Error: No EVM provider specified for: ${sellTokenAndNetwork.baseNetworkDb}`));
