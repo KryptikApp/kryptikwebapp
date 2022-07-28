@@ -44,11 +44,12 @@ export const networkFromNetworkDb = function(nw: NetworkDb):Network{
 
 export const getChainDataForNetwork = function(network:NetworkDb, tokenData:TokenDb):ChainData|null{
     let chainDataArray:ChainData[] = tokenData.chainData;
+    if(!network.evmData) return null;
     for(const chainInfo of chainDataArray){
         // each contract has a different address depending on the chain
         // we use the network chainId to extract the correct chaindata
-        if(chainInfo.chainId == network.chainIdEVM){
-            return chainInfo
+        if(chainInfo.chainId == network.evmData.chainId){
+            return chainInfo;
         }
     }
     // we return null if there is no chain data specified for network
