@@ -35,7 +35,12 @@ export class KryptikProvider{
                 break;
             }
             case(NetworkFamily.EVM):{
-                this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: networkDb.fullName.toLowerCase()=="ethereum"?"homestead":networkDb.fullName, chainId: networkDb.chainIdEVM });
+                if(networkDb.evmData){
+                    this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, { name: networkDb.fullName.toLowerCase()=="ethereum"?"homestead":networkDb.fullName, chainId: networkDb.evmData.chainId });
+                }
+                else{
+                    throw(new Error(`Error: ${network.fullName} required chain id was not provided.`))
+                }
                 break;
             }
             case(NetworkFamily.Solana):{

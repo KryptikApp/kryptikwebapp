@@ -3,7 +3,13 @@
 import { Network, NetworkFromTicker } from "hdseedloop"
 import { TokenAndNetwork } from "./token"
 
-export interface NetworkDb {
+
+export interface EVMData{
+    chainId: number,
+    zeroXSwapUrl?: string
+}
+
+export interface NetworkDb{
     fullName: string,
     ticker: string,
     iconPath: string,
@@ -11,15 +17,15 @@ export interface NetworkDb {
     about: string,
     whitePaperPath: string,
     chainId: number,
-    chainIdEVM: number,
+    evmData?: EVMData,
     decimals: number,
     hexColor: string,
     dateCreated: Date,
-    provider: string,
-    networkFamilyName: string,
-    coingeckoId: string
+    provider:string,
+    networkFamilyName:string,
+    coingeckoId:string
     isTestnet: boolean
-    blockExplorerURL: string
+    blockExplorerURL:string
 }
 
 
@@ -33,7 +39,10 @@ export const defaultNetworkDb:NetworkDb = {
     blockExplorerURL: "https://etherscan.io/",
     chainId: 60,
     decimals: 18,
-    chainIdEVM: 1,
+    evmData:{
+        chainId:1,
+        zeroXSwapUrl:"https://api.0x.org/"
+    },
     hexColor: "#3c3c3d",
     networkFamilyName: "evm",
     dateCreated: new Date('July 29, 2015 03:24:00'),
