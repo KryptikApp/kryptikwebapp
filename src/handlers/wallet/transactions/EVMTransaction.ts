@@ -112,9 +112,12 @@ export const createEVMTransaction = async function(txIn:EVMTransactionParams):Pr
     if(!kryptikProvider.ethProvider){
         throw(new Error(`Error: No EVM provider specified for ${networkDb.fullName}`));
     };
+    if(!networkDb.evmData){
+        throw(new Error(`Error: No EVM DATA specified for ${networkDb.fullName} network model`));
+    }
     let ethProvider = kryptikProvider.ethProvider;
     let accountNonce = await ethProvider.getTransactionCount(sendAccount, "latest");
-    let chainIdEVM = networkDb.chainIdEVM;
+    let chainIdEVM = networkDb.evmData.chainId;
     let tx:TransactionRequest;
     // UPDATE SO BETTER TYPE 1 VS. TYPE 2 CASING
     if(txIn.networkDb.ticker != "eth(arbitrum)"){
