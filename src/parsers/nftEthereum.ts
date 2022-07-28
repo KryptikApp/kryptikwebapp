@@ -61,6 +61,11 @@ export interface ITraitType{
     trait_type: string
     value: any
 }
+
+export interface MetaDataExtension{
+    metadataUrl?:string
+}
+
 export interface INFTMetadata{
     animation_original_url?:string
     animation_url?:string
@@ -70,6 +75,7 @@ export interface INFTMetadata{
     decimals?: null
     description?: string
     external_link?: string
+    metaExtensions?:MetaDataExtension
     id?: number
     image_original_url?: string
     image_preview_url?: string

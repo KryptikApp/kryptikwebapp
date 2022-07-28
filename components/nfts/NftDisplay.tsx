@@ -96,7 +96,7 @@ const NftDisplay:NextPage<Props> = (props) => {
                             <CardDivider/>
 
                             {
-                                nftMetaData.description?
+                                (nftMetaData.description)?
                                 <div>
                                 <h2 className="text-lg dark:text-white font-bold">Description</h2>
                                     <p className="text-gray-400 dark:text-gray-300">
@@ -104,11 +104,16 @@ const NftDisplay:NextPage<Props> = (props) => {
                                     </p>
                                 
                                 </div>:
-
+                                (nftMetaData.metaExtensions && nftMetaData.metaExtensions.metadataUrl)?
+                                <div>
+                                <h2 className="text-lg dark:text-white font-bold">Description</h2>
+                                <p className="text-gray-400 dark:text-gray-300">{nftMetaData.name} is a collectible. You can find more metadata <a className="hover:cursor-pointer hover:text-sky-500 text-sky-400" href={nftMetaData.metaExtensions.metadataUrl} target="_blank" rel="noopener noreferrer">here</a>.</p>
+                                </div> :
                                 <div>
                                     <h2 className="text-lg dark:text-white font-bold">Description</h2>
                                     <p className="text-gray-400 dark:text-gray-300">{nftMetaData.name} is a collectible. You can learn more about NFTs <a className="hover:cursor-pointer hover:text-sky-500 text-sky-400" href={`https://opensea.io/blog/guides/non-fungible-tokens/`} target="_blank" rel="noopener noreferrer">here</a>.</p>
-                                </div> 
+                                </div>
+                                
                             }
                             
                             

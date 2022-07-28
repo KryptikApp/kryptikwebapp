@@ -1,10 +1,11 @@
 import { KryptikFetch } from "../kryptikFetch";
-import { INFTAssetContract, INFTCollectionData, INFTMetadata } from "./nftEthereum";
+import { INFTAssetContract, INFTCollectionData, INFTMetadata, MetaDataExtension } from "./nftEthereum";
 
 
 export interface NearParseData{
     token:any,
     tokenMetaData?:any,
+    metaDataUrl?:string
     tokenId: string,
     contractName: string,
     collectionData:INearCollectionData
@@ -40,6 +41,12 @@ export const parseNearNFTMetaData = function(assetData:NearParseData[]):INFTMeta
             token_id: asset.tokenId,
             collection: collection,
             asset_contract: assetContract
+        }
+        if(asset.metaDataUrl){
+            let metaExtensions:MetaDataExtension = {
+                metadataUrl: asset.metaDataUrl
+            }
+            nftData.metaExtensions = metaExtensions;
         }
         nftDataToReturn.push(nftData);
     }

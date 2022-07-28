@@ -37,7 +37,8 @@ export const listNearLikelyNfts = async function(address:string):Promise<IKrypti
 export const getTokenMetaData = async function(refUrl:string){
   try {
       const dataResponse = await KryptikFetch(refUrl, {
-        timeout: 3000, // 3 secs
+        timeout: 2000, // 2 secs
+        addContentType:false
       });
       return dataResponse.data;
     }
@@ -65,15 +66,10 @@ export const listNearNftsByAddress = async function(address:string, nearProvider
         tokenId: token.token_id,
         collectionData: collectionData
       }
-      // TODO: FIX LOAD SPEED FOR IPFS METADATA
-      // let metaDataPath = buildMediaUrl(token.metadata.reference, collectionData.base_uri);
-      // console.log("getting near metadata");
-      // console.log(metaDataPath);
+      let metaDataPath = buildMediaUrl(token.metadata.reference, collectionData.base_uri);
+      // TODO: FIX LOAD SPEED HANDLER FOR IPFS METADATA AND REQUEST CORS
       // let tokenMetaData = await getTokenMetaData(metaDataPath);
-      // console.log(tokenMetaData);
-      // if(tokenMetaData){
-      //   tokenDataToAdd.tokenMetaData = tokenMetaData;
-      // }
+     tokenDataToAdd.metaDataUrl = metaDataPath;
       dataToParse.push(tokenDataToAdd);
     }
   }
