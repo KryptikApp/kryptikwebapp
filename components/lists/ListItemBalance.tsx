@@ -25,7 +25,12 @@ const ListItemBalance:NextPage<Props> = (props) => {
     // redirect to asset info page if infolink provided
     const handleOnClick = function(){
         if(infoLink){
-            router.push({ pathname: '../coins/coinInfo', query:{networkTicker:networkTicker, tokenTicker:tokenTicker?tokenTicker:undefined} })
+            if(tokenTicker){
+                router.push( { pathname: '../coins/coinInfo', query:{networkTicker:networkTicker, tokenTicker:tokenTicker} } );
+            }
+            else{
+                router.push( { pathname: '../coins/coinInfo', query:{networkTicker:networkTicker} } );
+            }
         }
     }
     return(
