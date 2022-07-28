@@ -3,10 +3,12 @@ import { toUpper } from 'lodash';
 import type { NextPage } from 'next'
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import { AiOutlineArrowLeft } from 'react-icons/ai';
 import { RiArrowLeftLine, RiSearchLine, RiSwapLine } from 'react-icons/ri';
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider';
 import SearchResultItem from '../../components/search/searchResultItem';
 import { useKryptikThemeContext } from '../../components/ThemeProvider';
+import TxFee from '../../components/transactions/TxFee';
 import { getTokenSearchSuggestions } from '../../src/handlers/search/token';
 import { ISearchResult } from '../../src/handlers/search/types';
 import { BuildSwapTokenTransaction, IBuildSwapParams } from '../../src/handlers/swaps';
@@ -21,6 +23,7 @@ import { fetch0xSwapOptions } from '../../src/requests/swaps/0xSwaps';
 import { defaultTokenAndNetwork } from '../../src/services/models/network';
 import { KryptikProvider } from '../../src/services/models/provider';
 import { TokenAndNetwork } from '../../src/services/models/token';
+import { TxProgress } from '../../src/services/types';
 
 
 const Swap: NextPage = () => {
@@ -32,10 +35,8 @@ const Swap: NextPage = () => {
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [isInputCrypto, setIsInputCrypto] = useState(false);
   const [amountUSD, setAmountUSD] = useState("0");
-
   const [sellTokenAndNetwork, setSellTokenAndNetwork] = useState(defaultTokenAndNetwork);
   const [buyTokenAndNetwork, setBuyTokenAndNetwork] = useState(defaultTokenAndNetwork);
-
   const [fromAddress, setFromAddress] = useState(kryptikWallet.resolvedEthAccount.address);
   const [toAddress, setToAddress] = useState("");
   const [toResolvedAccount, setToResolvedAccount] = useState(defaultResolvedAccount);
@@ -45,6 +46,7 @@ const Swap: NextPage = () => {
   const [showAssetSearch, setShowAssetSearch] = useState(false);
   const [isSearchSellToken, setIsSearchSellToken] = useState(false);
   const [builtTx, setBuiltTx] = useState<KryptikTransaction|null>(null);
+  const [swapProgress, setSwapProgress] = useState(TxProgress.Begin);
   // swap validator state
   const defaultSwapValidator = new SwapValidator(defaultTokenAndNetwork);
   const [currentSwapValidator, setCurrentSwapValidator] = useState<SwapValidator>(defaultSwapValidator)
@@ -69,7 +71,7 @@ const Swap: NextPage = () => {
     return true;
   }
 
-  const handleSwapRequest = async function(){
+  const handleSwapBuildRequest = async function(){
     setIsLoading(true);
     let isValidAmount = validateAmount();
     if(!isValidAmount) return;
@@ -83,8 +85,12 @@ const Swap: NextPage = () => {
       kryptikProvider: kryptikProvider
     }
     let newBuiltTx = await BuildSwapTokenTransaction(swapParams);
-    console.log("New Built tx:");
-    console.log(newBuiltTx);
+    if(newBuiltTx == null){
+      toast.error(`Error building ${toUpper(sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.symbol:sellTokenAndNetwork.baseNetworkDb.ticker)}-${toUpper(buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.symbol:buyTokenAndNetwork.baseNetworkDb.ticker)} swap request`)
+    }
+    else{
+      setSwapProgress(TxProgress.Rewiew);
+    }
     setBuiltTx(newBuiltTx);
     setIsLoading(false);
   }
@@ -188,8 +194,11 @@ const Swap: NextPage = () => {
     else{
       newSearchResults = getTokenSearchSuggestions(query, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs, false, updateBuyToken, currentSwapValidator);
     }
-    
     setSearchResults(newSearchResults);
+  }
+
+  const handleClickBack = function(){
+    setSwapProgress(TxProgress.Begin);
   }
 
     // get data on token/network change
@@ -210,8 +219,10 @@ const Swap: NextPage = () => {
           <div className="">
 
           
-            <div className="max-w-[450px] bg-white dark:bg-black mt-8 mx-auto py-8 md:mt-0 rounded-lg min-h-[30rem] md:min-h-[25rem] h-fit md:max-h-[40rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
-                <div className="flex flex-col">
+            <div className="max-w-[450px] bg-white dark:bg-black mx-auto pb-8 md:mt-0 rounded-lg min-h-[30rem] md:min-h-[25rem] h-fit md:max-h-[40rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
+                {
+                swapProgress == TxProgress.Begin &&
+                <div className="flex flex-col mt-8">
 
                     <div className="mb-8">
                     <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-6xl text-center bg-transparent" id="amount" placeholder="$0" autoComplete="off" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
@@ -264,7 +275,7 @@ const Swap: NextPage = () => {
                         </div>
                     </div>
                     <div className="mx-auto">
-                          <button onClick={()=>handleSwapRequest()} className={`bg-transparent rounded-full hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent my-5`} disabled={isLoading}>      
+                          <button onClick={()=>handleSwapBuildRequest()} className={`bg-transparent rounded-full hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent my-5`} disabled={isLoading}>      
                                   {
                                           !isLoading?"Review Swap":
                                           <svg role="status" className="inline w-4 h-4 ml-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -275,6 +286,78 @@ const Swap: NextPage = () => {
                           </button>
                     </div>
                 </div>
+                }
+                {
+                  (swapProgress == TxProgress.Rewiew && builtTx)&&
+                  <div className="flex flex-col pt-2">
+                    <div className='flex-1'>
+                      <AiOutlineArrowLeft className="hover:cursor-pointer" onClick={()=>handleClickBack()} size="25"/>
+                    </div>
+
+                    <div className="mb-8">
+                    <span className="text-slate-500">
+                      Hey!
+                    </span>
+                    </div>
+
+                    <div className="flex flex-col w-[80%] max-w-[90%] border rounded mx-auto">
+                        <div className="flex flex-row items-center justify-center space-x-4 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer py-3">
+                          <div className="max-w-[20%] text-gray-500 dark:text-gray-400 font-lg flex-grow text-left">
+                          From
+                          </div>
+                          <div className="">
+                              <img className="w-8 h-8 rounded-full inline" src={sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.logoURI:sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} image`}/>
+                              {
+                                sellTokenAndNetwork.tokenData &&
+                                <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                              }
+                              <span className="inline text-md pl-2 dark:text-gray-200">{sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.name:sellTokenAndNetwork.baseNetworkDb.fullName}</span>
+                          </div>
+                          <div className="flex-grow text-right right-0 text-lg text-gray-500 dark:text-gray-400 float-right">
+                            <svg className="h-5 w-5 float-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div>
+                          {/* <AiOutlineArrowDown className="text-gray-200 pl-2" size="30"/> */}
+                          <hr/>
+                        </div>
+                        <div className="flex flex-row items-center justify-center space-x-4 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer py-3">
+                          <div className="max-w-[20%] text-gray-500 dark:text-gray-400 font-lg flex-grow text-left">
+                          To   
+                          </div>
+                          <div className="">
+                              <img className="w-8 h-8 rounded-full inline" src={buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.logoURI:buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} token image`}/>
+                              {
+                                buyTokenAndNetwork.tokenData &&
+                                <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                              }
+                              <span className="inline text-md pl-2 dark:text-gray-200">{buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.name:buyTokenAndNetwork.baseNetworkDb.fullName}</span>
+                          </div>
+                          <div className="flex-grow text-right right-0 text-lg text-gray-500 dark:text-gray-400 float-right">
+                            <svg className="h-5 w-5 float-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div>
+                          <TxFee tokenAndNetwork={sellTokenAndNetwork} feesLoaded={true} txFeeData={builtTx.feeData}/>
+                        </div>
+                    </div>
+                    <div className="mx-auto">
+                          <button onClick={()=>handleSwapBuildRequest()} className={`bg-transparent rounded-full hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent my-5`} disabled={isLoading}>      
+                                  {
+                                          !isLoading?"Convert":
+                                          <svg role="status" className="inline w-4 h-4 ml-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                          <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                                          <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                                          </svg>
+                                    }
+                          </button>
+                    </div>
+                </div>
+                }
             </div>
             </div>
 
@@ -362,3 +445,5 @@ const Swap: NextPage = () => {
 }
 
 export default Swap
+
+
