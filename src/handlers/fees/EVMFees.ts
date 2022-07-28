@@ -4,7 +4,7 @@ import {
 import { BigNumber, utils } from "ethers";
 import { INetworkFeeDataParams } from '.';
 import { isNetworkArbitrum, networkFromNetworkDb } from "../../helpers/utils/networkUtils";
-import { multByDecimals, roundToDecimals } from "../../helpers/utils/numberUtils";
+import { divByDecimals, multByDecimals, roundToDecimals } from "../../helpers/utils/numberUtils";
 import { NetworkDb, placeHolderEVMAddress } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
 import { TokenData } from '../../services/models/token';
@@ -77,13 +77,13 @@ export function evmFeeDataFromLimits(params:IEVMGasLimitsParams):TransactionFeeD
     let {gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas, tokenPriceUsd, networkDb} = {...params}
     // calculate u.i. fees in token amount
     let gasPriceConverted:number = Number(utils.formatEther(gasPrice));
-    let maxFeePerGasConverted:number = multByDecimals(Number(maxFeePerGas), networkDb.decimals).asNumber;
-    let maxPriorityFeePerGasConverted:number = multByDecimals(Number(maxFeePerGas), networkDb.decimals).asNumber;
+    let maxFeePerGasConverted:number = divByDecimals(Number(maxFeePerGas), networkDb.decimals).asNumber;
+    let maxPriorityFeePerGasConverted:number = divByDecimals(Number(maxFeePerGas), networkDb.decimals).asNumber;
     let baseFeePerGasConverted:number = maxPriorityFeePerGasConverted*.3;
 
     let lowerBoundCrypto:number = Number(gasLimit)*(gasPriceConverted+baseFeePerGasConverted);
-    let lowerBoundUSD:number = lowerBoundCrypto*params.tokenPriceUsd;
-    let upperBoundCrypto:number = Number(gasLimit)**(maxFeePerGasConverted+maxPriorityFeePerGasConverted);
+    let lowerBoundUSD:number = lowerBoundCrypto*tokenPriceUsd;
+    let upperBoundCrypto:number = Number(gasLimit)*(gasPriceConverted+maxPriorityFeePerGasConverted);
     let upperBoundUsd:number = upperBoundCrypto*tokenPriceUsd;
     let network = networkFromNetworkDb(networkDb);
     // create new fee data object
