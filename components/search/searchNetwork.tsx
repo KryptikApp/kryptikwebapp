@@ -52,17 +52,18 @@ const SearchNetwork:NextPage = () => {
         <div className="">
 
         <div className="md:max-w-lg max-h-40 max-w-[95%] mx-auto">
-            <div onFocus={()=>setShowDarkener(true)} className="flex z-20 relative w-full h-full transition ease-in-out focus-within:scale-105 focus-within:border focus-within:ring-2 focus-within:ring-sky-500 focus-within:border-slate-400 rounded-xl">
-            <div onClick={()=>setShowNetworkModal(true)} className="flex-grow p-4 bg-transparent hover:dark:bg-[#1c1c1c] hover:cursor-pointer rounded-l-xl border border-slate-700">
-                <img className="rounded-lg w-8 h-8 dropshadow-lg" src={`${selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath}`}/>
+            <div onFocus={()=>setShowDarkener(true)} className="flex relative z-20 w-full h-full transition ease-in-out focus-within:scale-105 focus-within:border focus-within:ring-2 focus-within:ring-sky-500 focus-within:border-slate-400 rounded-xl">
+            <div onClick={()=>setShowNetworkModal(true)} className="flex-grow p-4 bg-transparent hover:bg-[#F9FBFD] hover:dark:bg-[#1c1c1c] hover:cursor-pointer rounded-l-xl border border-slate-300 dark:border-slate-700">
+                <img className="flex-1 rounded-lg w-8 h-8 dropshadow-lg" src={`${selectedTokenAndNetwork.tokenData?selectedTokenAndNetwork.tokenData.tokenDb.logoURI:selectedTokenAndNetwork.baseNetworkDb.iconPath}`}/>
             </div>
-            <input onFocus={()=>setShowDarkener(true)} type="search" autoComplete="off" id="search-dropdown" className="w-[88%] p-4 z-20 text-gray-900 text-lg bg-gray-50 border rounded-r-xl border-gray-300 dark:bg-gray-700 dark:border-l-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-bold outline-none" placeholder={`Search ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)} name or address`} value={query} onChange={(e) => handleQueryChange(e.target.value)}  required/>
+            <input onFocus={()=>setShowDarkener(true)} type="search" autoComplete="off" id="search-dropdown" className="w-[88%]  p-4 text-gray-900 text-lg bg-gray-50 border rounded-r-xl border-gray-300 dark:bg-gray-700 dark:border-l-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-bold outline-none" placeholder={`Search ${selectedTokenAndNetwork.tokenData?formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol):formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)} name or address`} value={query} onChange={(e) => handleQueryChange(e.target.value)}  required/>
             </div>
        
             {
-                searchresults.length && 
+                searchresults.length != 0 &&
                 <div className="ml-[12%] relative z-10 max-h-80 my-2 rounded-xl px-2 py-2 bg-white text-slate-500 dark:bg-gray-700 dark:text-slate-200 divide-y divide-gray-200 dark:divide-gray-600 overflow-auto no-scrollbar">
-                    {
+                {
+                searchresults.length != 0 && 
                         searchresults.map((searchResult:ISearchResult, index:number)=>
                         {
                             return(
@@ -70,9 +71,11 @@ const SearchNetwork:NextPage = () => {
                             )
                         }   
                         )
-                    }
+                }
                 </div>
             }
+                
+          
             
             
         </div>
