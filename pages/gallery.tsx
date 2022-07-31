@@ -296,7 +296,7 @@ const Gallery: NextPage = () => {
 
 
             {/* show active category name */}
-            <div className="invisible md:visible dark:text-white">
+            <div className="invisible md:visible dark:text-white min-h-[60px]">
             {
               activeCategory == ActiveCategory.all &&
               <div className="font-bold text-2xl ml-20 mb-6">
