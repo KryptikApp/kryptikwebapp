@@ -19,7 +19,7 @@ export interface ISignAndSendSolParameters extends ISignAndSendParameters{
 
 // signs and sends any sol transaction
 export const signAndSendSOLTransaction = async function(params:ISignAndSendSolParameters):Promise<TransactionPublishedData>{
-    let txDoneData:TransactionPublishedData = defaultTxPublishedData;
+    let txDoneData:TransactionPublishedData = {hash:""};
     const {
         txSol,
         wallet,

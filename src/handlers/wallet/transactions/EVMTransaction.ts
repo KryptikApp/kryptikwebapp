@@ -62,7 +62,7 @@ export const PublishEVMTransferTx = async function(params:CreateTransferTransact
         errorHandler} = params;
     let network =  networkFromNetworkDb(tokenAndNetwork.baseNetworkDb);
     let kryptikProvider = kryptikService.getProviderForNetwork(tokenAndNetwork.baseNetworkDb);
-    let txDoneData:TransactionPublishedData = defaultTxPublishedData;
+    let txDoneData:TransactionPublishedData = {hash:""}
 
     if(!kryptikProvider.ethProvider){
         errorHandler(`Error: Provider not set for ${network.fullName}`);
@@ -75,7 +75,7 @@ export const PublishEVMTransferTx = async function(params:CreateTransferTransact
       // sign and send erc20 token
       if(tokenAndNetwork.tokenData && tokenAndNetwork.tokenData.tokenParamsEVM){
          let txResponse = await tokenAndNetwork.tokenData.tokenParamsEVM.tokenContractConnected.transfer(toAddress, utils.parseEther(amountDecimals));
-         if(txResponse.hash) txDoneData.hash = txResponse.hash;
+         if(txResponse.hash) txDoneData = {hash:txResponse.hash};
       }
       // sign and send base layer tx.
       else{

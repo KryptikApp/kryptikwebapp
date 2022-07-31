@@ -23,7 +23,7 @@ export interface ISignAndSendNearParameters extends ISignAndSendParameters{
 
 // signs and sends a transaction to the NEAR Blockchain
 export const signAndSendNEARTransaction = async function(params:ISignAndSendNearParameters):Promise<TransactionPublishedData>{
-  let txDoneData:TransactionPublishedData = defaultTxPublishedData;
+  let txDoneData:TransactionPublishedData = {hash:""};
   const {
     txNear,
     wallet,

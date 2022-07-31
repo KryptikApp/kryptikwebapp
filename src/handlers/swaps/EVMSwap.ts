@@ -37,6 +37,7 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
     let maxFeePerGas:BigNumberish = feeData.maxFeePerGas?feeData.maxFeePerGas:BigNumber.from(0);
     let maxPriorityFeePerGas:BigNumberish = feeData.maxPriorityFeePerGas?feeData.maxPriorityFeePerGas:BigNumber.from(0);
     // validate fee data response
+    
     if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
         // arbitrum uses pre EIP-1559 fee structure
         if(isNetworkArbitrum(sellTokenAndNetwork.baseNetworkDb)){
