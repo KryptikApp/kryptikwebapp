@@ -150,6 +150,8 @@ export const getUserPhotoPath = function(user:UserDB):string{
   // if not... return a default avatar icon
   let randomIndex:number = getRandomIntArbitrary(0, avatarPathList.length-1);
   let photoUrl:string = avatarPathList[randomIndex];
+  // update shared user state
+  user.photoUrl = photoUrl;
   return photoUrl;
 }
 
