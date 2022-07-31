@@ -139,7 +139,12 @@ export interface FeeDataEvmParameters{
 
 export type IErrorHandler = (message:string, isFatal?:boolean)=>void
 
-export interface CreateTransactionParameters{
+export const defaultErrorHandler = function(message:string, isFatal?:boolean){
+    console.log("Kryptik App Encountered An Error:");
+    console.warn(message);
+}
+
+export interface CreateTransferTransactionParameters{
     tokenAndNetwork:TokenAndNetwork,
     amountCrypto: string,
     txFeeData: TransactionFeeData,
@@ -154,7 +159,12 @@ export interface CreateTransactionParameters{
 export interface ISignAndSendParameters{
     sendAccount:string,
     wallet:IWallet,
-    networkDb:NetworkDb,
     kryptikProvider:KryptikProvider,
     errorHandler?:IErrorHandler
 }
+
+export interface AmountTotalBounds{
+    lowerBoundTotalUsd: string,
+    upperBoundTotalUsd: string
+  }
+export const defaultAmountTotalBounds = {lowerBoundTotalUsd: "0", upperBoundTotalUsd: "0"};

@@ -12,11 +12,11 @@ import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
-import TransactionFeeData, { CreateTransactionParameters, defaultTransactionFeeData, defaultTxPublishedData, SolTransactionParams, TransactionPublishedData, TransactionRequest, TxType } from '../../src/services/models/transaction'
+import TransactionFeeData, { AmountTotalBounds, CreateTransferTransactionParameters, defaultAmountTotalBounds, defaultTransactionFeeData, defaultTxPublishedData, SolTransactionParams, TransactionPublishedData, TransactionRequest, TxType } from '../../src/services/models/transaction'
 import { createSolTokenTransaction, createSolTransaction } from '../../src/handlers/wallet/transactions/SolTransactions'
 import { Transaction} from '@solana/web3.js'
 import { TokenParamsSpl } from '../../src/services/models/token'
-import {handlePublishTransaction} from '../../src/handlers/wallet/sendHandler'
+import {handlePublishTransferTransaction} from '../../src/handlers/wallet/sendHandler'
 import TxFee from '../../components/transactions/TxFee'
 import { networkFromNetworkDb, formatTicker } from '../../src/helpers/utils/networkUtils'
 import { roundUsdAmount, formatAmountUi, roundCryptoAmount } from '../../src/helpers/utils/numberUtils'
@@ -28,11 +28,7 @@ import { getSendTransactionFeeData, IFeeDataParameters } from '../../src/handler
 
 
 const Send: NextPage = () => {
-  interface AmountTotalBounds{
-    lowerBoundTotalUsd: string,
-    upperBoundTotalUsd: string
-  }
-  const defaultAmountTotalBounds = {lowerBoundTotalUsd: "0", upperBoundTotalUsd: "0"};
+
   const { authUser, loading, kryptikWallet, kryptikService } = useKryptikAuthContext();  
 
 
@@ -383,7 +379,7 @@ const Send: NextPage = () => {
   const handleSendTransaction = async function(){
     setisLoading(true);
     // params for create tx. method
-    let txParams:CreateTransactionParameters={
+    let txParams:CreateTransferTransactionParameters={
       tokenAndNetwork: selectedTokenAndNetwork,
       wallet: kryptikWallet,
       kryptikService: kryptikService,
@@ -393,7 +389,7 @@ const Send: NextPage = () => {
       txFeeData: transactionFeeData,
       errorHandler: errorHandler
     }
-    let txResult = await handlePublishTransaction(txParams);
+    let txResult = await handlePublishTransferTransaction(txParams);
     if(!txResult){
       // ERROR REDIRECT WILL BE DONE BY ERROR HANDLER
       setisLoading(false);
@@ -746,7 +742,6 @@ const Send: NextPage = () => {
                           </div>
                     </div>
                     <div className="flex flex-row">
-
                           <div className="flex-1">
                             <p className="text-slate-600 text-left dark:text-slate-300">Network Fees</p>
                           </div>
