@@ -1,13 +1,13 @@
 import { NetworkFamily } from "hdseedloop";
 
 import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
-import { TransactionPublishedData, CreateTransactionParameters } from "../../services/models/transaction";
+import { TransactionPublishedData, CreateTransferTransactionParameters } from "../../services/models/transaction";
 import { PublishEVMTransferTx } from "./transactions/EVMTransaction";
 import { PublishNEARTransferTx } from "./transactions/NearTransactions";
 import { PublishSolTransferTx } from "./transactions/SolTransactions";
 
 
-export const handlePublishTransaction = async function(params:CreateTransactionParameters):Promise<TransactionPublishedData|null>{
+export const handlePublishTransferTransaction = async function(params:CreateTransferTransactionParameters):Promise<TransactionPublishedData|null>{
     let network =  networkFromNetworkDb(params.tokenAndNetwork.baseNetworkDb);
     // UPDATE TO REFLECT ERROR IN UI
     switch(network.networkFamily){
