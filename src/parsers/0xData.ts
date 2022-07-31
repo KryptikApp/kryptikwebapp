@@ -1,28 +1,36 @@
-export interface IEVMSwapSource{
+import { TokenAndNetwork } from "../services/models/token"
+
+export interface ISwapSource{
     name:string,
     proportion:string
 }
 
-export interface IEVMSwapData{
+export interface ISwapData{
+    buyAmount:string
     buyTokenAddress: string
-    chainId: 1,
+    chainId: number,
     data: string,
     gas: string,
     guaranteedPrice: string
     estimatedGas: string,
     gasPrice: string,
-    minimumProtocolFee: 0,
+    minimumProtocolFee: number,
     price: string
     protocolFee: string
     sellAmount: string
     sellTokenAddress: string
     sellTokenToEthRate: string
-    sources: IEVMSwapSource[]
+    sources: ISwapSource[]
     to: string
     value: string
 }
 
-export function parse0xdata(data:any):IEVMSwapData{
-    let dataToReturn:IEVMSwapData = {...data};
+export interface IKryptikSwapData extends ISwapData{
+    buyTokenAndNetwork:TokenAndNetwork
+    sellTokenAndNetwork:TokenAndNetwork
+}
+
+export function parse0xdata(data:any):ISwapData{
+    let dataToReturn:ISwapData = {...data};
     return dataToReturn;
 }
