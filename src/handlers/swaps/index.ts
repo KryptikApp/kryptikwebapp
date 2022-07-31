@@ -1,6 +1,6 @@
 import { Network, NetworkFamily } from "hdseedloop";
 import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
-import { KryptikEVMTransaction, KryptikTransaction } from "../../models/transactions";
+import { KryptikTransaction } from "../../models/transactions";
 import { KryptikProvider } from "../../services/models/provider";
 import { TokenAndNetwork } from "../../services/models/token";
 import { BuildEVMSwapTransaction, IBuildEVMSwapParams } from "./EVMSwap";
@@ -24,7 +24,7 @@ export async function BuildSwapTokenTransaction(swapParams:IBuildSwapParams):Pro
         return null;
     }
     if(buyBaseNetwork.networkFamily == NetworkFamily.EVM && sellBaseNetwork.networkFamily == NetworkFamily.EVM){
-        let kryptikEVMTx:KryptikEVMTransaction|null = await BuildEVMSwapTransaction(swapParams);
+        let kryptikEVMTx:KryptikTransaction|null = await BuildEVMSwapTransaction(swapParams);
         return kryptikEVMTx;
     }
     return null;

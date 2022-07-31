@@ -1,8 +1,8 @@
 import { KryptikFetch } from "../../kryptikFetch";
-import { IEVMSwapData, parse0xdata } from "../../parsers/0xData";
+import { ISwapData, parse0xdata } from "../../parsers/0xData";
 
 
-export const fetch0xSwapOptions = async function(baseUrl:string, buyTokenId:string, sellTokenId:string, sellAmount:number, takerAddress?:string):Promise<null|IEVMSwapData>{
+export const fetch0xSwapOptions = async function(baseUrl:string, buyTokenId:string, sellTokenId:string, sellAmount:number, takerAddress?:string):Promise<null|ISwapData>{
     try { // add support for multiple pages
         let url:string;
         if(takerAddress){
@@ -16,7 +16,7 @@ export const fetch0xSwapOptions = async function(baseUrl:string, buyTokenId:stri
         });
         if(!dataResponse || !dataResponse.data) return null;
         // parse api response and return
-        const evmSwapData:IEVMSwapData = parse0xdata(dataResponse.data);
+        const evmSwapData:ISwapData = parse0xdata(dataResponse.data);
         return evmSwapData;
       }
     catch(e){
