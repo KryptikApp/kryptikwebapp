@@ -1,10 +1,10 @@
 import { BigNumber, BigNumberish } from "ethers";
 import { toUpper } from "lodash";
 import { IBuildSwapParams } from ".";
-import { isNetworkArbitrum } from "../../helpers/utils/networkUtils";
+import { formatTicker, isNetworkArbitrum } from "../../helpers/utils/networkUtils";
 import { multByDecimals } from "../../helpers/utils/numberUtils";
-import { IKryptikEVMTxParams, KryptikEVMTransaction } from "../../models/transactions";
-import { IEVMSwapData } from "../../parsers/0xData";
+import { IKryptikTxParams, KryptikTransaction } from "../../models/transactions";
+import { ISwapData } from "../../parsers/0xData";
 import { fetch0xSwapOptions } from "../../requests/swaps/0xSwaps";
 import { TransactionRequest } from "../../services/models/transaction";
 import { evmFeeDataFromLimits, IEVMGasLimitsParams } from "../fees/EVMFees";
@@ -15,16 +15,16 @@ export interface IBuildEVMSwapParams extends IBuildSwapParams{
   // empty for now
 }
 
-export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promise<KryptikEVMTransaction|null>{
+export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promise<KryptikTransaction|null>{
     const {tokenAmount, sellTokenAndNetwork, buyTokenAndNetwork, fromAccount, kryptikProvider, sellNetworkTokenPriceUsd} = {...params};
     // fetch 0x swap data
     let tokenDecimals:number = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.decimals:sellTokenAndNetwork.baseNetworkDb.decimals;
     let swapAmount = multByDecimals(tokenAmount, tokenDecimals);
     // use address for token and symbol for base network coin. Will return undefined if token and network selected address is undefined
-    const sellTokenId:string|undefined = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.selectedAddress:toUpper(sellTokenAndNetwork.baseNetworkDb.ticker);
-    const buyTokenId:string|undefined = buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.selectedAddress:toUpper(buyTokenAndNetwork.baseNetworkDb.ticker);
+    const sellTokenId:string|undefined = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.selectedAddress:formatTicker(sellTokenAndNetwork.baseNetworkDb.ticker);
+    const buyTokenId:string|undefined = buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.selectedAddress:formatTicker(buyTokenAndNetwork.baseNetworkDb.ticker);
     if(!sellTokenId || !buyTokenId || !sellTokenAndNetwork.baseNetworkDb.evmData || !sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl) return null;
-    const swapData:IEVMSwapData|null = await fetch0xSwapOptions(sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl, buyTokenId, sellTokenId, swapAmount.asNumber);
+    const swapData:ISwapData|null = await fetch0xSwapOptions(sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl, buyTokenId, sellTokenId, swapAmount.asNumber);
     if(!swapData) return null;
     if(!kryptikProvider.ethProvider){
         throw(new Error(`Error: No EVM provider specified for: ${sellTokenAndNetwork.baseNetworkDb}`));
@@ -76,11 +76,19 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
         maxFeePerGas: maxFeePerGas,
         maxPriorityFeePerGas: maxPriorityFeePerGas,
     }
-    let kryptikTxParams:IKryptikEVMTxParams = {
+    let kryptikTxParams:IKryptikTxParams = {
         feeData: kryptikFeeData,
-        evmTransaction: tx,
-        tokenPriceUsd: sellNetworkTokenPriceUsd
+        swapData: {
+            ...swapData,
+            sellTokenAndNetwork: sellTokenAndNetwork,
+            buyTokenAndNetwork: buyTokenAndNetwork
+        },
+        kryptikTx:{
+            evmTx:tx
+        },
+        tokenAndNetwork: sellTokenAndNetwork,
+        tokenPriceUsd: sellNetworkTokenPriceUsd,
     }
-    let kryptikTx:KryptikEVMTransaction = new KryptikEVMTransaction(kryptikTxParams);
+    let kryptikTx:KryptikTransaction = new KryptikTransaction(kryptikTxParams);
     return kryptikTx;
 }
