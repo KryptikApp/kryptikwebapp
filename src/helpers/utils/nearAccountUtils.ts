@@ -140,7 +140,6 @@ export const reserveNearAccountName = async function(params:INearReservationPara
     let sendParams:ISignAndSendNearParameters = {
         txNear: nearNameTx,
         wallet: wallet,
-        networkDb: nearNetworkDb,
         kryptikProvider: kryptikProvider,
         sendAccount: fromAddress
     }
