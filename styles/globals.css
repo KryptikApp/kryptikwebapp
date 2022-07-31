@@ -370,3 +370,19 @@ a {
 }
 
 
+/* + to x style */
+
+.rotate {
+  -moz-transition: all .3s linear;
+  -webkit-transition: all .3s linear;
+  transition: all .3s linear;
+}
+
+.down {
+  -moz-transform:rotate(135deg);
+  -webkit-transform:rotate(135deg);
+  transform:rotate(135deg);
+}
+
+
+
