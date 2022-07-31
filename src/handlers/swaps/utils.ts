@@ -7,7 +7,7 @@ export function isSwapAvailable(buyTokenNetworkDb:NetworkDb, sellTokenNetworkDb:
     const buyTokenNetwork:Network = networkFromNetworkDb(buyTokenNetworkDb);
     const sellTokenNetwork:Network = networkFromNetworkDb(sellTokenNetworkDb);
     // TODO: UPDATE TO SUPPORT NONEVM + CROSSCHAIN SWAPS
-    if(buyTokenNetwork.networkFamily == NetworkFamily.EVM && sellTokenNetwork.networkFamily == NetworkFamily.EVM)
+    if(buyTokenNetwork.networkFamily == NetworkFamily.EVM && sellTokenNetwork.networkFamily == NetworkFamily.EVM && buyTokenNetwork.fullName.toLowerCase() == sellTokenNetwork.fullName.toLowerCase())
     {
         return true;
     }
