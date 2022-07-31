@@ -73,19 +73,22 @@ export const formatAmountUi = function(amountIn:string, tokenAndNetwork:TokenAnd
     else{
         returnAmount = (lastChar!="." && !(lastChar == "0" && oldAmount.endsWith(".")))?roundDecimalsByNetworkToken(Number(formattedAmount), tokenAndNetwork):formattedAmount;
     };
-    console.log("Amount to return:");
-    console.log(returnAmount);
     return returnAmount;
 }
 
 
 export const roundDecimalsByNetworkToken = function(amountIn:number, tokenAndNetwork:TokenAndNetwork):string{
     let amount:number;
+    let maxDecimals:number = 8;
     if(tokenAndNetwork.tokenData){
-        amount = roundToDecimals(amountIn, tokenAndNetwork.tokenData.tokenDb.decimals);
+        // show max 4 decimal places
+        let decimals:number = tokenAndNetwork.tokenData.tokenDb.decimals<maxDecimals?tokenAndNetwork.tokenData.tokenDb.decimals:maxDecimals;
+        amount = roundToDecimals(amountIn, decimals);
     }
     else{
-        amount = roundToDecimals(amountIn, tokenAndNetwork.baseNetworkDb.decimals)
+        // show max 4 decimal places
+        let decimals:number = tokenAndNetwork.baseNetworkDb.decimals<maxDecimals?tokenAndNetwork.baseNetworkDb.decimals:maxDecimals;
+        amount = roundToDecimals(amountIn, decimals)
     }
     return amount.toString();
 }
