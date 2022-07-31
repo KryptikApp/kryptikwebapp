@@ -3,8 +3,9 @@ import { toUpper } from 'lodash';
 import type { NextPage } from 'next'
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import { AiOutlineArrowLeft } from 'react-icons/ai';
+import { AiFillCheckCircle, AiOutlineArrowLeft, AiOutlineArrowRight } from 'react-icons/ai';
 import { RiArrowLeftLine, RiSearchLine, RiSwapLine } from 'react-icons/ri';
+import Divider from '../../components/Divider';
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider';
 import SearchResultItem from '../../components/search/searchResultItem';
 import { useKryptikThemeContext } from '../../components/ThemeProvider';
@@ -17,12 +18,12 @@ import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper';
 import { defaultResolvedAccount } from '../../src/helpers/resolvers/accountResolver';
 import { getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils';
 import { formatTicker, networkFromNetworkDb } from '../../src/helpers/utils/networkUtils';
-import { formatAmountUi, multByDecimals, roundCryptoAmount } from '../../src/helpers/utils/numberUtils';
-import { KryptikTransaction } from '../../src/models/transactions';
-import { fetch0xSwapOptions } from '../../src/requests/swaps/0xSwaps';
-import { defaultTokenAndNetwork } from '../../src/services/models/network';
+import { formatAmountUi, roundCryptoAmount, roundUsdAmount } from '../../src/helpers/utils/numberUtils';
+import { KryptikTransaction, SwapAmounts, TxSignatureParams } from '../../src/models/transactions';
+import { defaultTokenAndNetwork, defaultUniswapTokenAndNetwork } from '../../src/services/models/network';
 import { KryptikProvider } from '../../src/services/models/provider';
 import { TokenAndNetwork } from '../../src/services/models/token';
+import TransactionFeeData, { AmountTotalBounds, defaultAmountTotalBounds, defaultTxPublishedData, TransactionPublishedData } from '../../src/services/models/transaction';
 import { TxProgress } from '../../src/services/types';
 
 
@@ -35,8 +36,9 @@ const Swap: NextPage = () => {
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [isInputCrypto, setIsInputCrypto] = useState(false);
   const [amountUSD, setAmountUSD] = useState("0");
+  const [amountTotalBounds, setAmountTotalbounds] = useState<AmountTotalBounds>(defaultAmountTotalBounds);
   const [sellTokenAndNetwork, setSellTokenAndNetwork] = useState(defaultTokenAndNetwork);
-  const [buyTokenAndNetwork, setBuyTokenAndNetwork] = useState(defaultTokenAndNetwork);
+  const [buyTokenAndNetwork, setBuyTokenAndNetwork] = useState(defaultUniswapTokenAndNetwork);
   const [fromAddress, setFromAddress] = useState(kryptikWallet.resolvedEthAccount.address);
   const [toAddress, setToAddress] = useState("");
   const [toResolvedAccount, setToResolvedAccount] = useState(defaultResolvedAccount);
@@ -50,6 +52,13 @@ const Swap: NextPage = () => {
   // swap validator state
   const defaultSwapValidator = new SwapValidator(defaultTokenAndNetwork);
   const [currentSwapValidator, setCurrentSwapValidator] = useState<SwapValidator>(defaultSwapValidator)
+  // swap amount state
+  const [swapAmounts, setSwapAmounts] = useState<SwapAmounts|null>(null);
+  const [txPubData, setTxPubData] = useState<TransactionPublishedData|null>(defaultTxPublishedData);
+  //details state
+  const [showDetails, setShowDetails] = useState(false);
+  // error state
+  const [failureMsg, setFailureMsg] = useState("Unable to complete transaction");
 
 
 
@@ -71,6 +80,22 @@ const Swap: NextPage = () => {
     return true;
   }
 
+  const updateTotalBounds = function(feeData:TransactionFeeData){
+    let newTotalBounds:AmountTotalBounds = {
+      lowerBoundTotalUsd: (Number(amountUSD) + Number(feeData.lowerBoundUSD)).toString(),
+      upperBoundTotalUsd: (Number(amountUSD) + Number(feeData.upperBoundUSD)).toString()
+    }
+    setAmountTotalbounds(newTotalBounds);
+  }
+
+  const handleTxDetailsClick = function(){
+    let arrowIcon = document.getElementById("arrowDetails");
+    if(arrowIcon){
+      arrowIcon.classList.toggle("down");
+    }
+    setShowDetails(!showDetails);
+  }
+
   const handleSwapBuildRequest = async function(){
     setIsLoading(true);
     let isValidAmount = validateAmount();
@@ -89,9 +114,50 @@ const Swap: NextPage = () => {
       toast.error(`Error building ${toUpper(sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.symbol:sellTokenAndNetwork.baseNetworkDb.ticker)}-${toUpper(buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.symbol:buyTokenAndNetwork.baseNetworkDb.ticker)} swap request`)
     }
     else{
+      let newSwapAmounts = newBuiltTx.fetchSwapAmounts();
+      setSwapAmounts(newSwapAmounts);
+      updateTotalBounds(newBuiltTx.feeData);
       setSwapProgress(TxProgress.Rewiew);
     }
     setBuiltTx(newBuiltTx);
+    setIsLoading(false);
+  }
+
+  const handleCancelTransaction = function(){
+    let nw:Network =  networkFromNetworkDb(sellTokenAndNetwork.baseNetworkDb);
+    setIsLoading(true);
+    setAmountUSD("0");
+    setAmountCrypto("0");
+    setFromAddress("");
+    setToAddress("");
+    setAmountTotalbounds(defaultAmountTotalBounds);
+    setReadableFromAddress(truncateAddress(kryptikWallet.resolvedEthAccount.address, nw));
+    setReadableToAddress("");
+    setTxPubData(defaultTxPublishedData);
+    setSellTokenAndNetwork(defaultTokenAndNetwork);
+    setBuyTokenAndNetwork(defaultTokenAndNetwork);
+    setSwapProgress(TxProgress.Begin);
+    setIsLoading(false);
+  };
+
+  const handleSwapSendRequest = async function(){
+    let provider:KryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(sellTokenAndNetwork.baseNetworkDb);
+    if(!builtTx || !builtTx.isSwap || !builtTx.swapData || !provider) return;
+    setIsLoading(true);
+    let signParams:TxSignatureParams = {
+      sendAccount:fromAddress,
+      kryptikWallet: kryptikWallet,
+      kryptikProvider:provider,
+      errorHandler: errorHandler
+    }
+    let newPubData:TransactionPublishedData|null = await builtTx.SignAndSend(signParams)
+    setTxPubData(newPubData);
+    if(newPubData){
+      setSwapProgress(TxProgress.Complete)
+    }
+    else{
+      setSwapProgress(TxProgress.Failure)
+    }
     setIsLoading(false);
   }
 
@@ -175,8 +241,22 @@ const Swap: NextPage = () => {
 
   const startAssetSearch = function(isSellToken:boolean){
     setDefaultSearchResults(isSellToken)
+    setQuery("");
     setShowAssetSearch(true);
     setIsSearchSellToken(isSellToken);
+  }
+
+  // handler passed as parameter into publish tx. method
+  const errorHandler = function(message:string, isFatal=false){
+    // show failure screen
+    // typically used for errors when pushing to blockchain
+    if(isFatal){
+      setFailureMsg(message);
+      setSwapProgress(TxProgress.Failure)
+      return;
+    }
+    toast.error(message);
+    handleCancelTransaction();
   }
 
   const handleQueryChange = async function(newQuery:string){
@@ -196,9 +276,21 @@ const Swap: NextPage = () => {
     }
     setSearchResults(newSearchResults);
   }
-
+  
+  // step back through tx. flow
   const handleClickBack = function(){
-    setSwapProgress(TxProgress.Begin);
+    switch(swapProgress){
+      case(TxProgress.Rewiew):{
+        setSwapProgress(TxProgress.Begin);
+        break; 
+      }
+      case(TxProgress.Complete):{
+        handleCancelTransaction();
+      }
+      default:{
+        handleCancelTransaction();
+      }
+    }
   }
 
     // get data on token/network change
@@ -219,10 +311,10 @@ const Swap: NextPage = () => {
           <div className="">
 
           
-            <div className="max-w-[450px] bg-white dark:bg-black mx-auto pb-8 md:mt-0 rounded-lg min-h-[30rem] md:min-h-[25rem] h-fit md:max-h-[40rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
+            <div className="max-w-[450px] bg-white dark:bg-black mx-auto md:mt-0 rounded-lg h-fit border border-slate-400 dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
                 {
                 swapProgress == TxProgress.Begin &&
-                <div className="flex flex-col mt-8">
+                <div className="flex flex-col mt-8 pb-8">
 
                     <div className="mb-8">
                     <input className="w-full py-2 px-4 text-sky-400 leading-tight focus:outline-none text-6xl text-center bg-transparent" id="amount" placeholder="$0" autoComplete="off" required value={isInputCrypto? `${amountCrypto}`:`$${amountUSD}`} onChange={(e) => handleAmountChange(e.target.value)}/>
@@ -288,65 +380,138 @@ const Swap: NextPage = () => {
                 </div>
                 }
                 {
-                  (swapProgress == TxProgress.Rewiew && builtTx)&&
+                  (swapProgress == TxProgress.Rewiew && builtTx && builtTx.swapData && swapAmounts)&&
                   <div className="flex flex-col pt-2">
-                    <div className='flex-1'>
-                      <AiOutlineArrowLeft className="hover:cursor-pointer" onClick={()=>handleClickBack()} size="25"/>
+                    <div className='flex mb-4'>
+                      <div className='flex-1'>
+                        <AiOutlineArrowLeft className="ml-2 hover:cursor-pointer" onClick={()=>handleClickBack()} size="25"/>
+                      </div>
+                      <div className='flex-2'>
+                        <h4 className="font-bold text-xl mx-auto content-center dark:text-white">Review Swap</h4>
+                      </div>
+                      <div className='flex-1'>
+                          {/* space filler */}
+                      </div>
                     </div>
 
-                    <div className="mb-8">
-                    <span className="text-slate-500">
-                      Hey!
-                    </span>
+                    <div className="mb-4">
+                    
                     </div>
 
-                    <div className="flex flex-col w-[80%] max-w-[90%] border rounded mx-auto">
-                        <div className="flex flex-row items-center justify-center space-x-4 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer py-3">
-                          <div className="max-w-[20%] text-gray-500 dark:text-gray-400 font-lg flex-grow text-left">
-                          From
+                    <div className="flex flex-col w-[90%] max-w-[90%] mx-auto">
+                        <div className="flex flex-col px-3 rounded space-y-6">
+                          <div className="flex flex-row rounded-lg p-2 bg-gray-200 dark:bg-gray-600 ">
+                             <div>
+                                <img className="w-10 h-10 rounded-full inline" src={sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.logoURI:sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} image`}/>
+                                {
+                                  sellTokenAndNetwork.tokenData &&
+                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                                }
+                              </div>
+                              <div className="flex-grow text-right pt-1">
+                                <span className="text-xl font-semibold text-gray-600 dark:text-gray-200">{formatAmountUi(swapAmounts.sellAmountCrypto.toString(), sellTokenAndNetwork, false)} {formatTicker(sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.symbol:sellTokenAndNetwork.baseNetworkDb.ticker)}</span>
+                              </div>
                           </div>
-                          <div className="">
-                              <img className="w-8 h-8 rounded-full inline" src={sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.logoURI:sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} image`}/>
-                              {
-                                sellTokenAndNetwork.tokenData &&
-                                <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
-                              }
-                              <span className="inline text-md pl-2 dark:text-gray-200">{sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.name:sellTokenAndNetwork.baseNetworkDb.fullName}</span>
-                          </div>
-                          <div className="flex-grow text-right right-0 text-lg text-gray-500 dark:text-gray-400 float-right">
-                            <svg className="h-5 w-5 float-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
+                          <div className="flex flex-row rounded-lg p-2 bg-gray-200 dark:bg-gray-600 ">
+                              <div>
+                                <img className="w-10 h-10 rounded-full inline" src={buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.logoURI:buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} token image`}/>
+                                {
+                                  buyTokenAndNetwork.tokenData &&
+                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                                }
+                              </div>
+                              <div className="flex-grow text-right pt-1">
+                                <span className="text-xl font-semibold text-gray-600 dark:text-gray-200">{formatAmountUi(swapAmounts.buyAmountCrypto.toString(), buyTokenAndNetwork, false)} {formatTicker(buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.symbol:buyTokenAndNetwork.baseNetworkDb.ticker)}</span>
+                              </div>
+                             
                           </div>
                         </div>
                         <div>
-                          {/* <AiOutlineArrowDown className="text-gray-200 pl-2" size="30"/> */}
-                          <hr/>
-                        </div>
-                        <div className="flex flex-row items-center justify-center space-x-4 px-3 rounded hover:bg-gray-100 dark:hover:bg-gray-900 cursor-pointer py-3">
-                          <div className="max-w-[20%] text-gray-500 dark:text-gray-400 font-lg flex-grow text-left">
-                          To   
-                          </div>
-                          <div className="">
-                              <img className="w-8 h-8 rounded-full inline" src={buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.logoURI:buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} token image`}/>
-                              {
-                                buyTokenAndNetwork.tokenData &&
-                                <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
-                              }
-                              <span className="inline text-md pl-2 dark:text-gray-200">{buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.name:buyTokenAndNetwork.baseNetworkDb.fullName}</span>
-                          </div>
-                          <div className="flex-grow text-right right-0 text-lg text-gray-500 dark:text-gray-400 float-right">
-                            <svg className="h-5 w-5 float-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                          </div>
-                        </div>
-                        <div>
-                          <TxFee tokenAndNetwork={sellTokenAndNetwork} feesLoaded={true} txFeeData={builtTx.feeData}/>
+                          
                         </div>
                     </div>
+                    {/* transaction data dropdown */}
+                    <div className='pt-8 px-2 flex flex-col w-[90%] max-w-[90%] mx-auto'>
+                      <div className='flex-col border rounded hover:cursor-pointer hover:dark:bg-[#111112] py-2 px-2' onClick={()=>handleTxDetailsClick()}>
+                          <div className="flex flex-row">
+
+                              <div className="text-lg text-slate-600 text-left dark:text-slate-300 pb-1">
+                              {
+                                showDetails?
+                                <p className="text-sm">Transaction Details</p>:
+                                <p>Total Cost</p>
+                              }
+                              </div>
+                            
+                            
+                            <div className="flex-grow text-2xl font-semibold text-slate-600 dark:text-slate-300 flex flex-row-reverse">
+
+                              <div id="arrowDetails" className="mt-1 text-xl rotate font-semibold text-3xl rounded w-5 h-5 flex">
+                                <p className="place-self-center">+</p>
+                              </div>
+                              {
+                              !showDetails &&
+                                <div className="mr-2">
+                                {
+                                        (roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd)) == roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd)))?
+                                        <p className="text-right dark:text-white">{`~ $${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>:
+                                        <p className="text-right dark:text-white">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
+                                }
+                                </div>
+                              }
+                            </div>
+                         </div>
+                         {
+                          showDetails&&
+                          <div className='pt-2 flex flex-col mx-auto'>
+                          <div className="flex">
+                                <div className="flex-1">
+                                  <p className="text-slate-600 text-left dark:text-slate-300">Wallet Used</p>
+                                </div>
+                                <div className="flex-1 px-1">
+                                  <p className="text-right dark:text-white">{readableFromAddress}</p>
+                                </div>
+                          </div>
+                          <div className="flex flex-row">
+                                <div className="flex-1">
+                                  <p className="text-slate-600 text-left dark:text-slate-300">Blockchain</p>
+                                </div>
+                                <div className="flex-1 px-1">
+                                  <p className="text-right"><span style={{color:`${sellTokenAndNetwork.baseNetworkDb.hexColor}`}} className="font-semibold">{sellTokenAndNetwork.baseNetworkDb.fullName}</span></p>
+                                </div>
+                          </div>
+                          <div className="flex flex-row">
+                                <div className="flex-1">
+                                  <p className="text-slate-600 text-left dark:text-slate-300">Network Fees</p>
+                                </div>
+                                <div className="flex-1 px-1">
+                                  <div className='text-right'>
+                                  <TxFee txFeeData={builtTx.feeData} tokenAndNetwork={sellTokenAndNetwork} feesLoaded={true}/>
+                                  </div>
+                                </div>
+                          </div>
+                          <div className="flex flex-row">
+                                <div className="flex-1">
+                                  <p className="text-slate-600 text-left dark:text-slate-300">Total Amount</p>
+                                </div>
+                                <div className="flex-1 px-1">
+                                  {
+                                    (roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd)) == roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd)))?
+                                    <p className="text-right dark:text-white">{`$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>:
+                                    <p className="text-right dark:text-white">{`$${roundUsdAmount(Number(amountTotalBounds.lowerBoundTotalUsd))}-$${roundUsdAmount(Number(amountTotalBounds.upperBoundTotalUsd))}`}</p>
+                                  }
+                                </div>
+                          </div>
+                    </div>
+                         }
+
+                      </div>
+                      <div className="">
+                      </div>
+                    </div>
+
                     <div className="mx-auto">
-                          <button onClick={()=>handleSwapBuildRequest()} className={`bg-transparent rounded-full hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent my-5`} disabled={isLoading}>      
+                          <button onClick={()=>handleSwapSendRequest()} className={`bg-transparent rounded-full hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl my-8 py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent`} disabled={isLoading}>      
                                   {
                                           !isLoading?"Convert":
                                           <svg role="status" className="inline w-4 h-4 ml-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -358,12 +523,98 @@ const Swap: NextPage = () => {
                     </div>
                 </div>
                 }
+                {
+                  (swapProgress == TxProgress.Complete && txPubData && builtTx && builtTx.swapData && swapAmounts)&& 
+                  <div className="flex flex-col pt-2">
+                    <div className='flex mb-8'>
+                      <div className='flex-1'>
+                        <AiOutlineArrowLeft className="ml-2 hover:cursor-pointer" onClick={()=>handleClickBack()} size="25"/>
+                      </div>
+                      <div className='flex-2'>
+                        <h4 className="font-bold text-xl mx-auto content-center text-green-600">Swap Complete <AiFillCheckCircle className="inline ml-3"/></h4>
+                      </div>
+                      <div className='flex-1'>
+                          {/* space filler */}
+                      </div>
+                    </div>
+                    
+                    <div className="mx-3">
+                    <div className="flex flex-col mb-8 mx-auto">
+                      <div className="flex flex-row mx-auto space-x-3 mb-4">
+                              <div>
+                                <img className="w-10 h-10 rounded-full inline" src={sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.logoURI:sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} image`}/>
+                                {
+                                  sellTokenAndNetwork.tokenData &&
+                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                                }
+                              </div>
+                              <div>
+                                <AiOutlineArrowRight className="mt-1" size="30"/>
+                              </div>
+                              <div>
+                                <img className="w-10 h-10 rounded-full inline" src={buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.logoURI:buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} image`}/>
+                                {
+                                  buyTokenAndNetwork.tokenData &&
+                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                                }
+                              </div>
+                      </div>
+                      <h1 className="font-semibold text-2xl text-center">
+                        Initiated a swap
+                        <br/>
+                        from <span style={{color:`${builtTx.swapData.sellTokenAndNetwork.tokenData?builtTx.swapData.sellTokenAndNetwork.tokenData.tokenDb.hexColor:builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.hexColor}`}}>{formatAmountUi(swapAmounts.sellAmountCrypto.toString(), sellTokenAndNetwork, false)} {formatTicker(sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.symbol:sellTokenAndNetwork.baseNetworkDb.ticker)}</span> to
+                        <br/>
+                        <span className="text-3xl" style={{color:`${buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.hexColor:buyTokenAndNetwork.baseNetworkDb.hexColor}`}}>{formatAmountUi(swapAmounts.sellAmountCrypto.toString(), sellTokenAndNetwork, false)} {formatTicker(buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.symbol:buyTokenAndNetwork.baseNetworkDb.ticker)}</span>
+                      </h1>
+                    </div>
+                   
+                    </div>
+                    {
+                    txPubData.explorerPath &&
+                    <div className="mx-auto mb-4">                 
+                              <a href={txPubData.explorerPath} target="_blank" rel="noopener noreferrer">
+                                <button className={`bg-transparent hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent rounded-lg my-5`} disabled={isLoading}>      
+                                    View Transaction
+                                </button>
+                              </a>
+                    </div>
+                    }
+                   
+                  </div>
+                }
+                {
+                  swapProgress == TxProgress.Failure &&
+                  <div className="flex flex-col pt-2">
+                      <div className='flex mb-4'>
+                          <div className='flex-1'>
+                              {/* space filler */}
+                          </div>
+                          <div className='flex-2'>
+                            <h4 className="font-bold text-xl mx-auto content-center text-red-600">Transaction Failed</h4>
+                          </div>
+                          <div className='flex-1'>
+                              {/* space filler */}
+                          </div>
+                        </div>
+                          {/* error message */}
+                          <div className="mx-4 my-20 mx-auto">
+                            <p className="dark:text-white text-lg"><span className="font-semibold text-gray-600 dark:text-gray-300">Transaction failed with error message:</span> {failureMsg}</p>
+                          </div>
+                          <Divider/>
+                          <div className="mb-4 mx-auto">           
+                                      <button className={`bg-transparent hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent rounded-lg my-5`} onClick={()=>handleCancelTransaction()} disabled={isLoading}>      
+                                          New Transaction
+                                      </button>
+                          </div>
+                  </div>
+                }
             </div>
             </div>
 
         </div>
-
-          <div className={`${!showAssetSearch && "hidden"} modal fixed w-full h-full top-0 left-0 z-50 flex overflow-y-auto`} style={{backgroundColor:`rgba(0, 0, 0, 0.9)`}}>
+        
+        {/* asset search */}
+        <div className={`${!showAssetSearch && "hidden"} modal fixed w-full h-full top-0 left-0 z-50 flex overflow-y-auto`} style={{backgroundColor:`rgba(0, 0, 0, 0.9)`}}>
               {/* top right fixed close button  */}
             <button type="button" className="invisible md:visible text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto fixed top-4 right-5 items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={()=>setShowAssetSearch(false)}>
                             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path></svg>  
@@ -377,7 +628,7 @@ const Swap: NextPage = () => {
                 <div className="dark:text-white bg-white dark:bg-black pt-4 rounded-lg w-[450px] max-w-[450px] min-h-[30rem] md:min-h-[40rem] h-fit md:max-h-[45rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
                     <div className="flex px-2">
                         <div className="flex-1">
-                         <RiArrowLeftLine size={28} className="hover:cursor-pointer hover:text-sky-400" onClick={()=>setShowAssetSearch(false)}/>
+                         <RiArrowLeftLine size={28} className="ml-2 hover:cursor-pointer hover:text-sky-400" onClick={()=>setShowAssetSearch(false)}/>
                         </div>
 
                          <h1 className="text-xl font-bold text-center flex-grow">Select Token</h1>
@@ -390,7 +641,7 @@ const Swap: NextPage = () => {
                     <div className="w-full mt-4">
                       <div className="rounded border border-gray-300 p-2 dark:border-gray-600 max-w-[90%] mx-auto flex flex-row">
                        <RiSearchLine size={26} className="pt-1"/> 
-                      <input type="search" id="search-dropdown" className="ml-2 flex-grow dark:bg-black min-w-[80%] z-20 text-gray-900 text-xl dark:placeholder-gray-400 dark:text-white font-semibold outline-none" placeholder={`Search tokens`} value={query} onChange={(e) => handleQueryChange(e.target.value)}  required/>
+                      <input autoComplete='off' type="search" id="search-dropdown" className="ml-2 flex-grow dark:bg-black min-w-[80%] z-20 text-gray-900 text-xl dark:placeholder-gray-400 dark:text-white font-semibold outline-none" placeholder={`Search tokens`} value={query} onChange={(e) => handleQueryChange(e.target.value)}  required/>
 
                       </div>
                     </div>
