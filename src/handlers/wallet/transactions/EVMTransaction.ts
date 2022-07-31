@@ -1,8 +1,10 @@
+import { secondsToHours } from "date-fns";
 import { utils } from "ethers";
 import { TransactionParameters, SignedTransaction } from "hdseedloop";
+import { includes } from "lodash";
 import { networkFromNetworkDb, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
 import { roundToDecimals } from "../../../helpers/utils/numberUtils";
-import { CreateTransactionParameters, TransactionPublishedData, defaultTxPublishedData, EVMTransactionParams, TransactionRequest, ISignAndSendParameters } from "../../../services/models/transaction";
+import { CreateTransferTransactionParameters, TransactionPublishedData, defaultTxPublishedData, EVMTransactionParams, TransactionRequest, ISignAndSendParameters } from "../../../services/models/transaction";
 
 
 export interface ISignAndSendEVMParameters extends ISignAndSendParameters{
@@ -16,9 +18,8 @@ export const signAndSendEVMTransaction = async function(params:ISignAndSendEVMPa
         txEVM,
         wallet,
         sendAccount,
-        kryptikProvider,
-        networkDb} = params;
-    let network = networkFromNetworkDb(networkDb)
+        kryptikProvider} = params;
+    let network = networkFromNetworkDb(kryptikProvider.networkDb)
     // get provider
     if(!kryptikProvider.ethProvider){
       throw(new Error(`Error: Provider not set for ${network.fullName}`))
@@ -33,15 +34,24 @@ export const signAndSendEVMTransaction = async function(params:ISignAndSendEVMPa
         if(!signedTx.evmFamilyTx) throw(new Error("Error: Unable to sign EVM transaction"));
         let txResponse = await evmProvider.sendTransaction(signedTx.evmFamilyTx);
         txDoneData.hash = txResponse.hash;
+        // set tx. explorer path
+        let txExplorerPath:string|null = getTransactionExplorerPath(kryptikProvider.networkDb, txDoneData);
+        txDoneData.explorerPath = txExplorerPath?txExplorerPath:txDoneData.explorerPath;
     }
-    catch(e){
-        throw(new Error("Error: Unbale to publish transaction"));
+    catch(e:any){
+        let errorMsg:string = e.message.toLowerCase();
+        console.log("error message:");
+        console.log(errorMsg);
+        if(errorMsg.includes("insufficient funds")){
+            throw(new Error("Not enough funds to execute transaction."));
+        }
+        throw(new Error("Unable to publish transaction"));
     }
     return txDoneData;
 }
 
 // creates, signs, and publishes EVM transfer transaction to the blockchain
-export const PublishEVMTransferTx = async function(params:CreateTransactionParameters){
+export const PublishEVMTransferTx = async function(params:CreateTransferTransactionParameters){
     const {tokenAndNetwork,
         amountCrypto,
         txFeeData,
@@ -82,7 +92,6 @@ export const PublishEVMTransferTx = async function(params:CreateTransactionParam
                  // sign and publish tx.
           let sendParams:ISignAndSendEVMParameters = {
               kryptikProvider: kryptikProvider,
-              networkDb: tokenAndNetwork.baseNetworkDb,
               sendAccount: fromAddress,
               txEVM: EVMTransaction,
               wallet: wallet,
@@ -100,13 +109,10 @@ export const PublishEVMTransferTx = async function(params:CreateTransactionParam
             return null;
           }
       }
-      // set tx. explorer path
-      let txExplorerPath:string|null = getTransactionExplorerPath(tokenAndNetwork.baseNetworkDb, txDoneData);
-      txDoneData.explorerPath = txExplorerPath?txExplorerPath:txDoneData.explorerPath;
       return txDoneData;
 }
 
-
+// creates evm transfer transaction
 export const createEVMTransaction = async function(txIn:EVMTransactionParams):Promise<TransactionRequest>{
     const {sendAccount, toAddress, value, gasLimit, maxFeePerGas, maxPriorityFeePerGas, kryptikProvider, networkDb} = txIn;
     if(!kryptikProvider.ethProvider){

@@ -7,8 +7,11 @@ import { createEd25519PubKey, createSolTokenAccount } from "../../../helpers/uti
 import { networkFromNetworkDb, formatTicker, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
 import { lamportsToSol, multByDecimals, roundCryptoAmount, solToLamports } from "../../../helpers/utils/numberUtils";
 import { TokenParamsSpl } from "../../../services/models/token";
-import { CreateTransactionParameters, defaultTxPublishedData, ISignAndSendParameters, SolTransactionParams, TransactionPublishedData } from "../../../services/models/transaction";
+import { CreateTransferTransactionParameters, defaultTxPublishedData, ISignAndSendParameters, SolTransactionParams, TransactionPublishedData } from "../../../services/models/transaction";
 
+export interface SolFamilyTx{
+  txSol:Transaction
+}
 
 export interface ISignAndSendSolParameters extends ISignAndSendParameters{
     txSol:Transaction
@@ -21,13 +24,12 @@ export const signAndSendSOLTransaction = async function(params:ISignAndSendSolPa
         txSol,
         wallet,
         sendAccount,
-        kryptikProvider,
-        networkDb} = params;
+        kryptikProvider} = params;
      // create transaction parameters
      let kryptikTxParams:TransactionParameters = {
         transactionBuffer: txSol.serializeMessage()
       };
-      let network = networkFromNetworkDb(networkDb)
+      let network = networkFromNetworkDb(kryptikProvider.networkDb)
       if(!kryptikProvider.solProvider){
         throw(new Error(`Error: Provider not set for ${network.fullName}`))
       }
@@ -54,20 +56,20 @@ export const signAndSendSOLTransaction = async function(params:ISignAndSendSolPa
             let accountInfo = await solProvider.getAccountInfo(fromPubKey);
             let dataLength:number = accountInfo?accountInfo.data.length:50;
             let minimumAmountSol:number = lamportsToSol(await solProvider.getMinimumBalanceForRentExemption(dataLength));
-            let msg = `Unable to publish ${networkDb.fullName} transaction. Note: Your Solana Account must hold at least ${roundCryptoAmount(minimumAmountSol)} ${formatTicker(networkDb.ticker)} to pay 'rent' for space used on the blockchain.`;
+            let msg = `Unable to publish ${kryptikProvider.networkDb.fullName} transaction. Note: Your Solana Account must hold at least ${roundCryptoAmount(minimumAmountSol)} ${formatTicker(kryptikProvider.networkDb.ticker)} to pay 'rent' for space used on the blockchain.`;
             throw(new Error(msg));
         }
         throw(e);
       }
       // set tx. explorer path
-      let txExplorerPath:string|null = getTransactionExplorerPath(networkDb, txDoneData);
+      let txExplorerPath:string|null = getTransactionExplorerPath(kryptikProvider.networkDb, txDoneData);
       txDoneData.explorerPath = txExplorerPath? txExplorerPath:txDoneData.explorerPath;
       return txDoneData;
 }
 
 
 // creates, signs, and publishes transfer transaction to the blockchain
-export const PublishSolTransferTx = async function(params:CreateTransactionParameters){
+export const PublishSolTransferTx = async function(params:CreateTransferTransactionParameters){
     const {tokenAndNetwork,
         amountCrypto,
         kryptikService,
@@ -105,7 +107,6 @@ export const PublishSolTransferTx = async function(params:CreateTransactionParam
        // sign and publish tx.
       let sendParams:ISignAndSendSolParameters = {
         kryptikProvider: kryptikProvider,
-        networkDb: tokenAndNetwork.baseNetworkDb,
         sendAccount: fromAddress,
         txSol: txSol,
         wallet: wallet,

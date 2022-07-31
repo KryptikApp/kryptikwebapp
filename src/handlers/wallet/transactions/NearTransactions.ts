@@ -13,7 +13,7 @@ import { parseNearAmount } from "near-api-js/lib/utils/format";
 import { numberToBN } from "../../../helpers/utils";
 import { multByDecimals } from "../../../helpers/utils/numberUtils";
 import { networkFromNetworkDb, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
-import { CreateTransactionParameters, TransactionPublishedData, defaultTxPublishedData, NearTransactionParams, ISignAndSendParameters } from "../../../services/models/transaction";
+import {CreateTransferTransactionParameters, TransactionPublishedData, defaultTxPublishedData, NearTransactionParams, ISignAndSendParameters } from "../../../services/models/transaction";
 import { DEFAULT_NEAR_FUNCTION_CALL_GAS, FT_MINIMUM_STORAGE_BALANCE_LARGE, FT_STORAGE_DEPOSIT_GAS } from "../../../constants/nearConstants";
 
 
@@ -28,11 +28,9 @@ export const signAndSendNEARTransaction = async function(params:ISignAndSendNear
     txNear,
     wallet,
     sendAccount,
-    networkDb,
     kryptikProvider} = params;
-  let network = networkFromNetworkDb(networkDb)
   if(!kryptikProvider.nearProvider){
-    throw(new Error(`Error: Provider not set for ${network.fullName}`))
+    throw(new Error(`Error: Provider not set for ${kryptikProvider.networkDb.fullName}`))
   }
   let nearProvider = kryptikProvider.nearProvider;
   const serializedTx:Uint8Array = nearUtils.serialize.serialize(SCHEMA, txNear);
@@ -42,10 +40,10 @@ export const signAndSendNEARTransaction = async function(params:ISignAndSendNear
     transactionBuffer: serializedTxHash
   };
   // sign near transaction
-  const signature = await wallet.seedLoop.signTransaction(sendAccount, kryptikTxParams, network);
+  const signature = await wallet.seedLoop.signTransaction(sendAccount, kryptikTxParams, kryptikProvider.network);
   // ensure signature was created
   if(!signature.nearFamilyTx){
-    throw(new Error(`Error: Unable to create signature for ${network.fullName} base layer transaction`))
+    throw(new Error(`Error: Unable to create signature for ${kryptikProvider.networkDb.fullName} base layer transaction`))
   }
   // tx and signature that will be published to the blockchain
   const signedTransaction:SignedTransaction = new SignedTransaction({
@@ -66,13 +64,13 @@ export const signAndSendNEARTransaction = async function(params:ISignAndSendNear
     throw(e);
   }
   // set tx. explorer path
-  let txExplorerPath:string|null = getTransactionExplorerPath(networkDb, txDoneData);
+  let txExplorerPath:string|null = getTransactionExplorerPath(kryptikProvider.networkDb, txDoneData);
   txDoneData.explorerPath = txExplorerPath? txExplorerPath:txDoneData.explorerPath;
   return txDoneData;
 }
 
 // creates, signs, and publishes NEAR transfer transaction to the blockchain
-export const PublishNEARTransferTx = async function(params:CreateTransactionParameters){
+export const PublishNEARTransferTx = async function(params:CreateTransferTransactionParameters){
     const {tokenAndNetwork,
         amountCrypto,
         contractAddress,
@@ -119,7 +117,6 @@ export const PublishNEARTransferTx = async function(params:CreateTransactionPara
     // sign and publish tx.
     let sendParams:ISignAndSendNearParameters = {
       kryptikProvider: kryptikProvider,
-      networkDb: tokenAndNetwork.baseNetworkDb,
       sendAccount: fromAddress,
       txNear: txNear,
       wallet: wallet,
