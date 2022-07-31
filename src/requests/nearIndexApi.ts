@@ -38,7 +38,6 @@ export const getTokenMetaData = async function(refUrl:string){
   try {
       const dataResponse = await KryptikFetch(refUrl, {
         timeout: 2000, // 2 secs
-        addContentType:false
       });
       return dataResponse.data;
     }
