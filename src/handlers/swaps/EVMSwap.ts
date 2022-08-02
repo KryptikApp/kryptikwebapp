@@ -5,7 +5,7 @@ import { formatTicker, isNetworkArbitrum } from "../../helpers/utils/networkUtil
 import { multByDecimals } from "../../helpers/utils/numberUtils";
 import { IKryptikTxParams, KryptikTransaction } from "../../models/transactions";
 import { ISwapData } from "../../parsers/0xData";
-import { fetch0xSwapOptions } from "../../requests/swaps/0xSwaps";
+import { fetch0xSwapOptions, zeroXParams } from "../../requests/swaps/0xSwaps";
 import { TransactionRequest } from "../../services/models/transaction";
 import { evmFeeDataFromLimits, IEVMGasLimitsParams } from "../fees/EVMFees";
 import { isSwapAvailable } from "./utils";
@@ -24,7 +24,10 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
     const sellTokenId:string|undefined = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.selectedAddress:formatTicker(sellTokenAndNetwork.baseNetworkDb.ticker);
     const buyTokenId:string|undefined = buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.selectedAddress:formatTicker(buyTokenAndNetwork.baseNetworkDb.ticker);
     if(!sellTokenId || !buyTokenId || !sellTokenAndNetwork.baseNetworkDb.evmData || !sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl) return null;
-    const swapData:ISwapData|null = await fetch0xSwapOptions(sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl, buyTokenId, sellTokenId, swapAmount.asNumber);
+    // slippage currently set as default of 3%
+    let slippagePercentage:number = .03
+    let swapReqParams:zeroXParams = {baseUrl:sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl, buyTokenId:buyTokenId, sellTokenId:sellTokenId, sellAmount:swapAmount.asNumber, takerAddress:fromAccount, slippagePercentage:slippagePercentage}
+    const swapData:ISwapData|null = await fetch0xSwapOptions(swapReqParams);
     if(!swapData) return null;
     if(!kryptikProvider.ethProvider){
         throw(new Error(`Error: No EVM provider specified for: ${sellTokenAndNetwork.baseNetworkDb}`));
@@ -52,9 +55,10 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
             return null;
         }
     }
-
+    // add extra gas cushion to estimated gas required 
+    let paddedGasLimit = Number(swapData.gas) + Number(swapData.gas)*.1
     let EVMGasLimitsParams:IEVMGasLimitsParams = {
-        gasLimit: swapData.gas,
+        gasLimit: paddedGasLimit,
         gasPrice: feeData.gasPrice,
         maxFeePerGas: feeData.maxFeePerGas,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
