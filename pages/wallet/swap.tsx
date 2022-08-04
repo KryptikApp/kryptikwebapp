@@ -564,7 +564,7 @@ const Swap: NextPage = () => {
                         <br/>
                         from <span style={{color:`${builtTx.swapData.sellTokenAndNetwork.tokenData?builtTx.swapData.sellTokenAndNetwork.tokenData.tokenDb.hexColor:builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.hexColor}`}}>{formatAmountUi(swapAmounts.sellAmountCrypto.toString(), sellTokenAndNetwork, false)} {formatTicker(sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.symbol:sellTokenAndNetwork.baseNetworkDb.ticker)}</span> to
                         <br/>
-                        <span className="text-3xl" style={{color:`${buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.hexColor:buyTokenAndNetwork.baseNetworkDb.hexColor}`}}>{formatAmountUi(swapAmounts.sellAmountCrypto.toString(), sellTokenAndNetwork, false)} {formatTicker(buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.symbol:buyTokenAndNetwork.baseNetworkDb.ticker)}</span>
+                        <span className="text-3xl" style={{color:`${buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.hexColor:buyTokenAndNetwork.baseNetworkDb.hexColor}`}}>{formatAmountUi(swapAmounts.buyAmountCrypto.toString(), buyTokenAndNetwork, false)} {formatTicker(buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.symbol:buyTokenAndNetwork.baseNetworkDb.ticker)}</span>
                       </h1>
                     </div>
                    
