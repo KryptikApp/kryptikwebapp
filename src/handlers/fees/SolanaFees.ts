@@ -3,7 +3,7 @@ import { INetworkFeeDataParams } from ".";
 import { lamportsToSol } from "../../helpers/utils/numberUtils";
 import { NetworkDb } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
-import TransactionFeeData, {defaultEVMGas} from "../../services/models/transaction";
+import TransactionFeeData, {defaultEVMGas, defaultTransactionFeeData} from "../../services/models/transaction";
 
 
 export interface IFeeDataSolParams extends INetworkFeeDataParams{
@@ -34,4 +34,27 @@ export async function getTransactionFeeDataSolana(params:IFeeDataSolParams):Prom
             EVMGas: defaultEVMGas
         };
         return transactionFeeData;
+}
+
+// combines multiple fee objects...useful when pushing arrays of transactions
+export function AggregateSolFees(txFees:TransactionFeeData[]){
+    let network = txFees[0].network;
+    let masterFee:TransactionFeeData = {
+        network:network,
+        lowerBoundCrypto:0,
+        upperBoundCrypto:0,
+        lowerBoundUSD:0,
+        upperBoundUSD:0,
+        isFresh:true,
+        EVMGas:defaultEVMGas
     }
+    for(const txFee of txFees){
+        // ensure we're batching fee data for the same network!
+        if(txFee.network!=network) return defaultTransactionFeeData;
+        masterFee.lowerBoundCrypto = masterFee.lowerBoundCrypto + txFee.lowerBoundCrypto;
+        masterFee.upperBoundCrypto = masterFee.upperBoundCrypto + txFee.upperBoundCrypto;
+        masterFee.lowerBoundUSD = masterFee.lowerBoundUSD + txFee.lowerBoundUSD;
+        masterFee.upperBoundUSD = masterFee.upperBoundUSD + txFee.upperBoundUSD;
+    }
+    return masterFee;
+}
