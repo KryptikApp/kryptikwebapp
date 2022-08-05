@@ -13,7 +13,7 @@ import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
 import TransactionFeeData, { AmountTotalBounds, CreateTransferTransactionParameters, defaultAmountTotalBounds, defaultTransactionFeeData, defaultTxPublishedData, SolTransactionParams, TransactionPublishedData, TransactionRequest, TxType } from '../../src/services/models/transaction'
-import { createSolTokenTransaction, createSolTransaction } from '../../src/handlers/wallet/transactions/SolTransactions'
+import { createSolTokenTransferTransaction, createSolTransferTransaction } from '../../src/handlers/wallet/transactions/SolTransactions'
 import { Transaction} from '@solana/web3.js'
 import { TokenParamsSpl } from '../../src/services/models/token'
 import {handlePublishTransferTransaction} from '../../src/handlers/wallet/sendHandler'
@@ -168,11 +168,11 @@ const Send: NextPage = () => {
         // add sol token data to input params
         let txSolParams:TokenParamsSpl = selectedTokenAndNetwork.tokenData.tokenParamsSol;
         txIn.tokenParamsSol = txSolParams;
-        txSol = await createSolTokenTransaction(txIn);
+        txSol = await createSolTokenTransferTransaction(txIn);
       }
       // OR send base network sol coin
       else{
-        txSol = await createSolTransaction(txIn);
+        txSol = await createSolTransferTransaction(txIn);
       }
       await fetchNetworkFees(txSol);
       setFeesLoaded(true);
