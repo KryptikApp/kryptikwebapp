@@ -5,24 +5,29 @@ export interface ISwapSource{
     proportion:string
 }
 
+export interface EVMSwapdata{
+    gas: string
+    estimatedGas: string
+    gasPrice: string
+    sellTokenToEthRate: string
+    to: string
+    value: string
+    data: string
+}
+
 export interface ISwapData{
     buyAmount:string
     buyTokenAddress: string
-    chainId: number,
-    data: string,
-    gas: string,
-    guaranteedPrice: string
-    estimatedGas: string,
-    gasPrice: string,
-    minimumProtocolFee: number,
+    chainId: number
+    minimumProtocolFee: number
     price: string
+    guaranteedPrice: string
     protocolFee: string
     sellAmount: string
     sellTokenAddress: string
-    sellTokenToEthRate: string
     sources: ISwapSource[]
-    to: string
-    value: string
+    // evm specific data
+    evmData?:EVMSwapdata
 }
 
 export interface IKryptikSwapData extends ISwapData{
@@ -31,6 +36,8 @@ export interface IKryptikSwapData extends ISwapData{
 }
 
 export function parse0xdata(data:any):ISwapData{
+    let evmSwapData:EVMSwapdata = {...data};
     let dataToReturn:ISwapData = {...data};
+    dataToReturn.evmData = evmSwapData;
     return dataToReturn;
 }
