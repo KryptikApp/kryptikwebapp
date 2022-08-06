@@ -47,8 +47,9 @@ export const getChainDataForNetwork = function(network:NetworkDb, tokenData:Toke
     if(!network.evmData) return null;
     for(const chainInfo of chainDataArray){
         // each contract has a different address depending on the chain
-        // we use the network chainId to extract the correct chaindata
-        if(chainInfo.chainId == network.evmData.chainId){
+        // we use the network chainId + symbol to extract the correct chaindata
+        // remember: chainId may be specific to network
+        if(chainInfo.chainId == network.evmData.chainId && network.ticker.toLowerCase() == chainInfo.ticker.toLowerCase()){
             return chainInfo;
         }
     }
