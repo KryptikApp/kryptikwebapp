@@ -102,7 +102,7 @@ const Recieve: NextPage = () => {
               }
           {/* network dropdown */}
           <div className="max-w-xs mx-auto">
-                      <DropdownNetworks selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleTokenAndNetworkChange}/>
+                      <DropdownNetworks selectedTokenAndNetwork={selectedTokenAndNetwork} onlyNetworks={true} selectFunction={handleTokenAndNetworkChange}/>
           </div>
           </div>
           {
