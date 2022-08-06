@@ -23,8 +23,18 @@ export const formatTicker = function(tickerIn:string):string{
     return tickerIn.toUpperCase(); 
 }
 
-export const isNetworkArbitrum = function(network:NetworkDb){
-    return network.ticker == "eth(arbitrum)";
+export const isNetworkArbitrum = function(network:NetworkDb):boolean{
+    return network.ticker.toLowerCase() == "eth(arbitrum)";
+}
+
+export const isNetworkOptimism = function(network:NetworkDb):boolean{
+    return network.ticker.toLowerCase() == "eth(optimism)";
+}
+
+// true if supports type 2 tx., false otherwise
+export const isEVMTxTypeTwo = function(network:NetworkDb):boolean{
+    if(isNetworkArbitrum(network) || isNetworkOptimism(network) ) return false;
+    return true;
 }
 
 export const networkFromNetworkDb = function(nw: NetworkDb):Network{
