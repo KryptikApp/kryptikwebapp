@@ -10,6 +10,8 @@ import { defaultUser, UserDB, UserExtraData } from "../models/user";
 import Web3Service, { IConnectWalletReturn } from "../services/Web3Service";
 import { networkFromNetworkDb } from "./utils/networkUtils";
 import { IWallet } from "../models/KryptikWallet";
+import { connectKryptikWallet } from "./wallet";
+import { NetworkDb } from "../services/models/network";
 
 
 
@@ -44,6 +46,7 @@ export function useKryptikAuth() {
         }
         catch(e){
           // TODO: ADD BETTER ERROR HANDLER... redirect?
+          console.warn(e);
           console.warn("Error: unable to update kryptik auth context")
         }
         
@@ -53,7 +56,8 @@ export function useKryptikAuth() {
     const ConnectWalletLocalandRemote = async function(ks:Web3Service, user:UserDB, seed?:string):Promise<IWallet>{
       let UserExtraData:UserExtraData = await readExtraUserData(user)
       console.log("running kryptik connect method...");
-      let kryptikConnectionObject:IConnectWalletReturn = await ks.connectKryptikWallet(user.uid, UserExtraData.remoteShare, seed);
+      let networksToAdd:NetworkDb[] = ks.getSupportedNetworkDbs();
+      let kryptikConnectionObject:IConnectWalletReturn = await connectKryptikWallet(user.uid, networksToAdd, UserExtraData.remoteShare, seed);
       console.log("finished kryptik connect!")
         // update remote share on db if value generated on local computer is different
         if(!UserExtraData.remoteShare || kryptikConnectionObject.remoteShare!=UserExtraData.remoteShare){
@@ -120,7 +124,6 @@ export function useKryptikAuth() {
         // start web3 kryptik service
         let ks = await kryptikService.StartSevice();
         setKryptikService(ks);
-        ks.onWalletChanged = walletStateChanged;
         let walletKryptik:IWallet;
         console.log("connecting wallet local and remote");
         if (seed != "") {
