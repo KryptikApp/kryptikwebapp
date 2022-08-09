@@ -71,8 +71,13 @@ export class KryptikTransaction{
     // return s ui formatted swap amounts from internal swap data
     fetchSwapAmounts():SwapAmounts|null{
         if(!this.swapData) return null;
-        let sellTokenAmount = divByDecimals(Number(this.swapData.sellAmount), this.swapData.sellTokenAndNetwork.tokenData?this.swapData.sellTokenAndNetwork.tokenData.tokenDb.decimals:TOKENS.WSOL.decimals);
-        let buyTokenAmount = divByDecimals(Number(this.swapData.buyAmount), this.swapData.buyTokenAndNetwork.tokenData?this.swapData.buyTokenAndNetwork.tokenData.tokenDb.decimals:TOKENS.WSOL.decimals);
+        let sellTokenAmount = divByDecimals(Number(this.swapData.sellAmount), this.swapData.sellTokenAndNetwork.tokenData?this.swapData.sellTokenAndNetwork.tokenData.tokenDb.decimals:this.swapData.sellTokenAndNetwork.baseNetworkDb.decimals);
+        let buyTokenAmount = divByDecimals(Number(this.swapData.buyAmount), this.swapData.buyTokenAndNetwork.tokenData?this.swapData.buyTokenAndNetwork.tokenData.tokenDb.decimals:this.swapData.sellTokenAndNetwork.baseNetworkDb.decimals);
+        // sol swaps use wrapped sol... so use wrapped sol decimals for base network
+        if(this.swapData.sellTokenAndNetwork.baseNetworkDb.ticker.toLowerCase()=="sol"){
+            sellTokenAmount = divByDecimals(Number(this.swapData.sellAmount), this.swapData.sellTokenAndNetwork.tokenData?this.swapData.sellTokenAndNetwork.tokenData.tokenDb.decimals:TOKENS.WSOL.decimals);
+            buyTokenAmount = divByDecimals(Number(this.swapData.buyAmount), this.swapData.buyTokenAndNetwork.tokenData?this.swapData.buyTokenAndNetwork.tokenData.tokenDb.decimals:TOKENS.WSOL.decimals);
+        }
         return {buyAmountCrypto: buyTokenAmount.asNumber, sellAmountCrypto:sellTokenAmount.asNumber}
     }
 
