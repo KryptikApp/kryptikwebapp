@@ -1,9 +1,8 @@
-import { secondsToHours } from "date-fns";
 import { utils } from "ethers";
 import { TransactionParameters, SignedTransaction } from "hdseedloop";
-import { includes } from "lodash";
 import { networkFromNetworkDb, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
 import { roundToDecimals } from "../../../helpers/utils/numberUtils";
+import { CreateEVMContractParameters } from "../../../services/models/token";
 import { CreateTransferTransactionParameters, TransactionPublishedData, defaultTxPublishedData, EVMTransactionParams, TransactionRequest, ISignAndSendParameters } from "../../../services/models/transaction";
 
 
@@ -72,9 +71,21 @@ export const PublishEVMTransferTx = async function(params:CreateTransferTransact
       // amount with correct number of decimals
       let tokenDecimals = tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.decimals:tokenAndNetwork.baseNetworkDb.decimals;
       let amountDecimals = roundToDecimals(Number(amountCrypto), tokenDecimals).toString();
+
       // sign and send erc20 token
-      if(tokenAndNetwork.tokenData && tokenAndNetwork.tokenData.tokenParamsEVM){
-         let txResponse = await tokenAndNetwork.tokenData.tokenParamsEVM.tokenContractConnected.transfer(toAddress, utils.parseEther(amountDecimals));
+      if(tokenAndNetwork.tokenData){
+         // create erc20 contract
+         let erc20ContractParams:CreateEVMContractParameters= {
+            wallet: wallet,
+            networkDb: tokenAndNetwork.baseNetworkDb,
+            erc20Db: tokenAndNetwork.tokenData.tokenDb
+         }
+         let erc20Contract = await kryptikService.createERC20Contract(erc20ContractParams);
+         if(!erc20Contract){
+            errorHandler("Error: Unable to build ERC20 contract", true);
+            return null;
+         }
+         let txResponse = await erc20Contract.transfer(toAddress, utils.parseEther(amountDecimals));
          if(txResponse.hash) txDoneData = {hash:txResponse.hash};
       }
       // sign and send base layer tx.
@@ -88,8 +99,8 @@ export const PublishEVMTransferTx = async function(params:CreateTransferTransact
             gasPrice: txFeeData.EVMGas.gasPrice,
             kryptikProvider:kryptikService.getProviderForNetwork(tokenAndNetwork.baseNetworkDb)
           }
-          let EVMTransaction:TransactionRequest = await createEVMTransaction(evmParams);
-                 // sign and publish tx.
+          let EVMTransaction:TransactionRequest = await createEVMTransferTransaction(evmParams);
+          // sign and publish tx.
           let sendParams:ISignAndSendEVMParameters = {
               kryptikProvider: kryptikProvider,
               sendAccount: fromAddress,
@@ -113,7 +124,7 @@ export const PublishEVMTransferTx = async function(params:CreateTransferTransact
 }
 
 // creates evm transfer transaction
-export const createEVMTransaction = async function(txIn:EVMTransactionParams):Promise<TransactionRequest>{
+export const createEVMTransferTransaction = async function(txIn:EVMTransactionParams):Promise<TransactionRequest>{
     const {sendAccount, toAddress, value, gasLimit, maxFeePerGas, maxPriorityFeePerGas, kryptikProvider, networkDb} = txIn;
     if(!kryptikProvider.ethProvider){
         throw(new Error(`Error: No EVM provider specified for ${networkDb.fullName}`));
