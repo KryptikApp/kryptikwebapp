@@ -54,6 +54,7 @@ export interface SolTransactionParams extends TransactionParams{
 
 export interface NearTransactionParams extends TransactionParams{
     contractAddress?:string,
+    pubKeyString:string,
     txType: TxType,
     decimals: number,
     valueNear:number
@@ -145,6 +146,7 @@ export interface CreateTransferTransactionParameters{
     fromAddress:string,
     contractAddress?:string,
     tokenPriceUsd:number,
+    nearPubKeyString?:string
     errorHandler: IErrorHandler
 }
 

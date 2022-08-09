@@ -10,11 +10,12 @@ import { parseNearAmount } from "near-api-js/lib/utils/format";
 
 import { numberToBN } from "../../../helpers/utils";
 import { multByDecimals } from "../../../helpers/utils/numberUtils";
-import { getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
-import TransactionFeeData, {TransactionPublishedData, NearTransactionParams, ISignAndSendParameters } from "../../../services/models/transaction";
+import { getChainDataForNetwork, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
+import TransactionFeeData, {TransactionPublishedData, NearTransactionParams, ISignAndSendParameters, TxType } from "../../../services/models/transaction";
 import { DEFAULT_NEAR_FUNCTION_CALL_GAS, FT_MINIMUM_STORAGE_BALANCE_LARGE, FT_STORAGE_DEPOSIT_GAS } from "../../../constants/nearConstants";
 import { IKryptikTxParams, KryptikTransaction } from "../../../models/transactions";
 import { getTransactionFeeDataNear } from "../../fees/NearFees";
+import { ChainData } from "../../../services/models/token";
 
 
 export interface ISignAndSendNearParameters extends ISignAndSendParameters{
@@ -61,6 +62,7 @@ export const signAndSendNEARTransaction = async function(params:ISignAndSendNear
       txDoneData.hash = txPostResult.transaction.hash;
   }
   catch(e:any){
+    console.warn(e);
     throw(e);
   }
   // set tx. explorer path
@@ -69,11 +71,7 @@ export const signAndSendNEARTransaction = async function(params:ISignAndSendNear
   return txDoneData;
 }
 
-// let tokenWallet = wallet.seedLoop.getWalletForAddress(network, fromAddress);
-// if(!tokenWallet) return null;
-// let keyPair:nacl.SignKeyPair = tokenWallet.createKeyPair();
-// let nearKey:KeyPairEd25519 = new KeyPairEd25519(baseEncode(keyPair.secretKey));
-// let nearPubKeyString:string = nearKey.publicKey.toString();
+
 
 // wrapper around NEAR transfer creators
 export const BuildNEARTransfer = async function(params:NearTransactionParams):Promise<KryptikTransaction|null>{
@@ -86,8 +84,16 @@ export const BuildNEARTransfer = async function(params:NearTransactionParams):Pr
     }
     let txNear:Transaction;
     // create near token tx.
-    if(tokenAndNetwork.tokenData && tokenAndNetwork.tokenData.tokenParamsNep141){
+    if(txType == TxType.TransferToken){
+      if(!tokenAndNetwork.tokenData){
+        throw(new Error("Error: Token Data not provided for NEAR token transfer."))
+      }
       // add contract address
+      let nep141ChainData:ChainData|null = getChainDataForNetwork(tokenAndNetwork.baseNetworkDb, tokenAndNetwork.tokenData.tokenDb);
+      if(!nep141ChainData){
+        throw(new Error("Error: NEAR token information not provided by tokendb."))
+      }
+      params.contractAddress = nep141ChainData.address;
       txNear = await createNearTokenTransaction(params);
     }
     // create base layer near tx.
@@ -102,7 +108,7 @@ export const BuildNEARTransfer = async function(params:NearTransactionParams):Pr
     let kryptikTxParams:IKryptikTxParams = {
       feeData: kryptikFeeData,
       kryptikTx:{
-          
+          nearTx:txNear
       },
       tokenAndNetwork: tokenAndNetwork,
       tokenPriceUsd: tokenPriceUsd,
@@ -121,10 +127,9 @@ export const createNearTransaction = async function(txIn:NearTransactionParams):
   let amountYocto:string|null = parseNearAmount(txIn.valueNear.toString());
   if(!amountYocto) throw(new Error("Error: Unable to parse near amount"));
   // basic transfer type
-  console.log(amountYocto);
   let bnAmount = numberToBN(amountYocto);
   const actions:Action[] = [transfer(bnAmount)];
-  let pubkey = PublicKey.fromString(txIn.sendAccount);
+  let pubkey = PublicKey.fromString(txIn.pubKeyString);
   const accessKeyResponse = await nearProvider.connection.provider.query<AccessKeyView>({
       request_type: 'view_access_key',
       account_id: txIn.sendAccount,
@@ -175,7 +180,7 @@ export const createNearTokenTransaction = async function(txIn:NearTransactionPar
      actions.push(storageTransferAction);
   }
   actions.push(functionCall("ft_transfer", callArgs, DEFAULT_NEAR_FUNCTION_CALL_GAS, depositAmount))
-  let pubkey = PublicKey.fromString(txIn.sendAccount);
+  let pubkey = PublicKey.fromString(txIn.pubKeyString);
   const accessKeyResponse = await nearProvider.connection.provider.query<AccessKeyView>({
       request_type: 'view_access_key',
       account_id: txIn.sendAccount,

@@ -9,7 +9,7 @@ import { BuildNEARTransfer } from "./NearTransactions";
 import { createSolTokenTransferTransaction, createSolTransferTransaction} from "./SolTransactions";
 
 export async function BuildTransferTx(params:CreateTransferTransactionParameters):Promise<KryptikTransaction|null>{
-    const{kryptikProvider, fromAddress, toAddress, amountCrypto, tokenAndNetwork, tokenPriceUsd} = {...params}
+    const{kryptikProvider, fromAddress, toAddress, amountCrypto, tokenAndNetwork, tokenPriceUsd, nearPubKeyString} = {...params}
     let txType:TxType = tokenAndNetwork.tokenData?TxType.TransferToken:TxType.TransferNative;
     let network =  networkFromNetworkDb(params.tokenAndNetwork.baseNetworkDb);
     console.log(`building transfer tx... from ${fromAddress} to ${toAddress} `)
@@ -52,6 +52,7 @@ export async function BuildTransferTx(params:CreateTransferTransactionParameters
           return tx;
       }
       case(NetworkFamily.Near):{
+        if(!nearPubKeyString) return null;
         let txIn:NearTransactionParams = {
             sendAccount: fromAddress,
             toAddress: toAddress,
@@ -60,7 +61,8 @@ export async function BuildTransferTx(params:CreateTransferTransactionParameters
             decimals: tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.decimals:tokenAndNetwork.baseNetworkDb.decimals,
             tokenAndNetwork: tokenAndNetwork,
             tokenPriceUsd: tokenPriceUsd,
-            txType: txType
+            txType: txType,
+            pubKeyString: nearPubKeyString
         }
         let tx:KryptikTransaction|null = await BuildNEARTransfer(txIn)
         return tx;
