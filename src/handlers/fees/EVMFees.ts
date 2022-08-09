@@ -1,10 +1,11 @@
 import {
     JsonRpcProvider,
 } from '@ethersproject/providers';
-import { BigNumber, utils } from "ethers";
+import { BigNumber, Contract, utils } from "ethers";
 import { INetworkFeeDataParams } from '.';
-import { isNetworkArbitrum, networkFromNetworkDb } from "../../helpers/utils/networkUtils";
-import { divByDecimals, multByDecimals, roundToDecimals } from "../../helpers/utils/numberUtils";
+import { erc20Abi } from '../../abis/erc20Abi';
+import { isEVMTxTypeTwo, isNetworkArbitrum, networkFromNetworkDb } from "../../helpers/utils/networkUtils";
+import { divByDecimals, roundToDecimals } from "../../helpers/utils/numberUtils";
 import { NetworkDb, placeHolderEVMAddress } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
 import { TokenData } from '../../services/models/token';
@@ -25,22 +26,27 @@ export async function getSendTransactionFeeData1559Compatible(params:FeeDataEvmP
         }
         let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
         let feeData = await ethNetworkProvider.getFeeData();
+        
+        console.log("fee data");
+        console.log(feeData);
 
-        // FIX ASAP
-        // ARTIFICIALLY INFLATING ARBITRUM BASE GAS LIMIT, BECAUSE OG VALUE IS TOO SMALL
+        // TODO: 2X CHECK LAYER TWO GAS ESTIMATIONS FOR TRANSFER
+        // ARTIFICIALLY INFLATING ARBITRUM BASE TRANSFER GAS LIMIT, BECAUSE OG VALUE IS TOO SMALL
         let gasLimit:number = isNetworkArbitrum(params.networkDb)?500000:21000;
         if(params.tokenData && params.tokenData.tokenParamsEVM){
             let amount = roundToDecimals(Number(params.amountToken), params.tokenData.tokenDb.decimals);
             // get gaslimit for nonzero amount
             if(amount == 0) amount = 2;
             // get estimated gas limit for token transfer
-            gasLimit = Number(await params.tokenData.tokenParamsEVM.tokenContractConnected.estimateGas.transfer(placeHolderEVMAddress, amount));
+            let erc20Contract = new Contract(params.tokenData.tokenParamsEVM.contractAddress, erc20Abi);
+            erc20Contract = erc20Contract.connect(ethNetworkProvider);
+            gasLimit = Number(await erc20Contract.estimateGas.transfer(placeHolderEVMAddress, amount));
         }
         
         // validate fee data response
         if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
-            // arbitrum uses pre EIP-1559 fee structure
-            if(isNetworkArbitrum(params.networkDb)){
+            // some networks like arbitrum uses pre EIP-1559 fee structure
+            if(!isEVMTxTypeTwo(params.networkDb)){
                 let baseGas = await ethNetworkProvider.getGasPrice();
                 feeData.gasPrice = baseGas;
                 feeData.maxFeePerGas = baseGas;
@@ -77,7 +83,6 @@ export function evmFeeDataFromLimits(params:IEVMGasLimitsParams):TransactionFeeD
     let {gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas, tokenPriceUsd, networkDb} = {...params}
     // calculate u.i. fees in token amount
     let gasPriceConverted:number = Number(utils.formatEther(gasPrice));
-    let maxFeePerGasConverted:number = divByDecimals(Number(maxFeePerGas), networkDb.decimals).asNumber;
     let maxPriorityFeePerGasConverted:number = divByDecimals(Number(maxFeePerGas), networkDb.decimals).asNumber;
     let baseFeePerGasConverted:number = maxPriorityFeePerGasConverted*.3;
 
