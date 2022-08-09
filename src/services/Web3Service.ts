@@ -485,12 +485,13 @@ class Web3Service extends BaseService implements IWeb3Service{
         const solNetwork = this.getNetworkDbByTicker("sol");
         const avaxcNetwork = this.getNetworkDbByTicker("avaxc");
         const arbitrumNetwork = this.getNetworkDbByTicker("eth(arbitrum)");
+        const polygonNetwork = this.getNetworkDbByTicker("matic");
         let indexedNetworks:NetworkDb[] = []
         const addyToNetworks:{[address:string]:NetworkDb[]} = {};
-        if(ethNetwork && solNetwork && arbitrumNetwork && avaxcNetwork){
+        if(ethNetwork && solNetwork && arbitrumNetwork && avaxcNetwork && polygonNetwork){
             let solAddress = await getAddressForNetworkDb(walletUser, solNetwork);
             let ethAddress = await getAddressForNetworkDb(walletUser, ethNetwork);
-            addyToNetworks[ethAddress] = [ethNetwork, arbitrumNetwork, avaxcNetwork];
+            addyToNetworks[ethAddress] = [ethNetwork, arbitrumNetwork, avaxcNetwork, polygonNetwork];
             addyToNetworks[solAddress] = [solNetwork];
         }
         // init covalent balance data
@@ -503,7 +504,6 @@ class Web3Service extends BaseService implements IWeb3Service{
             // nested for loop with the ASSUMPTION THAT INNERLOOP WILL HAVE <10 ITERATIONS
             // get indexed balances for each network
             for(const networkDb of networkDbs){
-
                 let networkChainId:number = networkDb.evmData?networkDb.evmData.chainId:networkDb.chainId;
                 // solana covalent chain id is different
                 if(NetworkFamilyFromFamilyName(networkDb.networkFamilyName) == NetworkFamily.Solana){
@@ -553,9 +553,9 @@ class Web3Service extends BaseService implements IWeb3Service{
                                 }
                             }
                             balancesToReturn = balancesToReturn.concat(tempTokenAndBalances)
+                            // if we got here... indexing was successful... so add network to indexed list
+                            indexedNetworks.push(networkDb);
                         };
-                        // if we got here... indexing was successful... so add network to indexed list
-                        indexedNetworks.push(networkDb);
                     }
                     catch(e){
                         console.warn(`Error: Unable to get indexed balances for ${networkDb.fullName}`);
