@@ -8,6 +8,8 @@ import { BuildSolSwapTransaction } from "./SolanaSwap";
 import { isSwapAvailable } from "./utils";
 
 export interface IBuildSwapParams{
+    // price of the underlying network coin
+    baseCoinPrice:number
     sellTokenAndNetwork:TokenAndNetwork,
     buyTokenAndNetwork:TokenAndNetwork,
     tokenAmount:number,
