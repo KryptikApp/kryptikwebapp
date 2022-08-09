@@ -1,9 +1,13 @@
-import { utils } from "ethers";
+import { Contract } from "ethers";
+import { parseUnits } from "ethers/lib/utils";
 import { TransactionParameters, SignedTransaction } from "hdseedloop";
-import { networkFromNetworkDb, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
-import { roundToDecimals } from "../../../helpers/utils/numberUtils";
-import { CreateEVMContractParameters } from "../../../services/models/token";
-import { CreateTransferTransactionParameters, TransactionPublishedData, defaultTxPublishedData, EVMTransactionParams, TransactionRequest, ISignAndSendParameters } from "../../../services/models/transaction";
+import { erc20Abi } from "../../../abis/erc20Abi";
+import { networkFromNetworkDb, getTransactionExplorerPath, isEVMTxTypeTwo, getChainDataForNetwork } from "../../../helpers/utils/networkUtils";
+import { roundDecimalsByNetworkToken, roundToDecimals } from "../../../helpers/utils/numberUtils";
+import { IKryptikTxParams, KryptikTransaction } from "../../../models/transactions";
+import { ChainData } from "../../../services/models/token";
+import { TransactionPublishedData, defaultTxPublishedData, TransactionRequest, ISignAndSendParameters, EVMTransferTxParams } from "../../../services/models/transaction";
+import { getTransactionFeeDataEVM } from "../../fees/EVMFees";
 
 
 export interface ISignAndSendEVMParameters extends ISignAndSendParameters{
@@ -49,117 +53,72 @@ export const signAndSendEVMTransaction = async function(params:ISignAndSendEVMPa
     return txDoneData;
 }
 
-// creates, signs, and publishes EVM transfer transaction to the blockchain
-export const PublishEVMTransferTx = async function(params:CreateTransferTransactionParameters){
-    const {tokenAndNetwork,
-        amountCrypto,
-        txFeeData,
-        kryptikService,
-        wallet,
-        toAddress,
-        fromAddress,
-        errorHandler} = params;
-    let network =  networkFromNetworkDb(tokenAndNetwork.baseNetworkDb);
-    let kryptikProvider = kryptikService.getProviderForNetwork(tokenAndNetwork.baseNetworkDb);
-    let txDoneData:TransactionPublishedData = {hash:""}
-
+// creates evm transfer transaction for erc20 or coin on base network
+export const createEVMTransferTransaction = async function(txIn:EVMTransferTxParams):Promise<KryptikTransaction|null>{
+    const {sendAccount, toAddress, valueCrypto, kryptikProvider, tokenAndNetwork, tokenPriceUsd} = txIn;
     if(!kryptikProvider.ethProvider){
-        errorHandler(`Error: Provider not set for ${network.fullName}`);
-        return null;
-      }
-      let ethProvider = kryptikProvider.ethProvider;
-      // amount with correct number of decimals
-      let tokenDecimals = tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.decimals:tokenAndNetwork.baseNetworkDb.decimals;
-      let amountDecimals = roundToDecimals(Number(amountCrypto), tokenDecimals).toString();
-
-      // sign and send erc20 token
-      if(tokenAndNetwork.tokenData){
-         // create erc20 contract
-         let erc20ContractParams:CreateEVMContractParameters= {
-            wallet: wallet,
-            networkDb: tokenAndNetwork.baseNetworkDb,
-            erc20Db: tokenAndNetwork.tokenData.tokenDb
-         }
-         let erc20Contract = await kryptikService.createERC20Contract(erc20ContractParams);
-         if(!erc20Contract){
-            errorHandler("Error: Unable to build ERC20 contract", true);
-            return null;
-         }
-         let txResponse = await erc20Contract.transfer(toAddress, utils.parseEther(amountDecimals));
-         if(txResponse.hash) txDoneData = {hash:txResponse.hash};
-      }
-      // sign and send base layer tx.
-      else{
-          let evmParams:EVMTransactionParams = {
-            value: utils.parseEther(amountDecimals), sendAccount: fromAddress,
-            toAddress: toAddress, gasLimit: txFeeData.EVMGas.gasLimit, 
-            maxFeePerGas:txFeeData.EVMGas.maxFeePerGas, 
-            maxPriorityFeePerGas:txFeeData.EVMGas.maxPriorityFeePerGas, 
-            networkDb:tokenAndNetwork.baseNetworkDb, 
-            gasPrice: txFeeData.EVMGas.gasPrice,
-            kryptikProvider:kryptikService.getProviderForNetwork(tokenAndNetwork.baseNetworkDb)
-          }
-          let EVMTransaction:TransactionRequest = await createEVMTransferTransaction(evmParams);
-          // sign and publish tx.
-          let sendParams:ISignAndSendEVMParameters = {
-              kryptikProvider: kryptikProvider,
-              sendAccount: fromAddress,
-              txEVM: EVMTransaction,
-              wallet: wallet,
-          }
-          try{
-            txDoneData = await signAndSendEVMTransaction(sendParams);
-          }
-          catch(e:any){
-            if(e.message){
-                errorHandler(e.message, true)
-            }
-            else{
-                errorHandler(`Unable to publish ${tokenAndNetwork.baseNetworkDb.fullName} transaction.`)
-            }
-            return null;
-          }
-      }
-      return txDoneData;
-}
-
-// creates evm transfer transaction
-export const createEVMTransferTransaction = async function(txIn:EVMTransactionParams):Promise<TransactionRequest>{
-    const {sendAccount, toAddress, value, gasLimit, maxFeePerGas, maxPriorityFeePerGas, kryptikProvider, networkDb} = txIn;
-    if(!kryptikProvider.ethProvider){
-        throw(new Error(`Error: No EVM provider specified for ${networkDb.fullName}`));
+        throw(new Error(`Error: No EVM provider specified for ${tokenAndNetwork.baseNetworkDb.fullName}`));
     };
-    if(!networkDb.evmData){
-        throw(new Error(`Error: No EVM DATA specified for ${networkDb.fullName} network model`));
+    if(!tokenAndNetwork.baseNetworkDb.evmData){
+        throw(new Error(`Error: No EVM DATA specified for ${tokenAndNetwork.baseNetworkDb.fullName} network model`));
     }
     let ethProvider = kryptikProvider.ethProvider;
     let accountNonce = await ethProvider.getTransactionCount(sendAccount, "latest");
-    let chainIdEVM = networkDb.evmData.chainId;
+    let chainIdEVM = tokenAndNetwork.baseNetworkDb.evmData.chainId;
     let tx:TransactionRequest;
-    // UPDATE SO BETTER TYPE 1 VS. TYPE 2 CASING
-    if(txIn.networkDb.ticker != "eth(arbitrum)"){
+    let tokenDecimals:number = tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.decimals:tokenAndNetwork.baseNetworkDb.decimals;
+    let roundedAmountCrypto = roundToDecimals(valueCrypto, tokenDecimals);
+    let value = parseUnits(roundedAmountCrypto.toString(), tokenDecimals)
+    console.log("EVM tx value:");
+
+    if(!tokenAndNetwork.tokenData){
+        console.log("building regular eth transaction...");
+        console.log(value);
         tx = {
             from: sendAccount,
             to: toAddress,
             value: value,
             nonce: accountNonce,
-            gasLimit: gasLimit,
             chainId: chainIdEVM,
-            type:2,
-            maxFeePerGas: maxFeePerGas,
-            maxPriorityFeePerGas: maxPriorityFeePerGas,
         }
+    }
+    // creates evm transfer tx for ERC20 token
+    else{
+        let erc20ChainData:ChainData|null = getChainDataForNetwork(txIn.tokenAndNetwork.baseNetworkDb, tokenAndNetwork.tokenData.tokenDb);
+        if(!erc20ChainData) return null;
+        let erc20Contract = new Contract(erc20ChainData.address, erc20Abi);
+        if(!erc20Contract){
+            return null;
+        }
+        tx = await erc20Contract.populateTransaction.transfer(txIn.toAddress, value);
+        tx.from = sendAccount;
+        tx.chainId = chainIdEVM;
+    }
+    tx.nonce = accountNonce;
+
+    let kryptikFeeData = await getTransactionFeeDataEVM({kryptikProvider: kryptikProvider, tokenPriceUsd:tokenPriceUsd, tx:tx, networkDb:tokenAndNetwork.baseNetworkDb})
+
+
+    if(isEVMTxTypeTwo(tokenAndNetwork.baseNetworkDb)){
+        tx.type = 2;
+        tx.maxPriorityFeePerGas = kryptikFeeData.EVMGas.maxPriorityFeePerGas;
+        tx.gasLimit = kryptikFeeData.EVMGas.gasLimit;
+        tx.maxFeePerGas = kryptikFeeData.EVMGas.maxFeePerGas
     }
     else{
-        tx = {
-            from: sendAccount,
-            to: toAddress,
-            value: value,
-            nonce: accountNonce,
-            gasLimit: gasLimit,
-            chainId: chainIdEVM,
-            gasPrice: txIn.gasPrice
-        }
+        tx.gasLimit = kryptikFeeData.EVMGas.gasLimit;
+        tx.gasPrice = kryptikFeeData.EVMGas.gasPrice;
     }
-    return tx;
+
+    // create krptik tx. object
+    let kryptikTxParams:IKryptikTxParams = {
+        feeData: kryptikFeeData,
+        kryptikTx:{
+            evmTx: tx
+        },
+        tokenAndNetwork: txIn.tokenAndNetwork,
+        tokenPriceUsd: txIn.tokenPriceUsd,
+      }
+    let kryptikTx:KryptikTransaction = new KryptikTransaction(kryptikTxParams);
+    return kryptikTx;
 }

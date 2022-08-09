@@ -1,20 +1,20 @@
 import { TransactionParameters } from "hdseedloop";
-import { KeyPairEd25519 } from "near-api-js/lib/utils";
 import { Transaction, SCHEMA, SignedTransaction, Signature, Action, createTransaction, functionCall, transfer } from "near-api-js/lib/transaction";
-import {baseEncode} from "borsh"
 import { Near, utils as nearUtils } from "near-api-js";
 import * as sha256 from "fast-sha256"
 import { FinalExecutionOutcome } from "near-api-js/lib/providers";
 import { KeyType, PublicKey } from "near-api-js/lib/utils/key_pair";
 import BN from "bn.js";
-import { AccessKeyView, BlockResult, ExecutionStatusBasic, FinalExecutionStatusBasic } from "near-api-js/lib/providers/provider";
+import { AccessKeyView, BlockResult } from "near-api-js/lib/providers/provider";
 import { parseNearAmount } from "near-api-js/lib/utils/format";
 
 import { numberToBN } from "../../../helpers/utils";
 import { multByDecimals } from "../../../helpers/utils/numberUtils";
-import { networkFromNetworkDb, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
-import {CreateTransferTransactionParameters, TransactionPublishedData, defaultTxPublishedData, NearTransactionParams, ISignAndSendParameters } from "../../../services/models/transaction";
+import { getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
+import TransactionFeeData, {TransactionPublishedData, NearTransactionParams, ISignAndSendParameters } from "../../../services/models/transaction";
 import { DEFAULT_NEAR_FUNCTION_CALL_GAS, FT_MINIMUM_STORAGE_BALANCE_LARGE, FT_STORAGE_DEPOSIT_GAS } from "../../../constants/nearConstants";
+import { IKryptikTxParams, KryptikTransaction } from "../../../models/transactions";
+import { getTransactionFeeDataNear } from "../../fees/NearFees";
 
 
 export interface ISignAndSendNearParameters extends ISignAndSendParameters{
@@ -69,73 +69,53 @@ export const signAndSendNEARTransaction = async function(params:ISignAndSendNear
   return txDoneData;
 }
 
-// creates, signs, and publishes NEAR transfer transaction to the blockchain
-export const PublishNEARTransferTx = async function(params:CreateTransferTransactionParameters){
+// let tokenWallet = wallet.seedLoop.getWalletForAddress(network, fromAddress);
+// if(!tokenWallet) return null;
+// let keyPair:nacl.SignKeyPair = tokenWallet.createKeyPair();
+// let nearKey:KeyPairEd25519 = new KeyPairEd25519(baseEncode(keyPair.secretKey));
+// let nearPubKeyString:string = nearKey.publicKey.toString();
+
+// wrapper around NEAR transfer creators
+export const BuildNEARTransfer = async function(params:NearTransactionParams):Promise<KryptikTransaction|null>{
     const {tokenAndNetwork,
-        amountCrypto,
-        contractAddress,
-        kryptikService,
-        wallet,
-        toAddress,
-        fromAddress,
-        errorHandler} = params;
-    let network =  networkFromNetworkDb(tokenAndNetwork.baseNetworkDb);
-    let kryptikProvider = kryptikService.getProviderForNetwork(tokenAndNetwork.baseNetworkDb);
-    let txDoneData:TransactionPublishedData = defaultTxPublishedData;
+        tokenPriceUsd,
+        kryptikProvider,
+        txType} = params;
     if(!kryptikProvider.nearProvider){
-        errorHandler(`Error: Provider not set for ${network.fullName}`);
         return null;
-    }
-    let nearProvider = kryptikProvider.nearProvider;
-    // get special address for near
-    let tokenWallet = wallet.seedLoop.getWalletForAddress(network, fromAddress);
-    if(!tokenWallet) return null;
-    let keyPair:nacl.SignKeyPair = tokenWallet.createKeyPair();
-    let nearKey:KeyPairEd25519 = new KeyPairEd25519(baseEncode(keyPair.secretKey));
-    let nearPubKeyString:string = nearKey.publicKey.toString();
-    let txIn:NearTransactionParams = {
-      sendAccount: fromAddress,
-      nearPubKeyString: nearPubKeyString,
-      toAddress: toAddress,
-      contractAddress: contractAddress,
-      valueNear: Number(amountCrypto),
-      kryptikProvider: kryptikProvider,
-      decimals: tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.decimals:tokenAndNetwork.baseNetworkDb.decimals,
-      networkDb: tokenAndNetwork.baseNetworkDb
     }
     let txNear:Transaction;
     // create near token tx.
     if(tokenAndNetwork.tokenData && tokenAndNetwork.tokenData.tokenParamsNep141){
       // add contract address
-      txIn.contractAddress = tokenAndNetwork.tokenData.tokenParamsNep141.contractAddress;
-      txNear = await createNearTokenTransaction(txIn);
+      txNear = await createNearTokenTransaction(params);
     }
     // create base layer near tx.
     else{
-      txNear = await createNearTransaction(txIn);
+      txNear = await createNearTransaction(params);
     }
-    // sign and publish tx.
-    let sendParams:ISignAndSendNearParameters = {
-      kryptikProvider: kryptikProvider,
-      sendAccount: fromAddress,
-      txNear: txNear,
-      wallet: wallet,
+
+    // get expected tx fee.. used for UI
+    let kryptikFeeData:TransactionFeeData = await getTransactionFeeDataNear({tokenPriceUsd:tokenPriceUsd, kryptikProvider:kryptikProvider, txType:txType, networkDb:tokenAndNetwork.baseNetworkDb})
+
+    // create krptik tx. object
+    let kryptikTxParams:IKryptikTxParams = {
+      feeData: kryptikFeeData,
+      kryptikTx:{
+          
+      },
+      tokenAndNetwork: tokenAndNetwork,
+      tokenPriceUsd: tokenPriceUsd,
     }
-    try{
-      let publishResponse = await signAndSendNEARTransaction(sendParams);
-      txDoneData = publishResponse;
-    }
-    catch(e:any){
-      errorHandler(e.message, true)
-      return null;
-    }
-    return txDoneData;
+    let kryptikTx:KryptikTransaction = new KryptikTransaction(kryptikTxParams);
+
+    return kryptikTx;
 }
 
 
 // tx: basic send of base near coin
 export const createNearTransaction = async function(txIn:NearTransactionParams):Promise<Transaction>{
-  if(!txIn.kryptikProvider.nearProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
+  if(!txIn.kryptikProvider.nearProvider) throw(new Error(`No provider set for ${txIn.tokenAndNetwork.baseNetworkDb.fullName}. Unable to create transaction.`));
   let nearProvider = txIn.kryptikProvider.nearProvider;
   // convert near amount to yocto units.. similar to wei for ethereum
   let amountYocto:string|null = parseNearAmount(txIn.valueNear.toString());
@@ -144,7 +124,7 @@ export const createNearTransaction = async function(txIn:NearTransactionParams):
   console.log(amountYocto);
   let bnAmount = numberToBN(amountYocto);
   const actions:Action[] = [transfer(bnAmount)];
-  let pubkey = PublicKey.fromString(txIn.nearPubKeyString);
+  let pubkey = PublicKey.fromString(txIn.sendAccount);
   const accessKeyResponse = await nearProvider.connection.provider.query<AccessKeyView>({
       request_type: 'view_access_key',
       account_id: txIn.sendAccount,
@@ -165,7 +145,7 @@ export const createNearTransaction = async function(txIn:NearTransactionParams):
 }
 
 export const createNearTokenTransaction = async function(txIn:NearTransactionParams){
-  if(!txIn.kryptikProvider.nearProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
+  if(!txIn.kryptikProvider.nearProvider) throw(new Error(`No provider set for ${txIn.tokenAndNetwork.baseNetworkDb.fullName}. Unable to create transaction.`));
   if(!txIn.contractAddress) throw(new Error("Error: No contract address provided for Near Token Transfer."));
   let nearProvider = txIn.kryptikProvider.nearProvider;
   // convert near amount to yocto units.. similar to wei for ethereum
@@ -195,7 +175,7 @@ export const createNearTokenTransaction = async function(txIn:NearTransactionPar
      actions.push(storageTransferAction);
   }
   actions.push(functionCall("ft_transfer", callArgs, DEFAULT_NEAR_FUNCTION_CALL_GAS, depositAmount))
-  let pubkey = PublicKey.fromString(txIn.nearPubKeyString);
+  let pubkey = PublicKey.fromString(txIn.sendAccount);
   const accessKeyResponse = await nearProvider.connection.provider.query<AccessKeyView>({
       request_type: 'view_access_key',
       account_id: txIn.sendAccount,

@@ -7,8 +7,10 @@ import { createEd25519PubKey, createSolTokenAccount } from "../../../helpers/uti
 import { networkFromNetworkDb, formatTicker, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
 import { lamportsToSol, multByDecimals, roundCryptoAmount, solToLamports } from "../../../helpers/utils/numberUtils";
 import { TokenParamsSpl } from "../../../services/models/token";
-import { CreateTransferTransactionParameters, defaultTxPublishedData, ISignAndSendParameters, SolTransactionParams, TransactionPublishedData } from "../../../services/models/transaction";
+import TransactionFeeData, { CreateTransferTransactionParameters, defaultTxPublishedData, ISignAndSendParameters, SolTransactionParams, TransactionPublishedData } from "../../../services/models/transaction";
 import { IWallet } from "../../../models/KryptikWallet";
+import { IKryptikTxParams, KryptikTransaction } from "../../../models/transactions";
+import { getTransactionFeeDataSolana } from "../../fees/SolanaFees";
 
 export interface SolFamilyTx{
   txs:Transaction
@@ -107,69 +109,9 @@ export async function SignTransaction(txSol:Transaction, wallet:IWallet, sendAcc
   return txSol;
 }
 
-
-// creates, signs, and publishes transfer transaction to the blockchain
-export const PublishSolTransferTx = async function(params:CreateTransferTransactionParameters){
-    const {tokenAndNetwork,
-        amountCrypto,
-        kryptikService,
-        wallet,
-        toAddress,
-        fromAddress,
-        errorHandler} = params;
-    let network =  networkFromNetworkDb(tokenAndNetwork.baseNetworkDb);
-    let kryptikProvider = kryptikService.getProviderForNetwork(tokenAndNetwork.baseNetworkDb);
-    let txDoneData:TransactionPublishedData = defaultTxPublishedData;
-    if(!kryptikProvider.solProvider){
-        errorHandler(`Error: Provider not set for ${network.fullName}`);
-        return null;
-      }
-      let txIn:SolTransactionParams = {
-        sendAccount: fromAddress,
-        toAddress: toAddress,
-        valueSol: Number(amountCrypto),
-        kryptikProvider: kryptikProvider,
-        decimals: tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.decimals:tokenAndNetwork.baseNetworkDb.decimals,
-        networkDb: tokenAndNetwork.baseNetworkDb
-      }
-      let txSol:Transaction;
-      // create sol token 
-      if(tokenAndNetwork.tokenData && tokenAndNetwork.tokenData.tokenParamsSol){
-        // add sol token data to input params
-        let txSolData:TokenParamsSpl = tokenAndNetwork.tokenData.tokenParamsSol;
-        txIn.tokenParamsSol = txSolData;
-        txSol = await createSolTokenTransferTransaction(txIn);
-      }
-      // create base layer sol tx.
-      else{
-        txSol = await createSolTransferTransaction(txIn);
-      }
-       // sign and publish tx.
-      let sendParams:ISignAndSendSolParameters = {
-        kryptikProvider: kryptikProvider,
-        sendAccount: fromAddress,
-        txs: [txSol],
-        wallet: wallet,
-      }
-      try{
-        txDoneData = await signAndSendSOLTransaction(sendParams)
-      }
-      catch(e:any){
-        if(e.message){
-            errorHandler(e.message, true)
-        }
-        else{
-            errorHandler(`Unable to publish ${txIn.networkDb.fullName} transaction.`)
-        }
-        return null;
-      }
-      return txDoneData;
-  }
-
-
-  // tx: basic send of base sol coin
-export const createSolTransferTransaction = async function(txIn:SolTransactionParams):Promise<Transaction>{
-    if(!txIn.kryptikProvider.solProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
+// tx: basic send of base sol coin
+export const createSolTransferTransaction = async function(txIn:SolTransactionParams):Promise<KryptikTransaction>{
+    if(!txIn.kryptikProvider.solProvider) throw(new Error(`No provider set for ${txIn.tokenAndNetwork.baseNetworkDb.fullName}. Unable to create transaction.`));
     let fromPubKey:PublicKey = new PublicKey(txIn.sendAccount);
     let toPubKey:PublicKey = new PublicKey(txIn.toAddress);
     let transaction:Transaction = new Transaction().add(
@@ -182,13 +124,30 @@ export const createSolTransferTransaction = async function(txIn:SolTransactionPa
     let lastBlockHash = await txIn.kryptikProvider.solProvider.getLatestBlockhash('finalized');
     transaction.recentBlockhash = lastBlockHash.blockhash;
     transaction.feePayer = fromPubKey;
-    return transaction;
+
+    // get expected tx fee.. used for UI
+    let kryptikFeeData:TransactionFeeData = await getTransactionFeeDataSolana({transaction:transaction, kryptikProvider:txIn.kryptikProvider,
+      tokenPriceUsd:txIn.tokenPriceUsd, 
+      networkDb:txIn.tokenAndNetwork.baseNetworkDb});
+
+    // create krptik tx. object
+    let kryptikTxParams:IKryptikTxParams = {
+      feeData: kryptikFeeData,
+      kryptikTx:{
+          solTx: [transaction]
+      },
+      tokenAndNetwork: txIn.tokenAndNetwork,
+      tokenPriceUsd: txIn.tokenPriceUsd,
+    }
+    let kryptikTx:KryptikTransaction = new KryptikTransaction(kryptikTxParams);
+    return kryptikTx;
 }
 
+// TODO: FIX TO SUPPORT SENDS TO ADDYS THAT ALREADY HAVE TOKEN ACCOUNT
 // tx: send token that lives on solana blockchain
-export const createSolTokenTransferTransaction = async function(txIn:SolTransactionParams){
-    if(!txIn.kryptikProvider.solProvider) throw(new Error(`No provider set for ${txIn.networkDb.fullName}. Unable to create transaction.`));
-    if(!txIn.tokenParamsSol) throw(new Error(`No token data provided for ${txIn.networkDb.fullName}. Unable to create transaction.`));
+export const createSolTokenTransferTransaction = async function(txIn:SolTransactionParams):Promise<KryptikTransaction>{
+    if(!txIn.kryptikProvider.solProvider) throw(new Error(`No provider set for ${txIn.tokenAndNetwork.baseNetworkDb.fullName}. Unable to create transaction.`));
+    if(!txIn.tokenParamsSol) throw(new Error(`No token data provided for ${txIn.tokenAndNetwork.baseNetworkDb.fullName}. Unable to create transaction.`));
     let transaction:Transaction = new Transaction();
     // destination token account for transfer
     let toPubkey = createEd25519PubKey(txIn.toAddress);
@@ -221,5 +180,22 @@ export const createSolTokenTransferTransaction = async function(txIn:SolTransact
     let lastBlockHash = await txIn.kryptikProvider.solProvider.getLatestBlockhash('finalized');
     transaction.recentBlockhash = lastBlockHash.blockhash;
     transaction.feePayer = fromPubKey;
-    return transaction;
+
+    // get expected tx fee.. used for UI
+    let kryptikFeeData:TransactionFeeData = await getTransactionFeeDataSolana({transaction:transaction, kryptikProvider:txIn.kryptikProvider,
+      tokenPriceUsd:txIn.tokenPriceUsd, 
+      networkDb:txIn.tokenAndNetwork.baseNetworkDb});
+
+    // create krptik tx. object
+    let kryptikTxParams:IKryptikTxParams = {
+      feeData: kryptikFeeData,
+      kryptikTx:{
+          solTx: [transaction]
+      },
+      tokenAndNetwork: txIn.tokenAndNetwork,
+      tokenPriceUsd: txIn.tokenPriceUsd,
+    }
+    let kryptikTx:KryptikTransaction = new KryptikTransaction(kryptikTxParams);
+
+    return kryptikTx;
 }
