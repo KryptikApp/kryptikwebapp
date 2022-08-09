@@ -1,5 +1,4 @@
-import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
-import * as splToken from "@solana/spl-token"
+import { PublicKey, Transaction } from "@solana/web3.js";
 
 
 
@@ -7,17 +6,12 @@ import { IBuildSwapParams } from ".";
 import { createEd25519PubKey, createSolTokenAccount } from "../../helpers/utils/accountUtils";
 import { multByDecimals } from "../../helpers/utils/numberUtils";
 import { IKryptikTxParams, KryptikTransaction } from "../../models/transactions";
-import { NATIVE_SOL_MINT } from "../../constants/solConstants";
-import { getPoolByTokenMintAddresses, LiquidityPoolInfo } from "../../helpers/DEXs/raydium/pools";
 import { TOKENS } from "../../helpers/DEXs/raydium/tokens";
-import { closeAccount } from "../wallet/transactions/SolanaInstructions";
-import { isSwapAvailable, swapInstruction } from "./utils";
-import { TokenAmount } from "../../helpers/DEXs/raydium/utils";
+import { isSwapAvailable} from "./utils";
 import { ISwapData } from "../../parsers/0xData";
 import TransactionFeeData from "../../services/models/transaction";
 import { getTransactionFeeDataSolana } from "../fees/SolanaFees";
 import { getOneSolSwapTransactions, IOneSOlSwapInfo } from "../../helpers/DEXs/1Sol";
-import { OnesolProtocol } from "@onesol/onesol-sdk";
 
 export interface IBuildSolSwapParams extends IBuildSwapParams{
     // empty for now
