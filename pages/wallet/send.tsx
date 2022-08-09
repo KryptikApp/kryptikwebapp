@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
-import { defaultTokenAndNetwork, placeHolderSolAddress } from '../../src/services/models/network'
+import { defaultTokenAndNetwork } from '../../src/services/models/network'
 import { TxProgress, ServiceState } from '../../src/services/types'
 import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapLine} from "react-icons/ri"
@@ -12,17 +12,14 @@ import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper'
 import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import DropdownNetworks from '../../components/DropdownNetworks'
-import TransactionFeeData, { AmountTotalBounds, CreateTransferTransactionParameters, defaultAmountTotalBounds, defaultTransactionFeeData, defaultTxPublishedData, SolTransactionParams, TransactionPublishedData, TransactionRequest, TxType } from '../../src/services/models/transaction'
-import { createSolTokenTransferTransaction, createSolTransferTransaction } from '../../src/handlers/wallet/transactions/SolTransactions'
-import { Transaction} from '@solana/web3.js'
-import { TokenParamsSpl } from '../../src/services/models/token'
-import {handlePublishTransferTransaction} from '../../src/handlers/wallet/sendHandler'
+import { AmountTotalBounds, CreateTransferTransactionParameters, defaultAmountTotalBounds, defaultTransactionFeeData, defaultTxPublishedData, TransactionPublishedData, TxType } from '../../src/services/models/transaction'
 import TxFee from '../../components/transactions/TxFee'
 import { networkFromNetworkDb, formatTicker } from '../../src/helpers/utils/networkUtils'
 import { roundUsdAmount, formatAmountUi, roundCryptoAmount } from '../../src/helpers/utils/numberUtils'
-import { getAddressForNetworkDb, isValidAddress } from '../../src/helpers/utils/accountUtils'
+import { getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils'
 import { defaultResolvedAccount, IAccountResolverParams, resolveAccount } from '../../src/helpers/resolvers/accountResolver'
-import { getSendTransactionFeeData, IFeeDataParameters } from '../../src/handlers/fees'
+import { KryptikTransaction } from '../../src/models/transactions'
+import { BuildTransferTx } from '../../src/handlers/wallet/transactions/transfer'
 
 
 
@@ -36,11 +33,14 @@ const Send: NextPage = () => {
   const [isInputCrypto, setIsInputCrypto] = useState(false);
   const [amountUSD, setAmountUSD] = useState("0");
   const [dropdownLoaded, setDropDownLoaded] = useState(false);
-  const [feesLoaded, setFeesLoaded] = useState(false);
+  const [feesLoaded, setFeesLoaded] = useState(true);
   const [amountTotalBounds, setAmountTotalbounds] = useState<AmountTotalBounds>(defaultAmountTotalBounds);
   const [transactionFeeData, setTransactionFeedata] = useState(defaultTransactionFeeData)
   const [txPubData, setTxPubData] = useState<TransactionPublishedData>(defaultTxPublishedData);
+  // token price for currently selected token + network
   const [tokenPrice, setTokenPrice] = useState(0);
+  // token price for base network coin
+  const [baseCoinPrice, setBaseCoinPrice] = useState(0);
   const [fromAddress, setFromAddress] = useState(kryptikWallet.resolvedEthAccount.address);
   const [toAddress, setToAddress] = useState("");
   const [toResolvedAccount, setToResolvedAccount] = useState(defaultResolvedAccount);
@@ -52,6 +52,8 @@ const Send: NextPage = () => {
   const [isLoading, setisLoading] = useState(false);
   const [progress, setProgress] = useState<TxProgress>(TxProgress.Begin);
   const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
+  // kryptik tx state
+  const[builtTx, setBuiltTx] = useState<KryptikTransaction|null>(null);
 
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
@@ -67,21 +69,11 @@ const Send: NextPage = () => {
     updateTotalBounds();
   }, [amountUSD, transactionFeeData]);
 
-  // get solana tx. fees upon review
-  useEffect(()=>{
-    if(progress != TxProgress.Rewiew){
-      return;
-    }
-    setFeesLoaded(false);
-    fetchSolTransactionFees();
-    setFeesLoaded(true);
-  }, [progress]);
 
   // get data on token/network change
   useEffect(()=>{
     fetchFromAddress();
     fetchTokenPrice();
-    fetchNetworkFees();
     handleAmountChange("0");
 }, [selectedTokenAndNetwork]);
 
@@ -108,74 +100,13 @@ const Send: NextPage = () => {
     selectedTokenAndNetwork.baseNetworkDb.coingeckoId;
     let tokenPriceCoinGecko:number = await getPriceOfTicker(coingeckoId);
     setTokenPrice(tokenPriceCoinGecko);
-  }
-
-  // get fees for selected network
-  const fetchNetworkFees = async(solTx?:Transaction) =>{
-    setFeesLoaded(false);
-    // if token data present.. tx is a token transfer.... otherwise tx type is a native coin transfer
-    let txType:TxType = selectedTokenAndNetwork.tokenData?TxType.TransferToken:TxType.TransferNative;
-    let nw:Network =  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
-    // use instead of from address as react state may not have updated
-    let accountAddress = await getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
-    let kryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
-    let feeDataParams:IFeeDataParameters = {
-      kryptikProvider: kryptikProvider,
-      networkDb: selectedTokenAndNetwork.baseNetworkDb,
-      tokenData: selectedTokenAndNetwork.tokenData,
-      amountToken: amountCrypto,
-      sendAccount: accountAddress,
-      txType: txType,
-      solTransaction: solTx
-    }
-    // fee data returned from service
-    let transactionFeeDataFresh:TransactionFeeData|null = await getSendTransactionFeeData(feeDataParams);
-    console.log("Transaction fee data received");
-    console.log(transactionFeeDataFresh);
-    if(transactionFeeDataFresh){
-      setTransactionFeedata(transactionFeeDataFresh);
+    if(coingeckoId!=selectedTokenAndNetwork.baseNetworkDb.coingeckoId){
+      let networkCoinprice:number = await getPriceOfTicker(selectedTokenAndNetwork.baseNetworkDb.coingeckoId);
+      setBaseCoinPrice(networkCoinprice);
     }
     else{
-      setTransactionFeedata(defaultTransactionFeeData);
+      setBaseCoinPrice(tokenPriceCoinGecko);
     }
-    setFeesLoaded(true);
-  }
-
-  // gets solana tx. fees and sets sol transaction
-  const fetchSolTransactionFees = async()=>{
-      setFeesLoaded(false);
-      let nw:Network =  networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
-      let kryptikProvider = kryptikService.getProviderForNetwork(selectedTokenAndNetwork.baseNetworkDb);
-      // get solana transaction fee
-      if(nw.networkFamily != NetworkFamily.Solana){
-        return;
-      }
-      let accountAddress:string = await getAddressForNetworkDb(kryptikWallet, selectedTokenAndNetwork.baseNetworkDb);
-      
-      let txIn:SolTransactionParams = {
-        sendAccount: accountAddress,
-        toAddress: toAddress==""?toAddress:placeHolderSolAddress,
-        valueSol: Number(amountCrypto),
-        kryptikProvider: kryptikProvider,
-        decimals: selectedTokenAndNetwork.tokenData?
-        selectedTokenAndNetwork.tokenData.tokenDb.decimals:
-        selectedTokenAndNetwork.baseNetworkDb.decimals,
-        networkDb: selectedTokenAndNetwork.baseNetworkDb
-      }
-      let txSol:Transaction;
-      // send sol token 
-      if(selectedTokenAndNetwork.tokenData && selectedTokenAndNetwork.tokenData.tokenParamsSol){
-        // add sol token data to input params
-        let txSolParams:TokenParamsSpl = selectedTokenAndNetwork.tokenData.tokenParamsSol;
-        txIn.tokenParamsSol = txSolParams;
-        txSol = await createSolTokenTransferTransaction(txIn);
-      }
-      // OR send base network sol coin
-      else{
-        txSol = await createSolTransferTransaction(txIn);
-      }
-      await fetchNetworkFees(txSol);
-      setFeesLoaded(true);
   }
 
   const handleToAddressChange = function(toAddressIn:string){
@@ -349,10 +280,40 @@ const Send: NextPage = () => {
        setIsResolverLoading(false);
        return;
     }
+    // update resolver state
     setToResolvedAccount(newResolvedAccount);
     setIsResolverLoading(false);
     setToAddress(newResolvedAccount.address);
     setReadableToAddress(truncateAddress(newResolvedAccount.address, nw));
+    // build kryptik tx 
+    let transferBuildParams:CreateTransferTransactionParameters = {
+      kryptikProvider: kryptikProvider,
+      tokenAndNetwork: selectedTokenAndNetwork,
+      amountCrypto: amountCrypto,
+      fromAddress: fromAddress,
+      toAddress: newResolvedAccount.address,
+      tokenPriceUsd: baseCoinPrice,
+      errorHandler: errorHandler
+    }
+    try{
+      let newKryptikTx:KryptikTransaction|null = await BuildTransferTx(transferBuildParams);
+      if(newKryptikTx){
+        newKryptikTx.updateProvider(kryptikProvider);
+        setBuiltTx(newKryptikTx);
+        setTransactionFeedata(newKryptikTx.feeData);
+      }
+      else{
+        toast.error("Error: Unable to build transaction.");
+        setisLoading(false);
+        return;
+      }
+    }
+    catch(e){
+      toast.error("Error: Unable to build transaction.");
+      console.error(e);
+      setisLoading(false);
+      return;
+    }
     // change progress state
     setProgress(TxProgress.Rewiew);
     setisLoading(false);
@@ -377,19 +338,15 @@ const Send: NextPage = () => {
 
   // handler for when user clicks create transaction button
   const handleSendTransaction = async function(){
+    if(!builtTx){
+      toast.error("Error: No transaction available to send.")
+      return;
+    }
+    console.log("Sending tx....");
     setisLoading(true);
     // params for create tx. method
-    let txParams:CreateTransferTransactionParameters={
-      tokenAndNetwork: selectedTokenAndNetwork,
-      wallet: kryptikWallet,
-      kryptikService: kryptikService,
-      amountCrypto: amountCrypto,
-      toAddress: toAddress,
-      fromAddress: fromAddress,
-      txFeeData: transactionFeeData,
-      errorHandler: errorHandler
-    }
-    let txResult = await handlePublishTransferTransaction(txParams);
+    let txResult = await builtTx.SignAndSend({kryptikWallet:kryptikWallet, sendAccount:fromAddress, errorHandler:errorHandler});
+    console.log(txResult);
     if(!txResult){
       // ERROR REDIRECT WILL BE DONE BY ERROR HANDLER
       setisLoading(false);
@@ -434,11 +391,11 @@ const Send: NextPage = () => {
                 </div>
               
               {/* show fees when dropdown is loaded */}
-              {
+              {/* {
                 dropdownLoaded?
                 <TxFee txFeeData={transactionFeeData} tokenAndNetwork={selectedTokenAndNetwork} feesLoaded={feesLoaded} feeLabel={"Fees:"}/>:
                 <div className="w-40 h-6 mt-2 truncate bg-gray-300 animate-pulse rounded mx-auto"/>
-              }
+              } */}
               
               {/* next button... to set recipient */}
               <button onClick={()=>handleStartParameterSetting()} className={`bg-transparent hover:bg-sky-400 text-sky-400 font-semibold hover:text-white text-2xl py-2 px-20 ${isLoading?"hover:cursor-not-allowed":""} border border-sky-400 hover:border-transparent rounded-lg my-5`} disabled={isLoading}>      
@@ -502,7 +459,7 @@ const Send: NextPage = () => {
             </div>
           }
           {
-            progress == TxProgress.Rewiew &&
+            (progress == TxProgress.Rewiew && builtTx)&&
             <div>
                 <div className="h-[4rem]">
                   {/* padding div for space between top and main elements */}
