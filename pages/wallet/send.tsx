@@ -20,6 +20,8 @@ import { getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils'
 import { defaultResolvedAccount, IAccountResolverParams, resolveAccount } from '../../src/helpers/resolvers/accountResolver'
 import { KryptikTransaction } from '../../src/models/transactions'
 import { BuildTransferTx } from '../../src/handlers/wallet/transactions/transfer'
+import { KeyPairEd25519 } from 'near-api-js/lib/utils'
+import { baseEncode } from 'borsh'
 
 
 
@@ -294,6 +296,16 @@ const Send: NextPage = () => {
       toAddress: newResolvedAccount.address,
       tokenPriceUsd: baseCoinPrice,
       errorHandler: errorHandler
+    }
+    let currNetwork:Network = networkFromNetworkDb(selectedTokenAndNetwork.baseNetworkDb);
+    if(currNetwork.networkFamily == NetworkFamily.Near){
+      // add near pubk key string if needed
+      let tokenWallet = kryptikWallet.seedLoop.getWalletForAddress(currNetwork, fromAddress);
+      if(!tokenWallet) return null;
+      let keyPair:nacl.SignKeyPair = tokenWallet.createKeyPair();
+      let nearKey:KeyPairEd25519 = new KeyPairEd25519(baseEncode(keyPair.secretKey));
+      let nearPubKeyString:string = nearKey.publicKey.toString();
+      transferBuildParams.nearPubKeyString = nearPubKeyString;
     }
     try{
       let newKryptikTx:KryptikTransaction|null = await BuildTransferTx(transferBuildParams);
@@ -634,7 +646,7 @@ const Send: NextPage = () => {
                 <div className="max-w-md mx-auto border rounded-lg border-solid border-2 border-gray-400 py-4 px-2">
                 <div className='flex mb-4'>
                     <div className='flex-1'>
-                      <AiOutlineArrowLeft className="hover:cursor-pointer" onClick={()=>handleClickBack()} size="25"/>
+                      <AiOutlineArrowLeft className="hover:cursor-pointer dark:text-white" onClick={()=>handleClickBack()} size="25"/>
                     </div>
                     <div className='flex-2'>
                       <h4 className="font-bold text-xl mx-auto content-center text-green-600">Transaction Complete <AiFillCheckCircle className="inline ml-3"/></h4>
