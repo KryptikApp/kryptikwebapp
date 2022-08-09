@@ -1,16 +1,13 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 
-import { NetworkBalanceParameters, NetworkDb } from "../src/services/models/network";
-import { CreateEVMContractParameters, ERC20Params, SplParams, TokenAndNetwork, TokenBalanceParameters, TokenData, TokenDb, TokenParamsEVM, TokenParamsNep141, TokenParamsSpl } from "../src/services/models/token";
+import { TokenAndNetwork } from "../src/services/models/token";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 import ListItemDropdown from "./lists/ListItemDropwdown";
-import { Contract } from "ethers";
-import { IBalance } from "../src/services/Web3Service";
+
 import { title } from "process";
 import { useKryptikThemeContext } from "./ThemeProvider";
-import { getAddressForNetworkDb } from "../src/helpers/utils/accountUtils";
-import { NetworkFamily, NetworkFamilyFromFamilyName } from "hdseedloop";
+import { KryptikBalanceHolder } from "../src/services/models/KryptikBalanceHolder";
 
 interface Props{
     onlyWithValue?:boolean
@@ -29,179 +26,26 @@ const DropdownNetworks:NextPage<Props> = (props) => {
     const[showOptions, setShowOptions] = useState(false);
 
 
-
     // retrieves wallet balances
     const fetchTokenAndNetworks = async() =>{
         // ensure kryptik service is started
         await kryptikService.StartSevice();
-        // get supported networks
-        let networks:NetworkDb[] = kryptikService.getSupportedNetworkDbs();
-        let tokensAndNetworks:TokenAndNetwork[] = [];
-        let tickerToNetworkBalance:{ [ticker: string]: IBalance } = {};
-        // add networks
-        for(const nw of networks){
-            let networkBalance:IBalance|undefined = undefined;
-            // skip testnets if not advanced
-            if(nw.isTestnet && !isAdvanced) continue;
-            if(onlyWithValue){
-                let accountAddress:string = await getAddressForNetworkDb(kryptikWallet, nw);
-                let NetworkBalanceParams:NetworkBalanceParameters = {
-                    accountAddress: accountAddress,
-                    networkDb: nw
-                }
-                try{
-                    let nwBalance = await kryptikService.getBalanceNetwork(NetworkBalanceParams);
-                    tickerToNetworkBalance[nw.ticker] == nwBalance;
-                    if(nwBalance) networkBalance = nwBalance;
-                    // exclude networks with zero balance
-                    if(networkBalance?.amountCrypto == "0") continue;
-                }
-               catch(e){
-                console.warn(`Unable to get dropdown balance for ${nw.fullName}`);
-               }
-            }
-            let tokenAndNetworkToAdd:TokenAndNetwork = {
-                baseNetworkDb: nw,
-                networkBalance: networkBalance
-            };
-            tokensAndNetworks.push(tokenAndNetworkToAdd);
-            // make eth network default option
-            if(nw.ticker == "eth") selectFunction(tokenAndNetworkToAdd);
+        let newTokensAndNetworks:TokenAndNetwork[] = [];
+       
+        // remove zero balances, if requested
+        if(onlyWithValue){
+            // get balances
+            let balanceHolder:KryptikBalanceHolder =  await kryptikService.getAllBalances({walletUser:kryptikWallet, isAdvanced:isAdvanced});
+            newTokensAndNetworks = balanceHolder.getNonzeroBalances();
         }
-        // if we only wnat networks... we are done here, so we return
-        if(onlyNetworks){
-            setNetworkAndTokens(tokensAndNetworks);
-            setIsFetched(true);
-            if(onLoadedFunction){
-                onLoadedFunction();
-            }
-            return;
-        }
-        // add all erc20 tokens
-        let erc20Dbs:TokenDb[] = kryptikService.tokenDbs;
-        for(const erc20Db of erc20Dbs){
-            for(const chainInfo of erc20Db.chainData){
-                let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb || NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) != NetworkFamily.EVM) continue;
-                // skip testnets if not advanced
-                if(networkDb.isTestnet && !isAdvanced) continue;
-                let erc20ContractParams:CreateEVMContractParameters = {
-                    wallet: kryptikWallet,
-                    networkDb: networkDb,
-                    erc20Db: erc20Db
-                }
-                let erc20Contract:Contract|null = await kryptikService.createERC20Contract(erc20ContractParams);
-                if(!erc20Contract) return;
-                let tokenBalance:IBalance|undefined = undefined;
-                let erc20Params:ERC20Params = {erc20Contract:erc20Contract};
-                if(onlyWithValue){
-                    let accountAddress = await getAddressForNetworkDb(kryptikWallet, networkDb);
-                    // get balance for contract
-                    let tokenBalanceParams:TokenBalanceParameters = {
-                        erc20Params: erc20Params,
-                        tokenDb: erc20Db,
-                        accountAddress: accountAddress,
-                        networkDb: networkDb
-                    }
-                    tokenBalance = await kryptikService.getBalanceErc20Token(tokenBalanceParams);
-                    // exclude tokens with zero balance
-                    if(tokenBalance.amountCrypto == "0") continue;
-                }
-                let evmParams:TokenParamsEVM = {
-                    tokenContractConnected: erc20Contract,
-                }
-                let tokenDataToAdd:TokenData = {
-                    tokenParamsEVM: evmParams,
-                    tokenBalance: tokenBalance,
-                    tokenDb: erc20Db
-                }
-                let tokenAndNetworkToAdd:TokenAndNetwork = {
-                    baseNetworkDb: networkDb,
-                    networkBalance: tickerToNetworkBalance[networkDb.ticker],
-                    tokenData:tokenDataToAdd
-                };
-                tokensAndNetworks.push(tokenAndNetworkToAdd);
+        //TODO: FIX TO SHOW TOKENS AS WELL
+        else{
+            let networkDbs = kryptikService.NetworkDbs;
+            for(const nw of networkDbs){
+                newTokensAndNetworks.push({baseNetworkDb:nw});
             }
         }
-        // add all spl tokens
-        let splDbs:TokenDb[] = kryptikService.tokenDbs;
-        for(const splDb of splDbs){
-            for(const chainInfo of splDb.chainData){
-                let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
-                if(!networkDb || NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) != NetworkFamily.Solana) continue;
-                // skip testnets if not advanced
-                if(networkDb.isTestnet && !isAdvanced) continue;
-                let tokenBalance:IBalance|undefined = undefined;
-                let solParams:TokenParamsSpl = {
-                    contractAddress: chainInfo.address
-                }
-                if(onlyWithValue){
-                    let accountAddress = await getAddressForNetworkDb(kryptikWallet, networkDb);
-                    let splParams:SplParams = {tokenAddress:chainInfo.address};
-                    let tokenBalanceParams:TokenBalanceParameters = {
-                        tokenDb: splDb,
-                        splParams: splParams,
-                        accountAddress: accountAddress,
-                        networkDb: networkDb
-                    }
-                    // get balance for contract
-                    tokenBalance = await kryptikService.getBalanceSplToken(tokenBalanceParams);
-                    // exclude tokens with zero balance
-                    if(tokenBalance.amountCrypto == "0") continue;
-                }
-                let tokenDataToAdd:TokenData = {
-                    tokenParamsSol: solParams,
-                    tokenBalance: tokenBalance,
-                    tokenDb: splDb
-                }
-                let tokenAndNetworkToAdd:TokenAndNetwork = {
-                    baseNetworkDb: networkDb,
-                    networkBalance: tickerToNetworkBalance[networkDb.ticker],
-                    tokenData:tokenDataToAdd
-                };
-                tokensAndNetworks.push(tokenAndNetworkToAdd);
-            }
-        }
-         // add all nep141
-         let nep141Dbs:TokenDb[] = kryptikService.tokenDbs;
-         for(const nep141Db of nep141Dbs){
-             for(const chainInfo of nep141Db.chainData){
-                 let networkDb = kryptikService.getNetworkDbByTicker(chainInfo.ticker);
-                 if(!networkDb || NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) != NetworkFamily.Near) continue;
-                 // skip testnets if not advanced
-                 if(networkDb.isTestnet && !isAdvanced) continue;
-                 let tokenBalance:IBalance|undefined = undefined;
-                 let nep141Params:TokenParamsNep141 = {
-                     contractAddress: chainInfo.address
-                 }
-                 if(onlyWithValue){
-                     let accountAddress = await getAddressForNetworkDb(kryptikWallet, networkDb);
-                     let nep141Params:SplParams = {tokenAddress:chainInfo.address};
-                     let tokenBalanceParams:TokenBalanceParameters = {
-                         tokenDb: nep141Db,
-                         nep141Params: nep141Params,
-                         accountAddress: accountAddress,
-                         networkDb: networkDb
-                     }
-                     // get balance for contract
-                     tokenBalance = await kryptikService.getBalanceNep141Token(tokenBalanceParams);
-                     // exclude tokens with zero balance
-                     if(tokenBalance.amountCrypto == "0") continue;
-                 }
-                 let tokenDataToAdd:TokenData = {
-                     tokenParamsNep141: nep141Params,
-                     tokenBalance: tokenBalance,
-                     tokenDb: nep141Db
-                 }
-                 let tokenAndNetworkToAdd:TokenAndNetwork = {
-                     baseNetworkDb: networkDb,
-                     networkBalance: tickerToNetworkBalance[networkDb.ticker],
-                     tokenData:tokenDataToAdd
-                 };
-                 tokensAndNetworks.push(tokenAndNetworkToAdd);
-             }
-         }
-        setNetworkAndTokens(tokensAndNetworks);
+        setNetworkAndTokens(newTokensAndNetworks);
         setIsFetched(true);
         if(onLoadedFunction){
             onLoadedFunction();
