@@ -54,12 +54,11 @@ export const networkFromNetworkDb = function(nw: NetworkDb):Network{
 
 export const getChainDataForNetwork = function(network:NetworkDb, tokenData:TokenDb):ChainData|null{
     let chainDataArray:ChainData[] = tokenData.chainData;
-    if(!network.evmData) return null;
     for(const chainInfo of chainDataArray){
         // each contract has a different address depending on the chain
         // we use the network chainId + symbol to extract the correct chaindata
         // remember: chainId may be specific to network
-        if(chainInfo.chainId == network.evmData.chainId && network.ticker.toLowerCase() == chainInfo.ticker.toLowerCase()){
+        if(network.ticker.toLowerCase() == chainInfo.ticker.toLowerCase()){
             return chainInfo;
         }
     }
