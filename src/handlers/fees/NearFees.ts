@@ -40,7 +40,6 @@ export async function getTransactionFeeDataNear(params:FeeDataNearParameters){
     }
     // fetch latest gas price
     let gasPrice:number = Number((await nearProvider.connection.provider.gasPrice(block.header.hash)).gas_price);
-    console.log(gasPrice);
     // convert gas to near amount
     let feeInNear:number = divByDecimals((Number(gasPrice)*gasUsed), params.networkDb.decimals).asNumber; 
     let feeInUsd:number = params.tokenPriceUsd*feeInNear;

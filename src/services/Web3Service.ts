@@ -311,8 +311,6 @@ class Web3Service extends BaseService implements IWeb3Service{
         let ProviderAndSigner = walletKryptik.connect(ethProvider)
         let erc20ChainData:ChainData|null = getChainDataForNetwork(params.networkDb, params.erc20Db);
         if(!erc20ChainData) return null;
-        console.log("contract chain data:");
-        console.log(erc20ChainData);
         let erc20Contract = new Contract(erc20ChainData.address, erc20Abi);
         let contractConnected = erc20Contract.connect(ProviderAndSigner);
         return contractConnected;
@@ -525,6 +523,9 @@ class Web3Service extends BaseService implements IWeb3Service{
                                 if(!baseNetworkAndBalance && formatTicker(cBal.contract_ticker_symbol) == formatTicker(networkDb.ticker) || (cBal.contract_address == ETH_CONTRACT_ADDRESS) || (cBal.contract_address == NATIVE_SOL_MINT)){
                                     baseNetworkAndBalance = {baseNetworkDb:networkDb, networkBalance:newBal}
                                     tempTokenAndBalances.push(baseNetworkAndBalance);
+                                    if(onFetch){
+                                        onFetch(baseNetworkAndBalance);
+                                    }
                                 }
                                 // else... we have a regular token
                                 else{
