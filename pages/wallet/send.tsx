@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
 import { defaultTokenAndNetwork } from '../../src/services/models/network'
 import { TxProgress, ServiceState } from '../../src/services/types'
-import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineWallet } from 'react-icons/ai';
+import { AiFillCheckCircle, AiOutlineArrowDown, AiOutlineArrowLeft, AiOutlineCloseCircle, AiOutlineWallet } from 'react-icons/ai';
 import {RiSwapLine} from "react-icons/ri"
 import { Network, NetworkFamily, NetworkFamilyFromFamilyName, truncateAddress } from "hdseedloop"
 
@@ -282,11 +282,6 @@ const Send: NextPage = () => {
        setIsResolverLoading(false);
        return;
     }
-    // update resolver state
-    setToResolvedAccount(newResolvedAccount);
-    setIsResolverLoading(false);
-    setToAddress(newResolvedAccount.address);
-    setReadableToAddress(truncateAddress(newResolvedAccount.address, nw));
     // build kryptik tx 
     let transferBuildParams:CreateTransferTransactionParameters = {
       kryptikProvider: kryptikProvider,
@@ -326,6 +321,11 @@ const Send: NextPage = () => {
       setisLoading(false);
       return;
     }
+    // update resolver state
+    setToResolvedAccount(newResolvedAccount);
+    setIsResolverLoading(false);
+    setToAddress(newResolvedAccount.address);
+    setReadableToAddress(truncateAddress(newResolvedAccount.address, nw));
     // change progress state
     setProgress(TxProgress.Rewiew);
     setisLoading(false);
@@ -354,7 +354,6 @@ const Send: NextPage = () => {
       toast.error("Error: No transaction available to send.")
       return;
     }
-    console.log("Sending tx....");
     setisLoading(true);
     // params for create tx. method
     let txResult = await builtTx.SignAndSend({kryptikWallet:kryptikWallet, sendAccount:fromAddress, errorHandler:errorHandler});
@@ -646,7 +645,7 @@ const Send: NextPage = () => {
                 <div className="max-w-md mx-auto border rounded-lg border-solid border-2 border-gray-400 py-4 px-2">
                 <div className='flex mb-4'>
                     <div className='flex-1'>
-                      <AiOutlineArrowLeft className="hover:cursor-pointer dark:text-white" onClick={()=>handleClickBack()} size="25"/>
+                      <AiOutlineCloseCircle className="ml-1 hover:cursor-pointer dark:text-white" onClick={()=>handleClickBack()} size="20"/>
                     </div>
                     <div className='flex-2'>
                       <h4 className="font-bold text-xl mx-auto content-center text-green-600">Transaction Complete <AiFillCheckCircle className="inline ml-3"/></h4>
