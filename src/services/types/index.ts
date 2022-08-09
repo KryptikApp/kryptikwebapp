@@ -1,4 +1,6 @@
+import { IBalance } from "../models/IBalance"
 import { NetworkDb } from "../models/network"
+import { TokenAndNetwork } from "../models/token"
 
 enum ServiceState{
     started=0,
@@ -30,6 +32,8 @@ enum WaitlistProgress{
 }
 
 export type GetNetworkDbByTicker = (ticker:string)=>NetworkDb|null
+
+export type OnFetch = (balance:TokenAndNetwork|null)=>void
 
 export{ServiceState, Status, TxProgress, WaitlistProgress}
 

@@ -1,6 +1,6 @@
 import {firestore} from "../helpers/firebaseHelper"
 import { collection, getDocs, query } from "firebase/firestore";
-import { ServiceState } from './types';
+import { OnFetch, ServiceState } from './types';
 import BaseService from './BaseService';
 import {defaultNetworkDb, defaultTokenAndNetwork, NetworkBalanceParameters, NetworkDb} from './models/network'
 import {
@@ -416,7 +416,7 @@ class Web3Service extends BaseService implements IWeb3Service{
     }
 
     // gets balances for all supported networks and tokens
-    async getAllBalances(params:{walletUser:IWallet, isAdvanced?:boolean, onFetch?:(balance:IBalance|null)=>void, tryCached?:boolean, useCovalent?:boolean}):Promise<KryptikBalanceHolder>{
+    async getAllBalances(params:{walletUser:IWallet, isAdvanced?:boolean, onFetch?:OnFetch, tryCached?:boolean, useCovalent?:boolean}):Promise<KryptikBalanceHolder>{
         const{walletUser, isAdvanced, onFetch, tryCached, useCovalent} = {...params};
         // default try cached value is true
         const getCached = tryCached?tryCached:true;
@@ -438,7 +438,7 @@ class Web3Service extends BaseService implements IWeb3Service{
         let indexedNetworksList:NetworkDb[] = []
         if(getCovalentBals){
             console.log("getting indexed blockchain data START");
-            let indexedData = await this.getAllIndexedBalances(walletUser);
+            let indexedData = await this.getAllIndexedBalances({walletUser:walletUser, onFetch:onFetch});
             indexedNetworksList = indexedData.indexedNetworks;
             masterBalances = masterBalances.concat(indexedData.tokensAndBals);
         }
@@ -481,7 +481,8 @@ class Web3Service extends BaseService implements IWeb3Service{
 
     // TODO: ADD ROUTER IF WE HAVE DIFFERENT INDEXER METHODS FOR DIFFERENT NETWORKS
     // gets assets for all indexed chains
-    private getAllIndexedBalances = async(walletUser:IWallet):Promise<{indexedNetworks:NetworkDb[], tokensAndBals:TokenAndNetwork[]}>=>{
+    private getAllIndexedBalances = async(params:{walletUser:IWallet, onFetch?:OnFetch}):Promise<{indexedNetworks:NetworkDb[], tokensAndBals:TokenAndNetwork[]}>=>{
+        const{walletUser, onFetch} = {...params};
         const ethNetwork = this.getNetworkDbByTicker("eth");
         const solNetwork = this.getNetworkDbByTicker("sol");
         const avaxcNetwork = this.getNetworkDbByTicker("avaxc");
@@ -489,7 +490,6 @@ class Web3Service extends BaseService implements IWeb3Service{
         let indexedNetworks:NetworkDb[] = []
         const addyToNetworks:{[address:string]:NetworkDb[]} = {};
         if(ethNetwork && solNetwork && arbitrumNetwork && avaxcNetwork){
-            indexedNetworks = [ethNetwork, solNetwork, arbitrumNetwork, avaxcNetwork];
             let solAddress = await getAddressForNetworkDb(walletUser, solNetwork);
             let ethAddress = await getAddressForNetworkDb(walletUser, ethNetwork);
             addyToNetworks[ethAddress] = [ethNetwork, arbitrumNetwork, avaxcNetwork];
@@ -540,19 +540,25 @@ class Web3Service extends BaseService implements IWeb3Service{
                             if(!baseNetworkAndBalance.networkBalance){
                                 baseNetworkAndBalance.networkBalance = buildEmptyBalance(networkDb);
                                 balancesToReturn.push(baseNetworkAndBalance)
+                                if(onFetch){
+                                    onFetch(baseNetworkAndBalance);
+                                }
                             }
                             for(const tokenAndBal of tempTokenAndBalances){
                                 if(!baseNetworkAndBalance.networkBalance) break;
                                 tokenAndBal.networkBalance = baseNetworkAndBalance.networkBalance;
+                                if(onFetch){
+                                    onFetch(baseNetworkAndBalance);
+                                }
                             }
                             balancesToReturn = balancesToReturn.concat(tempTokenAndBalances)
                         };
+                        // if we got here... indexing was successful... so add network to indexed list
+                        indexedNetworks.push(networkDb);
                     }
                     catch(e){
                         console.warn(`Error: Unable to get indexed balances for ${networkDb.fullName}`);
                     }
-                    
-               
                 }
         }
         return {indexedNetworks:indexedNetworks, tokensAndBals:balancesToReturn};
@@ -572,7 +578,7 @@ class Web3Service extends BaseService implements IWeb3Service{
 
 
     // TODO: Update to support tx. based networks
-    async getBalanceAllNetworks(params:{walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void, isAdvanced:boolean, indexedNetworks:NetworkDb[]}):Promise<TokenAndNetwork[]>{
+    async getBalanceAllNetworks(params:{walletUser:IWallet, onFetch?:OnFetch, isAdvanced:boolean, indexedNetworks:NetworkDb[]}):Promise<TokenAndNetwork[]>{
         const {walletUser, isAdvanced, indexedNetworks, onFetch} = {...params}
         let networksFromDb = this.getSupportedNetworkDbs();
         // initialize return array
@@ -599,7 +605,7 @@ class Web3Service extends BaseService implements IWeb3Service{
                 // push balance obj to balance data array
                 if(networkBalance) balanceAndNetworks.push(networkBalance);
                 if(onFetch){
-                    onFetch(networkBalance?.networkBalance?networkBalance.networkBalance:null);
+                    onFetch(networkBalance);
                 }
             }
             catch(e){
@@ -698,7 +704,7 @@ class Web3Service extends BaseService implements IWeb3Service{
 
     // TODO: UPDATE TOKEN BALANCE FUNCS TO FILTER ON FAMILY
     // get balances for all erc20 networks
-    async getBalanceAllERC20Tokens(params:{walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void, indexedNetworks:NetworkDb[]}):Promise<TokenAndNetwork[]>{
+    async getBalanceAllERC20Tokens(params:{walletUser:IWallet, onFetch?:OnFetch, indexedNetworks:NetworkDb[]}):Promise<TokenAndNetwork[]>{
         const {walletUser, indexedNetworks, onFetch} = {...params}
         let erc20balances:TokenAndNetwork[] = [];
         for(const erc20Db of this.tokenDbs){
@@ -740,7 +746,7 @@ class Web3Service extends BaseService implements IWeb3Service{
                 }
                 let tokenBalance:TokenAndNetwork = await this.getBalanceErc20Token(tokenParams)
                 if(onFetch){
-                    onFetch(tokenBalance.tokenData?.tokenBalance?tokenBalance.tokenData.tokenBalance:null);
+                    onFetch(tokenBalance);
                 }
                 // push balance data to balance array
                 erc20balances.push(tokenBalance);
@@ -750,7 +756,7 @@ class Web3Service extends BaseService implements IWeb3Service{
     }
 
     // get balances for allNep141 tokens
-    async getBalanceAllNep141Tokens(params:{walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void, indexedNetworks:NetworkDb[]}):Promise<TokenAndNetwork[]>{
+    async getBalanceAllNep141Tokens(params:{walletUser:IWallet, onFetch?:OnFetch, indexedNetworks:NetworkDb[]}):Promise<TokenAndNetwork[]>{
         console.log("getting nep141 balances");
         const {walletUser, indexedNetworks, onFetch} = {...params}
         let nep141Balances:TokenAndNetwork[] = [];
@@ -779,7 +785,7 @@ class Web3Service extends BaseService implements IWeb3Service{
                     // push balance data to balance array
                     nep141Balances.push(tokenBalance);
                     if(onFetch){
-                        onFetch(tokenBalance.tokenData?.tokenBalance?tokenBalance.tokenData.tokenBalance:null);
+                        onFetch(tokenBalance);
                     }
                 }
                 catch(e){
@@ -795,7 +801,7 @@ class Web3Service extends BaseService implements IWeb3Service{
 
 
     // get balances for all spl tokens
-    async getBalanceAllSplTokens(params:{walletUser:IWallet, onFetch?:(balance:IBalance|null)=>void, indexedNetworks:NetworkDb[]}):Promise<TokenAndNetwork[]>{
+    async getBalanceAllSplTokens(params:{walletUser:IWallet, onFetch?:OnFetch, indexedNetworks:NetworkDb[]}):Promise<TokenAndNetwork[]>{
             let splBalances:TokenAndNetwork[] = [];
             const {walletUser, indexedNetworks, onFetch} = {...params}
             for(const splDb of this.tokenDbs){          
@@ -824,7 +830,7 @@ class Web3Service extends BaseService implements IWeb3Service{
                         // push balance data to balance array
                         splBalances.push(tokenBalance);
                         if(onFetch){
-                            onFetch(tokenBalance.tokenData?.tokenBalance?tokenBalance.tokenData.tokenBalance:null);
+                            onFetch(tokenBalance);
                         }
                     }
                     catch(e){
