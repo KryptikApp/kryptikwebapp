@@ -1,7 +1,7 @@
 import { BigNumber, BigNumberish } from "ethers";
 import { toUpper } from "lodash";
 import { IBuildSwapParams } from ".";
-import { formatTicker, isNetworkArbitrum } from "../../helpers/utils/networkUtils";
+import { formatTicker, isEVMTxTypeTwo, isNetworkArbitrum } from "../../helpers/utils/networkUtils";
 import { multByDecimals } from "../../helpers/utils/numberUtils";
 import { IKryptikTxParams, KryptikTransaction } from "../../models/transactions";
 import { ISwapData } from "../../parsers/0xData";
@@ -16,7 +16,7 @@ export interface IBuildEVMSwapParams extends IBuildSwapParams{
 }
 
 export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promise<KryptikTransaction|null>{
-    const {tokenAmount, sellTokenAndNetwork, buyTokenAndNetwork, fromAccount, kryptikProvider, sellNetworkTokenPriceUsd} = {...params};
+    const {tokenAmount, sellTokenAndNetwork, buyTokenAndNetwork, fromAccount, kryptikProvider, sellNetworkTokenPriceUsd, baseCoinPrice} = {...params};
     // fetch 0x swap data
     let tokenDecimals:number = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.decimals:sellTokenAndNetwork.baseNetworkDb.decimals;
     let swapAmount = multByDecimals(tokenAmount, tokenDecimals);
@@ -27,7 +27,7 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
     if(!sellTokenId || !buyTokenId || !sellTokenAndNetwork.baseNetworkDb.evmData || !sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl) return null;
     // slippage currently set as default of 3%
     let slippagePercentage:number = .1
-    let swapReqParams:zeroXParams = {baseUrl:sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl, buyTokenId:buyTokenId, sellTokenId:sellTokenId, sellAmount:swapAmount.asNumber, slippagePercentage:slippagePercentage}
+    let swapReqParams:zeroXParams = {baseUrl:sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl, buyTokenId:buyTokenId, sellTokenId:sellTokenId, sellAmount:swapAmount.asNumber, slippagePercentage:slippagePercentage, takerAddress:fromAccount}
     const swapData:ISwapData|null = await fetch0xSwapOptions(swapReqParams);
     // ensure swap data is present
     if(!swapData || !swapData.evmData) return null;
@@ -46,8 +46,8 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
     // validate fee data response
     
     if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
-        // arbitrum uses pre EIP-1559 fee structure
-        if(isNetworkArbitrum(sellTokenAndNetwork.baseNetworkDb)){
+        // some networks use pre EIP-1559 fee structure
+        if(isEVMTxTypeTwo(sellTokenAndNetwork.baseNetworkDb)){
             let baseGas = await evmProvider.getGasPrice();
             feeData.gasPrice = baseGas;
             feeData.maxFeePerGas = baseGas;
@@ -67,12 +67,11 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
         maxFeePerGas: feeData.maxFeePerGas,
         maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
         networkDb: kryptikProvider.networkDb,
-        tokenPriceUsd: sellNetworkTokenPriceUsd
+        tokenPriceUsd: baseCoinPrice
     }
-    console.log(` Gas Params: ${EVMGasLimitsParams}`)
+
 
     let kryptikFeeData = evmFeeDataFromLimits(EVMGasLimitsParams);
-    
     
     let tx:TransactionRequest = {
         from: fromAccount,
@@ -97,6 +96,7 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
             evmTx:tx
         },
         tokenAndNetwork: sellTokenAndNetwork,
+        //TODO: UPDATE TO ADD BASE NETWORK PRICE
         tokenPriceUsd: sellNetworkTokenPriceUsd,
     }
     let kryptikTx:KryptikTransaction = new KryptikTransaction(kryptikTxParams);
