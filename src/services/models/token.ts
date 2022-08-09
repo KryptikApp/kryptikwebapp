@@ -1,7 +1,8 @@
 import { Connection } from "@solana/web3.js";
 import { Contract } from "ethers";
 import { IWallet } from "../../models/KryptikWallet";
-import { IBalance } from "../Web3Service";
+import { GetNetworkDbByTicker } from "../types";
+import { IBalance } from "./IBalance";
 import { NetworkDb } from "./network";
 
 
@@ -27,7 +28,7 @@ export interface TokenDb{
 }
 
 export interface TokenParamsEVM{
-    tokenContractConnected: Contract
+    contractAddress:string
 }
 
 export interface TokenParamsSpl{
