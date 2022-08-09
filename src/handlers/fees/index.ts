@@ -6,14 +6,14 @@ import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
 import { NetworkDb } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
 import { TokenData } from "../../services/models/token";
-import TransactionFeeData, {TxType } from "../../services/models/transaction";
-import { getSendTransactionFeeData1559Compatible} from "./EVMFees";
+import TransactionFeeData, {TransactionRequest, TxType } from "../../services/models/transaction";
+import { getTransactionFeeDataEVM } from "./EVMFees";
 import { getTransactionFeeDataNear } from "./NearFees";
 import { getTransactionFeeDataSolana } from "./SolanaFees";
 
 
 export interface IFeeDataParameters{
-    kryptikProvider:KryptikProvider, networkDb:NetworkDb, sendAccount:string, txType:TxType, solTransaction?:Transaction, tokenData?:TokenData, amountToken:string
+    kryptikProvider:KryptikProvider, networkDb:NetworkDb, sendAccount:string, txType:TxType, solTx?:Transaction, evmTx:TransactionRequest, amountToken:string
 }
 
 export interface INetworkFeeDataParams{
@@ -29,13 +29,13 @@ export async function getSendTransactionFeeData(params:IFeeDataParameters):Promi
     let tokenPriceUsd:number = await getPriceOfTicker(params.networkDb.coingeckoId);
     switch(network.networkFamily){
         case (NetworkFamily.EVM): { 
-            let transactionFeeData:TransactionFeeData = await getSendTransactionFeeData1559Compatible({kryptikProvider:params.kryptikProvider, networkDb:params.networkDb, tokenPriceUsd: tokenPriceUsd, tokenData: params.tokenData, amountToken:params.amountToken});
+            let transactionFeeData:TransactionFeeData = await getTransactionFeeDataEVM({kryptikProvider:params.kryptikProvider, networkDb:params.networkDb, tokenPriceUsd: tokenPriceUsd, tx:params.evmTx});
             return transactionFeeData;
             break; 
          } 
          case(NetworkFamily.Solana):{
-            if(!params.solTransaction) return null;
-            let transactionFeeData:TransactionFeeData = await getTransactionFeeDataSolana({kryptikProvider:params.kryptikProvider, tokenPriceUsd:tokenPriceUsd, transaction:params.solTransaction, networkDb:params.networkDb});
+            if(!params.solTx) return null;
+            let transactionFeeData:TransactionFeeData = await getTransactionFeeDataSolana({kryptikProvider:params.kryptikProvider, tokenPriceUsd:tokenPriceUsd, transaction:params.solTx, networkDb:params.networkDb});
             return transactionFeeData;
             break;
          }
