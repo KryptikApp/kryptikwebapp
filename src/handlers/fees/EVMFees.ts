@@ -1,74 +1,31 @@
+import { asL2Provider } from '@eth-optimism/sdk';
 import {
     JsonRpcProvider,
 } from '@ethersproject/providers';
-import { BigNumber, Contract, utils } from "ethers";
+import { BigNumber } from "ethers";
 import { INetworkFeeDataParams } from '.';
-import { erc20Abi } from '../../abis/erc20Abi';
-import { isEVMTxTypeTwo, isNetworkArbitrum, networkFromNetworkDb } from "../../helpers/utils/networkUtils";
-import { divByDecimals, roundToDecimals } from "../../helpers/utils/numberUtils";
-import { NetworkDb, placeHolderEVMAddress } from "../../services/models/network";
-import { KryptikProvider } from "../../services/models/provider";
-import { TokenData } from '../../services/models/token';
-import TransactionFeeData, { EVMGas } from "../../services/models/transaction";
+import { isEVMTxTypeTwo, networkFromNetworkDb } from "../../helpers/utils/networkUtils";
+import { divByDecimals } from "../../helpers/utils/numberUtils";
+import { NetworkDb } from "../../services/models/network";
+import TransactionFeeData, { EVMGas, TransactionRequest } from "../../services/models/transaction";
 
 export interface FeeDataEvmParameters extends INetworkFeeDataParams{
-   amountToken: string;
-   tokenData?:TokenData,
+   tx:TransactionRequest
 }
 
-// estimate tx. fee for EIP 1559 compatible networks
-export async function getSendTransactionFeeData1559Compatible(params:FeeDataEvmParameters):Promise<TransactionFeeData>{
-        let kryptikProvider:KryptikProvider = params.kryptikProvider;
-        
-        // validate provider
-        if(!kryptikProvider.ethProvider){
-            throw(new Error(`No provider specified for ${kryptikProvider.network.fullName}`));
+// gets gas limit for basic transfer 
+export function getEVMTransferGasLimit(network:NetworkDb){
+    switch(network.ticker.toLowerCase()){
+        case("eth(arbitrum)"):{
+            return 500000;
         }
-        let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
-        let feeData = await ethNetworkProvider.getFeeData();
-        
-        console.log("fee data");
-        console.log(feeData);
-
-        // TODO: 2X CHECK LAYER TWO GAS ESTIMATIONS FOR TRANSFER
-        // ARTIFICIALLY INFLATING ARBITRUM BASE TRANSFER GAS LIMIT, BECAUSE OG VALUE IS TOO SMALL
-        let gasLimit:number = isNetworkArbitrum(params.networkDb)?500000:21000;
-        if(params.tokenData && params.tokenData.tokenParamsEVM){
-            let amount = roundToDecimals(Number(params.amountToken), params.tokenData.tokenDb.decimals);
-            // get gaslimit for nonzero amount
-            if(amount == 0) amount = 2;
-            // get estimated gas limit for token transfer
-            let erc20Contract = new Contract(params.tokenData.tokenParamsEVM.contractAddress, erc20Abi);
-            erc20Contract = erc20Contract.connect(ethNetworkProvider);
-            gasLimit = Number(await erc20Contract.estimateGas.transfer(placeHolderEVMAddress, amount));
+        case("eth(optimism)"):{
+            return 21000;
         }
-        
-        // validate fee data response
-        if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
-            // some networks like arbitrum uses pre EIP-1559 fee structure
-            if(!isEVMTxTypeTwo(params.networkDb)){
-                let baseGas = await ethNetworkProvider.getGasPrice();
-                feeData.gasPrice = baseGas;
-                feeData.maxFeePerGas = baseGas;
-                feeData.maxPriorityFeePerGas = BigNumber.from(0);
-            }
-            else{
-                throw(new Error(`No fee data returned for ${kryptikProvider.network.fullName}`));
-            }
+        default:{
+            return 21000;
         }
-
-        let EVMGasLimitsParams:IEVMGasLimitsParams = {
-            gasLimit: gasLimit,
-            gasPrice: feeData.gasPrice,
-            maxFeePerGas: feeData.maxFeePerGas,
-            maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
-            networkDb: kryptikProvider.networkDb,
-            tokenPriceUsd: params.tokenPriceUsd
-        }
-
-        // create new fee data object
-        let transactionFeeData:TransactionFeeData = evmFeeDataFromLimits(EVMGasLimitsParams)
-        return transactionFeeData;
+    }
 }
 
 
@@ -78,18 +35,75 @@ export interface IEVMGasLimitsParams extends EVMGas{
 }
 
 
+// calculates the fee data for a given transaction
+export async function getTransactionFeeDataEVM(params:FeeDataEvmParameters){
+    const{kryptikProvider, tx, networkDb} = {...params};
+    // validate provider
+    if(!kryptikProvider.ethProvider){
+        throw(new Error(`No provider specified for ${kryptikProvider.network.fullName}`));
+    }
+    let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
+
+    let gasLimit = await ethNetworkProvider.estimateGas(tx);
+    let feeData = await ethNetworkProvider.getFeeData();
+    // validate fee data response
+    if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
+        // some networks like arbitrum uses pre EIP-1559 fee structure
+        if(!isEVMTxTypeTwo(networkDb)){
+            let baseGas = await ethNetworkProvider.getGasPrice();
+            feeData.gasPrice = baseGas;
+            feeData.maxFeePerGas = baseGas;
+            feeData.maxPriorityFeePerGas = BigNumber.from(0);
+        }
+        else{
+            throw(new Error(`No fee data returned for ${kryptikProvider.network.fullName}`));
+        }
+    }
+
+    let EVMGasLimitsParams:IEVMGasLimitsParams = {
+        gasLimit: gasLimit,
+        // gasprice used for type 1 tx.s
+        gasPrice: feeData.gasPrice,
+        // max fee per gas and max priority fee per gas... used for type 2 txs
+        maxFeePerGas: feeData.maxFeePerGas,
+        maxPriorityFeePerGas: feeData.maxPriorityFeePerGas,
+        // network w/ tx fee
+        networkDb: kryptikProvider.networkDb,
+        // current price of base network coin
+        tokenPriceUsd: params.tokenPriceUsd
+    }
+
+
+    // create new fee data object
+    let transactionFeeData:TransactionFeeData = evmFeeDataFromLimits(EVMGasLimitsParams)
+    // optimism layer two solution has unique gas cost calculation
+    if(networkDb.ticker == "eth(optimism)"){
+        let optismismProvider = asL2Provider(ethNetworkProvider);
+        let optimismTotalGasCost:number = (await optismismProvider.estimateTotalGasCost(tx)).toNumber();
+        // format in crypto amount
+        optimismTotalGasCost = divByDecimals(optimismTotalGasCost, networkDb.decimals).asNumber;
+        let optimismFeeFiat = optimismTotalGasCost*params.tokenPriceUsd;
+        transactionFeeData.upperBoundUSD = optimismFeeFiat;
+        transactionFeeData.lowerBoundUSD = optimismFeeFiat;
+    }
+    console.log(`${params.networkDb.fullName} fee data:`)
+    console.log(transactionFeeData);
+    return transactionFeeData;
+}
+
 // calculate u.i. fee data from network fee limits
 export function evmFeeDataFromLimits(params:IEVMGasLimitsParams):TransactionFeeData{
     let {gasLimit, gasPrice, maxFeePerGas, maxPriorityFeePerGas, tokenPriceUsd, networkDb} = {...params}
     // calculate u.i. fees in token amount
-    let gasPriceConverted:number = Number(utils.formatEther(gasPrice));
-    let maxPriorityFeePerGasConverted:number = divByDecimals(Number(maxFeePerGas), networkDb.decimals).asNumber;
-    let baseFeePerGasConverted:number = maxPriorityFeePerGasConverted*.3;
+    let gasPriceConverted:number = divByDecimals(Number(params.gasPrice), networkDb.decimals).asNumber;
+    console.log(gasPriceConverted);
+    let maxPriorityFeePerGasConverted:number = divByDecimals(Number(maxPriorityFeePerGas), networkDb.decimals).asNumber;
 
-    let lowerBoundCrypto:number = Number(gasLimit)*(gasPriceConverted+baseFeePerGasConverted);
+    let lowerBoundCrypto:number = Number(gasLimit)*(gasPriceConverted);
     let lowerBoundUSD:number = lowerBoundCrypto*tokenPriceUsd;
     let upperBoundCrypto:number = Number(gasLimit)*(gasPriceConverted+maxPriorityFeePerGasConverted);
     let upperBoundUsd:number = upperBoundCrypto*tokenPriceUsd;
+
     let network = networkFromNetworkDb(networkDb);
     // create new fee data object
     let transactionFeeData:TransactionFeeData = {
