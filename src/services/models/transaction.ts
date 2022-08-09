@@ -1,12 +1,11 @@
 import { Transaction } from "@solana/web3.js";
-import { BigNumber, BigNumberish, BytesLike } from "ethers";
+import { BigNumberish, BytesLike } from "ethers";
 import { AccessListish } from "ethers/lib/utils";
 import { Network } from "hdseedloop";
 import { IWallet } from "../../models/KryptikWallet";
-import Web3Service from "../Web3Service";
 import { defaultNetwork, NetworkDb } from "./network";
 import { KryptikProvider } from "./provider";
-import { TokenAndNetwork, TokenData, TokenParamsEVM, TokenParamsNep141, TokenParamsSpl } from "./token";
+import { TokenAndNetwork, TokenData, TokenParamsSpl } from "./token";
 
 // TODO: UPDATE TO BE CLASS WITH PERSISTENT CHECKS FOR FRESHNESS
 export default interface TransactionFeeData{
@@ -55,28 +54,22 @@ export interface SolTransactionParams extends TransactionParams{
 
 export interface NearTransactionParams extends TransactionParams{
     contractAddress?:string,
-    nearPubKeyString:string,
+    txType: TxType,
     decimals: number,
     valueNear:number
 }
 
-export interface EVMTransactionParams extends TransactionParams{
-    gasPrice: BigNumberish,
-    // how much gas we're willing to use
-    gasLimit: BigNumberish,
-    // max fee per gas unit we're willing to pay
-    maxFeePerGas: BigNumberish,
-    // max tip per gas unit we're willing to pay
-    maxPriorityFeePerGas: BigNumberish,
+export interface EVMTransferTxParams extends TransactionParams{
     // value in token we are sending
-    value: BigNumberish
+    valueCrypto: number
 }
 
 export interface TransactionParams{
     sendAccount:string,
     kryptikProvider:KryptikProvider,
-    networkDb:NetworkDb
+    tokenAndNetwork:TokenAndNetwork,
     toAddress:string,
+    tokenPriceUsd:number
 }
 
 export type TransactionRequest = {
@@ -147,12 +140,11 @@ export const defaultErrorHandler = function(message:string, isFatal?:boolean){
 export interface CreateTransferTransactionParameters{
     tokenAndNetwork:TokenAndNetwork,
     amountCrypto: string,
-    txFeeData: TransactionFeeData,
-    kryptikService: Web3Service,
-    wallet: IWallet,
+    kryptikProvider:KryptikProvider,
     toAddress:string,
     fromAddress:string,
     contractAddress?:string,
+    tokenPriceUsd:number,
     errorHandler: IErrorHandler
 }
 
