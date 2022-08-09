@@ -15,12 +15,11 @@ import { ISearchResult } from '../../src/handlers/search/types';
 import { BuildSwapTokenTransaction, IBuildSwapParams } from '../../src/handlers/swaps';
 import { SwapValidator } from '../../src/handlers/swaps/utils';
 import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper';
-import { defaultResolvedAccount } from '../../src/helpers/resolvers/accountResolver';
 import { getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils';
 import { formatTicker, networkFromNetworkDb } from '../../src/helpers/utils/networkUtils';
 import { formatAmountUi, roundCryptoAmount, roundUsdAmount } from '../../src/helpers/utils/numberUtils';
 import { KryptikTransaction, SwapAmounts, TxSignatureParams } from '../../src/models/transactions';
-import { defaultTokenAndNetwork, defaultUniswapTokenAndNetwork } from '../../src/services/models/network';
+import { defaultTokenAndNetwork } from '../../src/services/models/network';
 import { KryptikProvider } from '../../src/services/models/provider';
 import { TokenAndNetwork } from '../../src/services/models/token';
 import TransactionFeeData, { AmountTotalBounds, defaultAmountTotalBounds, defaultTxPublishedData, TransactionPublishedData } from '../../src/services/models/transaction';
@@ -33,6 +32,8 @@ const Swap: NextPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const [tokenPrice, setTokenPrice] = useState(0);
+  // token price for base network coin
+  const [baseCoinPrice, setBaseCoinPrice] = useState(0);
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [isInputCrypto, setIsInputCrypto] = useState(false);
   const [amountUSD, setAmountUSD] = useState("0");
@@ -103,6 +104,7 @@ const Swap: NextPage = () => {
     if(!isValidAmount) return;
     let kryptikProvider:KryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(sellTokenAndNetwork.baseNetworkDb);
     let swapParams:IBuildSwapParams = {
+      baseCoinPrice: baseCoinPrice,
       sellNetworkTokenPriceUsd: tokenPrice,
       sellTokenAndNetwork: sellTokenAndNetwork,
       buyTokenAndNetwork: buyTokenAndNetwork,
@@ -190,6 +192,13 @@ const Swap: NextPage = () => {
       sellTokenAndNetwork.baseNetworkDb.coingeckoId;
       let tokenPriceCoinGecko:number = await getPriceOfTicker(coingeckoId);
       setTokenPrice(tokenPriceCoinGecko);
+      if(coingeckoId!=sellTokenAndNetwork.baseNetworkDb.coingeckoId){
+        let networkCoinprice:number = await getPriceOfTicker(sellTokenAndNetwork.baseNetworkDb.coingeckoId);
+        setBaseCoinPrice(networkCoinprice);
+      }
+      else{
+        setBaseCoinPrice(tokenPriceCoinGecko);
+      }
     }
 
     // retrieves wallet balances
@@ -361,7 +370,7 @@ const Swap: NextPage = () => {
                               }
                               <span className="inline text-md pl-2 dark:text-gray-200">{buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.name:buyTokenAndNetwork.baseNetworkDb.fullName}</span>
                               </div>:
-                              <span className="inline text-md dark:text-gray-200">Select Token</span>
+                              <span className="inline text-sm text-gray-700 dark:text-gray-300 ml-8">Select Token</span>
                             }
                              
                           </div>
