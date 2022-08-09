@@ -36,14 +36,14 @@ export async function BuildSolSwapTransaction(params:IBuildSolSwapParams):Promis
     if(!isValidSwap) return null;
     
     // token decimals 
-    let sellTokenDecimals:number = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.decimals:sellTokenAndNetwork.baseNetworkDb.decimals;
-    let buyTokenDecimals:number = buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.decimals:buyTokenAndNetwork.baseNetworkDb.decimals;
+    let sellTokenDecimals:number = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.decimals:TOKENS.WSOL.decimals;
+    let buyTokenDecimals:number = buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.decimals:TOKENS.WSOL.decimals;
 
 
     // TODO: UPDATE TO SUPPORT NATIVE MINT ON TESTNETS
     // GET TOKEN MINT OR DEFAULT TO WSOL 
-    let sellTokenAddress:string = sellTokenAndNetwork.tokenData?.selectedAddress?sellTokenAndNetwork.tokenData.selectedAddress:TOKENS.WSOL.mintAddress
-    let buyTokenAddress:string = buyTokenAndNetwork.tokenData?.selectedAddress?buyTokenAndNetwork.tokenData.selectedAddress:TOKENS.WSOL.mintAddress
+    let sellTokenAddress:string = sellTokenAndNetwork.tokenData?.selectedAddress?sellTokenAndNetwork.tokenData.selectedAddress:TOKENS.WSOL.mintAddress;
+    let buyTokenAddress:string = buyTokenAndNetwork.tokenData?.selectedAddress?buyTokenAndNetwork.tokenData.selectedAddress:TOKENS.WSOL.mintAddress;
 
     // adjusted token amounts
     let sellTokenAmount = multByDecimals(tokenAmount, sellTokenDecimals);
