@@ -82,8 +82,13 @@ export class KryptikBalanceHolder{
         this.lastUpdated = Date.now();
     }
 
-    getLastUpdateTimestamp():string{
+    getLastUpdateDatestamp():string{
         let date = new Date(this.lastUpdated);
         return date.toString();
+    }
+
+    getLastUpdateTimestamp():string{
+        let date = new Date(this.lastUpdated);
+        return date.toLocaleTimeString('en-US');
     }
 }
