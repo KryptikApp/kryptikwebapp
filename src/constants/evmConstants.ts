@@ -1,0 +1,1 @@
+export const ETH_CONTRACT_ADDRESS:string = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
