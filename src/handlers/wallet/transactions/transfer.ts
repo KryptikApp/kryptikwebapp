@@ -1,8 +1,8 @@
 import { Transaction as SolTransaction } from "@solana/web3.js";
 import { NetworkFamily } from "hdseedloop";
-import { networkFromNetworkDb } from "../../../helpers/utils/networkUtils";
+import { getChainDataForNetwork, networkFromNetworkDb } from "../../../helpers/utils/networkUtils";
 import { KryptikTransaction } from "../../../models/transactions";
-import { TokenParamsSpl } from "../../../services/models/token";
+import { ChainData, TokenParamsSpl } from "../../../services/models/token";
 import { CreateTransferTransactionParameters, EVMTransferTxParams, NearTransactionParams, SolTransactionParams, TxType } from "../../../services/models/transaction"
 import { createEVMTransferTransaction} from "./EVMTransaction";
 import { BuildNEARTransfer } from "./NearTransactions";
@@ -39,10 +39,17 @@ export async function BuildTransferTx(params:CreateTransferTransactionParameters
             tokenPriceUsd: tokenPriceUsd
           }
           let tx:KryptikTransaction;
-          if(tokenAndNetwork.tokenData && tokenAndNetwork.tokenData.tokenParamsSol){
+          if(txType == TxType.TransferToken){
+             // add contract address
+             if(!tokenAndNetwork.tokenData){
+              throw(new Error("Error: Token Data not provided for SPL token transfer."))
+            }
+            let splChainData:ChainData|null = getChainDataForNetwork(tokenAndNetwork.baseNetworkDb, tokenAndNetwork.tokenData.tokenDb);
+            if(!splChainData){
+              throw(new Error("Error: SPL token information not provided by token."))
+            }
             // add sol token data to input params
-            let txSolData:TokenParamsSpl = tokenAndNetwork.tokenData.tokenParamsSol;
-            txIn.tokenParamsSol = txSolData;
+            txIn.tokenParamsSol = {contractAddress:splChainData.address};
             tx = await createSolTokenTransferTransaction(txIn);
           }
           // create base layer sol tx.
