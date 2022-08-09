@@ -18,7 +18,7 @@ export interface ISignAndSendWrapperParams{
 
 export interface TxFamilyWrapper{
     evmTx?:TransactionRequest,
-    solTx?:SolTransaction,
+    solTx?:SolTransaction[],
     nearTx?:NearTransaction
 }
 
