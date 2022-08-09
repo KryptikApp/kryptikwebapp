@@ -38,12 +38,8 @@ const Swap: NextPage = () => {
   const [amountUSD, setAmountUSD] = useState("0");
   const [amountTotalBounds, setAmountTotalbounds] = useState<AmountTotalBounds>(defaultAmountTotalBounds);
   const [sellTokenAndNetwork, setSellTokenAndNetwork] = useState(defaultTokenAndNetwork);
-  const [buyTokenAndNetwork, setBuyTokenAndNetwork] = useState(defaultUniswapTokenAndNetwork);
+  const [buyTokenAndNetwork, setBuyTokenAndNetwork] = useState<TokenAndNetwork|null>(null);
   const [fromAddress, setFromAddress] = useState(kryptikWallet.resolvedEthAccount.address);
-  const [toAddress, setToAddress] = useState("");
-  const [toResolvedAccount, setToResolvedAccount] = useState(defaultResolvedAccount);
-  const [isResolverLoading, setIsResolverLoading] = useState(false);
-  const [readableToAddress, setReadableToAddress] = useState("");
   const [readableFromAddress, setReadableFromAddress] = useState("");
   const [showAssetSearch, setShowAssetSearch] = useState(false);
   const [isSearchSellToken, setIsSearchSellToken] = useState(false);
@@ -98,6 +94,11 @@ const Swap: NextPage = () => {
 
   const handleSwapBuildRequest = async function(){
     setIsLoading(true);
+    if(!buyTokenAndNetwork){
+      toast.error("Please specify what token you would like to swap to.");
+      setIsLoading(false);
+      return;
+    }
     let isValidAmount = validateAmount();
     if(!isValidAmount) return;
     let kryptikProvider:KryptikProvider = await kryptikService.getKryptikProviderForNetworkDb(sellTokenAndNetwork.baseNetworkDb);
@@ -129,13 +130,11 @@ const Swap: NextPage = () => {
     setAmountUSD("0");
     setAmountCrypto("0");
     setFromAddress("");
-    setToAddress("");
     setAmountTotalbounds(defaultAmountTotalBounds);
     setReadableFromAddress(truncateAddress(kryptikWallet.resolvedEthAccount.address, nw));
-    setReadableToAddress("");
     setTxPubData(defaultTxPublishedData);
     setSellTokenAndNetwork(defaultTokenAndNetwork);
-    setBuyTokenAndNetwork(defaultTokenAndNetwork);
+    setBuyTokenAndNetwork(null);
     setSwapProgress(TxProgress.Begin);
     setIsLoading(false);
   };
@@ -352,12 +351,19 @@ const Swap: NextPage = () => {
                           To   
                           </div>
                           <div className="">
+                            {
+                              (buyTokenAndNetwork)?
+                              <div>
                               <img className="w-8 h-8 rounded-full inline" src={buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.logoURI:buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} token image`}/>
                               {
                                 buyTokenAndNetwork.tokenData &&
                                 <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
                               }
                               <span className="inline text-md pl-2 dark:text-gray-200">{buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.name:buyTokenAndNetwork.baseNetworkDb.fullName}</span>
+                              </div>:
+                              <span className="inline text-md dark:text-gray-200">Select Token</span>
+                            }
+                             
                           </div>
                           <div className="flex-grow text-right right-0 text-lg text-gray-500 dark:text-gray-400 float-right">
                             <svg className="h-5 w-5 float-right" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -402,26 +408,26 @@ const Swap: NextPage = () => {
                         <div className="flex flex-col px-3 rounded space-y-6">
                           <div className="flex flex-row rounded-lg p-2 bg-gray-200 dark:bg-gray-600 ">
                              <div>
-                                <img className="w-10 h-10 rounded-full inline" src={sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.logoURI:sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} image`}/>
+                                <img className="w-10 h-10 rounded-full inline" src={builtTx.swapData.sellTokenAndNetwork.tokenData?builtTx.swapData.sellTokenAndNetwork.tokenData.tokenDb.logoURI:builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.fullName} image`}/>
                                 {
                                   sellTokenAndNetwork.tokenData &&
-                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
                                 }
                               </div>
                               <div className="flex-grow text-right pt-1">
-                                <span className="text-xl font-semibold text-gray-600 dark:text-gray-200">{formatAmountUi(swapAmounts.sellAmountCrypto.toString(), sellTokenAndNetwork, false)} {formatTicker(sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.symbol:sellTokenAndNetwork.baseNetworkDb.ticker)}</span>
+                                <span className="text-xl font-semibold text-gray-600 dark:text-gray-200">{formatAmountUi(swapAmounts.sellAmountCrypto.toString(), builtTx.swapData.sellTokenAndNetwork, false)} {formatTicker(builtTx.swapData.sellTokenAndNetwork.tokenData?builtTx.swapData.sellTokenAndNetwork.tokenData.tokenDb.symbol:builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.ticker)}</span>
                               </div>
                           </div>
                           <div className="flex flex-row rounded-lg p-2 bg-gray-200 dark:bg-gray-600 ">
                               <div>
-                                <img className="w-10 h-10 rounded-full inline" src={buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.logoURI:buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} token image`}/>
+                                <img className="w-10 h-10 rounded-full inline" src={builtTx.swapData.buyTokenAndNetwork.tokenData?builtTx.swapData.buyTokenAndNetwork.tokenData.tokenDb.logoURI:builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.fullName} token image`}/>
                                 {
-                                  buyTokenAndNetwork.tokenData &&
-                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                                  builtTx.swapData.buyTokenAndNetwork.tokenData &&
+                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
                                 }
                               </div>
                               <div className="flex-grow text-right pt-1">
-                                <span className="text-xl font-semibold text-gray-600 dark:text-gray-200">{formatAmountUi(swapAmounts.buyAmountCrypto.toString(), buyTokenAndNetwork, false)} {formatTicker(buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.symbol:buyTokenAndNetwork.baseNetworkDb.ticker)}</span>
+                                <span className="text-xl font-semibold text-gray-600 dark:text-gray-200">{formatAmountUi(swapAmounts.buyAmountCrypto.toString(), builtTx.swapData.buyTokenAndNetwork, false)} {formatTicker(builtTx.swapData.buyTokenAndNetwork.tokenData?builtTx.swapData.buyTokenAndNetwork.tokenData.tokenDb.symbol:builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.ticker)}</span>
                               </div>
                              
                           </div>
@@ -542,20 +548,20 @@ const Swap: NextPage = () => {
                     <div className="flex flex-col mb-8 mx-auto">
                       <div className="flex flex-row mx-auto space-x-3 mb-4">
                               <div>
-                                <img className="w-10 h-10 rounded-full inline" src={sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.logoURI:sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} image`}/>
+                                <img className="w-10 h-10 rounded-full inline" src={builtTx.swapData.sellTokenAndNetwork.tokenData?builtTx.swapData.sellTokenAndNetwork.tokenData.tokenDb.logoURI:builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.fullName} image`}/>
                                 {
-                                  sellTokenAndNetwork.tokenData &&
-                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${sellTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                                  builtTx.swapData.sellTokenAndNetwork.tokenData &&
+                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.iconPath} alt={`${builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
                                 }
                               </div>
                               <div>
                                 <AiOutlineArrowRight className="mt-1" size="30"/>
                               </div>
                               <div>
-                                <img className="w-10 h-10 rounded-full inline" src={buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.logoURI:buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} image`}/>
+                                <img className="w-10 h-10 rounded-full inline" src={builtTx.swapData.buyTokenAndNetwork.tokenData?builtTx.swapData.buyTokenAndNetwork.tokenData.tokenDb.logoURI:builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.fullName} image`}/>
                                 {
-                                  buyTokenAndNetwork.tokenData &&
-                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${buyTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
+                                  builtTx.swapData.buyTokenAndNetwork.tokenData &&
+                                  <img className="w-5 h-5 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.iconPath} alt={`${builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.fullName} secondary image`}/>
                                 }
                               </div>
                       </div>
@@ -564,7 +570,7 @@ const Swap: NextPage = () => {
                         <br/>
                         from <span style={{color:`${builtTx.swapData.sellTokenAndNetwork.tokenData?builtTx.swapData.sellTokenAndNetwork.tokenData.tokenDb.hexColor:builtTx.swapData.sellTokenAndNetwork.baseNetworkDb.hexColor}`}}>{formatAmountUi(swapAmounts.sellAmountCrypto.toString(), sellTokenAndNetwork, false)} {formatTicker(sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.symbol:sellTokenAndNetwork.baseNetworkDb.ticker)}</span> to
                         <br/>
-                        <span className="text-3xl" style={{color:`${buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.hexColor:buyTokenAndNetwork.baseNetworkDb.hexColor}`}}>{formatAmountUi(swapAmounts.buyAmountCrypto.toString(), buyTokenAndNetwork, false)} {formatTicker(buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.tokenDb.symbol:buyTokenAndNetwork.baseNetworkDb.ticker)}</span>
+                        <span className="text-3xl" style={{color:`${builtTx.swapData.buyTokenAndNetwork.tokenData?builtTx.swapData.buyTokenAndNetwork.tokenData.tokenDb.hexColor:builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.hexColor}`}}>{formatAmountUi(swapAmounts.buyAmountCrypto.toString(), builtTx.swapData.buyTokenAndNetwork, false)} {formatTicker(builtTx.swapData.buyTokenAndNetwork.tokenData?builtTx.swapData.buyTokenAndNetwork.tokenData.tokenDb.symbol:builtTx.swapData.buyTokenAndNetwork.baseNetworkDb.ticker)}</span>
                       </h1>
                     </div>
                    
