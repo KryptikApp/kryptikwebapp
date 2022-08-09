@@ -1,3 +1,5 @@
+import { NetworkDb } from "../models/network"
+
 enum ServiceState{
     started=0,
     stopped=1,
@@ -26,6 +28,8 @@ enum WaitlistProgress{
     Complete=1,
     Failure=2
 }
+
+export type GetNetworkDbByTicker = (ticker:string)=>NetworkDb|null
 
 export{ServiceState, Status, TxProgress, WaitlistProgress}
 
