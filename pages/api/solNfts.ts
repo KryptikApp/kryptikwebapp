@@ -1,6 +1,5 @@
 import axios from "axios";
 import { NextApiRequest, NextApiResponse } from "next";
-import { KryptikFetch } from "../../src/kryptikFetch";
 import { INFTMetadata } from "../../src/parsers/nftEthereum";
 import { parseSolNFTMetaData } from "../../src/parsers/nftSolana";
 
