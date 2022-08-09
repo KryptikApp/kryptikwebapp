@@ -1,3 +1,8 @@
+import { PublicKey, TransactionInstruction } from "@solana/web3.js";
+import {TOKEN_PROGRAM_ID } from "@solana/spl-token";
+//@ts-ignore
+import { nu64, struct, u8 } from "buffer-layout"
+
 import { Network, NetworkFamily } from "hdseedloop";
 import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
 import { NetworkDb } from "../../services/models/network";
@@ -7,9 +12,20 @@ export function isSwapAvailable(buyTokenNetworkDb:NetworkDb, sellTokenNetworkDb:
     const buyTokenNetwork:Network = networkFromNetworkDb(buyTokenNetworkDb);
     const sellTokenNetwork:Network = networkFromNetworkDb(sellTokenNetworkDb);
     // TODO: UPDATE TO SUPPORT NONEVM + CROSSCHAIN SWAPS
-    if(buyTokenNetwork.networkFamily == NetworkFamily.EVM && sellTokenNetwork.networkFamily == NetworkFamily.EVM && buyTokenNetwork.fullName.toLowerCase() == sellTokenNetwork.fullName.toLowerCase())
+    if(buyTokenNetwork.networkFamily == NetworkFamily.EVM && sellTokenNetwork.networkFamily == NetworkFamily.EVM 
+        // ensure same chain to and from
+        && buyTokenNetwork.fullName.toLowerCase() == sellTokenNetwork.fullName.toLowerCase())
     {
         return true;
+    }
+    // approve solana swaps
+    // TODO: UPDATE TO APPROVE TESTNETS WHEN SUPPORTED
+    if(buyTokenNetwork.networkFamily == NetworkFamily.Solana && sellTokenNetwork.networkFamily == NetworkFamily.Solana
+         // ensure same chain to and from
+         && buyTokenNetwork.fullName.toLowerCase() == sellTokenNetwork.fullName.toLowerCase()
+         // ensure not a testnet
+         && !buyTokenNetworkDb.isTestnet && !sellTokenNetworkDb.isTestnet){
+        return true
     }
     return false;
 }
