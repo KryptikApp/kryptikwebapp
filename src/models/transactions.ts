@@ -1,6 +1,7 @@
 import { TransactionRequest } from "@ethersproject/abstract-provider";
 import { NetworkFamily } from "hdseedloop";
 import { handleSignAndSendTransaction, ISignAndSendWrapperParams, TxFamilyWrapper } from "../handlers/wallet/transactions";
+import { TOKENS } from "../helpers/DEXs/raydium/tokens";
 import { divByDecimals } from "../helpers/utils/numberUtils";
 import { IKryptikSwapData } from "../parsers/0xData";
 
@@ -70,8 +71,8 @@ export class KryptikTransaction{
     // return s ui formatted swap amounts from internal swap data
     fetchSwapAmounts():SwapAmounts|null{
         if(!this.swapData) return null;
-        let sellTokenAmount = divByDecimals(Number(this.swapData.sellAmount), this.swapData.sellTokenAndNetwork.tokenData?this.swapData.sellTokenAndNetwork.tokenData.tokenDb.decimals:this.swapData.sellTokenAndNetwork.baseNetworkDb.decimals);
-        let buyTokenAmount = divByDecimals(Number(this.swapData.buyAmount), this.swapData.buyTokenAndNetwork.tokenData?this.swapData.buyTokenAndNetwork.tokenData.tokenDb.decimals:this.swapData.buyTokenAndNetwork.baseNetworkDb.decimals);
+        let sellTokenAmount = divByDecimals(Number(this.swapData.sellAmount), this.swapData.sellTokenAndNetwork.tokenData?this.swapData.sellTokenAndNetwork.tokenData.tokenDb.decimals:TOKENS.WSOL.decimals);
+        let buyTokenAmount = divByDecimals(Number(this.swapData.buyAmount), this.swapData.buyTokenAndNetwork.tokenData?this.swapData.buyTokenAndNetwork.tokenData.tokenDb.decimals:TOKENS.WSOL.decimals);
         return {buyAmountCrypto: buyTokenAmount.asNumber, sellAmountCrypto:sellTokenAmount.asNumber}
     }
 
@@ -112,7 +113,7 @@ export class KryptikTransaction{
                 }
                 txSignParams.solParams = {
                     ...baseParams,
-                    txSol: this.txData.solTx
+                    txs: this.txData.solTx
                 }
                 break;
             }
