@@ -26,7 +26,7 @@ const ListBalance:NextPage = () => {
     const totalToFetch = kryptikService.NetworkDbs.length + kryptikService.tokenDbs.length;
     const stepSize:number = Number(((1/totalToFetch)*100));
 
-    const incrementLoadProgress = function(balance:IBalance|null){
+    const incrementLoadProgress = function(tokenANdBalance:TokenAndNetwork|null){
         let progressBar = document.getElementById("progressBar");
         if(progressBar){
             let currentWidth = progressBar.style.width;
@@ -67,8 +67,14 @@ const ListBalance:NextPage = () => {
     return(
         <div>
         <div>
-                <div className="flex justify-start mt-5">
-                    <h2 className="font-medium text-slate-700 dark:text-slate-200">Your Network Balances</h2>
+                <div className="flex flex-row mt-5">
+                    <h2 className="text-lg text-slate-700 dark:text-slate-200">Your Network Balances</h2>
+                    <div className="flex-grow text-right">
+                        {
+                            (isFetchedBalances && balanceHolder) &&
+                            <h2 className="text-sm text-slate-500 dark:text-slate-500 pt-1">Last Updated: {balanceHolder?.getLastUpdateTimestamp()}</h2>
+                        }
+                    </div>
                 </div>
                 {/* progress bar */}
                 {
