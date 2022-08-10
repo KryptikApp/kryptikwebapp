@@ -6,7 +6,7 @@ import { networkFromNetworkDb, getTransactionExplorerPath, isEVMTxTypeTwo, getCh
 import { roundDecimalsByNetworkToken, roundToDecimals } from "../../../helpers/utils/numberUtils";
 import { IKryptikTxParams, KryptikTransaction } from "../../../models/transactions";
 import { ChainData } from "../../../services/models/token";
-import { TransactionPublishedData, defaultTxPublishedData, TransactionRequest, ISignAndSendParameters, EVMTransferTxParams } from "../../../services/models/transaction";
+import { TransactionPublishedData, defaultTxPublishedData, TransactionRequest, ISignAndSendParameters, EVMTransferTxParams, TxType } from "../../../services/models/transaction";
 import { getTransactionFeeDataEVM } from "../../fees/EVMFees";
 
 
@@ -70,10 +70,8 @@ export const createEVMTransferTransaction = async function(txIn:EVMTransferTxPar
     let roundedAmountCrypto = roundToDecimals(valueCrypto, tokenDecimals);
     let value = parseUnits(roundedAmountCrypto.toString(), tokenDecimals)
     console.log("EVM tx value:");
-
+    let txType:TxType;
     if(!tokenAndNetwork.tokenData){
-        console.log("building regular eth transaction...");
-        console.log(value);
         tx = {
             from: sendAccount,
             to: toAddress,
@@ -81,9 +79,11 @@ export const createEVMTransferTransaction = async function(txIn:EVMTransferTxPar
             nonce: accountNonce,
             chainId: chainIdEVM,
         }
+        txType = TxType.TransferNative;
     }
     // creates evm transfer tx for ERC20 token
     else{
+        txType = TxType.TransferToken;
         let erc20ChainData:ChainData|null = getChainDataForNetwork(txIn.tokenAndNetwork.baseNetworkDb, tokenAndNetwork.tokenData.tokenDb);
         if(!erc20ChainData) return null;
         let erc20Contract = new Contract(erc20ChainData.address, erc20Abi);
@@ -116,6 +116,7 @@ export const createEVMTransferTransaction = async function(txIn:EVMTransferTxPar
         kryptikTx:{
             evmTx: tx
         },
+        txType: TxType.Swap,
         tokenAndNetwork: txIn.tokenAndNetwork,
         tokenPriceUsd: txIn.tokenPriceUsd,
       }

@@ -118,7 +118,10 @@ export interface FeeDataSolParameters{
 
 export enum TxType{
   TransferNative=0,
-  TransferToken=1
+  TransferToken=1,
+  Unknown=3,
+  Approval=4, 
+  Swap=5
 }
 
 export interface FeeDataNearParameters{

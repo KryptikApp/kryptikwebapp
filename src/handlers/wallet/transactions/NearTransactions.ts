@@ -110,6 +110,7 @@ export const BuildNEARTransfer = async function(params:NearTransactionParams):Pr
       kryptikTx:{
           nearTx:txNear
       },
+      txType: txType,
       tokenAndNetwork: tokenAndNetwork,
       tokenPriceUsd: tokenPriceUsd,
     }

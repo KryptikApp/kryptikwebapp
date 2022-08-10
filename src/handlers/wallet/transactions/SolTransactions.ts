@@ -7,7 +7,7 @@ import { createEd25519PubKey, createSolTokenAccount } from "../../../helpers/uti
 import { networkFromNetworkDb, formatTicker, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
 import { lamportsToSol, multByDecimals, roundCryptoAmount, solToLamports } from "../../../helpers/utils/numberUtils";
 import { TokenParamsSpl } from "../../../services/models/token";
-import TransactionFeeData, { CreateTransferTransactionParameters, defaultTxPublishedData, ISignAndSendParameters, SolTransactionParams, TransactionPublishedData } from "../../../services/models/transaction";
+import TransactionFeeData, { CreateTransferTransactionParameters, defaultTxPublishedData, ISignAndSendParameters, SolTransactionParams, TransactionPublishedData, TxType } from "../../../services/models/transaction";
 import { IWallet } from "../../../models/KryptikWallet";
 import { IKryptikTxParams, KryptikTransaction } from "../../../models/transactions";
 import { getTransactionFeeDataSolana } from "../../fees/SolanaFees";
@@ -136,6 +136,7 @@ export const createSolTransferTransaction = async function(txIn:SolTransactionPa
       kryptikTx:{
           solTx: [transaction]
       },
+      txType: TxType.TransferNative,
       tokenAndNetwork: txIn.tokenAndNetwork,
       tokenPriceUsd: txIn.tokenPriceUsd,
     }
@@ -192,6 +193,7 @@ export const createSolTokenTransferTransaction = async function(txIn:SolTransact
       kryptikTx:{
           solTx: [transaction]
       },
+      txType: TxType.TransferToken,
       tokenAndNetwork: txIn.tokenAndNetwork,
       tokenPriceUsd: txIn.tokenPriceUsd,
     }

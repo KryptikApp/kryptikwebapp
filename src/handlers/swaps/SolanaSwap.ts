@@ -9,7 +9,7 @@ import { IKryptikTxParams, KryptikTransaction } from "../../models/transactions"
 import { TOKENS } from "../../helpers/DEXs/raydium/tokens";
 import { isSwapAvailable} from "./utils";
 import { ISwapData } from "../../parsers/0xData";
-import TransactionFeeData from "../../services/models/transaction";
+import TransactionFeeData, { TxType } from "../../services/models/transaction";
 import { getTransactionFeeDataSolana } from "../fees/SolanaFees";
 import { getOneSolSwapTransactions, IOneSOlSwapInfo } from "../../helpers/DEXs/1Sol";
 
@@ -104,6 +104,7 @@ export async function BuildSolSwapTransaction(params:IBuildSolSwapParams):Promis
       kryptikTx:{
           solTx:oneSolSwapInfo.transactions
       },
+      txType: TxType.Swap,
       tokenAndNetwork: sellTokenAndNetwork,
       tokenPriceUsd: sellNetworkTokenPriceUsd,
     }

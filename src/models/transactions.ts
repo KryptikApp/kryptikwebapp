@@ -1,4 +1,3 @@
-import { TransactionRequest } from "@ethersproject/abstract-provider";
 import { NetworkFamily } from "hdseedloop";
 import { handleSignAndSendTransaction, ISignAndSendWrapperParams, TxFamilyWrapper } from "../handlers/wallet/transactions";
 import { TOKENS } from "../helpers/DEXs/raydium/tokens";
@@ -7,7 +6,7 @@ import { IKryptikSwapData } from "../parsers/0xData";
 
 import { KryptikProvider } from "../services/models/provider";
 import { TokenAndNetwork } from "../services/models/token";
-import TransactionFeeData, { defaultErrorHandler, IErrorHandler, ISignAndSendParameters, TransactionPublishedData } from "../services/models/transaction";
+import TransactionFeeData, { defaultErrorHandler, IErrorHandler, ISignAndSendParameters, TransactionPublishedData, TxType } from "../services/models/transaction";
 import { IWallet } from "./KryptikWallet";
 
 export interface IKryptikTxParams{
@@ -15,6 +14,7 @@ export interface IKryptikTxParams{
     tokenPriceUsd:number
     tokenAndNetwork:TokenAndNetwork
     kryptikTx:TxFamilyWrapper
+    txType:TxType
     kryptikProvider?:KryptikProvider
     swapData?:IKryptikSwapData
 }
@@ -38,16 +38,18 @@ export class KryptikTransaction{
     txData:TxFamilyWrapper
     // swaps
     isSwap:boolean
+    txType: TxType
     swapData?:IKryptikSwapData
     
     constructor(params:IKryptikTxParams) {
-        const {feeData, tokenPriceUsd, kryptikTx, kryptikProvider, tokenAndNetwork, swapData} = {...params};
+        const {feeData, tokenPriceUsd, kryptikTx, kryptikProvider, tokenAndNetwork, swapData, txType} = {...params};
         this.feeData = feeData;
         this.provider = kryptikProvider?kryptikProvider:null;
         this.tokenPriceUsd = tokenPriceUsd;
         this.tokenAndNetwork = tokenAndNetwork;
         this.lastUpdated = Date.now();
         this.txData = kryptikTx;
+        this.txType = txType;
         if(swapData){
             this.swapData = swapData;
             this.isSwap = true;
