@@ -69,7 +69,6 @@ export const createEVMTransferTransaction = async function(txIn:EVMTransferTxPar
     let tokenDecimals:number = tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.decimals:tokenAndNetwork.baseNetworkDb.decimals;
     let roundedAmountCrypto = roundToDecimals(valueCrypto, tokenDecimals);
     let value = parseUnits(roundedAmountCrypto.toString(), tokenDecimals)
-    console.log("EVM tx value:");
     let txType:TxType;
     if(!tokenAndNetwork.tokenData){
         tx = {
