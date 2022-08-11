@@ -13,6 +13,7 @@ export interface EVMSwapdata{
     to: string
     value: string
     data: string
+    allowanceTarget:string
 }
 
 export interface ISwapData{
