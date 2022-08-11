@@ -2,7 +2,7 @@ import type { NextPage } from 'next'
 import { Toaster } from 'react-hot-toast';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { WaitlistProgress } from '../src/services/types';
 import { addEmailToWaitlist } from '../src/helpers/waitlist';
 import { isValidEmailAddress } from '../src/helpers/resolvers/kryptikResolver';
@@ -109,7 +109,7 @@ const LaunchPage: NextPage = () => {
             <div className="min-w-[50%] max-h-[400px] graphPaper -mx-4">
               <div className={`min-w-[40%] max-h-[800px] ${(isDark || themeLoading)?"colorFadeGreenBlackCenter":"colorFadeGreenWhiteCenter"}`}>
                 <div className="place-items-center max-w-[400px] mx-auto pt-48 lg:pt-40">
-                  <img src="kryptikBrand/journey begins.png"/>
+                  <img className="max-w-[90%] mx-auto" src="kryptikBrand/journey begins.png"/>
                 </div>
               </div>
             </div>
@@ -118,7 +118,7 @@ const LaunchPage: NextPage = () => {
                 <div className="h-[400px] md:h-[200px]">
                   {/* padding div for space between top and main elements */}
                 </div>
-                <p className="text-white text-6xl mb-2">You&apos;re #{waitlistPosition} on the list.</p>
+                <p className="dark:text-white text-6xl mb-2">You&apos;re #{waitlistPosition} on the list.</p>
                 <p className="text-slate-500 dark:text-slate-400 text-xl ">A Web3 Wallet full of <span className="text-transparent font-semibold bg-clip-text bg-gradient-to-br from-green-200 to-sky-500 background-animate">magical</span> powers. Coming soon.</p>
                 <Link href="/explore">
                  <p className="text-md dark:text-white hover:cursor-pointer dark:hover:text-sky-500 transition-colors duration-1500 mt-4">Keep exploring?</p>
