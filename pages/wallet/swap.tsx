@@ -171,6 +171,7 @@ const Swap: NextPage = () => {
       let newSwapAmounts = newswapTx.fetchSwapAmounts();
       setSwapAmounts(newSwapAmounts);
       updateTotalBounds(feeDataArray);
+      setShowDetails(false);
       setSwapProgress(TxProgress.Rewiew);
     }
     setSwapTx(newswapTx);
@@ -192,6 +193,7 @@ const Swap: NextPage = () => {
     setIsLoading(false);
     setSwapTx(null);
     setApprovalTx(null);
+    setShowDetails(false);
   };
 
   const handleSwapSendRequest = async function(){
@@ -280,6 +282,10 @@ const Swap: NextPage = () => {
 
   const updateSellToken = function(newTokenAndNetwork:TokenAndNetwork){
     let newSwapValidator:SwapValidator = new SwapValidator(newTokenAndNetwork);
+    // make sure new pair is valid
+    if(buyTokenAndNetwork && !newSwapValidator.isValidSwapPair(buyTokenAndNetwork)){
+      setBuyTokenAndNetwork(null);
+    }
     setCurrentSwapValidator(newSwapValidator);
     setSellTokenAndNetwork(newTokenAndNetwork);
     setShowAssetSearch(false);
