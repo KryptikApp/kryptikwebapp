@@ -141,7 +141,7 @@ const Security: NextPage = () => {
                   <div>
                         <input type="password" className="bg-gray-200 dark:bg-gray-700 appearance-none border border-gray-200 rounded w-full py-3 px-4 text-gray-800 dark:text-white leading-tight focus:outline-none focus:bg-white focus:border-sky-400 dark:focus:border-sky-500 text-xl" id="inline-full-name" placeholder="Enter your password" required onChange={(e) => setPassword(e.target.value)}/>
                         <div className='my-4 text-right float-right'>
-                              <button onClick={()=>handleLockWallet()} className="bg-transparent hover:bg-green-500 text-green-500 text-xl font-semibold hover:text-white py-2 px-8 border border-green-500 hover:border-transparent rounded">
+                              <button onClick={()=>handleLockWallet()} className="bg-transparent hover:bg-green-500 text-green-500 text-xl font-semibold hover:text-white py-2 px-8 border border-green-500 hover:border-transparent rounded" disabled={loading}>
                                    {
                                           !loading?"Lock Wallet":
                                           <svg role="status" className="inline w-4 h-4 ml-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
