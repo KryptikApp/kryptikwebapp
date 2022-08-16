@@ -45,7 +45,7 @@ const fetchAccountName = async function(){
     if(!newResolvedAccount){
         newResolvedAccount = defaultResolvedAccount
     }
-    if(authUser.isLoggedIn && authUser.name && !newResolvedAccount.names && !accountPassedIn){
+    if(authUser && authUser.isLoggedIn && authUser.name && !newResolvedAccount.names && !accountPassedIn){
         setNameToDisplay(authUser.name)
     }
     else{
