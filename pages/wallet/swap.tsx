@@ -1,6 +1,7 @@
 import { Network, NetworkFamily, truncateAddress } from 'hdseedloop';
 import { toUpper } from 'lodash';
 import type { NextPage } from 'next'
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { AiFillCheckCircle, AiOutlineArrowLeft, AiOutlineArrowRight } from 'react-icons/ai';
@@ -19,17 +20,18 @@ import { getPriceOfTicker } from '../../src/helpers/coinGeckoHelper';
 import { getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils';
 import { formatTicker, networkFromNetworkDb } from '../../src/helpers/utils/networkUtils';
 import { formatAmountUi, roundCryptoAmount, roundUsdAmount } from '../../src/helpers/utils/numberUtils';
+import { WalletStatus } from '../../src/models/KryptikWallet';
 import { KryptikTransaction, SwapAmounts, TxSignatureParams } from '../../src/models/transactions';
 import { defaultTokenAndNetwork } from '../../src/services/models/network';
 import { KryptikProvider } from '../../src/services/models/provider';
 import { TokenAndNetwork } from '../../src/services/models/token';
 import TransactionFeeData, { AmountTotalBounds, defaultAmountTotalBounds, defaultTxPublishedData, TransactionPublishedData } from '../../src/services/models/transaction';
-import { TxProgress } from '../../src/services/types';
+import { ServiceState, TxProgress } from '../../src/services/types';
 
 
 const Swap: NextPage = () => {
   const {isDark} = useKryptikThemeContext();
-  const {kryptikWallet, kryptikService} = useKryptikAuthContext();
+  const {authUser, loadingAuthUser, walletStatus, kryptikWallet, kryptikService} = useKryptikAuthContext();
   const [isLoading, setIsLoading] = useState(false);
   
   const [tokenPrice, setTokenPrice] = useState(0);
@@ -70,6 +72,16 @@ const Swap: NextPage = () => {
   const[query, setQuery] = useState("");
 
   const[searchresults, setSearchResults] = useState<ISearchResult[]>([]);
+
+  const router = useRouter();
+  // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
+  useEffect(() => {
+    if ((!loadingAuthUser && (!authUser || !authUser.isLoggedIn)) || (walletStatus!=WalletStatus.Connected && walletStatus!=WalletStatus.Locked)) router.push('/');
+    // ensure service is started
+    if(kryptikService.serviceState != ServiceState.started){
+      router.push('/')
+    }
+  }, [authUser, loadingAuthUser])
 
   const handleToggleIsCrypto = function(){
     setIsInputCrypto(!isInputCrypto);

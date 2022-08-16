@@ -21,15 +21,15 @@ export const resolveEVMAccount = async function(params:IAccountResolverParams):P
         address = await evmProvider.resolveName(account);
         avatarPath = await evmProvider.getAvatar(account);
     }
-    else{
-        // get eth provider, for default ENS service
-        evmProvider = new StaticJsonRpcProvider(defaultNetworkDb.provider, {name:"homestead", chainId:1});
-        let resolver= await evmProvider.getResolver(account);
-        if(resolver){
-            address = await resolver.getAddress(networkDB.chainId);
-            avatarPath = await evmProvider.getAvatar(account);
-        }
-    }
+    // else{
+    //     // get eth provider, for default ENS service
+    //     evmProvider = new StaticJsonRpcProvider(defaultNetworkDb.provider, {name:"homestead", chainId:1});
+    //     let resolver= await evmProvider.getResolver(account);
+    //     if(resolver){
+    //         address = await resolver.getAddress(networkDB.chainId);
+    //         avatarPath = await evmProvider.getAvatar(account);
+    //     }
+    // }
     // if account resolves then account is an ENS name...
     // check if address is a valid EVM address and set
     // otherwise... no ens name set for account, check if account is valid address

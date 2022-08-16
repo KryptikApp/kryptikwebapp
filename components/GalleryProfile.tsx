@@ -5,6 +5,7 @@ import { getUserPhotoPath } from "../src/helpers/firebaseHelper";
 import { defaultResolvedAccount, IAccountResolverParams, IResolvedAccount, resolveAccount } from "../src/helpers/resolvers/accountResolver";
 import { resolveEVMAccount } from "../src/helpers/resolvers/evmResolver";
 import { networkFromNetworkDb } from "../src/helpers/utils/networkUtils";
+import { defaultUser } from "../src/models/user";
 import { defaultNetworkDb, NetworkDb } from "../src/services/models/network";
 import { KryptikProvider } from "../src/services/models/provider";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
@@ -46,7 +47,7 @@ const fetchAccountName = async function(){
         newResolvedAccount = defaultResolvedAccount
     }
     let network:Network = networkFromNetworkDb(networkDb?networkDb:defaultNetworkDb);
-    if(authUser.isLoggedIn && authUser.name && !newResolvedAccount.names && !account){
+    if(authUser && authUser.isLoggedIn && authUser.name && !newResolvedAccount.names && !account){
         setNameToDisplay(authUser.name)
         let newAddy = truncateAddress(newResolvedAccount.address, network);
         setAddyToDisplay(newAddy);
@@ -64,7 +65,7 @@ const fetchAccountName = async function(){
         }
        
     }
-    setAvatarToDisplay(newResolvedAccount.avatarPath?newResolvedAccount.avatarPath:getUserPhotoPath(authUser));
+    setAvatarToDisplay(newResolvedAccount.avatarPath?newResolvedAccount.avatarPath:getUserPhotoPath(authUser?authUser:defaultUser));
     setResolvedAccount(newResolvedAccount);
     setLoadingResolvedAccount(false);
     }

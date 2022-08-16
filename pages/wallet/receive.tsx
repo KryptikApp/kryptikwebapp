@@ -11,15 +11,28 @@ import { TokenAndNetwork } from '../../src/services/models/token'
 import { defaultTokenAndNetwork} from '../../src/services/models/network'
 import DropdownNetworks from '../../components/DropdownNetworks'
 import { getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils';
+import { useRouter } from 'next/router';
+import { ServiceState } from '../../src/services/types';
+import { WalletStatus } from '../../src/models/KryptikWallet';
 
 
 const Recieve: NextPage = () => {
-    const { kryptikWallet, kryptikService } = useKryptikAuthContext();
+    const { kryptikWallet, kryptikService, authUser, loadingAuthUser, walletStatus } = useKryptikAuthContext();
     const[selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(defaultTokenAndNetwork);
     const [readableFromAddress, setReadableFromAddress] = useState("");
     const [toAddress, setToAddress] = useState(" ");
     const [isCopied, setIsCopied] = useState(false);
     const { Canvas } = useQRCode();
+
+    const router = useRouter();
+    // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
+    useEffect(() => {
+      if ((!loadingAuthUser && (!authUser || !authUser.isLoggedIn)) || (walletStatus!=WalletStatus.Connected && walletStatus!=WalletStatus.Locked)) router.push('/');
+      // ensure service is started
+      if(kryptikService.serviceState != ServiceState.started){
+        router.push('/')
+      }
+    }, [authUser, loadingAuthUser])
 
     useEffect(()=>{
         fetchFromAddress();

@@ -7,18 +7,19 @@ import Divider from '../../components/Divider'
 import { useKryptikThemeContext } from '../../components/ThemeProvider'
 import Link from 'next/link'
 import NavProfile from '../../components/navbars/NavProfile'
+import { defaultUser } from '../../src/models/user'
 
 
 const Settings: NextPage = () => {
-  const { authUser, loading, signOut, kryptikWallet, signInWithToken } = useKryptikAuthContext();
+  const { authUser, loadingAuthUser, signOut, kryptikWallet } = useKryptikAuthContext();
   const {updateIsDark, isDark, updateIsAdvanced, isAdvanced, isVisible, updateIsVisible} = useKryptikThemeContext();
   const [updateVisibleLoading, setUpdateVisibleLoading] = useState(false);
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loading && !authUser.isLoggedIn)
+    if (!loadingAuthUser && (!authUser?.isLoggedIn))
       router.push('/')
-  }, [authUser, loading])
+  }, [authUser, loadingAuthUser])
 
   const handleLogout = function(){
     try{
@@ -32,6 +33,10 @@ const Settings: NextPage = () => {
 
 
   const handleUpdateWalletVisibility = async function(){
+    if(!authUser){
+      toast.error("Please login before updating your preferences");
+      return;
+    }
     setUpdateVisibleLoading(true);
     try{
       await updateIsVisible(!isVisible, authUser.uid, kryptikWallet);
@@ -50,6 +55,10 @@ const Settings: NextPage = () => {
   }
 
   const handleUpdateIsAdvanced = function(newIsAdvanced:boolean){
+    if(!authUser){
+      toast.error("Please login before updating your preferences");
+      return;
+  }
     updateIsAdvanced(newIsAdvanced, authUser.uid);
     if(newIsAdvanced){
       toast.success("Advanced mode activated!");
@@ -76,7 +85,7 @@ const Settings: NextPage = () => {
           
           {/* visibility toggle */}
 
-          <div className="hover:bg-gray-100 hover:dark:bg-[#141414] py-4 rounded">
+          <div className="hover:bg-gray-100 hover:dark:bg-[#141414] py-4 rounded px-1">
             <div>
               <h2 className='font-bold text-gray-500 dark:text-gray-400 mb-1 inline'>Wallet Visiblity</h2>
               {
@@ -97,16 +106,16 @@ const Settings: NextPage = () => {
 
           {/* dark mode stereo */} 
 
-          <div className='hover:bg-gray-100 hover:dark:bg-[#141414] py-4 rounded'>
-          <h1 className='font-bold text-gray-500 dark:text-gray-400 mb-1'>Kryptik Theme</h1>
+          <div className='hover:bg-gray-100 hover:dark:bg-[#141414] py-4 rounded px-1'>
+          <h1 className='text-lg font-bold text-gray-500 dark:text-gray-400 mb-1 text-left'>Kryptik Theme</h1>
 
           <div className="flex mb-2">
-            <div className="form-check form-check-inline" onClick={()=>updateIsDark(false, authUser.uid)}>
+            <div className="form-check form-check-inline" onClick={()=>updateIsDark(false, authUser?authUser.uid:defaultUser.uid)}>
               <input className="form-check-input form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-sky-500 checked:border-sky-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="inlineRadioOptions" id="inlineRadioLight" value="light" checked={isDark?false:true}/>
               <label className="form-check-label inline-block text-gray-800 dark:text-slate-200" htmlFor="inlineRadioLight">Light</label>
             </div>
 
-            <div className="form-check form-check-inline ml-4" onClick={()=>updateIsDark(true, authUser.uid)}>
+            <div className="form-check form-check-inline ml-4" onClick={()=>updateIsDark(true, authUser?authUser.uid:defaultUser.uid)}>
               <input className="form-check-input form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-sky-500 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="radio" name="inlineRadioOptions" id="inlineRadioDark" value="dark" checked={isDark?true:false}/>
               <label className="form-check-label inline-block text-gray-800 dark:text-slate-200" htmlFor="inlineRadioDark">Dark</label>
             </div>
@@ -115,7 +124,7 @@ const Settings: NextPage = () => {
           </div>
 
           {/* advanced mode toggle */}
-          <div className="hover:bg-gray-100 hover:dark:bg-[#141414] py-4 rounded">
+          <div className="hover:bg-gray-100 hover:dark:bg-[#141414] py-4 rounded px-1">
             <h2 className='font-bold text-gray-500 dark:text-gray-400 mb-1'>Advanced Mode</h2>
             <label className="inline-flex relative items-center cursor-pointer mt-2 mb-2">
               <input type="checkbox" checked={isAdvanced?true:false} id={isAdvanced?"checked-toggle":"default-toggle"} className="sr-only peer" onClick={(()=>handleUpdateIsAdvanced(!isAdvanced))}/>
@@ -129,7 +138,7 @@ const Settings: NextPage = () => {
                             Logout
           </button>
           <br/>
-          <Link href="../wallet/deleteWallet">
+          <Link href="../wallet/delete">
             <p className="text-red-500 text-sm hover:cursor-pointer">Delete Wallet</p>
           </Link>
         </div>

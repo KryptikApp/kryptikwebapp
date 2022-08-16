@@ -7,21 +7,22 @@ import Divider from '../../components/Divider'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import HeaderProfile from '../../components/HeaderProfile'
 import NavProfile from '../../components/navbars/NavProfile';
+import Link from 'next/link';
 
 
 
 
 const Profile: NextPage = () => {
-  const { authUser, loading, updateCurrentUserKryptik } = useKryptikAuthContext();
+  const { authUser, loadingAuthUser, updateCurrentUserKryptik } = useKryptikAuthContext();
   const router = useRouter();
-  // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
+  // ROUTE PROTECTOR: Listen for changes on loadingAuthUser and authUser, redirect if needed
   useEffect(() => {
-    if (!loading && !authUser.isLoggedIn)
+    if (!loadingAuthUser && (!authUser || !authUser.isLoggedIn))
       router.push('/')
-  }, [authUser, loading])
+  }, [authUser, loadingAuthUser])
 
-  const [name, setName] = useState(authUser.name);
-  const[bio, setBio] = useState(authUser.bio);
+  const [name, setName] = useState(authUser?authUser.name:"");
+  const[bio, setBio] = useState(authUser?authUser.bio:"");
   const [loadingUpdate, setloadingUpdate] = useState(false);
 
   const handleClickUpdate = async function(){
@@ -31,7 +32,7 @@ const Profile: NextPage = () => {
       return;
     }
     try{
-      if(!loadingUpdate){
+      if(!loadingUpdate && authUser){
         setloadingUpdate(true);
         authUser.name = name;
         authUser.bio = bio;
@@ -59,21 +60,23 @@ const Profile: NextPage = () => {
               <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
                 Profile Name
               </label>
-              <input maxLength={12} className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-sky-400 dark:bg-[#141414] dark:text-white" id="inline-full-name" placeholder={authUser.name} value={name} onChange={(e) => setName(e.target.value)}/>
+              <input maxLength={12} className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-sky-400 dark:bg-[#141414] dark:text-white" id="inline-full-name" placeholder={authUser?authUser.name:"Your Name"} value={name} onChange={(e) => setName(e.target.value)}/>
             </div>
+
+            <Link href="../wallet/createName">Create Near Name</Link>
 
             <div className="px-5 py-5 m-2 rounded mt-0 mb-0">
               <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
                 Your Email
               </label>
-              <input disabled className="hover:cursor-not-allowed bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400 dark:bg-[#141414] dark:text-white disabled" id="inline-full-name" placeholder={authUser.uid}/>
+              <input disabled className="hover:cursor-not-allowed bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400 dark:bg-[#141414] dark:text-white disabled" id="inline-full-name" placeholder={authUser?authUser.uid:"your@email"}/>
             </div>
 
             <div className="px-5 py-5 m-2 rounded mt-0">
               <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
                 Your Bio
               </label>
-              <textarea maxLength={150} className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400 dark:bg-[#141414] dark:text-white" id="inline-bio" placeholder={authUser.bio} value={bio} onChange={(e) => setBio(e.target.value)}/>
+              <textarea maxLength={150} className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400 dark:bg-[#141414] dark:text-white" id="inline-bio" placeholder={authUser?authUser.bio:"Your bio!"} value={bio} onChange={(e) => setBio(e.target.value)}/>
               <div className="flex justify-end mt-5">
               <button onClick={()=>handleClickUpdate()}className={`bg-transparent hover:bg-green-500 text-green-500 font-semibold hover:text-white py-2 px-4 ${loadingUpdate?"hover:cursor-not-allowed":""} border border-green-500 hover:border-transparent rounded-lg my-5 transition-colors duration-100`} disabled={loadingUpdate}>
                         Save

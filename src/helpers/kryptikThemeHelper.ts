@@ -86,8 +86,8 @@ export function useKryptikTheme() {
             let blockchainAccounts:any = {}
             let keyrings = wallet.seedLoop.getAllKeyrings();
             for(const keyring of keyrings){
-                //UPDATE TO SUPPORT MORE THAN FIRST ADDY
-                let addy = keyring.getAddressesSync()[0];
+                // STODO: UPDATE TO SUPPORT MORE THAN FIRST ADDY
+                let addy = keyring.getAddresses()[0];
                 blockchainAccounts[keyring.network.ticker] = addy;
             }
             await addUserBlockchainAccountsDB(blockchainAccounts);
@@ -141,14 +141,14 @@ export function useKryptikTheme() {
     useEffect(()=>{
         setThemeLoading(true);
         // fetch current theme
-        fetchTheme(authUser.uid);
+        fetchTheme(authUser?.uid);
         setThemeLoading(false);
     }, [])
 
     useEffect(()=>{
         setThemeLoading(true);
         // fetch current theme
-        fetchTheme(authUser.uid);
+        fetchTheme(authUser?.uid);
         setThemeLoading(false);
     }, [authUser])
 

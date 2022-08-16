@@ -22,7 +22,7 @@ export interface VaultAndShares{
 }
 
 export const createVault = function(seedloop:HDSeedLoop, uid:string):VaultAndShares{
-    let seedloopSerialized:SerializedSeedLoop = seedloop.serializeSync();
+    let seedloopSerialized:SerializedSeedLoop = seedloop.serialize();
     // genrate random encryption key
     let newPassword = randomBytes(256).toString('hex');
     let seedloopString = JSON.stringify(seedloopSerialized);
@@ -63,7 +63,7 @@ export const unlockVault = function(uid:string, remoteShare:string, seedloopUpda
     let vaultName:string = createVaultName(uid);
     let vaultString:string|null = localStorage.getItem(vaultName);
     if(vaultString == null){
-        console.log("There is no vault to unlock with the given id.");
+        console.warn("There is no vault to unlock with the given id.");
         return null;
     }
     let vaultRecovered:VaultContents = JSON.parse(vaultString);
@@ -79,7 +79,7 @@ export const unlockVault = function(uid:string, remoteShare:string, seedloopUpda
     console.log("done!");
     // update vault seedloop if updated seedloop is provided
     if(seedloopUpdated){
-        let seedloopSerialized:SerializedSeedLoop = seedloopUpdated.serializeSync();
+        let seedloopSerialized:SerializedSeedLoop = seedloopUpdated.serialize();
         // genrate random encryption key
         let seedloopString = JSON.stringify(seedloopSerialized);
         let seedloopEncrypted:string = crypt.AES.encrypt(seedloopString, passwordRecovered).toString();

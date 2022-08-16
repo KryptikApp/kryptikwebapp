@@ -7,9 +7,11 @@ import GalleryProfile from '../components/GalleryProfile';
 import { useKryptikAuthContext } from '../components/KryptikAuthProvider'
 import NftDisplay from '../components/nfts/NftDisplay';
 import ProfileName from '../components/ProfileName';
+import SearchNetwork from '../components/search/searchNetwork';
 import { getUserPhotoPath } from '../src/helpers/firebaseHelper';
 import { getAddressForNetworkDb } from '../src/helpers/utils/accountUtils';
 import { networkFromNetworkDb } from '../src/helpers/utils/networkUtils';
+import { WalletStatus } from '../src/models/KryptikWallet';
 import { INFTMetadata } from '../src/parsers/nftEthereum';
 import { listNearNftsByAddress } from '../src/requests/nearIndexApi';
 import { listNftsByAddress } from '../src/requests/nfts/ethereumApi';
@@ -58,7 +60,7 @@ const Gallery: NextPage = () => {
   const ethImagePath = "https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/eth.png?alt=media&token=cc1091fb-ef28-4008-a91e-5709818c452e"
 
   const fetchNFTDataKryptik = async function(){
-    if(!kryptikWallet.connected || !authUser.isLoggedIn) return;
+    if(kryptikWallet.status != WalletStatus.Connected || !authUser?.isLoggedIn) return;
     setIsNFTFetched(false);
     let solanaNetworkDb = kryptikService.getNetworkDbByTicker("sol");
     if(!solanaNetworkDb){
@@ -294,31 +296,33 @@ const Gallery: NextPage = () => {
 
            <div className="flex-9 md:w-[80%]"> 
 
-
-            {/* show active category name */}
-            <div className="invisible md:visible dark:text-white min-h-[60px]">
-            {
-              activeCategory == ActiveCategory.all &&
-              <div className="font-bold text-2xl ml-20 mb-6">
-                <span className='w-10 mr-2 inline'>🎨</span>
-                <h1 className="inline">All</h1>
-              </div>
-            }
-            {
-              activeCategory == ActiveCategory.poaps &&
-              <div className="font-bold text-2xl ml-20 mb-6">
-                <span className='w-10 mr-2 inline'>🏷️</span>
-                <h1 className="inline">Proof of Attendance</h1>
-              </div>
-            }
-            {
-              (activeCategory!=ActiveCategory.poaps && activeCategory!=ActiveCategory.all && activeCategoryNetworkDb) &&
-              <div className="font-bold text-2xl ml-20 mb-6">
-                <img className='w-10 mr-2 inline' src={activeCategoryNetworkDb.iconPath}/>
-                <h1 className="inline">{activeCategoryNetworkDb.fullName} Nfts</h1>
-              </div>
-            }
+            <div className="flex flex-row">
+                   {/* show active category name */}
+                   <div className="invisible md:visible dark:text-white min-h-[60px]">
+                   {
+                     activeCategory == ActiveCategory.all &&
+                     <div className="font-bold text-2xl ml-20 mb-6">
+                       <span className='w-10 mr-2 inline'>🎨</span>
+                       <h1 className="inline">All</h1>
+                     </div>
+                   }
+                   {
+                     activeCategory == ActiveCategory.poaps &&
+                     <div className="font-bold text-2xl ml-20 mb-6">
+                       <span className='w-10 mr-2 inline'>🏷️</span>
+                       <h1 className="inline">Proof of Attendance</h1>
+                     </div>
+                   }
+                   {
+                     (activeCategory!=ActiveCategory.poaps && activeCategory!=ActiveCategory.all && activeCategoryNetworkDb) &&
+                     <div className="font-bold text-2xl ml-20 mb-6">
+                       <img className='w-10 mr-2 inline' src={activeCategoryNetworkDb.iconPath}/>
+                       <h1 className="inline">{activeCategoryNetworkDb.fullName} Nfts</h1>
+                     </div>
+                   }
+                   </div>
             </div>
+
 
             {/* show loader while fetching nft data */}
             {

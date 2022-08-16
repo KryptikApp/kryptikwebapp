@@ -12,7 +12,7 @@ import { Connection, PublicKey, RpcResponseAndContext, TokenAmount } from "@sola
 import { Near } from "near-api-js";
 import { AccountBalance as NearAccountBalance } from "near-api-js/lib/account";
 
-import {Network, NetworkFamily, NetworkFamilyFromFamilyName, WalletKryptik } from "hdseedloop";
+import {Network, NetworkFamily, NetworkFamilyFromFamilyName} from "hdseedloop";
 import { CreateEVMContractParameters, ChainData, TokenDb, TokenAndNetwork, ERC20Params, Nep141Params, SplParams, TokenBalanceParameters, TokenParamsEVM } from "./models/token";
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
@@ -297,22 +297,17 @@ class Web3Service extends BaseService implements IWeb3Service{
     }
 
 
-    // creates and returns a connected erc20 contract 
+    // creates and returns an erc20 contract 
     createERC20Contract = async(params:CreateEVMContractParameters):Promise<Contract|null> =>{
         // hdseedloop compatible network
         let network = networkFromNetworkDb(params.networkDb);
         let provider = await this.getKryptikProviderForNetworkDb(params.networkDb);
         if(!provider.ethProvider) return null;
         let ethProvider:JsonRpcProvider = provider.ethProvider;
-        let accountAddress:string = await getAddressForNetworkDb(params.wallet, params.networkDb);
-        // connect provider and signer and attach to contract
-        let walletKryptik:WalletKryptik|null = params.wallet.seedLoop.getWalletForAddress(network, accountAddress);
-        if(!walletKryptik) return null;;
-        let ProviderAndSigner = walletKryptik.connect(ethProvider)
         let erc20ChainData:ChainData|null = getChainDataForNetwork(params.networkDb, params.erc20Db);
         if(!erc20ChainData) return null;
         let erc20Contract = new Contract(erc20ChainData.address, erc20Abi);
-        let contractConnected = erc20Contract.connect(ProviderAndSigner);
+        let contractConnected = erc20Contract.connect(ethProvider);
         return contractConnected;
     }
 
@@ -417,9 +412,9 @@ class Web3Service extends BaseService implements IWeb3Service{
     async getAllBalances(params:{walletUser:IWallet, isAdvanced?:boolean, onFetch?:OnFetch, tryCached?:boolean, useCovalent?:boolean}):Promise<KryptikBalanceHolder>{
         const{walletUser, isAdvanced, onFetch, tryCached, useCovalent} = {...params};
         // default try cached value is true
-        const getCached = tryCached?tryCached:true;
+        const getCached = (tryCached!=undefined)?tryCached:true;
         // default use covalent is true
-        const getCovalentBals = useCovalent?useCovalent:true;
+        const getCovalentBals = (useCovalent!=undefined)?useCovalent:true;
         // use cached balances if fresh
         if(this.kryptikBalances){
             console.log("kryptik balance holder id:");
@@ -429,6 +424,7 @@ class Web3Service extends BaseService implements IWeb3Service{
             console.log(this.kryptikBalances.getLastUpdateTimestamp());
         }
         if(getCached && this.kryptikBalances && this.kryptikBalances.isFresh()){
+            console.log("Returning cached balances...");
             return this.kryptikBalances;
         }
         let masterBalances:TokenAndNetwork[] = [];
@@ -463,18 +459,12 @@ class Web3Service extends BaseService implements IWeb3Service{
         masterBalances = masterBalances.concat(erc20Balances);
         masterBalances = masterBalances.concat(nep141Balances);
         masterBalances = masterBalances.concat(splBalances);
-        // return kryptik balances holder
-        if(this.kryptikBalances){
-            this.kryptikBalances.updateBalances(masterBalances);
-            return this.kryptikBalances;
-        }
-        else{
-            // init new kryptik balance holder
-            let newBalanceHolder:KryptikBalanceHolder = new KryptikBalanceHolder({tokenAndBalances:masterBalances});
-            // add new balance holder to service state
-            this.kryptikBalances = newBalanceHolder;
-            return newBalanceHolder;
-        }
+        // init new kryptik balance holder
+        let newBalanceHolder:KryptikBalanceHolder = new KryptikBalanceHolder({tokenAndBalances:masterBalances});
+        // add new balance holder to service state
+        this.kryptikBalances = newBalanceHolder;
+        return newBalanceHolder;
+        
     }
 
     // TODO: ADD ROUTER IF WE HAVE DIFFERENT INDEXER METHODS FOR DIFFERENT NETWORKS
@@ -489,8 +479,9 @@ class Web3Service extends BaseService implements IWeb3Service{
         let indexedNetworks:NetworkDb[] = []
         const addyToNetworks:{[address:string]:NetworkDb[]} = {};
         if(ethNetwork && solNetwork && arbitrumNetwork && avaxcNetwork && polygonNetwork){
-            let solAddress = await getAddressForNetworkDb(walletUser, solNetwork);
-            let ethAddress = await getAddressForNetworkDb(walletUser, ethNetwork);
+            let solAddress = getAddressForNetworkDb(walletUser, solNetwork);
+            let ethAddress = getAddressForNetworkDb(walletUser, ethNetwork);
+            console.log(ethAddress);
             addyToNetworks[ethAddress] = [ethNetwork, arbitrumNetwork, avaxcNetwork, polygonNetwork];
             addyToNetworks[solAddress] = [solNetwork];
         }

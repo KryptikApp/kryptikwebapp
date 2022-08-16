@@ -30,7 +30,7 @@ const TxFee:NextPage<Props> = (props) => {
           {
               (txFeeData.isFresh)&&
               <div>
-                <p className={`${style?style:"text-slate-400 text-sm"} inline`}>{feeLabelDisplay} ${(txFeeData.lowerBoundUSD == txFeeData.upperBoundUSD)?`${roundUsdAmount(txFeeData.upperBoundUSD)}`:`${roundUsdAmount(txFeeData.lowerBoundUSD)}-$${roundUsdAmount(txFeeData.upperBoundUSD)}`}</p>
+                <p className={`${style?style:"text-slate-400 text-sm"} inline`}>{feeLabelDisplay} ${(txFeeData.lowerBoundUSD == txFeeData.upperBoundUSD)?txFeeData.upperBoundUSD<.01?`<.01`:`${roundUsdAmount(txFeeData.upperBoundUSD, 2)}`:`${roundUsdAmount(txFeeData.lowerBoundUSD)}-$${roundUsdAmount(txFeeData.upperBoundUSD)}`}</p>
                   {/* spinner to show fees are updating */}
                   {
                     !feesLoaded &&

@@ -46,6 +46,8 @@ const DropdownNetworks:NextPage<Props> = (props) => {
             }
         }
         setNetworkAndTokens(newTokensAndNetworks);
+        // update selected network to be first in possible options
+        if(newTokensAndNetworks.length!=0 && onlyWithValue) selectFunction(newTokensAndNetworks[0])
         setIsFetched(true);
         if(onLoadedFunction){
             onLoadedFunction();
@@ -108,7 +110,7 @@ const DropdownNetworks:NextPage<Props> = (props) => {
 
                 <ul className="no-scrollbar absolute z-10 mt-1 w-full bg-white dark:bg-black opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:border dark:border-slate-500" tabIndex={-1} role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3" hidden={!showOptions}>
                 {networkAndTokens.map((nt:TokenAndNetwork, index:number) => (
-                  (!(nt.baseNetworkDb.isTestnet&&!authUser.isAdvanced)) &&
+                  (!(nt.baseNetworkDb.isTestnet&&authUser&&!authUser.isAdvanced)) &&
                   <ListItemDropdown selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleOptionClick} tokenAndNetwork={nt} key={index}/>
                 ))}
                 </ul>

@@ -47,15 +47,15 @@ export const isValidAddress = function(address:NamedCurve, networkDB:NetworkDb){
 
 
 // returns blockchain address for a given networkdb
-export const getAddressForNetworkDb = async(wallet:IWallet, networkDb:NetworkDb):Promise<string>=>{
+export const getAddressForNetworkDb = (wallet:IWallet, networkDb:NetworkDb):string=>{
     let network = networkFromNetworkDb(networkDb);
-    let addy = await getAddressForNetwork(wallet, network);
+    let addy = getAddressForNetwork(wallet, network);
     return addy;
 }
 
-export const getAddressForNetwork = async(wallet:IWallet, network:Network):Promise<string>=>{
+export const getAddressForNetwork = (wallet:IWallet, network:Network):string=>{
     // gets all addresses for network
-    let allAddys:string[] = await wallet.seedLoop.getAddresses(network);
+    let allAddys:string[] = wallet.seedLoop.getAddresses(network);
     // gets first address for network
     let firstAddy:string = allAddys[0];
     return firstAddy;

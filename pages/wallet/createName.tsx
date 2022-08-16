@@ -16,7 +16,7 @@ import { defaultResolvedAccount, IAccountResolverParams, IResolvedAccount, resol
 
 
 const CreateName: NextPage = () => {
-  const { authUser, loading, kryptikWallet, kryptikService } = useKryptikAuthContext();
+  const { authUser, loadingAuthUser, kryptikWallet, kryptikService } = useKryptikAuthContext();
   const router = useRouter();
   const [nameIsAvailable, setNameIsAvailable] = useState(false);
   const [updateMsg, setUpdateMsg] = useState<string|null>(null);
@@ -30,9 +30,9 @@ const CreateName: NextPage = () => {
   const [isReservationLoading, setIsReservationLoading] = useState(false);
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loading && !authUser.isLoggedIn)
+    if (!loadingAuthUser &&  (!authUser || !authUser.isLoggedIn))
       router.push('/')
-  }, [authUser, loading])
+  }, [authUser, loadingAuthUser])
 
 
   useEffect(()=>{

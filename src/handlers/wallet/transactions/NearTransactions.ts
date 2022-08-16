@@ -1,4 +1,3 @@
-import { TransactionParameters } from "hdseedloop";
 import { Transaction, SCHEMA, SignedTransaction, Signature, Action, createTransaction, functionCall, transfer } from "near-api-js/lib/transaction";
 import { Near, utils as nearUtils } from "near-api-js";
 import * as sha256 from "fast-sha256"
@@ -16,6 +15,8 @@ import { DEFAULT_NEAR_FUNCTION_CALL_GAS, FT_MINIMUM_STORAGE_BALANCE_LARGE, FT_ST
 import { IKryptikTxParams, KryptikTransaction } from "../../../models/transactions";
 import { getTransactionFeeDataNear } from "../../fees/NearFees";
 import { ChainData } from "../../../services/models/token";
+import { TransactionParameters } from "hdseedloop";
+
 
 
 export interface ISignAndSendNearParameters extends ISignAndSendParameters{

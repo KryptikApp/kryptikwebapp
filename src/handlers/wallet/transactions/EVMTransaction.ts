@@ -1,6 +1,6 @@
 import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
-import { TransactionParameters, SignedTransaction } from "hdseedloop";
+import { SignedTransaction, TransactionParameters } from "hdseedloop";
 import { erc20Abi } from "../../../abis/erc20Abi";
 import { networkFromNetworkDb, getTransactionExplorerPath, isEVMTxTypeTwo, getChainDataForNetwork } from "../../../helpers/utils/networkUtils";
 import { roundDecimalsByNetworkToken, roundToDecimals } from "../../../helpers/utils/numberUtils";
@@ -120,5 +120,6 @@ export const createEVMTransferTransaction = async function(txIn:EVMTransferTxPar
         tokenPriceUsd: txIn.tokenPriceUsd,
       }
     let kryptikTx:KryptikTransaction = new KryptikTransaction(kryptikTxParams);
+    console.log(kryptikTx);
     return kryptikTx;
 }

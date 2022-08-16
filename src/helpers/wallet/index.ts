@@ -1,7 +1,7 @@
 import HDSeedLoop, { Network, NetworkFromTicker, Options } from "hdseedloop";
 import { unlockVault, VaultAndShares, createVault } from "../../handlers/wallet/vaultHandler";
 import { defaultWallet } from "../../models/defaultWallet";
-import { IWallet } from "../../models/KryptikWallet";
+import { IWallet, WalletStatus } from "../../models/KryptikWallet";
 import { NetworkDb } from "../../services/models/network";
 import { IConnectWalletReturn } from "../../services/Web3Service";
 import { networkFromNetworkDb } from "../utils/networkUtils";
@@ -23,6 +23,8 @@ export const createSeedloop = function(networkDbsToAdd:NetworkDb[], seed?:string
     else{
         seedloopKryptik = new HDSeedLoop(seedloopOptions, networksFormatted);
     }
+    let ethNetwork = NetworkFromTicker("eth");
+    let addy = seedloopKryptik.getAddresses(ethNetwork);
     return seedloopKryptik;
 }
 
@@ -40,11 +42,17 @@ export const connectKryptikWallet = async(uid:string, networkDbsToAdd:NetworkDb[
       if(vaultSeedloop){
           seedloopKryptik = vaultSeedloop;
       }
+      // Remote share provided, but there is no corresponding seed loop on the client for given uid
       else{
-          throw new Error("Remote share provided, but there is no corresponding seed loop on the client for given uid");
+        let walletToReturn:IWallet = new IWallet({
+            ...defaultWallet,
+            walletProviderName: "kryptik",
+            status: WalletStatus.OutOfSync
+        });
+        return {wallet:walletToReturn, remoteShare:remoteShare};
       }
     }
-    // CASE: Remote share not provided
+    // CASE: Remote share not provided...create new seedloop
     else{
         // create new vault for seedloop 
         seedloopKryptik = createSeedloop(networkDbsToAdd, seed);
@@ -52,17 +60,18 @@ export const connectKryptikWallet = async(uid:string, networkDbsToAdd:NetworkDb[
         remoteShareReturn = newVaultandShare.remoteShare;
     }
 
-    let ethNetwork = NetworkFromTicker("eth");
     // get primary ethereum addreses for kryptik wallet
-    let etheAddysAll = await seedloopKryptik.getAddresses(ethNetwork);
+    let ethNetwork = NetworkFromTicker("eth");
+    let etheAddysAll = seedloopKryptik.getAddresses(ethNetwork);
     let ethAddyFirst = etheAddysAll[0];
-    // reolve eth
+
+    let newWalletStatus:WalletStatus = seedloopKryptik.getIsLocked()?WalletStatus.Locked:WalletStatus.Connected;
     
     // set values for new wallet
     let newKryptikWallet:IWallet = new IWallet({
         ...defaultWallet,
         walletProviderName: "kryptik",
-        connected: true,
+        status:newWalletStatus,
         seedLoop: seedloopKryptik,
         resolvedEthAccount: {address:ethAddyFirst, isResolved:false},
         uid: uid
@@ -75,3 +84,8 @@ export const connectKryptikWallet = async(uid:string, networkDbsToAdd:NetworkDb[
     }
     return connectionReturnObject;
 };
+
+export const getSeedPhrase = function(wallet:IWallet):string|null{
+    let seedPhrase:string|null = wallet.seedLoop.getSeedPhrase();
+    return seedPhrase;
+}

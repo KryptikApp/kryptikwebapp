@@ -9,19 +9,20 @@ import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import { getFileName } from '../../src/helpers/utils'
 import toast, { Toaster } from 'react-hot-toast'
 import NavProfile from '../../components/navbars/NavProfile'
+import { defaultUser } from '../../src/models/user'
 
 
 
 const Profile: NextPage = () => {
-  const { authUser, loading, getUserPhotoPath, updateCurrentUserKryptik } = useKryptikAuthContext();
+  const { authUser, loadingAuthUser, getUserPhotoPath, updateCurrentUserKryptik } = useKryptikAuthContext();
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loading && !authUser.isLoggedIn)
+    if (!loadingAuthUser &&  (!authUser || !authUser.isLoggedIn))
       router.push('/')
-  }, [authUser, loading])
+  }, [authUser, loadingAuthUser])
 
-  const imageUrlInit:string = getUserPhotoPath(authUser);
+  const imageUrlInit:string = getUserPhotoPath(authUser?authUser:defaultUser);
   const [imageUrl, setImageUrl] = useState(imageUrlInit);
   //UNCOMMENT for file uploads
   const [imageFile, setImageFile] = useState<Blob|null>(null);
@@ -48,6 +49,10 @@ const Profile: NextPage = () => {
 
 
   const uploadToRemote = async():Promise<string>=>{
+    if(!authUser){
+      toast.error("Please login before updating your preferences");
+      return "";
+  }
     console.log("firebase image upload starting....");
     let fileName:string = getFileName(imageUrl);
     let storageFilePath:string = generateStoragePath(fileName, authUser);
@@ -66,6 +71,10 @@ const Profile: NextPage = () => {
 
 
   const handleClickUpload = async() =>{
+    if(!authUser){
+      toast.error("Please login before updating your preferences");
+      return;
+    }
     try{
       setloadingUpdate(true);
       // don't upload if still in upload process
@@ -86,13 +95,13 @@ const Profile: NextPage = () => {
   return (
     <div>
     <Toaster/>
-    <div className="h-[2rem]">
+    <div className="h-[5vh]">
       {/* padding div for space between top and main elements */}
     </div>
 
-    <div className="container grid md:grid-cols-2 gap-10 mx-auto place-items-center">
+    <div className="container flex md:flex-row flex-col space-y-10 spaxe-x-10 mx-auto place-items-center">
         <div className="w-full rounded">
-          <img src={imageUrl} alt="image sneak peak" className="shadow rounded h-auto align-middle border-none" />
+          <img src={imageUrl} alt="image sneak peak" className="shadow rounded w-[300px] max-w-[90%] align-middle border-none" />
         </div>
         <div className="w-full rounded">
         <h5 className="mb-3 text-base font-bold text-black-900 lg:text-xl dark:text-white">

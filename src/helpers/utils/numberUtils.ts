@@ -1,12 +1,12 @@
 import fromExponential from "from-exponential";
 import { TokenAndNetwork } from "../../services/models/token";
 
-export const roundCryptoAmount = function(amountIn:number):number{
-    return Number(amountIn.toFixed(4));
+export const roundCryptoAmount = function(amountIn:number, decimals:number=4):number{
+    return Number(amountIn.toFixed(decimals));
 }
 
-export const roundUsdAmount = function(amountIn:number):number{
-    return Number(amountIn.toFixed(4));
+export const roundUsdAmount = function(amountIn:number, decimals:number=2):number{
+    return Number(amountIn.toFixed(decimals));
 }
 
 export const roundToDecimals = function(amountIn:number, decimals:number=18){

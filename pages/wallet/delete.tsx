@@ -11,13 +11,13 @@ import NavProfile from '../../components/navbars/NavProfile'
 
 
 const DeleteWallet: NextPage = () => {
-  const { authUser, loading, signOut, kryptikWallet, signInWithToken, setKryptikWallet } = useKryptikAuthContext();
+  const { authUser, loadingAuthUser, signInWithToken, setKryptikWallet } = useKryptikAuthContext();
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loading && !authUser)
+    if (!loadingAuthUser &&  (!authUser || !authUser.isLoggedIn))
       router.push('/')
-  }, [authUser, loading])
+  }, [authUser, loadingAuthUser])
 
 
   const handleDeleteWallet = async function(){
@@ -37,6 +37,7 @@ const DeleteWallet: NextPage = () => {
   }
 
   const handleRefreshLogin = async function(){
+    if(!authUser) return;
     try{
       // login user with undefined seed
       // seed will be created when wallet is created

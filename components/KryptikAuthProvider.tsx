@@ -1,24 +1,42 @@
 import { createContext, useContext} from 'react'
 
 import { defaultWallet } from '../src/models/defaultWallet';
-import { defaultUser, UserDB } from '../src/models/user';
+import { UserDB } from '../src/models/user';
 import { useKryptikAuth } from '../src/helpers/kryptikAuthHelper';
 import Web3Service from '../src/services/Web3Service';
-import { IWallet } from '../src/models/KryptikWallet';
+import { IWallet, WalletStatus } from '../src/models/KryptikWallet';
 
 
-const kryptikAuthContext = createContext({
+interface IAuthContext{
+  kryptikService: Web3Service,
+	kryptikWallet: IWallet,
+	setKryptikWallet: (newWallet:IWallet)=>void,
+  // auth db funcs and vals
+  authUser: UserDB|null,
+  loadingAuthUser: boolean,
+  loadingWallet: boolean,
+  signInWithToken: (token:string, seed?:string, isRefresh?:boolean) => void,
+  updateCurrentUserKryptik: (user:UserDB) => void,
+  getUserPhotoPath: (user:UserDB)=>string,
+  walletStatus:WalletStatus,
+  updateWalletStatus:(newStatus:WalletStatus)=>void,
+  signOut: ()=>void
+}
+
+const kryptikAuthContext = createContext<IAuthContext>({
   kryptikService: new Web3Service(),
 	kryptikWallet: defaultWallet,
 	setKryptikWallet: (newWallet:IWallet) => {},
   // auth db funcs and vals
-  authUser: defaultUser,
-  loading: true,
+  authUser: null,
+  loadingAuthUser: false,
+  loadingWallet:false,
   signInWithToken: async (token:string, seed?:string, isRefresh?:boolean) => {},
   updateCurrentUserKryptik: async(user:UserDB) => {},
   getUserPhotoPath: (user:UserDB):string => {return ""},
-  getSeedPhrase: ():string => {return ""},
-  signOut: ()=>{}
+  signOut: ()=>{},
+  walletStatus:defaultWallet.status,
+  updateWalletStatus:(newStatus:WalletStatus)=>{}
 });
 
 export function KryptikAuthProvider(props:any) {

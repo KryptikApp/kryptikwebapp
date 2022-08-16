@@ -1,16 +1,16 @@
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { PublicKey, SignaturePubkeyPair, SystemProgram, Transaction } from "@solana/web3.js";
+import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import * as splToken from "@solana/spl-token"
-import { Network, TransactionParameters } from "hdseedloop";
+import { Network, TransactionParameters } from "hdseedloop"
 
 import { createEd25519PubKey, createSolTokenAccount } from "../../../helpers/utils/accountUtils";
 import { networkFromNetworkDb, formatTicker, getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
 import { lamportsToSol, multByDecimals, roundCryptoAmount, solToLamports } from "../../../helpers/utils/numberUtils";
-import { TokenParamsSpl } from "../../../services/models/token";
-import TransactionFeeData, { CreateTransferTransactionParameters, defaultTxPublishedData, ISignAndSendParameters, SolTransactionParams, TransactionPublishedData, TxType } from "../../../services/models/transaction";
+import TransactionFeeData, { ISignAndSendParameters, SolTransactionParams, TransactionPublishedData, TxType } from "../../../services/models/transaction";
 import { IWallet } from "../../../models/KryptikWallet";
 import { IKryptikTxParams, KryptikTransaction } from "../../../models/transactions";
 import { getTransactionFeeDataSolana } from "../../fees/SolanaFees";
+
 
 export interface SolFamilyTx{
   txs:Transaction

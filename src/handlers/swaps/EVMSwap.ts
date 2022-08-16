@@ -1,10 +1,9 @@
 import { BigNumber, BigNumberish, Contract } from "ethers";
-import { formatEther, formatUnits, parseEther, parseUnits } from "ethers/lib/utils";
-import { toUpper } from "lodash";
+import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { IBuildSwapParams } from ".";
 import { erc20Abi } from "../../abis/erc20Abi";
 import { getPriceOfTicker } from "../../helpers/coinGeckoHelper";
-import { formatTicker, isEVMTxTypeTwo, isNetworkArbitrum } from "../../helpers/utils/networkUtils";
+import { formatTicker, isEVMTxTypeTwo } from "../../helpers/utils/networkUtils";
 import { multByDecimals, roundToDecimals } from "../../helpers/utils/numberUtils";
 import { IKryptikTxParams, KryptikTransaction } from "../../models/transactions";
 import { ISwapData } from "../../parsers/0xData";
@@ -12,7 +11,7 @@ import { fetch0xSwapOptions, zeroXParams } from "../../requests/swaps/0xSwaps";
 import { KryptikProvider } from "../../services/models/provider";
 import { TokenAndNetwork } from "../../services/models/token";
 import TransactionFeeData, { TransactionRequest, TxType } from "../../services/models/transaction";
-import { evmFeeDataFromLimits, getTransactionFeeDataEVM, IEVMGasLimitsParams } from "../fees/EVMFees";
+import { getTransactionFeeDataEVM } from "../fees/EVMFees";
 import { isSwapAvailable } from "./utils";
 
 

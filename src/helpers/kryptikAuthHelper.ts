@@ -9,7 +9,7 @@ import { defaultWallet } from "../models/defaultWallet";
 import { defaultUser, UserDB, UserExtraData } from "../models/user";
 import Web3Service, { IConnectWalletReturn } from "../services/Web3Service";
 import { networkFromNetworkDb } from "./utils/networkUtils";
-import { IWallet } from "../models/KryptikWallet";
+import { IWallet, WalletStatus } from "../models/KryptikWallet";
 import { connectKryptikWallet } from "./wallet";
 import { NetworkDb } from "../services/models/network";
 
@@ -21,8 +21,10 @@ export function useKryptikAuth() {
     // init state
     const [kryptikService, setKryptikService] = useState(initServiceState);
     const [kryptikWallet, setKryptikWallet] = useState(defaultWallet);
-    const [authUser, setAuthUser] = useState(defaultUser);
-    const [loading, setLoading] = useState(true);
+    const [walletStatus, setWalletStatus] = useState(defaultWallet.status);
+    const [authUser, setAuthUser] = useState<UserDB|null>(defaultUser);
+    const [loadingAuthUser, setLoadingAuthUser] = useState<boolean>(false);
+    const [loadingWallet, setLoadingWallet] = useState<boolean>(false);
     
     // wallet state change event handler
     const walletStateChanged = function(wallet:IWallet){
@@ -33,12 +35,11 @@ export function useKryptikAuth() {
 
     // routine to run when auth. state changes
     const authStateChanged = async (user:any, seed?:string) => {
-        console.log("Running auth. state changed!");
         // TODO: ADD CONDITION FOR INTERNET CONNECTION
         // if(window && window.)
         if (!user) {
-          setAuthUser(defaultUser)
-          setLoading(false)
+          setAuthUser(null)
+          setLoadingAuthUser(false)
           return;
         }
         try{
@@ -54,7 +55,7 @@ export function useKryptikAuth() {
 
     // connects wallet with local service and updates remote share on server if necessary
     const ConnectWalletLocalandRemote = async function(ks:Web3Service, user:UserDB, seed?:string):Promise<IWallet>{
-      let UserExtraData:UserExtraData = await readExtraUserData(user)
+      let UserExtraData:UserExtraData = await readExtraUserData(user);
       console.log("running kryptik connect method...");
       let networksToAdd:NetworkDb[] = ks.getSupportedNetworkDbs();
       let kryptikConnectionObject:IConnectWalletReturn = await connectKryptikWallet(user.uid, networksToAdd, UserExtraData.remoteShare, seed);
@@ -87,9 +88,14 @@ export function useKryptikAuth() {
       // get current extra user data
       let extraUserData:UserExtraData = await readExtraUserData(user);
       let extraUserDataUpdated:UserExtraData = {remoteShare: extraUserData.remoteShare, 
-        bio: user.bio, isTwoFactorAuth:extraUserData.isTwoFactorAuth};
+      bio: user.bio, isTwoFactorAuth:extraUserData.isTwoFactorAuth};
       await writeExtraUserData(user, extraUserDataUpdated);
       await updateProfile(userFirebase, {displayName:user.name, photoURL:user.photoUrl});
+    }
+
+    const updateWalletStatus = function(newWalletStatus:WalletStatus){
+      kryptikWallet.status = newWalletStatus;
+      setWalletStatus(newWalletStatus);
     }
 
     // sign in with external auth token
@@ -112,11 +118,9 @@ export function useKryptikAuth() {
     {
         let isSigningInWithToken = sessionStorage.getItem("isSigniningInWithToken")
         if(isSigningInWithToken){
-          // log for developing... remove in production
-          console.log("SIGNING IN WITH TOKEN ESCAPE ROUTE HIT!!!!")
           return;
         }
-        setLoading(true)
+        setLoadingAuthUser(true)
         let formattedUser:UserDB = formatAuthUser(user);
         // read extra user data from db
         let userExtraData = await readExtraUserData(formattedUser);
@@ -124,18 +128,19 @@ export function useKryptikAuth() {
         // start web3 kryptik service
         let ks = await kryptikService.StartSevice();
         setKryptikService(ks);
-        let walletKryptik:IWallet;
-        console.log("connecting wallet local and remote");
-        if (seed != "") {
-            walletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser, seed);
+        let newWalletKryptik:IWallet;
+        setLoadingWallet(true);
+        console.log("connecting kryptik wallet local and remote");
+        if(seed != "") {
+            newWalletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser, seed);
         }
         else {
-            walletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser);
+            newWalletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser);
         }
         console.log("finished connecting");
         try{
           console.log("Updating wallet networks:");
-          walletKryptik = updateWalletNetworks(walletKryptik, kryptikService, formattedUser, userExtraData);
+          newWalletKryptik = updateWalletNetworks(newWalletKryptik, kryptikService, formattedUser, userExtraData);
           // UPDATE: TO DO if wallet is set as visible update remote addresses
           console.log("wallet up to date");
         }
@@ -143,9 +148,11 @@ export function useKryptikAuth() {
           throw(new Error("Error: unable to synchronize remote networks."))
         }
         // set data
-        setKryptikWallet(walletKryptik)
+        setKryptikWallet(newWalletKryptik);
+        setWalletStatus(newWalletKryptik.status);
         setAuthUser(formattedUser);    
-        setLoading(false);
+        setLoadingAuthUser(false);
+        setLoadingWallet(false);
     }
 
     // update wallets on local seedloop to match networks supported by app.
@@ -157,7 +164,6 @@ export function useKryptikAuth() {
         let network = networkFromNetworkDb(networkDb);
         if(!wallet.seedLoop.networkOnSeedloop(network)){
           isUpdated = true;
-          console.log(`Adding ${network.fullName} to wallet.`);
           wallet.seedLoop.addKeyRingByNetwork(network);
         }
       }
@@ -180,12 +186,6 @@ export function useKryptikAuth() {
       await setDoc(doc(firestore, "users", user.uid), data);
     }
 
-    const getSeedPhrase = function():string{
-      let seedPhrase:string|null = kryptikWallet.seedLoop.getSeedPhrase();
-      if(!seedPhrase) throw(new Error("Error: HDSeedloop seedphrase is undefined"))
-      return seedPhrase;
-    }
-
   
     const signOut = () =>
       firebaseAuth.signOut().then(clear);
@@ -198,23 +198,26 @@ export function useKryptikAuth() {
     
     // clear current kryptik web 3 service state
     const clear = () => {
-      setAuthUser(defaultUser);
+      setAuthUser(null);
       setKryptikWallet(defaultWallet);
       setKryptikService(new Web3Service());
-      setLoading(true);
+      setLoadingAuthUser(false);
+      setLoadingWallet(false);
     };
   
     return {
       authUser,
-      loading,
+      loadingAuthUser,
+      loadingWallet,
       signInWithToken,
       updateCurrentUserKryptik,
       getUserPhotoPath,
-      getSeedPhrase,
       signOut,
       kryptikService,
       setKryptikWallet,
       kryptikWallet,
+      walletStatus,
+      updateWalletStatus,
       clear
     };
   };

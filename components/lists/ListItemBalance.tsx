@@ -51,16 +51,16 @@ const ListItemBalance:NextPage<Props> = (props) => {
       <div>
       {
         (amount && amountFiat) &&
-        <li key={`${htmlKey}`} className="py-3 sm:py-4 hover:cursor-pointer hover:gray-100 hover:dark:bg-[#141414]" onClick={()=>handleOnClick()}>
-          <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0">
+        <li key={`${htmlKey}`} className="py-3 sm:py-4 hover:cursor-pointer rounded hover:gray-100 hover:dark:bg-[#141414]" onClick={()=>handleOnClick()}>
+          <div className="flex space-x-2 px-2">
+              <div className="flex-shrink-0 min-w-[48px]">
                   <img className="w-8 h-8 rounded-full inline" src={imgSrcPrimary} alt={`${title} image`}/>
                   {
                     imgSrcSecondary &&
                     <img className="w-4 h-4 -ml-2 drop-shadow-lg mt-4 rounded-full inline" src={imgSrcSecondary} alt={`${title} secondary image`}/>
                   }
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="text-left flex-1 min-w-0">
 
                     <div>
                         <p className="text-md font-medium text-gray-900 truncate dark:text-gray-100">
@@ -72,7 +72,7 @@ const ListItemBalance:NextPage<Props> = (props) => {
                       {subtitle}
                   </p>
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-grow text-right min-w-0">
                   <p className={`text-lg font-medium text-gray-900 truncate dark:text-gray-200 ${hideBalances?"font-bold blur-sm":""}`}>
                       $
                       {amountFiat}
