@@ -139,7 +139,13 @@ const Settings: NextPage = () => {
           </button>
           <br/>
           <Link href="../wallet/delete">
-            <p className="text-red-500 text-sm hover:cursor-pointer">Delete Wallet</p>
+            <p className="text-red-500 mb-4 text-sm hover:cursor-pointer">Delete Wallet</p>
+          </Link>
+          <Link href="../support/privacy">
+            <p className="text-sky-500 text-sm hover:cursor-pointer">Privacy</p>
+          </Link>
+          <Link href="../support/terms">
+            <p className="text-sky-500 text-sm hover:cursor-pointer">Terms of Use</p>
           </Link>
         </div>
 
