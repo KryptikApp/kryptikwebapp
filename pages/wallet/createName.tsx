@@ -13,10 +13,12 @@ import { networkFromNetworkDb } from '../../src/helpers/utils/networkUtils'
 import { TransactionPublishedData } from '../../src/services/models/transaction'
 import { getAddressForNetwork, getAddressForNetworkDb } from '../../src/helpers/utils/accountUtils'
 import { defaultResolvedAccount, IAccountResolverParams, IResolvedAccount, resolveAccount } from '../../src/helpers/resolvers/accountResolver'
+import { ServiceState } from '../../src/services/types'
+import { WalletStatus } from '../../src/models/KryptikWallet'
 
 
 const CreateName: NextPage = () => {
-  const { authUser, loadingAuthUser, kryptikWallet, kryptikService } = useKryptikAuthContext();
+  const { authUser, loadingAuthUser, kryptikWallet, kryptikService, walletStatus } = useKryptikAuthContext();
   const router = useRouter();
   const [nameIsAvailable, setNameIsAvailable] = useState(false);
   const [updateMsg, setUpdateMsg] = useState<string|null>(null);
@@ -24,14 +26,19 @@ const CreateName: NextPage = () => {
   const [isResolveLoading, setIsResolveLoading] = useState(true);
   const [resolvedAccount, setResolvedAccount] = useState(defaultResolvedAccount);
   const [currentAddress, setCurrentAddress] = useState("");
-  const [readableCurrentAddress, setReadableCurrentADdress] = useState("");
+  const [readableCurrentAddress, setReadableCurrentAddress] = useState("");
   const [kryptikProvider, setKryptikProvider] = useState(defaultKryptikProvider)
   const [isUpdateLoading, setIsUpdateLoading] = useState(false);
   const [isReservationLoading, setIsReservationLoading] = useState(false);
+  const [txPubData, setTxPubData] = useState<TransactionPublishedData|null>(null);
+
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loadingAuthUser &&  (!authUser || !authUser.isLoggedIn))
+    if ((!loadingAuthUser && (!authUser || !authUser.isLoggedIn)) || walletStatus!=WalletStatus.Connected) router.push('/');
+    // ensure service is started
+    if(kryptikService.serviceState != ServiceState.started){
       router.push('/')
+    }
   }, [authUser, loadingAuthUser])
 
 
@@ -53,12 +60,10 @@ const CreateName: NextPage = () => {
       networkDB: networkDb
     }
     let newResolvedAccount:IResolvedAccount|null = await resolveAccount(resolverParams);
-    console.log("resolved:");
-    console.log(newResolvedAccount);
     if(!newResolvedAccount) return;
     setResolvedAccount(newResolvedAccount);
     setCurrentAddress(newResolvedAccount.address);
-    setReadableCurrentADdress(truncateAddress(newResolvedAccount.address, network));
+    setReadableCurrentAddress(truncateAddress(newResolvedAccount.address, network));
     setKryptikProvider(newKryptikProvider);
   }
 
@@ -83,7 +88,7 @@ const CreateName: NextPage = () => {
 
   useEffect(()=>{
     fetchNameAvailability();
-  }, [name])
+  }, [name, txPubData])
 
   const updateMessageManager = function(msg:string, isError:boolean){
     setUpdateMsg(msg);
@@ -135,8 +140,8 @@ const CreateName: NextPage = () => {
         fromAddress: currentAddress
      }
      // publish tx.
-     let txPubdata:TransactionPublishedData|null = await reserveNearAccountName(publishParams);
-     console.log(txPubdata);
+     let newTxPubdata:TransactionPublishedData|null = await reserveNearAccountName(publishParams);
+     setTxPubData(newTxPubdata);
      setIsReservationLoading(false);
   }
 
@@ -146,10 +151,22 @@ const CreateName: NextPage = () => {
         <div className="h-[2rem]">
         {/* padding div for space between top and main elements */}
         </div>
-        <div className="max-w-lg mx-auto rounded-md border border-solid py-10 px-6 border-gray-400 dark:border-gray-700">
+        <div className="max-w-lg mx-auto rounded-md border border-solid pt-4 pb-10 px-6 border-gray-400 dark:border-gray-700">
+          <div className="flex flex-col">
+            <div className="flex flex-row pb-4">
+              <div>
+                <div className="w-fit bg-gradient-to-br from-sky-400 via-emerald-600 to-green-500 background-animate rounded-lg py-1 px-2 text-white">
+                  <p>Beta</p>
+                </div>
+              </div>
+                <div className="text-sm dark:text-gray-700 text-gray-200 pl-2">
+                    <p>Still in development. Secondary token balances will not display.</p>
+                </div>
+            </div>
             <h1 className="text-4xl font-bold sans mb-5 dark:text-white">
                     Add Custom NEAR Name
             </h1>
+          </div>
             <Divider/>
             <p className="text-slate-700 mb-2 dark:text-white">Create a unique Near name. Your custom name will be used for all actions on the NEAR Protocol blockchain.</p> 
             

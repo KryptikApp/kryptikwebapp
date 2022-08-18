@@ -11,7 +11,6 @@ import { NetworkDb } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
 import Web3Service from "../../services/Web3Service";
 import { numberToBN } from "../utils";
-import { networkFromNetworkDb } from "./networkUtils";
 import {ISignAndSendNearParameters, signAndSendNEARTransaction} from "../../handlers/wallet/transactions/NearTransactions"
 import { IErrorHandler, TransactionPublishedData } from "../../services/models/transaction";
 import { DEFAULT_NEAR_FUNCTION_CALL_GAS } from "../../constants/nearConstants";
@@ -19,6 +18,7 @@ import { listNearAccountsByAddress } from "../../requests/nearIndexApi";
 import { IKryptikFetchResponse } from "../../kryptikFetch";
 import { validateNearImplicitAddress } from "../resolvers/nearResolver";
 import { IWallet } from "../../models/KryptikWallet";
+import { hexToBase58 } from "hdseedloop/dist/utils";
 
 
 const ACCOUNT_ID_REGEX = /^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$/;
@@ -36,8 +36,10 @@ export interface INearNameTxParams{
     newAccountPublicKeyBase58:string, 
     newAccountId:string,
     amount: BN, 
+    // hex encoded address or name 
     sendAccount:string, 
-    sendAccountPubKey:PublicKey, 
+    // pub key base 58 encoded
+    pubKeyString:string, 
     toAccount:string,
 }
 
@@ -108,15 +110,7 @@ export const reserveNearAccountName = async function(params:INearReservationPara
         errorHandler("Error: Address not available!");
         return null;
     }
-    let nearNetwork:Network = networkFromNetworkDb(nearNetworkDb);
-    let tokenWallet = wallet.seedLoop.getWalletForAddress(nearNetwork, fromAddress);
-    if(!tokenWallet){
-        errorHandler("Error: Unable to retrieve neartoken wallet from seedloop");
-        return null;
-    }
-
-    let keyPair:nacl.SignKeyPair = tokenWallet.createKeyPair();
-    let nearKey:KeyPairEd25519 = new KeyPairEd25519(baseEncode(keyPair.secretKey));
+    let nearEncodedAddress = hexToBase58(fromAddress);
     // get amount in BN 
     let amountYocto:string|null = parseNearAmount("0.1");
     if(!amountYocto){
@@ -127,12 +121,12 @@ export const reserveNearAccountName = async function(params:INearReservationPara
     // for now we'll just hardcode to account to be the from account
     let createTxParams:INearNameTxParams = {
         kryptikProvider: kryptikProvider,
-        newAccountPublicKeyBase58: baseEncode(keyPair.publicKey),
+        newAccountPublicKeyBase58: nearEncodedAddress,
         newAccountId: newAccountId,
         amount: bnAmount,
         sendAccount: fromAddress,
         toAccount: fromAddress,
-        sendAccountPubKey: nearKey.publicKey
+        pubKeyString: nearEncodedAddress
     }
     console.log("Building near name tx.")
     let nearNameTx:Transaction = await createNearReservationTx(createTxParams);
@@ -159,23 +153,24 @@ export const reserveNearAccountName = async function(params:INearReservationPara
 
 // creates a near transaction to reserve an account name
 export const createNearReservationTx = async function(params:INearNameTxParams){
-    const{amount, kryptikProvider, newAccountPublicKeyBase58, sendAccount, sendAccountPubKey, newAccountId} = {...params};
+    const{amount, kryptikProvider, newAccountPublicKeyBase58, sendAccount, pubKeyString, newAccountId} = {...params};
     if(!kryptikProvider.nearProvider) throw(new Error(`No provider set for Near. Unable to create transaction.`));
     let nearProvider = kryptikProvider.nearProvider;
     const accessKeyResponse = await nearProvider.connection.provider.query<AccessKeyView>({
         request_type: 'view_access_key',
         account_id: sendAccount,
-        public_key: sendAccountPubKey.toString(),
+        public_key: newAccountPublicKeyBase58,
         finality: 'optimistic'
     });
     let block:BlockResult = await nearProvider.connection.provider.block({ finality: 'final' });
     let recentBlockhash:Buffer = serialize.base_decode(block.header.hash); 
+    let pubkey = PublicKey.fromString(pubKeyString);
     // create function call action
     const callArgs = {new_account_id: newAccountId, new_public_key: newAccountPublicKeyBase58};
     const actions:Action[] = [functionCall("create_account", callArgs, DEFAULT_NEAR_FUNCTION_CALL_GAS, amount)];
     let nearTX:Transaction = createTransaction(
         sendAccount,
-        sendAccountPubKey,
+        pubkey,
         "near",
         accessKeyResponse.nonce+1,
         actions,
@@ -184,16 +179,6 @@ export const createNearReservationTx = async function(params:INearNameTxParams){
     return nearTX;
 }
 
-
-//creates near key...BUT address must correspond to a key on the seedloop
-export const createNearKey = function(wallet:IWallet, address:string){
-    let nearNetwork:Network = defaultNetworks["near"];
-    let tokenWallet = wallet.seedLoop.getWalletForAddress(nearNetwork, address);
-    if(!tokenWallet) throw(new Error("Error: Unable to retrieve near token wallet from seedloop"));
-    let keyPair:nacl.SignKeyPair = tokenWallet.createKeyPair();
-    let nearKey:KeyPairEd25519 = new KeyPairEd25519(baseEncode(keyPair.secretKey));
-    return nearKey;
-}
 
 export interface INearAccountsLists{
     customAccounts:string[],
