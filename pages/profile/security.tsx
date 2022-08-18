@@ -56,7 +56,8 @@ const Security: NextPage = () => {
     }
     setLoading(true);
     try{
-      kryptikWallet.seedLoop.lock(password);
+      kryptikWallet.seedLoop.addPassword(password);
+      kryptikWallet.seedLoop.lock();
       let isWalletLocked = kryptikWallet.seedLoop.getIsLocked();
       // lock successful...update state
       if(isWalletLocked){
