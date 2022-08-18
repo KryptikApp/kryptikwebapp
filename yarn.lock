@@ -8389,13 +8389,15 @@ hdkey@^2.0.1:
     safe-buffer "^5.1.1"
     secp256k1 "^4.0.0"
 
-hdseedloop@^0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/hdseedloop/-/hdseedloop-0.7.0.tgz#aa519ccd28740eec82eb157edffca5a2a57c8619"
-  integrity sha512-DwI+hobRV8eo5JBooUUh8KE7p6Q1w0kZRotWrPFPU2ML8NC+VyahuzQieEdNHp9+1pZFcvspj3k4l4l8PSAZ0w==
+hdseedloop@^0.7.1:
+  version "0.7.1"
+  resolved "https://registry.yarnpkg.com/hdseedloop/-/hdseedloop-0.7.1.tgz#633d15176d836d173162f3b4280acf19adf20067"
+  integrity sha512-SU+IamDr0cSoozPdfilNcqIzvvNn4iODdB23WQ8/TC67bJASDfOC8GVmfRxiH3u5INZyTBOeZIBMxBP0c856Xw==
   dependencies:
-    "@ethersproject/abstract-provider" "^5.6.1"
+    "@ethersproject/abstract-signer" "^5.6.2"
+    "@ethersproject/address" "^5.6.1"
     "@ethersproject/hash" "^5.6.1"
+    "@ethersproject/keccak256" "^5.6.1"
     "@ethersproject/properties" "^5.6.0"
     "@ethersproject/signing-key" "^5.6.2"
     "@ethersproject/transactions" "^5.6.2"
