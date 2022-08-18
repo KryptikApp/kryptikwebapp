@@ -23,6 +23,9 @@ type Data = {
 //     request: 0
 // }
 
+// will be used to rotate api keys
+let flipKey:boolean = false;
+
 // basic login routine
 export default async( req: NextApiRequest, res: NextApiResponse<Data> )=>
 {
@@ -32,6 +35,7 @@ export default async( req: NextApiRequest, res: NextApiResponse<Data> )=>
     if(!body.accountAddress || !body.currency || !body.chainId){
         console.warn("Error: required balance params not provided.");
     }
+    // const apiKey = flipKey?process.env.CovalentApiKey1:process.env.CovalentApiKey2
     // let reqParams:BalanceReqParams = {accountAddress:body.accountAddress, currency:body.currency, chainId:body.chainId};
     let dataToReturn = await getAssetsFromCovalent(body.chainId, body.accountAddress, body.currency);
     if(dataToReturn){

@@ -204,9 +204,6 @@ class Web3Service extends BaseService implements IWeb3Service{
     }
 
     async searchNetworkDbsAsync(searchQuery:string, onlySupported?:boolean) :Promise<NetworkDb[]>{
-        console.log("Searching....");
-        console.log("Is Only supported:")
-        console.log(onlySupported);
         // set default to false if not specified
             if(onlySupported==undefined){
             onlySupported=false
@@ -289,7 +286,6 @@ class Web3Service extends BaseService implements IWeb3Service{
           return newKryptikProvider;
     }
 
-    //TODO: change to simple dictionary lookup
     getNetworkDbByTicker(ticker:string):NetworkDb|null{
         let networkDbRes:NetworkDb = this.TickerToNetworkDbs[ticker];
         if(networkDbRes) return networkDbRes;
@@ -351,8 +347,6 @@ class Web3Service extends BaseService implements IWeb3Service{
         let balanceNetwork:number;
         let network:Network = networkFromNetworkDb(params.networkDb);
         let kryptikProvider:KryptikProvider = await this.getKryptikProviderForNetworkDb(params.networkDb);
-        console.log(`Getting network balance for ${network.fullName}`);
-        console.log(`Address: ${params.accountAddress}`);
         // get balance in layer 1 token amount
         switch(network.networkFamily){
             case(NetworkFamily.EVM):{
@@ -416,13 +410,6 @@ class Web3Service extends BaseService implements IWeb3Service{
         // default use covalent is true
         const getCovalentBals = (useCovalent!=undefined)?useCovalent:true;
         // use cached balances if fresh
-        if(this.kryptikBalances){
-            console.log("kryptik balance holder id:");
-            console.log(this.kryptikBalances.id)
-            console.log("is fresh:");
-            console.log(this.kryptikBalances.isFresh());
-            console.log(this.kryptikBalances.getLastUpdateTimestamp());
-        }
         if(getCached && this.kryptikBalances && this.kryptikBalances.isFresh()){
             console.log("Returning cached balances...");
             return this.kryptikBalances;
@@ -481,7 +468,6 @@ class Web3Service extends BaseService implements IWeb3Service{
         if(ethNetwork && solNetwork && arbitrumNetwork && avaxcNetwork && polygonNetwork){
             let solAddress = getAddressForNetworkDb(walletUser, solNetwork);
             let ethAddress = getAddressForNetworkDb(walletUser, ethNetwork);
-            console.log(ethAddress);
             addyToNetworks[ethAddress] = [ethNetwork, arbitrumNetwork, avaxcNetwork, polygonNetwork];
             addyToNetworks[solAddress] = [solNetwork];
         }

@@ -40,11 +40,12 @@ export interface BalanceReqParams{
 export const getAssetsFromCovalent = async (
     chainId: Number,
     accountAddress: string,
-    currency:string
+    currency:string,
+    apiKey?:string
   ): Promise<CovalentAddressBalanceResponseData|null> => {
     try {
         const url = `https://api.covalenthq.com/v1/${chainId}/address/${accountAddress}/balances_v2/`;
-        const covalentKey = process.env.CovalentApiKey;
+        const covalentKey = apiKey || process.env.CovalentApiKey;
         if(!covalentKey) return null;
         const params = {
             'key': covalentKey,
@@ -72,17 +73,11 @@ export const fetchServerBalances = async function(chainId: Number,
     accountAddress: string,
     currency:string):Promise<CovalentAddressBalanceResponseData|null>{
     // request balance data from api
-    let dataResponse = await
-      fetch('/api/balances', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({chainId:chainId, accountAddress:accountAddress, currency:currency})
-    })
+    let dataResponse = await KryptikFetch('/api/balances', {method:"POST", timeout:2000, headers:{'Content-Type': 'application/json',}, body: JSON.stringify({chainId:chainId, accountAddress:accountAddress, currency:currency})})
+    console.log("INDEXED response");
+    console.log(dataResponse);
     if(dataResponse.status != 200) return null
-    let dataJson = await dataResponse.json();
-    console.log(dataJson);
+    let dataJson = await dataResponse.data.balanceData;
     if(!dataJson.balanceData) return null;
     return dataJson.balanceData;
 }
