@@ -58,7 +58,7 @@ const Swap: NextPage = () => {
   const [currentSwapValidator, setCurrentSwapValidator] = useState<SwapValidator>(defaultSwapValidator)
   // swap amount state
   const [swapAmounts, setSwapAmounts] = useState<SwapAmounts|null>(null);
-  const [txPubData, setTxPubData] = useState<TransactionPublishedData|null>(defaultTxPublishedData);
+  const [txPubData, setTxPubData] = useState<TransactionPublishedData|null>(null);
   //details state
   const [showDetails, setShowDetails] = useState(false);
   // error state
