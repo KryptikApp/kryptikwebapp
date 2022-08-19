@@ -128,8 +128,15 @@ export const reserveNearAccountName = async function(params:INearReservationPara
         toAccount: fromAddress,
         pubKeyString: nearEncodedAddress
     }
-    console.log("Building near name tx.")
-    let nearNameTx:Transaction = await createNearReservationTx(createTxParams);
+    let nearNameTx:Transaction;
+    console.log("Building near name transaction...")
+    try{
+        nearNameTx = await createNearReservationTx(createTxParams);
+    }
+    catch(e){
+        errorHandler("Unable to build transaction. Make sure your account has a balance.")
+        return null;
+    }
     console.log("Built near name tx.")
     let sendParams:ISignAndSendNearParameters = {
         txNear: nearNameTx,
