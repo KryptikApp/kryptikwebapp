@@ -151,21 +151,26 @@ const Swap: NextPage = () => {
       // add token allowance transaction for EVM swaps
       if(network.networkFamily == NetworkFamily.EVM && newswapTx.swapData && newswapTx.swapData.evmData && newswapTx.txData.evmTx){
         setLoadingMessage("Building swap approval.");
-        let newApprovalTx = await BuildEVMTokenApproval(sellTokenAndNetwork, kryptikProvider, fromAddress, newswapTx.swapData.evmData.allowanceTarget ,Number(amountCrypto), baseCoinPrice);
-        setLoadingMessage("Updating total transaction cost.");
-        // update nonce for swap tx. Must be higher than for the approval tx.
-        if(newApprovalTx){
-          // make sure nonce is avilable to incremenent
-          if(!newswapTx.txData.evmTx.nonce){
-            toast.error("Error: Unable to update swap transaction nonce.");
-            setIsLoading(false);
-            setLoadingMessage("");
-            return;
+        try{
+          let newApprovalTx = await BuildEVMTokenApproval(sellTokenAndNetwork, kryptikProvider, fromAddress, newswapTx.swapData.evmData.allowanceTarget ,Number(amountCrypto), baseCoinPrice);
+          setLoadingMessage("Updating total transaction cost.");
+          // update nonce for swap tx. Must be higher than for the approval tx.
+          if(newApprovalTx){
+            // make sure nonce is avilable to incremenent
+            if(!newswapTx.txData.evmTx.nonce){
+              toast.error("Error: Unable to update swap transaction nonce.");
+              setIsLoading(false);
+              setLoadingMessage("");
+              return;
+            }
+            newswapTx.txData.evmTx.nonce = Number(newswapTx.txData.evmTx.nonce)+1;
+            feeDataArray.push(newApprovalTx.feeData);
           }
-          newswapTx.txData.evmTx.nonce = Number(newswapTx.txData.evmTx.nonce)+1;
-          feeDataArray.push(newApprovalTx.feeData);
+          setApprovalTx(newApprovalTx);
         }
-        setApprovalTx(newApprovalTx);
+        catch(e){
+          toast.error("Unable to build approval transaction.")
+        }
       }
       // update tx total cost and progress
       let newSwapAmounts = newswapTx.fetchSwapAmounts();
