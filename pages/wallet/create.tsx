@@ -2,20 +2,21 @@ import type { NextPage } from 'next'
 import Link from 'next/link'
 import { useState } from 'react'
 import { Magic } from 'magic-sdk'
-import router from 'next/router'
+import router, { useRouter } from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
 
 // kryptik imports
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import { ILoginUserParams, loginUser } from '../../src/handlers/profile/loginHandler'
 import { isValidEmailAddress } from '../../src/helpers/resolvers/kryptikResolver'
+import { isOnAlphaTestList } from '../../src/helpers/waitlist'
 
 const CreateWallet: NextPage = () => {
   const {signInWithToken} = useKryptikAuthContext();
   const [email, setEmail] = useState("");
   const [isLoading, setisLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
-  
+  const router = useRouter();
 
   const handleLoginUser = async function(){
     if(!isValidEmailAddress(email)){
@@ -23,6 +24,12 @@ const CreateWallet: NextPage = () => {
       return;
     }
     setisLoading(true);
+    const isOnTestList = await isOnAlphaTestList(email)
+    if(!isOnTestList){
+      router.push("../support/testing")
+      setisLoading(false);
+      return;
+    }
     try{
       // login user with undefined seed
       // seed will be created when wallet is created

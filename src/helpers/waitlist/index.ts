@@ -52,3 +52,10 @@ export const isEmailInWaitlist = async function(email:string):Promise<boolean>{
     if(docSnap.exists()) return true;
     return false;
 }
+
+export const isOnAlphaTestList = async function(email:string):Promise<boolean>{
+    const docRef = doc(firestore, "alphaTesters", email);
+    const docSnap = await getDoc(docRef);
+    if(docSnap.exists()) return true;
+    return false;
+}

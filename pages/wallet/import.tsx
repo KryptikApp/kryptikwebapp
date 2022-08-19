@@ -1,7 +1,6 @@
 import type { NextPage } from 'next'
 import { useState } from 'react'
 import { Magic } from 'magic-sdk'
-import router from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
 
 //kryptic imports
@@ -9,6 +8,8 @@ import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import { ILoginUserParams, loginUser } from '../../src/handlers/profile/loginHandler'
 import { validateAndFormatMnemonic } from 'hdseedloop'
 import { isValidEmailAddress } from '../../src/helpers/resolvers/kryptikResolver'
+import { isOnAlphaTestList } from '../../src/helpers/waitlist'
+import { useRouter } from 'next/router'
 
 const ImportSeed: NextPage = () => {
 
@@ -18,6 +19,7 @@ const ImportSeed: NextPage = () => {
   const [isLoading, setisLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
 
+  const router = useRouter();
 
   const handleSeed = function(seedIn:string){
     setSeed(seedIn);
@@ -33,6 +35,12 @@ const ImportSeed: NextPage = () => {
       return;
     }
     setisLoading(true);
+    const isOnTestList = await isOnAlphaTestList(email)
+    if(!isOnTestList){
+      router.push("../support/testing")
+      setisLoading(false);
+      return;
+    }
     try{
       // login user with defined seed
       const loginParams:ILoginUserParams = {
