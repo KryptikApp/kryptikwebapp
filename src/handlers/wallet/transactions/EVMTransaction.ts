@@ -83,9 +83,7 @@ export const createEVMTransferTransaction = async function(txIn:EVMTransferTxPar
     // creates evm transfer tx for ERC20 token
     else{
         txType = TxType.TransferToken;
-        let erc20ChainData:ChainData|null = getChainDataForNetwork(txIn.tokenAndNetwork.baseNetworkDb, tokenAndNetwork.tokenData.tokenDb);
-        if(!erc20ChainData) return null;
-        let erc20Contract = new Contract(erc20ChainData.address, erc20Abi);
+        let erc20Contract = new Contract(tokenAndNetwork.tokenData.selectedAddress, erc20Abi);
         if(!erc20Contract){
             return null;
         }

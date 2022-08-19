@@ -44,7 +44,7 @@ export interface TokenData{
     tokenParamsEVM?:TokenParamsEVM,
     tokenParamsNep141?:TokenParamsNep141,
     tokenBalance?:IBalance
-    selectedAddress?: string
+    selectedAddress: string
     tokenDb: TokenDb
 }
 
@@ -76,6 +76,7 @@ export interface TokenBalanceParameters{
     nep141Params?:Nep141Params
     erc20Params?:ERC20Params, 
     accountAddress:string, 
+    priceUsd?:number,
     networkDb:NetworkDb
 }
 

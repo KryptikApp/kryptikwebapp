@@ -44,12 +44,8 @@ export async function BuildTransferTx(params:CreateTransferTransactionParameters
              if(!tokenAndNetwork.tokenData){
               throw(new Error("Error: Token Data not provided for SPL token transfer."))
             }
-            let splChainData:ChainData|null = getChainDataForNetwork(tokenAndNetwork.baseNetworkDb, tokenAndNetwork.tokenData.tokenDb);
-            if(!splChainData){
-              throw(new Error("Error: SPL token information not provided by token."))
-            }
             // add sol token data to input params
-            txIn.tokenParamsSol = {contractAddress:splChainData.address};
+            txIn.tokenParamsSol = {contractAddress:tokenAndNetwork.tokenData.selectedAddress};
             tx = await createSolTokenTransferTransaction(txIn);
           }
           // create base layer sol tx.

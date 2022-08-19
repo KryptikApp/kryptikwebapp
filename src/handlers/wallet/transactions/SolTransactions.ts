@@ -34,8 +34,6 @@ export const signAndSendSOLTransaction = async function(params:ISignAndSendSolPa
         throw(new Error(`Error: Provider not set for ${network.fullName}`))
       }
       let solProvider = kryptikProvider.solProvider;
-      console.log("Transactions input...");
-      console.log(txs);
       let numTxToSign = txs.length;
       let currIndex = 0;
       for(let txSol of txs){

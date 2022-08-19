@@ -90,11 +90,7 @@ export const BuildNEARTransfer = async function(params:NearTransactionParams):Pr
         throw(new Error("Error: Token Data not provided for NEAR token transfer."))
       }
       // add contract address
-      let nep141ChainData:ChainData|null = getChainDataForNetwork(tokenAndNetwork.baseNetworkDb, tokenAndNetwork.tokenData.tokenDb);
-      if(!nep141ChainData){
-        throw(new Error("Error: NEAR token information not provided by tokendb."))
-      }
-      params.contractAddress = nep141ChainData.address;
+      params.contractAddress = tokenAndNetwork.tokenData.selectedAddress;
       txNear = await createNearTokenTransaction(params);
     }
     // create base layer near tx.
