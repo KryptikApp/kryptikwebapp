@@ -112,7 +112,7 @@ const ListBalance:NextPage = () => {
                 {
                     (!isFetchedBalances)&&
                     <div className="max-w-full bg-gray-200 dark:bg-[#141414] rounded-full h-6 mx-2">
-                        <div id="progressBar" className="bg-gradient-to-r from-sky-400 to-sky-600 h-6 rounded-full text-gray-700" style={{width: `0%`, maxWidth:`100%`}}>{progressPercent>15?`${roundToDecimals(progressPercent, 2)}%`:""}</div>
+                        <div id="progressBar" className="bg-gradient-to-r from-sky-400 to-sky-600 h-6 rounded-full text-gray-700" style={{width: `0%`, maxWidth:`100%`, paddingLeft:'2%'}}>{progressPercent>5?`${roundToDecimals(progressPercent, 2)}%`:""}</div>
                     </div>
                 }
                 
