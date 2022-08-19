@@ -11,7 +11,7 @@ import { useKryptikAuthContext } from '../../components/KryptikAuthProvider';
 import SearchResultItem from '../../components/search/searchResultItem';
 import { useKryptikThemeContext } from '../../components/ThemeProvider';
 import TxFee from '../../components/transactions/TxFee';
-import { getTokenSearchSuggestions } from '../../src/handlers/search/token';
+import { getTokenSearchSuggestions, searchSuggestionsFromTokenAndNetworks } from '../../src/handlers/search/token';
 import { ISearchResult } from '../../src/handlers/search/types';
 import { BuildSwapTokenTransaction, IBuildSwapParams } from '../../src/handlers/swaps';
 import { BuildEVMTokenApproval } from '../../src/handlers/swaps/EVMSwap';
@@ -22,6 +22,7 @@ import { formatTicker, networkFromNetworkDb } from '../../src/helpers/utils/netw
 import { formatAmountUi, roundCryptoAmount, roundUsdAmount } from '../../src/helpers/utils/numberUtils';
 import { WalletStatus } from '../../src/models/KryptikWallet';
 import { KryptikTransaction, SwapAmounts, TxSignatureParams } from '../../src/models/transactions';
+import { KryptikBalanceHolder } from '../../src/services/models/KryptikBalanceHolder';
 import { defaultTokenAndNetwork } from '../../src/services/models/network';
 import { KryptikProvider } from '../../src/services/models/provider';
 import { TokenAndNetwork } from '../../src/services/models/token';
@@ -30,10 +31,12 @@ import { ServiceState, TxProgress } from '../../src/services/types';
 
 
 const Swap: NextPage = () => {
-  const {isDark} = useKryptikThemeContext();
-  const {authUser, loadingAuthUser, walletStatus, kryptikWallet, kryptikService} = useKryptikAuthContext();
+  const {isDark, isAdvanced} = useKryptikThemeContext();
+  const {authUser, loadingAuthUser, walletStatus, kryptikWallet, kryptikService,} = useKryptikAuthContext();
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [loadingNetworks, setLoadingNetworks] = useState(false);
+  const[networkAndTokens, setNetworkAndTokens] = useState<TokenAndNetwork[]>([]);
+
   const [tokenPrice, setTokenPrice] = useState(0);
   // token price for base network coin
   const [baseCoinPrice, setBaseCoinPrice] = useState(0);
@@ -83,6 +86,36 @@ const Swap: NextPage = () => {
     }
   }, [authUser, loadingAuthUser])
 
+  // retrieves wallet balances
+  const fetchTokenAndNetworks = async(onlyWithValue:boolean=true) =>{
+    // ensure kryptik service is started
+    setLoadingNetworks(true);
+    await kryptikService.StartSevice();
+    let newTokensAndNetworks:TokenAndNetwork[] = [];
+   
+    // remove zero balances, if requested
+    if(onlyWithValue){
+        // get balances
+        let balanceHolder:KryptikBalanceHolder =  await kryptikService.getAllBalances({walletUser:kryptikWallet, isAdvanced:isAdvanced});
+        newTokensAndNetworks = balanceHolder.getNonzeroBalances();
+    }
+    //TODO: FIX TO SHOW TOKENS AS WELL
+    else{
+        let networkDbs = kryptikService.NetworkDbs;
+        for(const nw of networkDbs){
+            newTokensAndNetworks.push({baseNetworkDb:nw});
+        }
+    }
+    setNetworkAndTokens(newTokensAndNetworks);
+    // update selected network to be first in possible options
+    if(newTokensAndNetworks.length!=0 && onlyWithValue) setSellTokenAndNetwork(newTokensAndNetworks[0])
+    setLoadingNetworks(false);
+  }
+
+  useEffect(()=>{
+    fetchTokenAndNetworks()
+  }, [])
+
   const handleToggleIsCrypto = function(){
     setIsInputCrypto(!isInputCrypto);
   }
@@ -90,6 +123,16 @@ const Swap: NextPage = () => {
   const validateAmount = function():boolean{
     if(amountCrypto == "0"){
       toast.error("Please enter a nonzero amount.");
+      setIsLoading(false);
+      return false;
+    }
+    if(sellTokenAndNetwork.tokenData && (Number(sellTokenAndNetwork.tokenData.tokenBalance?.amountCrypto) < Number(amountCrypto))){
+      toast.error(`You don't have enough ${sellTokenAndNetwork.tokenData.tokenDb.name} to complete this transaction`);
+      setIsLoading(false);
+      return false;
+    }
+    if(!sellTokenAndNetwork.tokenData && (Number(sellTokenAndNetwork.networkBalance?.amountCrypto) < Number(amountCrypto))){
+      toast.error(`You don't have enough ${sellTokenAndNetwork.baseNetworkDb.fullName} to complete this transaction`);
       setIsLoading(false);
       return false;
     }
@@ -310,7 +353,7 @@ const Swap: NextPage = () => {
   const setDefaultSearchResults = function(isSellToken:boolean){
     let defaultSearchResults:ISearchResult[];
     if(isSellToken){
-      defaultSearchResults = getTokenSearchSuggestions(query, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs, true, updateSellToken);
+      defaultSearchResults = searchSuggestionsFromTokenAndNetworks(query, networkAndTokens, updateSellToken, true)
     }
     else{
       defaultSearchResults = getTokenSearchSuggestions(query, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs, true, updateBuyToken, currentSwapValidator);
@@ -348,7 +391,7 @@ const Swap: NextPage = () => {
     let newSearchResults:ISearchResult[];
     // pass in different onclick function depending on whether we are updating buy or sell token
     if(isSearchSellToken){
-      newSearchResults = getTokenSearchSuggestions(query, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs, false, updateSellToken);
+      newSearchResults = searchSuggestionsFromTokenAndNetworks(query, networkAndTokens, updateSellToken, false)
     }
     else{
       newSearchResults = getTokenSearchSuggestions(query, kryptikService.TickerToNetworkDbs, kryptikService.NetworkDbs, kryptikService.tokenDbs, false, updateBuyToken, currentSwapValidator);
@@ -780,8 +823,16 @@ const Swap: NextPage = () => {
                       }
                       {
                         (searchresults.length == 0 && isSearchSellToken)&&
-                        <div className="mt-[4rem] text-center">
+                        <div>
+                        {
+                          query==""?
+                          <div className="mt-[4rem] text-center font-bold">
+                            <p>Deposit Tokens To Swap</p>
+                          </div>:
+                          <div className="mt-[4rem] text-center">
                           <p>No search results for "{query}"</p>
+                          </div>
+                          }
                         </div>
                       }
                     

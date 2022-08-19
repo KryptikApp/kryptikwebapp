@@ -20,6 +20,23 @@ const tokenOnclickFunction = function(params:ITokenClickHandlerParams){
     }
 }
 
+export const searchSuggestionsFromTokenAndNetworks = function(query:string, tokenAndNetworks:TokenAndNetwork[], clickHandler?:(selectedToken:TokenAndNetwork)=>void, returnAll:boolean=false):ISearchResult[]{
+    let suggestions:ISearchResult[] = [];
+    let newSuggestion:ISearchResult;
+    const filteredTokens = returnAll?filterTokenAndNetworkListByQuery(tokenAndNetworks, query):tokenAndNetworks;
+    for(const token of filteredTokens){
+        if(clickHandler){
+            newSuggestion = {resultString:token.tokenData?token.tokenData.tokenDb.name:token.baseNetworkDb.fullName, iconPath:token.tokenData?token.tokenData.tokenDb.logoURI:token.baseNetworkDb.iconPath, iconPathSecondary:token.tokenData?token.baseNetworkDb.iconPath:undefined, onClickFunction:clickHandler, onClickParams:token};
+        }
+        else{
+            let queryOnClickParams:ITokenClickHandlerParams = {networkTicker:token.baseNetworkDb.ticker, tokenTicker:token.tokenData?token.tokenData.tokenDb.symbol:undefined}
+            newSuggestion = {resultString:token.tokenData?token.tokenData.tokenDb.name:token.baseNetworkDb.fullName, iconPath:token.tokenData?token.tokenData.tokenDb.logoURI:token.baseNetworkDb.iconPath, iconPathSecondary:token.tokenData?token.baseNetworkDb.iconPath:undefined, onClickFunction:tokenOnclickFunction, onClickParams:queryOnClickParams};
+        }
+        suggestions.push(newSuggestion);
+    }
+    return suggestions
+}
+
 // TODO: update to support any passed in click handler
 export const getTokenSearchSuggestions = function(query:string, tickerToNetworkDict:{[ticker:string]:NetworkDb}, networksToSearch:NetworkDb[], tokensToSearch:TokenDb[], returnAll=false, clickHandler?:(selectedToken:TokenAndNetwork)=>void, swapValidator?:SwapValidator):ISearchResult[]{
     let suggestions:ISearchResult[] = [];
@@ -80,6 +97,12 @@ export const getTokenSearchSuggestions = function(query:string, tickerToNetworkD
     }
 
     return suggestions;
+}
+
+export function filterTokenAndNetworkListByQuery(tokenAndNetworks:TokenAndNetwork[], query:string):TokenAndNetwork[]{
+    query = query.toLowerCase();
+    let filteredResult:TokenAndNetwork[] = tokenAndNetworks.filter(t=>(t.tokenData?t.tokenData.tokenDb.symbol.toLowerCase().includes(query)||t.tokenData.tokenDb.name.toLowerCase().includes(query):t.baseNetworkDb.fullName.toLowerCase().includes(query) ||t.baseNetworkDb.ticker.toLowerCase().includes(query)));
+    return filteredResult;
 }
 
 export function filterTokenListByQuery(tokenList:TokenDb[], query:string):TokenDb[]{
