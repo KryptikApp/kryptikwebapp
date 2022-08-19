@@ -89,7 +89,8 @@ export const defaultTokenAndNetwork:TokenAndNetwork = {
 export const defaultUniswapTokenAndNetwork:TokenAndNetwork = {
     baseNetworkDb:defaultNetworkDb,
     tokenData:{
-        tokenDb: defaultUniswapTokenData
+        tokenDb: defaultUniswapTokenData,
+        selectedAddress: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
     }
 }
 
