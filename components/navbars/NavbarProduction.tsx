@@ -65,8 +65,18 @@ const NavbarProduction:NextPage = () => {
                 <Link href="../profile"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/profile" ? "font-bold" : ""} `}>Profile</span></Link>
                 :<Link href="../about"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/about" ? "font-bold" : ""} `}>About</span></Link>
                 }
-                <Link href="../explore"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/explore" ? "font-bold" : ""} `}>Explore</span></Link>
-                <Link href="../gallery"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 md:text-center border border-transparent rounded hover:text-white hover:cursor-pointer hover:bg-sky-400 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/gallery" ? "font-bold" : ""}`}>Collect</span></Link> 
+                {
+                    authUser?
+                    <Link href="../explore"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/explore" ? "font-bold" : ""} `}>Explore</span></Link>:
+                    <Link href="../vision"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/vision" ? "font-bold" : ""} `}>Vision</span></Link>
+                }
+                {
+                    authUser?
+                    <Link href="../gallery"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 md:text-center border border-transparent rounded hover:text-white hover:cursor-pointer hover:bg-sky-400 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/gallery" ? "font-bold" : ""}`}>Collect</span></Link>:
+                    <Link href="../explore"><span className={`p-2 lg:px-4 md:mx-2 text-green-400 md:text-center border border-transparent rounded hover:text-white hover:cursor-pointer hover:bg-sky-400 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/explore" ? "font-bold" : ""}`}>Explore</span></Link>
+                }
+            
+                
                 {/* show disconnect button if connected and vise versa */}
                 {authUser ? 
                 walletStatus == WalletStatus.Connected?
