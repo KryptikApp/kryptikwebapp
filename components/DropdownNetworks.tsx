@@ -109,10 +109,16 @@ const DropdownNetworks:NextPage<Props> = (props) => {
                 </button>
 
                 <ul className="no-scrollbar absolute z-10 mt-1 w-full bg-white dark:bg-black opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:border dark:border-slate-500" tabIndex={-1} role="listbox" aria-labelledby="listbox-label" aria-activedescendant="listbox-option-3" hidden={!showOptions}>
-                {networkAndTokens.map((nt:TokenAndNetwork, index:number) => (
-                  (!(nt.baseNetworkDb.isTestnet&&authUser&&!authUser.isAdvanced)) &&
-                  <ListItemDropdown selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleOptionClick} tokenAndNetwork={nt} key={index}/>
-                ))}
+                {
+                    onlyWithValue && networkAndTokens.length == 0?
+                    <li className="py-2">
+                        <p className="dark:text-white">No Token Balances Available</p>
+                    </li>:
+                    networkAndTokens.map((nt:TokenAndNetwork, index:number) => (
+                        (!(nt.baseNetworkDb.isTestnet&&authUser&&!authUser.isAdvanced)) &&
+                        <ListItemDropdown selectedTokenAndNetwork={selectedTokenAndNetwork} selectFunction={handleOptionClick} tokenAndNetwork={nt} key={index}/>
+                    ))
+                }
                 </ul>
             </div>
             </div>
