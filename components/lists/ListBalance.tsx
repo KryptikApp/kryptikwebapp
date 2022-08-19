@@ -13,6 +13,8 @@ import { TokenAndNetwork } from "../../src/services/models/token";
 import { KryptikBalanceHolder } from "../../src/services/models/KryptikBalanceHolder";
 import { AiOutlineRedo } from "react-icons/ai";
 import { WalletStatus } from "../../src/models/KryptikWallet";
+import AvailableNetworks from "../networks/AvailableNetworks";
+import BuyEth from "../BuyEth";
 
 const ListBalance:NextPage = () => {
     const {kryptikService, kryptikWallet} = useKryptikAuthContext();
@@ -20,11 +22,11 @@ const ListBalance:NextPage = () => {
     const router = useRouter();
     const {isAdvanced} = useKryptikThemeContext()
     const initTokenAndBalances:TokenAndNetwork[] = [];
-    const[isFetchedBalances, setIsFetchedBalances] = useState(false);
-    const[isManualRefresh, setIsManualRefresh] = useState(false);
-    const[tokenAndBalances, setTokenAndBalances] = useState<TokenAndNetwork[]>(initTokenAndBalances);
-    const[balanceHolder, setBalanceHolder] = useState<KryptikBalanceHolder|null>(null);
-    const[progressPercent, setProgressPercent] = useState(0);
+    const [isFetchedBalances, setIsFetchedBalances] = useState(false);
+    const [isManualRefresh, setIsManualRefresh] = useState(false);
+    const [tokenAndBalances, setTokenAndBalances] = useState<TokenAndNetwork[]>(initTokenAndBalances);
+    const [balanceHolder, setBalanceHolder] = useState<KryptikBalanceHolder|null>(null);
+    const [progressPercent, setProgressPercent] = useState(0);
     const totalToFetch = kryptikService.NetworkDbs.length + kryptikService.tokenDbs.length;
     const stepSize:number = Number(((1/totalToFetch)*100));
 
@@ -130,15 +132,36 @@ const ListBalance:NextPage = () => {
             }
             </ul>
             :
-            <div>
-                <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-                {tokenAndBalances.map((tokenAndBalance:TokenAndNetwork, index:number) => (
-                    (tokenAndBalance.networkBalance || tokenAndBalance.tokenData?.tokenBalance) &&      
-                    <ListItemBalance key={index} tokenAndNetwork={tokenAndBalance} htmlKey={100000+index}
-                    />
-                ))}
-                </ul>
+            tokenAndBalances.length == 0?
+            <div className="max-w-full m-2 py-2 px-4 bg-gray-300 dark:bg-gray-800 rounded">
+                <div className="flex flex-row">
+                    <div className="my-auto">
+                    <AvailableNetworks/>
+                    </div>
+                    <div className="ml-2 text-left">
+                        <h1 className="text-xl text-left text-slate-900 dark:text-slate-100 font-bold">Deposit Tokens</h1>
+                        <p className=" text-slate-500 dark:text-slate-400">You'll need tokens to use your wallet!</p>
+                    </div>
+                </div>
+
+                <div className="flex flex-row my-4">
+                    <div className="flex-grow">
+                        <div className="float-right">
+                            <BuyEth/>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>:
+             <div>
+             <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
+             {tokenAndBalances.map((tokenAndBalance:TokenAndNetwork, index:number) => (     
+                 <ListItemBalance key={index} tokenAndNetwork={tokenAndBalance} htmlKey={index}
+                 />
+             ))}
+             </ul>
             </div>
+            
         }
 
         </div>
