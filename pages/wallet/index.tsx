@@ -60,16 +60,52 @@ const Profile: NextPage = () => {
             </Link>
             </div>
           </div>
-          <ListBalance/>
+          
         </div>
 
-        <div className="px-4 border hover:border-sky-400 rounded max-w-md mx-auto mt-10 py-4">
-          <h1 className="text-2xl text-slate-800 dark:text-slate-200 font-semibold">Add A Custom Name</h1>
-          <p className="text-lg text-slate-700 dark:text-slate-300">Make it easier for people to search for your account and send you money.</p>
-          <button onClick={()=>handleStartAddName()} className={`bg-transparent hover:bg-green-500 text-green-500 text-2xl font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded-lg mt-5 mb-2`}>      
-                                Try
-          </button>
+        <div className="max-w-2xl mx-auto mt-4">
+          <div className="flex flex-col mx-auto">
+
+            <div className="max-w-2xl">
+            <ListBalance/>
+            </div>
+
+            <div className="px-4 border hover:border-sky-400 rounded max-w-lg lg:max-w-md mx-auto mt-10 py-4">
+              <h1 className="text-2xl text-slate-800 dark:text-slate-200 font-semibold">Add A Custom Name</h1>
+              <p className="text-lg text-slate-700 dark:text-slate-300">Make it easier for people to search for your account and send you money.</p>
+              <button onClick={()=>handleStartAddName()} className={`bg-transparent hover:bg-green-500 text-green-500 text-2xl font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded-lg mt-5 mb-2`}>      
+                                    Try
+              </button>
+            </div>
+            
+          </div>
+          
         </div>
+
+        {/* uncomment below for side by side view */}
+        {/* <div className="max-w-2xl 2xl:max-w-full mx-auto mt-4">
+          <div className="flex flex-col 2xl:flex-row mx-auto">
+            <div className="2xl:w-[37%]">
+
+            </div>
+
+            <div className="2xl:w-[33%] max-w-2xl">
+            <ListBalance/>
+            </div>
+
+            <div className="px-4 border hover:border-sky-400 rounded max-w-lg lg:max-w-md mx-auto 2xl:my-auto mt-10 py-4">
+              <h1 className="text-2xl text-slate-800 dark:text-slate-200 font-semibold">Add A Custom Name</h1>
+              <p className="text-lg text-slate-700 dark:text-slate-300">Make it easier for people to search for your account and send you money.</p>
+              <button onClick={()=>handleStartAddName()} className={`bg-transparent hover:bg-green-500 text-green-500 text-2xl font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded-lg mt-5 mb-2`}>      
+                                    Try
+              </button>
+            </div>
+            
+          </div>
+          
+        </div> */}
+
+        
 
         <div className="min-h-[10vh]">
           {/* spacefiller between content and bottom of the screen */}
