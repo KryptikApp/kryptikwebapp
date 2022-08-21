@@ -57,11 +57,17 @@ const NavbarProduction:NextPage = () => {
             </div>
             <div id="menu" className={menuWrapperClassName} onClick={()=>setMenuMobile(false)}>
                 {
-                    hideBalances?
-                    <RiEyeCloseLine className="dark:text-white hover:cursor-pointer mt-2 ml-2 md:ml-0 md:mr-2  hover:animate-pulse" size="28" onClick={()=>handleHideBalances(false)}/>:
-                    <RiEyeLine className="dark:text-white hover:cursor-pointer mt-2 ml-2 md:ml-0 md:mr-2 hover:animate-pulse" size="28" onClick={()=>handleHideBalances(true)}/>
-                    
+                    authUser&&
+                    <div>
+                    {
+                        hideBalances?
+                        <RiEyeCloseLine className="dark:text-white hover:cursor-pointer mt-2 ml-2 md:ml-0 md:mr-2  hover:animate-pulse" size="28" onClick={()=>handleHideBalances(false)}/>:
+                        <RiEyeLine className="dark:text-white hover:cursor-pointer mt-2 ml-2 md:ml-0 md:mr-2 hover:animate-pulse" size="28" onClick={()=>handleHideBalances(true)}/>
+                        
+                    }
+                    </div>
                 }
+                
                 <a href="#"></a>
                 {authUser? 
                 <Link href="../profile"><span className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${router.pathname == "/profile" ? "font-bold" : ""} `}>Profile</span></Link>
