@@ -1,5 +1,5 @@
 // helps with integrating web3service into app. context
-import { signInWithCustomToken, updateCurrentUser, updateProfile, User, UserCredential } from "firebase/auth";
+import { signInWithCustomToken, updateProfile, User, UserCredential } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { firebaseAuth, firestore, formatAuthUser, readExtraUserData, getUserPhotoPath } from "./firebaseHelper";
@@ -121,6 +121,7 @@ export function useKryptikAuth() {
           return;
         }
         setLoadingAuthUser(true)
+        setLoadingWallet(true);
         let formattedUser:UserDB = formatAuthUser(user);
         // read extra user data from db
         let userExtraData = await readExtraUserData(formattedUser);
@@ -129,7 +130,6 @@ export function useKryptikAuth() {
         let ks = await kryptikService.StartSevice();
         setKryptikService(ks);
         let newWalletKryptik:IWallet;
-        setLoadingWallet(true);
         console.log("connecting kryptik wallet local and remote");
         if(seed != "") {
             newWalletKryptik = await ConnectWalletLocalandRemote(ks, formattedUser, seed);

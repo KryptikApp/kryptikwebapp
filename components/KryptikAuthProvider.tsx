@@ -30,7 +30,7 @@ const kryptikAuthContext = createContext<IAuthContext>({
   // auth db funcs and vals
   authUser: null,
   loadingAuthUser: false,
-  loadingWallet:false,
+  loadingWallet: false,
   signInWithToken: async (token:string, seed?:string, isRefresh?:boolean) => {},
   updateCurrentUserKryptik: async(user:UserDB) => {},
   getUserPhotoPath: (user:UserDB):string => {return ""},

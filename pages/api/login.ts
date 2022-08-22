@@ -11,7 +11,6 @@ type Data = {
 // basic login routine
 export default async( req: NextApiRequest, res: NextApiResponse<Data> )=>
 {
-    console.log("Login hit!");
     if (req.method !== 'POST') return res.status(405).end()
     // make sure we have access to a magic secret key
     let  magicSecretKey:string = process.env.MAGIC_SECRET_KEY? process.env.MAGIC_SECRET_KEY: "not set";
@@ -47,7 +46,8 @@ const createCustomFirebaseToken = async(uid:string):Promise<string> => {
   // let arrayKey:Uint8Array = pemToArray(firebaseserviceKey.private_key);
   if(!process.env.FIREBASE_PRIVATE_KEY) throw(new Error("Error: Firebase private key not provided. Unable to create custom database token."));
   if(!process.env.FIREBASE_CLIENT_EMAIL) throw(new Error("Error: Firebase client email not provided. Unable to create custom database token."));
-  let keyToUse = process.env.NEXT_PUBLIC_APP_MODE=="prelaunch"?process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'):process.env.FIREBASE_PRIVATE_KEY;
+  // format firebase private key.. unless deployed on Vercel
+  let keyToUse = process.env.IS_PRODUCTION=="false"?process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'):process.env.FIREBASE_PRIVATE_KEY;
   let keyObj = crypto.createPrivateKey(keyToUse);
   // create jwt
   const jwt = await new jose.SignJWT({ 'uid': uid })

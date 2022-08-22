@@ -6,6 +6,7 @@ import UserLandingPage from './landings/UserLandingPage';
 import BrandLandingPage from './landings/BrandLandingPage';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { defaultUser } from '../src/models/user';
 
 
 const LandingPage: NextPage = () => {
@@ -28,7 +29,7 @@ const LandingPage: NextPage = () => {
         <div className="dark:text-white">
           
           {
-            ((loadingAuthUser||loadingWallet||authUser))?
+            (loadingAuthUser||loadingWallet||(authUser && authUser!=defaultUser))?
             <UserLandingPage/>:
             <BrandLandingPage/>
           }
