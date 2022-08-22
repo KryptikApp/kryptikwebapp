@@ -58,11 +58,11 @@ const NavbarProduction:NextPage = () => {
             <div id="menu" className={menuWrapperClassName} onClick={()=>setMenuMobile(false)}>
                 {
                     authUser&&
-                    <div>
+                    <div className="mt-2 ml-2 md:ml-0 md:mr-2">
                     {
                         hideBalances?
-                        <RiEyeCloseLine className="dark:text-white hover:cursor-pointer mt-2 ml-2 md:ml-0 md:mr-2  hover:animate-pulse" size="28" onClick={()=>handleHideBalances(false)}/>:
-                        <RiEyeLine className="dark:text-white hover:cursor-pointer mt-2 ml-2 md:ml-0 md:mr-2 hover:animate-pulse" size="28" onClick={()=>handleHideBalances(true)}/>
+                        <RiEyeCloseLine className="dark:text-white hover:cursor-pointer hover:animate-pulse" size="28" onClick={()=>handleHideBalances(false)}/>:
+                        <RiEyeLine className="dark:text-white hover:cursor-pointer hover:animate-pulse" size="28" onClick={()=>handleHideBalances(true)}/>
                         
                     }
                     </div>
