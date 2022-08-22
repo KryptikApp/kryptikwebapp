@@ -9,7 +9,7 @@ import toast, { Toaster } from 'react-hot-toast'
 import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import { ILoginUserParams, loginUser } from '../../src/handlers/profile/loginHandler'
 import { isValidEmailAddress } from '../../src/helpers/resolvers/kryptikResolver'
-import { isOnAlphaTestList } from '../../src/helpers/waitlist'
+import { addEmailToWaitlist, isOnAlphaTestList } from '../../src/helpers/waitlist'
 
 const CreateWallet: NextPage = () => {
   const {signInWithToken} = useKryptikAuthContext();
@@ -17,6 +17,10 @@ const CreateWallet: NextPage = () => {
   const [isLoading, setisLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
   const router = useRouter();
+
+  const waitListErrorHandler = function(msg:string){
+    console.warn(msg);
+  }
 
   const handleLoginUser = async function(){
     if(!isValidEmailAddress(email)){
@@ -26,6 +30,7 @@ const CreateWallet: NextPage = () => {
     setisLoading(true);
     const isOnTestList = await isOnAlphaTestList(email)
     if(!isOnTestList){
+      const newPosition = await addEmailToWaitlist(email, waitListErrorHandler);
       router.push("../support/testing")
       setisLoading(false);
       return;

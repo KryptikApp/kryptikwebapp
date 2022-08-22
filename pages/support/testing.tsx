@@ -19,7 +19,7 @@ const Testing: NextPage = () => {
                         You're Excited!
                 </h1>
                 <p className="leading-loose text-2xl text-justify"><span className="text-sky-500 dark:text-sky-400 font-semibold">So are we (:</span></p>
-                <p className="leading-loose mb-2 text-xl text-justify">Right now... the Kryptik wallet is being improved by a small group of testers. To get early access to our powerful wallet, join the waitlist <span className="hover:cursor-pointer text-green-400 hover:text-green-500"><Link href="../waitlist">here</Link></span>.</p>
+                <p className="leading-loose mb-2 text-xl text-justify">Right now... the Kryptik wallet is being improved by a small group of testers. Your spot on the waitlist has been <span className="text-green-500 dark:text-green-400">reserved</span> and we will notify you when your Kryptik journey begins. Thanks for stopping by and have a great day 👋🏼!</p>
             </div>
         </div>
           

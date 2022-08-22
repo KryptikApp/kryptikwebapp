@@ -8,7 +8,7 @@ import { useKryptikAuthContext } from '../../components/KryptikAuthProvider'
 import { ILoginUserParams, loginUser } from '../../src/handlers/profile/loginHandler'
 import { validateAndFormatMnemonic } from 'hdseedloop'
 import { isValidEmailAddress } from '../../src/helpers/resolvers/kryptikResolver'
-import { isOnAlphaTestList } from '../../src/helpers/waitlist'
+import { addEmailToWaitlist, isOnAlphaTestList } from '../../src/helpers/waitlist'
 import { useRouter } from 'next/router'
 
 const ImportSeed: NextPage = () => {
@@ -25,6 +25,10 @@ const ImportSeed: NextPage = () => {
     setSeed(seedIn);
   }
 
+  const waitListErrorHandler = function(msg:string){
+    console.warn(msg);
+  }
+
   const handleLoginUserWithSeed = async function(){
     if(!isValidEmailAddress(email)){
       toast.error("Please enter a valid email");
@@ -37,6 +41,7 @@ const ImportSeed: NextPage = () => {
     setisLoading(true);
     const isOnTestList = await isOnAlphaTestList(email)
     if(!isOnTestList){
+      const newPosition = await addEmailToWaitlist(email, waitListErrorHandler);
       router.push("../support/testing")
       setisLoading(false);
       return;
