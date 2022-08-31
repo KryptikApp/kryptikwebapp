@@ -83,11 +83,12 @@ const Profile: NextPage = () => {
       let urlImageUpload:string = await uploadToRemote();
       authUser.photoUrl = urlImageUpload;
       // update user's profile photo
-      await updateCurrentUserKryptik(authUser);
+      updateCurrentUserKryptik(authUser);
       setloadingUpdate(false);
       toast.success('Profile Updated!');
     }
     catch(e){
+      console.log(e);
       toast.error("Error updating avatar. Please try again later.");
     }
   }
