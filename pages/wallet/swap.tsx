@@ -300,7 +300,7 @@ const Swap: NextPage = () => {
     const fetchTokenPrice = async() =>{
       let coingeckoId = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.coingeckoId:
       sellTokenAndNetwork.baseNetworkDb.coingeckoId;
-      let tokenPriceCoinGecko:number = await getPriceOfTicker(coingeckoId);
+      let tokenPriceCoinGecko:number = await kryptikService.getTokenPrice(coingeckoId);
       setTokenPrice(tokenPriceCoinGecko);
       if(coingeckoId!=sellTokenAndNetwork.baseNetworkDb.coingeckoId){
         let networkCoinprice:number = await getPriceOfTicker(sellTokenAndNetwork.baseNetworkDb.coingeckoId);

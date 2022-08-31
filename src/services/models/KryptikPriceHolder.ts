@@ -19,7 +19,7 @@ export class KryptikPriceHolder{
         const {prices, freshWindow} = {...params};
         this.prices = prices;
          // use provided number of seconds or default to five minutes
-         this.freshWindow = freshWindow?freshWindow:300
+        this.freshWindow = freshWindow?freshWindow:300
         this.lastUpdated = Date.now();
     }
 

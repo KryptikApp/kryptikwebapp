@@ -428,7 +428,7 @@ class Web3Service extends BaseService implements IWeb3Service{
             console.log("Returning cached balances...");
             return this.kryptikBalances;
         }
-        if(!this.kryptikPrices || this.kryptikPrices){
+        if(!this.kryptikPrices){
             // get prices in place
             this.getAllSupportedPrices()
         }
@@ -877,13 +877,20 @@ class Web3Service extends BaseService implements IWeb3Service{
         }
         let priceResponse:PricesDict = await getPriceOfMultipleTickers(ids);
         if(!this.kryptikPrices){
-            let newPriceHolder:KryptikPriceHolder = new KryptikPriceHolder({prices:priceResponse});
+            const newPriceHolder:KryptikPriceHolder = new KryptikPriceHolder({prices:priceResponse});
             this.kryptikPrices = newPriceHolder;
         }
         else{
             this.kryptikPrices.updatePrices(priceResponse);
         }
         return this.kryptikPrices;
+    }
+
+    // TODO: ADD Individual price fetches
+    async getTokenPrice(tokenId:string):Promise<number>{
+        const cachedPrice = this.kryptikPrices?this.kryptikPrices.getPriceById(tokenId):null;
+        let priceUSD = cachedPrice || getPriceOfTicker(tokenId);
+        return priceUSD;
     }
         
 }
