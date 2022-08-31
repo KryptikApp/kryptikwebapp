@@ -47,7 +47,8 @@ const createCustomFirebaseToken = async(uid:string):Promise<string> => {
   if(!process.env.FIREBASE_PRIVATE_KEY) throw(new Error("Error: Firebase private key not provided. Unable to create custom database token."));
   if(!process.env.FIREBASE_CLIENT_EMAIL) throw(new Error("Error: Firebase client email not provided. Unable to create custom database token."));
   // format firebase private key.. unless deployed on Vercel
-  let keyToUse = process.env.IS_PRODUCTION=="false"?process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'):process.env.FIREBASE_PRIVATE_KEY;
+  const isProduction:boolean = process.env.IS_PRODUCTION=="false";
+  let keyToUse = isProduction?process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'):process.env.FIREBASE_PRIVATE_KEY;
   let keyObj = crypto.createPrivateKey(keyToUse);
   // create jwt
   const jwt = await new jose.SignJWT({ 'uid': uid })
