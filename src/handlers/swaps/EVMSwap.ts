@@ -2,6 +2,7 @@ import { BigNumber, BigNumberish, Contract } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { IBuildSwapParams } from ".";
 import { erc20Abi } from "../../abis/erc20Abi";
+import { ETH_CONTRACT_ADDRESS } from "../../constants/evmConstants";
 import { getPriceOfTicker } from "../../helpers/coinGeckoHelper";
 import { formatTicker, isEVMTxTypeTwo } from "../../helpers/utils/networkUtils";
 import { multByDecimals, roundToDecimals } from "../../helpers/utils/numberUtils";
@@ -109,8 +110,8 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
     let tokenDecimals:number = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.tokenDb.decimals:sellTokenAndNetwork.baseNetworkDb.decimals;
     let swapAmount = multByDecimals(tokenAmount, tokenDecimals);
     // use address for token and symbol for base network coin. Will return undefined if token and network selected address is undefined
-    const sellTokenId:string|undefined = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.selectedAddress:formatTicker(sellTokenAndNetwork.baseNetworkDb.ticker);
-    const buyTokenId:string|undefined = buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.selectedAddress:formatTicker(buyTokenAndNetwork.baseNetworkDb.ticker);
+    let sellTokenId:string|undefined = sellTokenAndNetwork.tokenData?sellTokenAndNetwork.tokenData.selectedAddress:ETH_CONTRACT_ADDRESS;
+    const buyTokenId:string|undefined = buyTokenAndNetwork.tokenData?buyTokenAndNetwork.tokenData.selectedAddress:ETH_CONTRACT_ADDRESS;
     // ensure we have required params for 0x fetch
     if(!sellTokenId || !buyTokenId || !sellTokenAndNetwork.baseNetworkDb.evmData || !sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl) return null;
     // slippage currently set as default of 3%
