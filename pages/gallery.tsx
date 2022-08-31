@@ -107,6 +107,7 @@ const Gallery: NextPage = () => {
     }
     // update nft state
     setNftList(newNftMetadataList);
+    setActiveCategoryNftList(newNftMetadataList);
     setIsNFTFetched(true);
   }
 
