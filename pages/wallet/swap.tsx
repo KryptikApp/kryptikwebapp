@@ -108,7 +108,7 @@ const Swap: NextPage = () => {
     }
     setNetworkAndTokens(newTokensAndNetworks);
     // update selected network to be first in possible options
-    if(newTokensAndNetworks.length!=0 && onlyWithValue) setSellTokenAndNetwork(newTokensAndNetworks[0])
+    if(newTokensAndNetworks.length!=0 && onlyWithValue) updateSellToken(newTokensAndNetworks[0])
     setLoadingNetworks(false);
   }
 

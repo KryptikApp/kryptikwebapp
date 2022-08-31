@@ -23,7 +23,7 @@ const tokenOnclickFunction = function(params:ITokenClickHandlerParams){
 export const searchSuggestionsFromTokenAndNetworks = function(query:string, tokenAndNetworks:TokenAndNetwork[], clickHandler?:(selectedToken:TokenAndNetwork)=>void, returnAll:boolean=false):ISearchResult[]{
     let suggestions:ISearchResult[] = [];
     let newSuggestion:ISearchResult;
-    const filteredTokens = returnAll?filterTokenAndNetworkListByQuery(tokenAndNetworks, query):tokenAndNetworks;
+    const filteredTokens = returnAll?tokenAndNetworks:filterTokenAndNetworkListByQuery(tokenAndNetworks, query);
     for(const token of filteredTokens){
         if(clickHandler){
             newSuggestion = {resultString:token.tokenData?token.tokenData.tokenDb.name:token.baseNetworkDb.fullName, iconPath:token.tokenData?token.tokenData.tokenDb.logoURI:token.baseNetworkDb.iconPath, iconPathSecondary:token.tokenData?token.baseNetworkDb.iconPath:undefined, onClickFunction:clickHandler, onClickParams:token};
