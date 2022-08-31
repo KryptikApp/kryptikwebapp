@@ -42,7 +42,14 @@ export const resolveEVMAccount = async function(params:IAccountResolverParams):P
         if(isValidEVMAddress(account)){
             address = account;
             // try reverse lookup
-            name = await evmProvider.lookupAddress(account);
+            //may fail on chains that aren't eth
+            // TODO: LOOKUP W/ ETH PROVIDER?
+            try{
+                name = await evmProvider.lookupAddress(account);
+            }
+            catch(e){
+                name = account;
+            }
         }
         else{
             return null;
