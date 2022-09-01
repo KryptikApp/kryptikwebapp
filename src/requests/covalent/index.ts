@@ -68,14 +68,12 @@ export const getAssetsFromCovalent = async (
     return null;
 };
 
-// gets all blances from server for all possible networks (currently will fetch if network supported by covalent + kryptik)
+// gets all balances from server for all possible networks (currently will fetch if network supported by covalent + kryptik)
 export const fetchServerBalances = async function(chainId: Number,
     accountAddress: string,
     currency:string):Promise<CovalentAddressBalanceResponseData|null>{
     // request balance data from api
     let dataResponse = await KryptikFetch('/api/balances', {method:"POST", timeout:2000, headers:{'Content-Type': 'application/json',}, body: JSON.stringify({chainId:chainId, accountAddress:accountAddress, currency:currency})})
-    console.log("INDEXED response");
-    console.log(dataResponse);
     if(dataResponse.status != 200) return null
     let dataJson = await dataResponse.data.balanceData;
     if(!dataJson.balanceData) return null;

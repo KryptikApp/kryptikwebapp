@@ -45,7 +45,7 @@ import { CoinGeckoClient, CoinMarketChartResponse } from 'coingecko-api-v3';
   }
   
 
-  export const getHistoricalPriceForTicker = async function(id:string, days:number, priceSetFunction:(val:any)=>void):Promise<CoinMarketChartResponse>{
+  export const getHistoricalPriceForTicker = async function(id:string, days:number, priceSetFunction?:(val:any)=>void):Promise<CoinMarketChartResponse>{
     
     const client = new CoinGeckoClient({
       timeout: 10000,
@@ -58,8 +58,7 @@ import { CoinGeckoClient, CoinMarketChartResponse } from 'coingecko-api-v3';
     days: days
     }
     const marketChartResponse = await client.coinIdMarketChart(input);
-    console.log(marketChartResponse);
     let prices:number[][] = marketChartResponse.prices
-    priceSetFunction(prices);
+    priceSetFunction && priceSetFunction(prices);
     return marketChartResponse;
   }

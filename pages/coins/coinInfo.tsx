@@ -13,6 +13,7 @@ import { removeHttp } from '../../src/helpers/utils';
 import { formatTicker } from '../../src/helpers/utils/networkUtils';
 import { roundToDecimals, roundUsdAmount } from '../../src/helpers/utils/numberUtils';
 import { useKryptikThemeContext } from '../../components/ThemeProvider';
+import { fetchServerHistoricalPrices } from '../../src/requests/prices';
 
 ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, LineController, Tooltip);
 
@@ -57,26 +58,13 @@ const CoinInfo: NextPage = () => {
     if(router.query["tokenTicker"] && (typeof(router.query["tokenTicker"]) == "string")){
       tokenTicker = router.query["tokenTicker"];
     }
-    let networkData = kryptikService.getTokenAndNetworkFromTickers(networkTicker, tokenTicker?tokenTicker:undefined);
-    setTokenAndNetwork(networkData); 
+    let newTokenAndNetwork = kryptikService.getTokenAndNetworkFromTickers(networkTicker, tokenTicker?tokenTicker:undefined);
+    setTokenAndNetwork(newTokenAndNetwork); 
+    setLoaded(true);
   }, [])
 
-  // update percent difference when prices change
-  useEffect(()=>{
-    let currentPrice = prices[prices.length-1];
-    let initialPrice = prices[0];
-    if(!currentPrice || !initialPrice){
-      return;
-    }
-    let amountChange = currentPrice-initialPrice;
-    let percentChange = amountChange/initialPrice;
-    percentChange = roundToDecimals(percentChange*100, 2);
-    setPercentChange(percentChange);
-    setCurrentPrice(currentPrice);
-    setLoaded(true);
-  }, [prices])
 
-  useEffect(()=>{
+  const updateHistoricalData = async function(daysBack:number){
     let coingeckoId:string;
     if(tokenAndNetwork.tokenData){
       coingeckoId = tokenAndNetwork.tokenData.tokenDb.coingeckoId;
@@ -85,30 +73,47 @@ const CoinInfo: NextPage = () => {
       coingeckoId = tokenAndNetwork.baseNetworkDb.coingeckoId;
     }
     // fetch historical data for asset. Default 1 day
-    getHistoricalPriceForTicker(coingeckoId, 1, setHistoricalData);
+    let newHistoricalData = await fetchServerHistoricalPrices(coingeckoId, daysBack);
+    if(!newHistoricalData){
+      return;
+    }
+    // update meta
+    let newTimes:number[] = [];
+    let newPrices:number[] = [];
+    // extract times and prices from the historical data object
+    for (let i = 0; i < newHistoricalData.prices.length; i++) {
+      newTimes.push(newHistoricalData.prices[i][0]);
+      newPrices.push(newHistoricalData.prices[i][1]);
+    }
+    // update percentage change when prices change
+    let currentPrice = newPrices[newPrices.length-1];
+    let initialPrice = newPrices[0];
+    if(!currentPrice || !initialPrice){
+      return;
+    }
+    let amountChange = currentPrice-initialPrice;
+    let percentChange = amountChange/initialPrice;
+    percentChange = roundToDecimals(percentChange*100, 2);
+    // update local state
+    setHistoricalData(newHistoricalData.prices);
     setAssetId(coingeckoId);
+    setTimes(newTimes);
+    setPrices(newPrices);
+    setPercentChange(percentChange);
+    setCurrentPrice(currentPrice);
+  }
+
+  useEffect(()=>{
+    updateHistoricalData(1)
   }, [tokenAndNetwork])
 
   // get asset price with dynamic lookback
   useEffect(()=>{
     if(assetId == "") return;
     let numDays:number = lookbackDict[activeLookback]?lookbackDict[activeLookback]:1;
-    getHistoricalPriceForTicker(assetId, numDays, setHistoricalData);
+    updateHistoricalData(numDays);
   }, [activeLookback])
 
-  // runs when historical data changes
-  useEffect(() => {
-    let newTimes:number[] = [];
-    let newPrices:number[] = [];
-    // extract times and prices from the historical data object
-    for (let i = 0; i < historicalData.length; i++) {
-      newTimes.push(historicalData[i][0]);
-      newPrices.push(historicalData[i][1]);
-    }
-    // update local state
-    setTimes(newTimes);
-    setPrices(newPrices);
-  }, [historicalData])
 
   const createGradient = function():CanvasGradient|undefined{
     const chart = chartRef.current;
@@ -141,8 +146,7 @@ const CoinInfo: NextPage = () => {
         </div>
 
         <div className="text-center max-w-2xl mx-auto content-center">
-        {
-          loaded &&
+
           <div className="flex flex-row mb-4">
              {/* icon */}
              <div className="flex-shrink-0">
@@ -154,17 +158,21 @@ const CoinInfo: NextPage = () => {
               </div>
               {/* token name and... price and percent change */}
               <div className="flex-1 min-w-0 text-left md:ml-2">
-                    <div>
-                        <h1 className="text-2xl font-bold truncate dark:text-white" style={{color:`${tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.hexColor:tokenAndNetwork.baseNetworkDb.hexColor}`}}>
-                            {tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.name:tokenAndNetwork.baseNetworkDb.fullName} ({formatTicker(tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.symbol:tokenAndNetwork.baseNetworkDb.ticker)})
-                        </h1>
-                    </div>
+              {loaded&& 
+                  <div>
+                     <div>
+                     <h1 className="text-2xl font-bold truncate dark:text-white" style={{color:`${tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.hexColor:tokenAndNetwork.baseNetworkDb.hexColor}`}}>
+                         {tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.name:tokenAndNetwork.baseNetworkDb.fullName} ({formatTicker(tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.symbol:tokenAndNetwork.baseNetworkDb.ticker)})
+                     </h1>
+                 </div>
                   <div>
                         <span className={`text-3xl text-black dark:text-white`}>${roundUsdAmount(currentPrice)}</span> <span className={`text-base font-semibold mt-1 mx-2 ${percentChange>0?"text-green-500":"text-red-600"}`}>{percentChange}%</span>
                   </div>
+                </div>
+                }
+                 
               </div>
           </div>
-        }
         <Chart
             ref={chartRef}
             data={data}
