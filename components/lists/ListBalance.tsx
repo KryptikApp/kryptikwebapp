@@ -61,7 +61,7 @@ const ListBalance:NextPage = () => {
         if(kryptikWallet.status!=WalletStatus.Connected) return;
         setIsFetchedBalances(false);
         const newBalanceHolder:KryptikBalanceHolder = await kryptikService.getAllBalances({walletUser:kryptikWallet, isAdvanced:isAdvanced, onFetch:incrementLoadProgress, tryCached:!manualRefresh});
-        const newTokenAndBals:TokenAndNetwork[] = newBalanceHolder.getNonzeroBalances();
+        const newTokenAndBals:TokenAndNetwork[] = newBalanceHolder.getNonzeroBalances(isAdvanced);
         setTokenAndBalances(newTokenAndBals);
         setBalanceHolder(newBalanceHolder);
         setIsFetchedBalances(true);
@@ -155,7 +155,7 @@ const ListBalance:NextPage = () => {
             </div>:
              <div>
              <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
-             {tokenAndBalances.map((tokenAndBalance:TokenAndNetwork, index:number) => (     
+             {tokenAndBalances.map((tokenAndBalance:TokenAndNetwork, index:number) => (   
                  <ListItemBalance key={index} tokenAndNetwork={tokenAndBalance} htmlKey={index}
                  />
              ))}

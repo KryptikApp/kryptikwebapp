@@ -58,18 +58,26 @@ export class KryptikBalanceHolder{
         return this.tokenAndBalances;
     }
 
-    getNonzeroBalances(){
+    getNonzeroBalances(includeTestnets:boolean= false){
         let tempTokenAndBals:TokenAndNetwork[] = [];
         for(const bal of this.tokenAndBalances){
             // add non zero balances to array
             if(bal.tokenData && bal.tokenData.tokenBalance?.amountCrypto != "0"){
                 // nonzero token balances
-                tempTokenAndBals.push(bal);
+
+                // filter testnets
+                if((includeTestnets)||(!includeTestnets && !bal.baseNetworkDb.isTestnet)){
+                    tempTokenAndBals.push(bal);
+                }
             }
             else{
                 // nonzero base network balances
                 if(!bal.tokenData && bal.networkBalance?.amountCrypto != "0"){
-                    tempTokenAndBals.push(bal);
+                    // filter testnets
+                    if((includeTestnets)||(!includeTestnets && !bal.baseNetworkDb.isTestnet)){
+                        tempTokenAndBals.push(bal);
+                    }
+
                 }
             }
             
