@@ -142,17 +142,21 @@ const avatarPathList = ["/media/avatars/defaultAvatar1.jpg", "/media/avatars/def
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// TODO: ADD SUPPORT FOR RANDOM AVATAR
 export const getUserPhotoPath = function(user:UserDB):string{
   // if user has a proper photo url, return it
   if(user.photoUrl!=null && user.photoUrl!=""){
     return user.photoUrl;
   }
   // if not... return a default avatar icon
+  let randomAvatar = getRandomAvatarPhoto();
+  // update shared user state
+  user.photoUrl = randomAvatar
+  return randomAvatar;
+}
+
+export const getRandomAvatarPhoto = function():string{
   let randomIndex:number = getRandomIntArbitrary(0, avatarPathList.length-1);
   let photoUrl:string = avatarPathList[randomIndex];
-  // update shared user state
-  user.photoUrl = photoUrl;
   return photoUrl;
 }
 

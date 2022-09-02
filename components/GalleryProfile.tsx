@@ -1,7 +1,7 @@
 import { Network, truncateAddress } from "hdseedloop";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { getUserPhotoPath } from "../src/helpers/firebaseHelper";
+import { getRandomAvatarPhoto, getUserPhotoPath } from "../src/helpers/firebaseHelper";
 import { defaultResolvedAccount, IAccountResolverParams, IResolvedAccount, resolveAccount } from "../src/helpers/resolvers/accountResolver";
 import { resolveEVMAccount } from "../src/helpers/resolvers/evmResolver";
 import { networkFromNetworkDb } from "../src/helpers/utils/networkUtils";
@@ -12,12 +12,13 @@ import { useKryptikAuthContext } from "./KryptikAuthProvider";
 import ProfileName from "./ProfileName";
 interface Props{
     account?:string,
-    networkDb?:NetworkDb
+    networkDb?:NetworkDb,
+    forAuthUser?:boolean
 }
 
 
 const GalleryProfile:NextPage<Props> = (props) => {
-    const {account, networkDb} = {...props};
+    const {account, networkDb, forAuthUser} = {...props};
     const {authUser, kryptikWallet, kryptikService} = useKryptikAuthContext();
     const [loadingResolvedAccount, setLoadingResolvedAccount] = useState(false);
     const [resolvedAccount, setResolvedAccount] = useState(defaultResolvedAccount);
@@ -63,9 +64,21 @@ const fetchAccountName = async function(){
         else{
             setNameToDisplay(truncateAddress(newResolvedAccount.address, networkFromNetworkDb(networkDb?networkDb:defaultNetworkDb)))
         }
-       
     }
-    setAvatarToDisplay(newResolvedAccount.avatarPath?newResolvedAccount.avatarPath:getUserPhotoPath(authUser?authUser:defaultUser));
+    let avatarPath:string;
+    // is this a view of authuser or someone else?
+    if(authUser && authUser.isLoggedIn && forAuthUser)
+    {
+        avatarPath = getUserPhotoPath(authUser)
+    }
+    else{
+        avatarPath = getRandomAvatarPhoto();
+    }
+    // if resoved avatar... add it!
+    if(newResolvedAccount.avatarPath){
+        avatarPath = newResolvedAccount.avatarPath
+    }
+    setAvatarToDisplay(avatarPath);
     setResolvedAccount(newResolvedAccount);
     setLoadingResolvedAccount(false);
     }

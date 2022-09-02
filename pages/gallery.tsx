@@ -240,13 +240,13 @@ const Gallery: NextPage = () => {
        <div className="h-[2rem] dark:text-white">
           {/* padding div for space between top and main elements */}
         </div>
-        <div className="flex flex-col md:flex-row">
+        <div className="flex flex-col md:flex-row pb-20">
 
            <div className='flex-1'>
              {
                 routerParams?
-                <GalleryProfile account={routerParams.account} networkDb={routerParams.networkDb}/>:
-                <GalleryProfile/>
+                <GalleryProfile account={routerParams.account} networkDb={routerParams.networkDb} forAuthUser={false}/>:
+                <GalleryProfile forAuthUser={true}/>
               }
             <br/>
 
@@ -371,10 +371,8 @@ const Gallery: NextPage = () => {
             </div>
             }
             
-
-
            </div>
-           <div className="md:hidden min-h-[4rem] h-[4rem] dark:text-white">
+           <div className="h-[4%]">
             
                     {/* padding div for space between top and main elements */}
             </div>

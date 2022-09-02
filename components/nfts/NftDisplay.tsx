@@ -25,14 +25,14 @@ const NftDisplay:NextPage<Props> = (props) => {
             <div className="hover:cursor-pointer transition ease-in-out hover:scale-110" onClick={()=>setShowModal(true)}>
                 <img src={nftMetaData.image_preview_url?nftMetaData.image_preview_url:nftMetaData.image_url} className="w-56 h-56 rounded-md drop-shadow-lg object-cover border border-gray-200 dark:border-gray-800"/>
                 <div className="flex">
-                    <p className="my-2 text-sm text-gray-400 dark:text-gray-500 font-semibold">{nftMetaData.name?nftMetaData.name:nftMetaData.collection.name}</p>
+                    <p className="my-2 text-sm max-w-[200px] text-gray-400 dark:text-gray-500 font-semibold truncate ...">{nftMetaData.name?nftMetaData.name:nftMetaData.collection.name}</p>
                     <div className="flex-grow mt-3">
                         <img className="h-4 w-4 float-right" src={networkDb.iconPath}/>
                     </div>
                 </div>
             </div>:
             <div className="transition ease-in-out hover:scale-110 hover:cursor-pointer" onClick={()=>setShowModal(true)}>
-            <div className="h-56 w-56 pt-20 rounded-md bg-gradient-to-r from-gray-100 to-white drop-shadow-lg dark:from-gray-900 dark:to-black text-lg dark:text-white text-center px-1 font-semibold">
+            <div className="h-56 w-56 pt-20 rounded-md bg-gradient-to-r from-gray-100 to-white drop-shadow-lg dark:from-gray-900 dark:to-black text-lg dark:text-white text-center px-1 font-semibold truncate ...">
                  {nftMetaData.collection.name}
             </div>
             <p className="my-2 text-sm text-gray-400 dark:text-gray-500 font-semibold">{nftMetaData.name?nftMetaData.name:nftMetaData.collection.name}</p>
@@ -107,11 +107,11 @@ const NftDisplay:NextPage<Props> = (props) => {
                                 (nftMetaData.metaExtensions && nftMetaData.metaExtensions.metadataUrl)?
                                 <div>
                                 <h2 className="text-lg dark:text-white font-bold">Description</h2>
-                                <p className="text-gray-400 dark:text-gray-300">{nftMetaData.name} is a collectible. You can find more metadata <a className="hover:cursor-pointer hover:text-sky-500 text-sky-400" href={nftMetaData.metaExtensions.metadataUrl} target="_blank" rel="noopener noreferrer">here</a>.</p>
+                                <p className="text-gray-400 dark:text-gray-300">{nftMetaData.name?nftMetaData.name:nftMetaData.collection.name} is a collectible. You can find more metadata <a className="hover:cursor-pointer hover:text-sky-500 text-sky-400" href={nftMetaData.metaExtensions.metadataUrl} target="_blank" rel="noopener noreferrer">here</a>.</p>
                                 </div> :
                                 <div>
                                     <h2 className="text-lg dark:text-white font-bold">Description</h2>
-                                    <p className="text-gray-400 dark:text-gray-300">{nftMetaData.name} is a collectible. You can learn more about NFTs <a className="hover:cursor-pointer hover:text-sky-500 text-sky-400" href={`https://opensea.io/blog/guides/non-fungible-tokens/`} target="_blank" rel="noopener noreferrer">here</a>.</p>
+                                    <p className="text-gray-400 dark:text-gray-300">{nftMetaData.name?nftMetaData.name:nftMetaData.collection.name} is a collectible. You can learn more about NFTs <a className="hover:cursor-pointer hover:text-sky-500 text-sky-400" href={`https://opensea.io/blog/guides/non-fungible-tokens/`} target="_blank" rel="noopener noreferrer">here</a>.</p>
                                 </div>
                                 
                             }

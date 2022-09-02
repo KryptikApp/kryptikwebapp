@@ -175,7 +175,7 @@ const CreateName: NextPage = () => {
               !isResolveLoading &&
               <div>
               <p className="mb-2 text-justify text-sm text-gray-500 dark:text-gray-400">Current name{resolvedAccount.names?"s":""}:</p>
-                <div className="grid grid-cols-3">
+                <div className="grid grid-cols-3 gap-y-2">
                   <span className="bg-sky-400 text-white font-semibold rounded-full py-1 px-2 mr-1">{readableCurrentAddress}</span>
                   {
                     resolvedAccount.names &&
