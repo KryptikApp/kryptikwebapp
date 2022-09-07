@@ -117,7 +117,7 @@ const ListBalance:NextPage = () => {
                 }
                 
                 <Divider/>
-        {/* Network balances */}
+        {/* Network balances list display*/}
         </div>
         {
             (!isFetchedBalances && !isManualRefresh)?
@@ -143,7 +143,6 @@ const ListBalance:NextPage = () => {
                         <p className=" text-slate-500 dark:text-slate-400">You'll need tokens to use your wallet!</p>
                     </div>
                 </div>
-
                 <div className="flex flex-row my-4">
                     <div className="flex-grow">
                         <div className="float-right">
@@ -151,7 +150,6 @@ const ListBalance:NextPage = () => {
                         </div>
                     </div>
                 </div>
-                
             </div>:
              <div>
              <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">

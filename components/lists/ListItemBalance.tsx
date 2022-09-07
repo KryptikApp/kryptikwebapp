@@ -25,7 +25,6 @@ const ListItemBalance:NextPage<Props> = (props) => {
     let amount = null;
     let amountFiat = null;
     if(tokenAndNetwork.tokenData?.tokenBalance){
-
         amount = roundCryptoAmount(Number(tokenAndNetwork.tokenData.tokenBalance.amountCrypto));
         amountFiat = roundUsdAmount(Number(tokenAndNetwork.tokenData.tokenBalance.amountUSD));
     }
@@ -50,7 +49,7 @@ const ListItemBalance:NextPage<Props> = (props) => {
     return(
       <div>
       {
-        (amount && amountFiat) &&
+        (amount!=null && amountFiat!=null) &&
         <li key={`${htmlKey}`} className="py-3 sm:py-4 hover:cursor-pointer rounded hover:gray-100 hover:dark:bg-[#141414]" onClick={()=>handleOnClick()}>
           <div className="flex space-x-2 px-2">
               <div className="flex-shrink-0 min-w-[48px]">
