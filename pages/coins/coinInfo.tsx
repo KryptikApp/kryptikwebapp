@@ -14,8 +14,19 @@ import { formatTicker } from '../../src/helpers/utils/networkUtils';
 import { roundToDecimals, roundUsdAmount } from '../../src/helpers/utils/numberUtils';
 import { useKryptikThemeContext } from '../../components/ThemeProvider';
 import { fetchServerHistoricalPrices } from '../../src/requests/prices';
+import { TokenAndNetwork } from '../../src/services/models/token';
 
 ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, LineController, Tooltip);
+
+interface IChartData{
+  labels: number[]
+  datasets: {
+      label: string;
+      data: number[];
+      borderColor: CanvasGradient | string | undefined;
+      tension: number;
+  }[]
+}
 
 
 const CoinInfo: NextPage = () => {
@@ -30,7 +41,8 @@ const CoinInfo: NextPage = () => {
   const [currentPrice, setCurrentPrice] = useState(0);
   const [times, setTimes] = useState(defaultDataArray);
   const [activeLookback, setActiveLookbook] = useState('1D');
-  const [tokenAndNetwork, setTokenAndNetwork] = useState(defaultTokenAndNetwork);
+  const [tokenAndNetwork, setTokenAndNetwork] = useState<TokenAndNetwork|null>(null);
+  const [chartData, setChartData] = useState<IChartData|null>(null)
   const [assetId, setAssetId] = useState("");
   const chartRef = useRef<ChartJS>(null);  
 
@@ -60,11 +72,12 @@ const CoinInfo: NextPage = () => {
     }
     let newTokenAndNetwork = kryptikService.getTokenAndNetworkFromTickers(networkTicker, tokenTicker?tokenTicker:undefined);
     setTokenAndNetwork(newTokenAndNetwork); 
-    setLoaded(true);
   }, [])
 
 
   const updateHistoricalData = async function(daysBack:number){
+    if(!tokenAndNetwork) return;
+    setLoaded(false);
     let coingeckoId:string;
     if(tokenAndNetwork.tokenData){
       coingeckoId = tokenAndNetwork.tokenData.tokenDb.coingeckoId;
@@ -94,13 +107,26 @@ const CoinInfo: NextPage = () => {
     let amountChange = currentPrice-initialPrice;
     let percentChange = amountChange/initialPrice;
     percentChange = roundToDecimals(percentChange*100, 2);
+    const newChartData = {
+      labels: newTimes,
+      datasets: [{
+        label: `${formatTicker(tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.symbol:tokenAndNetwork.baseNetworkDb.ticker)} Price`,
+        data: newPrices,
+        borderColor: "#30b0ff",
+        tension: 0.3
+      }],
+    };    
     // update local state
+    setChartData(newChartData);
     setHistoricalData(newHistoricalData.prices);
     setAssetId(coingeckoId);
     setTimes(newTimes);
     setPrices(newPrices);
     setPercentChange(percentChange);
-    setCurrentPrice(currentPrice);
+    if(daysBack==1){
+      setCurrentPrice(currentPrice);
+    }
+    setLoaded(true)
   }
 
   useEffect(()=>{
@@ -115,28 +141,20 @@ const CoinInfo: NextPage = () => {
   }, [activeLookback])
 
 
-  const createGradient = function():CanvasGradient|undefined{
+  const createGradient = function(tokenAndNetworkForLine:TokenAndNetwork):CanvasGradient|undefined{
     const chart = chartRef.current;
     if (!chart) {
       return undefined;
     }
     const gradient = chart.ctx.createLinearGradient(0, 0, 0, 400);
     // UPDATE FOR DARK SCHEME
-    gradient.addColorStop(0, tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.hexColor:tokenAndNetwork.baseNetworkDb.hexColor)
+    gradient.addColorStop(0, tokenAndNetworkForLine.tokenData?tokenAndNetworkForLine.tokenData.tokenDb.hexColor:tokenAndNetworkForLine.baseNetworkDb.hexColor)
     gradient.addColorStop(1, `${isDark?"#b5b5b5":"#11161a"}`);
     return gradient;
   }
 
   
-  const data = {
-    labels: times,
-    datasets: [{
-      label: `${formatTicker(tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.symbol:tokenAndNetwork.baseNetworkDb.ticker)} Price`,
-      data: prices,
-      borderColor: createGradient(),
-      tension: 0.3
-    }],
-  };    
+
 
 
   return (
@@ -146,7 +164,9 @@ const CoinInfo: NextPage = () => {
         </div>
 
         <div className="text-center max-w-2xl mx-auto content-center">
-
+        {
+          (tokenAndNetwork) && 
+            <div>
           <div className="flex flex-row mb-4">
              {/* icon */}
              <div className="flex-shrink-0">
@@ -158,24 +178,27 @@ const CoinInfo: NextPage = () => {
               </div>
               {/* token name and... price and percent change */}
               <div className="flex-1 min-w-0 text-left md:ml-2">
-              {loaded&& 
                   <div>
                      <div>
                      <h1 className="text-2xl font-bold truncate dark:text-white" style={{color:`${tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.hexColor:tokenAndNetwork.baseNetworkDb.hexColor}`}}>
                          {tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.name:tokenAndNetwork.baseNetworkDb.fullName} ({formatTicker(tokenAndNetwork.tokenData?tokenAndNetwork.tokenData.tokenDb.symbol:tokenAndNetwork.baseNetworkDb.ticker)})
                      </h1>
-                 </div>
+                  </div>
+                  {loaded&&
                   <div>
                         <span className={`text-3xl text-black dark:text-white`}>${roundUsdAmount(currentPrice)}</span> <span className={`text-base font-semibold mt-1 mx-2 ${percentChange>0?"text-green-500":"text-red-600"}`}>{percentChange}%</span>
                   </div>
+                  }
                 </div>
-                }
+              
                  
               </div>
-          </div>
-        <Chart
+           </div>
+           {
+            chartData &&
+            <Chart
             ref={chartRef}
-            data={data}
+            data={chartData}
             type="line"
             options = {{
                 scales: {
@@ -200,7 +223,7 @@ const CoinInfo: NextPage = () => {
                     point:{
                         borderWidth: 0,
                         radius: 10,
-                        backgroundColor: 'rgba(0,0,0,0)'
+                        backgroundColor: 'rgba(20,0,0,0)'
                     }
                 },
                 plugins:{
@@ -227,41 +250,46 @@ const CoinInfo: NextPage = () => {
             }
             width={400}
             height={400}
-        />
-                <div className="flex flex-row">
-                      <div className="flex-1">
-                        {/* space filler */}
-                      </div>
+          />
+           }
 
-                      <div className="flex-1">
-                        {/* space filler */}
-                      </div>
+                      <div className="flex flex-row">
+                            <div className="flex-1">
+                              {/* space filler */}
+                            </div>
+      
+                            <div className="flex-1">
+                              {/* space filler */}
+                            </div>
+      
+                            <div className="flex-3 content-end">
+      
+                              <ul className="flex flex-wrap text-sm font-medium text-center text-gray-500 dark:text-gray-400">
+                                  <li className="mr-2">
+                                      <div onClick={()=>setActiveLookbook("1D")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1D"?`active text-white bg-sky-500`:"hover:bg-gray-400"}`} aria-current="page">1D</div>
+                                  </li>
+                                  <li className="mr-2">
+                                      <div onClick={()=>setActiveLookbook("7D")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="7D"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>7D</div>
+                                  </li>
+                                  <li className="mr-2">
+                                      <div onClick={()=>setActiveLookbook("1M")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1M"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>1M</div>
+                                  </li>
+                                  <li className="mr-2">
+                                      <div onClick={()=>setActiveLookbook("3M")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="3M"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>3M</div>
+                                  </li>
+                                  <li>
+                                      <div onClick={()=>setActiveLookbook("1Y")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1Y"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>1Y</div>
+                                  </li>
+                              </ul>
+      
+                            </div>
+                </div>
+                <Divider/>
+                </div>
+         }
 
-                      <div className="flex-3 content-end">
-
-                        <ul className="flex flex-wrap text-sm font-medium text-center text-gray-500 dark:text-gray-400">
-                            <li className="mr-2">
-                                <div onClick={()=>setActiveLookbook("1D")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1D"?`active text-white bg-sky-500`:"hover:bg-gray-400"}`} aria-current="page">1D</div>
-                            </li>
-                            <li className="mr-2">
-                                <div onClick={()=>setActiveLookbook("7D")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="7D"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>7D</div>
-                            </li>
-                            <li className="mr-2">
-                                <div onClick={()=>setActiveLookbook("1M")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1M"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>1M</div>
-                            </li>
-                            <li className="mr-2">
-                                <div onClick={()=>setActiveLookbook("3M")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="3M"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>3M</div>
-                            </li>
-                            <li>
-                                <div onClick={()=>setActiveLookbook("1Y")} className={`inline-block py-3 px-4 rounded-lg hover:text-gray-900 hover:cursor-pointer  dark:hover:text-white ${activeLookback=="1Y"?"active text-white bg-sky-500":"hover:bg-gray-400"}`}>1Y</div>
-                            </li>
-                        </ul>
-
-                      </div>
-          </div>
-          <Divider/>
           {
-            loaded &&
+            (loaded && tokenAndNetwork) &&
             <div>
 
               <div className="text-left mt-4 mb-20 text-lg dark:text-white">
