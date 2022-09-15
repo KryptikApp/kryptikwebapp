@@ -63,8 +63,6 @@ const Profile: NextPage = () => {
               <input maxLength={12} className="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-sky-400 dark:bg-[#141414] dark:text-white" id="inline-full-name" placeholder={authUser?authUser.name:"Your Name"} value={name} onChange={(e) => setName(e.target.value)}/>
             </div>
 
-            <Link href="../wallet/createName">Create Near Name</Link>
-
             <div className="px-5 py-5 m-2 rounded mt-0 mb-0">
               <label className="block text-gray-500 font-bold md:text-left mb-1 md:mb-0 pr-4">
                 Your Email

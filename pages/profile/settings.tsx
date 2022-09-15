@@ -81,7 +81,7 @@ const Settings: NextPage = () => {
                   Settings
           </h1>
           <Divider/>
-          <p className="mb-2 text-justify text-green-500 dark:text-green-600">Your Krytpik wallet settings will be managed on this page.</p>
+          <p className="mb-2 text-justify text-green-500 dark:text-green-600">Your Kryptik wallet settings will be managed on this page.</p>
           
           {/* visibility toggle */}
 
