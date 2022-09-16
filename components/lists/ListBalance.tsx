@@ -26,6 +26,7 @@ const ListBalance:NextPage = () => {
     const [isManualRefresh, setIsManualRefresh] = useState(false);
     const [tokenAndBalances, setTokenAndBalances] = useState<TokenAndNetwork[]>(initTokenAndBalances);
     const [balanceHolder, setBalanceHolder] = useState<KryptikBalanceHolder|null>(null);
+    const [totalBalance, setTotalBalance] = useState<number>(0);
     const [progressPercent, setProgressPercent] = useState(0);
     const totalToFetch = kryptikService.NetworkDbs.length + kryptikService.tokenDbs.length;
     const stepSize:number = Number(((1/totalToFetch)*100));
@@ -62,6 +63,8 @@ const ListBalance:NextPage = () => {
         setIsFetchedBalances(false);
         const newBalanceHolder:KryptikBalanceHolder = await kryptikService.getAllBalances({walletUser:kryptikWallet, isAdvanced:isAdvanced, onFetch:incrementLoadProgress, tryCached:!manualRefresh});
         const newTokenAndBals:TokenAndNetwork[] = newBalanceHolder.getNonzeroBalances(isAdvanced);
+        const newTotalBal:number = newBalanceHolder.getTotalBalance();
+        setTotalBalance(newTotalBal);
         setTokenAndBalances(newTokenAndBals);
         setBalanceHolder(newBalanceHolder);
         setIsFetchedBalances(true);
@@ -87,13 +90,29 @@ const ListBalance:NextPage = () => {
     return(
         <div>
             <div className="pt-4 border rounded">
-        <div>
+        <div>   
+                
+                
                 <div className="flex flex-row px-3 py-2">
-                    <h2 className="text-xl font-semibold text-slate-700 dark:text-slate-200">Your assets</h2>
-                    <div className="flex-grow text-right">
+
+                  <div className="">
+                    {
+                        (isFetchedBalances&& balanceHolder)?
+                        <div className="flex flex-col">
+                            <h1 className="text-lg font-semibold text-slate-700 dark:text-slate-200">Your Balance</h1>
+                            <h1 className="text-left text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-sky-500 to-green-400 hover:text-sky-400">${roundToDecimals(totalBalance, 2)}</h1>
+                        </div>:
+                        <div className="flex flex-col space-y-4">
+                            <h1 className="text-lg font-semibold text-slate-700 dark:text-slate-200">Your Balance</h1>
+                            <div className="w-20 h-6 my-auto bg-gray-400 animate-pulse rounded"></div>
+                        </div>
+                    }
+                    </div>
+
+                    <div className="flex-grow text-right min-y-full">
                         {
                             (isFetchedBalances && balanceHolder) &&
-                            <div className="text-slate-500 dark:text-slate-500 pt-1">
+                            <div className="text-slate-500 dark:text-slate-500 bottom-0 pt-8">
                             <h2 className="text-sm inline">Last Updated: {balanceHolder?.getLastUpdateTimestamp()}</h2>
                             {
                                 isManualRefresh?
@@ -103,7 +122,6 @@ const ListBalance:NextPage = () => {
                                 </svg>:
                                 <AiOutlineRedo className="inline pl-2 hover:cursor-pointer" onClick={()=>handleManualRefresh()} size={25}/>
                             }
-                            
                             </div>
                         }
                     </div>

@@ -73,7 +73,7 @@ export const fetchServerBalances = async function(chainId: Number,
     accountAddress: string,
     currency:string):Promise<CovalentAddressBalanceResponseData|null>{
     // request balance data from api
-    let dataResponse = await KryptikFetch('/api/balances', {method:"POST", timeout:2000, headers:{'Content-Type': 'application/json',}, body: JSON.stringify({chainId:chainId, accountAddress:accountAddress, currency:currency})})
+    let dataResponse = await KryptikFetch('/api/balances', {method:"POST", timeout:4000, headers:{'Content-Type': 'application/json',}, body: JSON.stringify({chainId:chainId, accountAddress:accountAddress, currency:currency})})
     if(dataResponse.status != 200) return null
     let dataJson = await dataResponse.data.balanceData;
     if(!dataJson.balanceData) return null;

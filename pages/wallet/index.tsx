@@ -70,13 +70,13 @@ const Profile: NextPage = () => {
             <ListBalance/>
             </div>
 
-            <div className="px-4 border hover:border-sky-400 rounded max-w-lg lg:max-w-md mx-auto mt-10 py-4">
+            {/* <div className="px-4 border hover:border-sky-400 rounded max-w-lg lg:max-w-md mx-auto mt-10 py-4">
               <h1 className="text-2xl text-slate-800 dark:text-slate-200 font-semibold">Add A Custom Name</h1>
               <p className="text-lg text-slate-700 dark:text-slate-300">Make it easier for people to search for your account and send you money.</p>
               <button onClick={()=>handleStartAddName()} className={`bg-transparent hover:bg-green-500 text-green-500 text-2xl font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded-lg mt-5 mb-2`}>      
                                     Try
               </button>
-            </div>
+            </div> */}
             
           </div>
           
