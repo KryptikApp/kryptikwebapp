@@ -8,6 +8,7 @@ import { useKryptikThemeContext } from '../../components/ThemeProvider'
 import Link from 'next/link'
 import NavProfile from '../../components/navbars/NavProfile'
 import { defaultUser } from '../../src/models/user'
+import { WalletStatus } from '../../src/models/KryptikWallet'
 
 
 const Settings: NextPage = () => {
@@ -35,6 +36,14 @@ const Settings: NextPage = () => {
   const handleUpdateWalletVisibility = async function(){
     if(!authUser){
       toast.error("Please login before updating your preferences");
+      return;
+    }
+    if(kryptikWallet.status == WalletStatus.OutOfSync || kryptikWallet.status == WalletStatus.Disconected){
+      toast.error("Please sync wallet before updating your preferences")
+      return;
+    }
+    if(kryptikWallet.status == WalletStatus.Locked){
+      toast.error("Please unlock wallet before updating your preferences")
       return;
     }
     setUpdateVisibleLoading(true);
