@@ -1,7 +1,9 @@
+import { defaultNetworks } from "hdseedloop";
 import { useEffect, useState } from "react";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import { IWallet } from "../models/KryptikWallet";
 import { addUserBlockchainAccountsDB, deleteUserBlockchainAccountsDB } from "./firebaseHelper";
+import { getAddressForNetwork } from "./utils/accountUtils";
 
 export function useKryptikTheme() {
     // init state
@@ -74,7 +76,6 @@ export function useKryptikTheme() {
     }
 
     const updateIsVisible = async function(newIsVisible:boolean, uid:string, wallet:IWallet){
-        console.log("updating is visible...");
         let newTheme:ITheme = {
             isAdvanced: isAdvanced,
             isDark: isDark,
@@ -84,13 +85,20 @@ export function useKryptikTheme() {
         }
         if(newIsVisible){
             let blockchainAccounts:any = {}
-            let keyrings = wallet.seedLoop.getAllKeyrings();
-            for(const keyring of keyrings){
-                // STODO: UPDATE TO SUPPORT MORE THAN FIRST ADDY
-                let addy = keyring.getAddresses()[0];
-                blockchainAccounts[keyring.network.ticker] = addy;
-            }
+            // PERPETUAL TODO: UPDATE WHEN NETWORK WITH DIFFERENT ADDY IS ADDED
+            const solNetwork = defaultNetworks["sol"];
+            const ethNetwork = defaultNetworks["eth"];
+            const nearNetwork = defaultNetworks["near"];
+            const solAddy = getAddressForNetwork(wallet, solNetwork);
+            const ethAddy = getAddressForNetwork(wallet, ethNetwork);
+            const nearAddy = getAddressForNetwork(wallet, nearNetwork);
+            // add data to ticker-addy dictionary
+            blockchainAccounts[solNetwork.ticker] = solAddy;
+            blockchainAccounts[ethNetwork.ticker] = ethAddy;
+            blockchainAccounts[nearNetwork.ticker] = nearAddy;
+            console.log("adding addys to remote...");
             await addUserBlockchainAccountsDB(blockchainAccounts);
+            console.log("----");
         }
         else{
             await deleteUserBlockchainAccountsDB();
