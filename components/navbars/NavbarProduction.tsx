@@ -17,8 +17,6 @@ const NavbarProduction:NextPage = () => {
     const {authUser, walletStatus} = useKryptikAuthContext();
     const {hideBalances, updateHideBalances} = useKryptikThemeContext();
     const router = useRouter();
-    console.log("Router path (Navbar):")
-    console.log(router.pathname)
 
     // change style based on boolean
     const menuWrapperClassName = isMenuMobile
