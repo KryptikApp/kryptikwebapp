@@ -507,7 +507,7 @@ class Web3Service extends BaseService implements IWeb3Service{
                 if(!covalentSupportedChainIds.includes(networkChainId)) continue;
                 // try to get indexed balances for network
                     try{
-                        covalentBalances = await fetchServerBalances(networkChainId, addy, "usd");
+                        covalentBalances = await fetchServerBalances(networkChainId, addy, "usd");                        
                         if(covalentBalances){
                             let baseNetworkAndBalance:TokenAndNetwork = {baseNetworkDb:networkDb}
                             let tempTokenAndBalances:TokenAndNetwork[] = [];
@@ -624,10 +624,11 @@ class Web3Service extends BaseService implements IWeb3Service{
         let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
         // fetch balance
         console.log(`getting ${params.tokenDb.name} ERC20 balance for ${params.accountAddress}`);
-        let networkBalance:number = Number(utils.formatEther(await params.erc20Params.erc20Contract.balanceOf(params.accountAddress)));
+        let fetchedTokenAmount:number = Number(await params.erc20Params.erc20Contract.balanceOf(params.accountAddress));
+        let tokenBalance:number = divByDecimals(fetchedTokenAmount, params.tokenDb.decimals).asNumber;
         // prettify token balance
-        let networkBalanceString = networkBalance.toString();
-        let amountUSD = (priceUSD * networkBalance);
+        let networkBalanceString = tokenBalance.toString();
+        let amountUSD = (priceUSD * tokenBalance);
         // create new object for balance data
         let newBalanceObj:IBalance = {fullName:params.tokenDb.name, ticker:params.tokenDb.symbol, iconPath:params.tokenDb.logoURI,
         iconPathSecondary: params.networkDb.iconPath, amountCrypto:networkBalanceString, amountUSD:amountUSD.toString(), baseNetworkTicker:params.networkDb.ticker}
