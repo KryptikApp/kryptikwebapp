@@ -2,6 +2,7 @@ import { SOL_COVALENT_CHAINID } from "../../constants/solConstants";
 import { CovalentBalance} from "../../requests/covalent";
 import { IBalance } from "../../services/models/IBalance"
 import { NetworkDb } from "../../services/models/network"
+import { TokenAndNetwork } from "../../services/models/token";
 import { formatTicker } from "../utils/networkUtils";
 import { divByDecimals, IBigNumber } from "../utils/numberUtils";
 
@@ -31,6 +32,24 @@ export const covalentDataToBalance = function(networkDb:NetworkDb, covalentBal:C
         baseNetworkTicker:networkDb.ticker,
     }
     return balance;
+}
+
+    /** Returns fiat sum of token/balance array.*/
+export const sumFiatBalances = function(tokenAndBalances:TokenAndNetwork[]):number{
+        let totalBalance = 0;
+        for(const tokenAndBal of tokenAndBalances){
+            let newBalToAdd:number = 0;
+            if(tokenAndBal.tokenData && tokenAndBal.tokenData.tokenBalance){
+                newBalToAdd = Number(tokenAndBal.tokenData.tokenBalance.amountUSD);
+            }
+            else{
+                if(tokenAndBal.networkBalance){
+                    newBalToAdd = Number(tokenAndBal.networkBalance.amountUSD);
+                }
+            }
+            totalBalance = totalBalance + newBalToAdd;
+        }
+        return totalBalance;
 }
 
 

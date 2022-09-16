@@ -1,5 +1,6 @@
 // class that 'holds' and manages balances
 import { NetworkFamily, NetworkFamilyFromFamilyName } from "hdseedloop";
+import {sumFiatBalances } from "../../helpers/balances";
 import { TokenAndNetwork } from "./token";
 
 
@@ -17,6 +18,8 @@ export class KryptikBalanceHolder{
     // number of seconds we consider these balances to be 'fresh'
     private freshWindow:number
     private tokenAndBalances:TokenAndNetwork[]
+    // null if not calculated yet
+    private totalBalanceFiat:number|null
     
     constructor(params:IKryptikBalanceParams) {
         const{
@@ -27,6 +30,7 @@ export class KryptikBalanceHolder{
         // use provided number of seconds or default to five minutes
         this.freshWindow = freshWindow?freshWindow:300
         this.id = Math.random()
+        this.totalBalanceFiat = null;
     }
 
     isFresh():boolean{
@@ -89,6 +93,17 @@ export class KryptikBalanceHolder{
         this.tokenAndBalances = newTokenAndBalances;
         this.lastUpdated = Date.now();
     }
+
+    /** Returns the total value of current balances (in fiat). */
+    getTotalBalance(){
+        if(this.totalBalanceFiat){
+            return this.totalBalanceFiat;
+        }
+        const newTotalBalance = sumFiatBalances(this.tokenAndBalances);
+        this.totalBalanceFiat = newTotalBalance;
+        return newTotalBalance;
+    }
+
 
     getLastUpdateDatestamp():string{
         let date = new Date(this.lastUpdated);
