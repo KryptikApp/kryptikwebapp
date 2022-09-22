@@ -2,6 +2,7 @@ import type { NextPage } from 'next'
 import {Chart as ChartJS, LinearScale, PointElement, LineElement, TimeScale, Tooltip, ArcElement, DoughnutController, Legend} from 'chart.js'
 import {Chart} from 'react-chartjs-2';
 import { useKryptikThemeContext } from '../components/ThemeProvider';
+import { AiOutlineLink } from 'react-icons/ai';
 
 ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, ArcElement, DoughnutController, Legend, Tooltip);
 
@@ -128,7 +129,34 @@ const About: NextPage = () => {
             height={400}
           />
           </div>
+        
+        <div className="max-w-2xl py-2 mx-auto">
+          <a href="https://gitcoin.co/grants/7813/kryptik-wallet" target="_blank" rel="noopener noreferrer">
+          <div className='hover:cursor-pointer hover:z-10 transition ease-in-out hover:scale-105 flex flex-col border rounded-lg p-2 shadow-md shadow-sky-400 hover:shadow-green-500'>
+
+            <div className='flex flex-row'>
+              {
+                isDark?
+                <img src="/media/partners/gitcoinLight.svg" width="80" className='mr-2'/>:
+                <img src="/media/partners/gitcoinDark.svg" width="80" className='mr-2'/>
+              }
+              <h1 className="text-4xl font-semibold mt-4">Support Kryptik</h1>
+              <div className="flex-grow">
+                <AiOutlineLink size="30" className='float-right'/>
+              </div>
+            </div>
+            
+            <p className="text-lg text-gray-500 dark:text-gray-400">Help support the development of essential features and security updates. Your donations will keep Kryptik free and open to everyone.</p>
+              
+          </div>
+          </a>
+            
+            
         </div>
+
+        </div>
+
+        
 
         <div className="h-[6rem]">
           {/* padding div for space between bottom and main elements */}
