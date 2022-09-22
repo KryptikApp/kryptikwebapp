@@ -34,9 +34,6 @@ import { KryptikPriceHolder } from "./models/KryptikPriceHolder";
 
 
 const NetworkDbsRef = collection(firestore, "networks");
-const ERC20DbRef = collection(firestore, "erc20tokens");
-const SplDbRef = collection(firestore, "spltokens");
-const Nep141Ref = collection(firestore, "nep141tokens")
 const ALLTOKENSRef = collection(firestore, "tokens");
 
 
@@ -76,14 +73,14 @@ class Web3Service extends BaseService implements IWeb3Service{
         try{
             await this.populateNetworkDbsAsync();
         }
-        catch{
+        catch(e){
             throw(Error("Error: Unable to populate NetworkDbs when starting web3 service."))
         }
         // fetch token data
         try{
             await this.populateTokenDbsAsync();
         }
-        catch{
+        catch(e){
             throw(new Error("Error: Unable to populate TokenDb array from database when starting web3 service."));
         }
 
