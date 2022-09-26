@@ -1,0 +1,41 @@
+.markdown {
+    @apply text-lg leading-relaxed;
+    @apply text-white
+  }
+  
+  .markdown p,
+  .markdown blockquote {
+    @apply my-6;
+  }
+  
+  .markdown h2 {
+    @apply text-3xl my-6 leading-snug;
+  }
+  
+  .markdown h3 {
+    @apply text-2xl mt-8 mb-4 leading-snug;
+  }
+
+  .markdown ol,
+  .markdown ul{
+    @apply list-decimal my-6 px-2
+  }
+  .markdown li{
+    @apply my-2
+  }
+
+  .mardown table{
+    @apply table-fixed
+  }
+
+  .markdown thead{
+    @apply bg-gray-800 uppercase text-xl
+  }
+
+  .markdown td{
+    @apply py-4
+  }
+
+  .markdown tr{
+    @apply border-b
+  }
