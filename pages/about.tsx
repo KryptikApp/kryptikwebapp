@@ -3,6 +3,7 @@ import {Chart as ChartJS, LinearScale, PointElement, LineElement, TimeScale, Too
 import {Chart} from 'react-chartjs-2';
 import { useKryptikThemeContext } from '../components/ThemeProvider';
 import { AiOutlineLink } from 'react-icons/ai';
+import Link from 'next/link';
 
 ChartJS.register(LinearScale, PointElement, LineElement, TimeScale, ArcElement, DoughnutController, Legend, Tooltip);
 
@@ -23,7 +24,8 @@ const About: NextPage = () => {
                     The <span className="">Kryptik</span> Wallet
               </h1>
               <p className="leading-loose mb-2 text-xl text-justify dark:text-gray-400">Kryptik is a simple wallet that lets you save, send, and collect value across the internet. With Kryptik you can access a world of possibilities across 10+ blockchains from a single app. One <span className="text-purple-500">secure</span> wallet. One <span className="text-green-500">simple</span> interface. One <span className="text-sky-500">magical</span> future. </p>
-              <p className="text-md mt-8 text-gray-700 dark:text-gray-200 text-right">Learn more about Kryptik <a href="../support" className="text-sky-400">here</a> 💥</p>
+              <p className="text-md mt-8 text-gray-700 dark:text-gray-200 text-right">Learn more about Kryptik <span className="text-sky-400"><Link href="../support">here</Link></span> 💥</p>
+              {/* <p className="text-md mt-8 text-gray-700 dark:text-gray-200 text-right">Check out the Kryptik docs <span className="text-sky-400"><Link href="../docs">here</Link></span> 📜</p> */}
             </div>
 
             <div className="min-h-[10vh]">
