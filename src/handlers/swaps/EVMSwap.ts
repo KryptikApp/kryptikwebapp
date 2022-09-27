@@ -125,7 +125,7 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
     };
     let evmProvider = kryptikProvider.ethProvider;
     let accountNonce = await evmProvider.getTransactionCount(fromAccount, "latest");
-    let isValidSwap = isSwapAvailable(buyTokenAndNetwork.baseNetworkDb, sellTokenAndNetwork.baseNetworkDb);
+    let isValidSwap = isSwapAvailable(buyTokenAndNetwork, sellTokenAndNetwork);
     if(!isValidSwap) return null;
 
     let feeData = await evmProvider.getFeeData();

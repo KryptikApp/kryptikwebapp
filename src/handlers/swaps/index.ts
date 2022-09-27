@@ -24,7 +24,7 @@ export async function BuildSwapTokenTransaction(swapParams:IBuildSwapParams):Pro
     const{sellTokenAndNetwork, buyTokenAndNetwork, sellNetworkTokenPriceUsd, fromAccount, kryptikProvider} = {...swapParams}
     const sellBaseNetwork:Network = networkFromNetworkDb(sellTokenAndNetwork.baseNetworkDb);
     const buyBaseNetwork:Network = networkFromNetworkDb(buyTokenAndNetwork.baseNetworkDb);
-    if(!isSwapAvailable(buyTokenAndNetwork.baseNetworkDb, sellTokenAndNetwork.baseNetworkDb)){
+    if(!isSwapAvailable(buyTokenAndNetwork, sellTokenAndNetwork)){
         return null;
     }
     if(buyBaseNetwork.networkFamily == NetworkFamily.EVM && sellBaseNetwork.networkFamily == NetworkFamily.EVM){
