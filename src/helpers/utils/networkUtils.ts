@@ -1,4 +1,4 @@
-import { Network } from "hdseedloop";
+import { Network, NetworkFamily } from "hdseedloop";
 import { NetworkDb } from "../../services/models/network";
 import { ChainData, TokenDb } from "../../services/models/token";
 import { TransactionPublishedData } from "../../services/models/transaction";
@@ -64,4 +64,26 @@ export const getChainDataForNetwork = function(network:NetworkDb, tokenData:Toke
     }
     // we return null if there is no chain data specified for network
     return null;
+}
+
+/**
+ * Determines whether a network is a `layer 1'
+ * @param network network to evaluate
+ * @returns true if the network is a base network, false otherwise
+ */
+export const isLayerOne = function(network:NetworkDb):boolean{
+    return !isLayerTwo(network);
+}
+
+/**
+ * Determines whether a network is a 'layer 2'
+ * @param network network to evaluate
+ * @returns true if the network is a layer 2, false otherwise
+ */
+export const isLayerTwo = function(network:NetworkDb):boolean{
+    const networkFamily = networkFromNetworkDb(network).networkFamily;
+    if(network.ticker.toLowerCase()=="eth" || networkFamily != NetworkFamily.EVM){
+        return false;
+    }
+    return true;
 }
