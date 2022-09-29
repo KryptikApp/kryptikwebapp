@@ -73,7 +73,7 @@ export async function BuildSolSwapTransaction(params:IBuildSolSwapParams):Promis
     console.log("Swapper pub key:");
     console.log(accountPubKey);
 
-    // create swap data from raydium data
+    // create swap data from data
     let swapData:ISwapData = {
       buyAmount:buyTokenAmount.toString(),
       buyTokenAddress:buyTokenAddress,
