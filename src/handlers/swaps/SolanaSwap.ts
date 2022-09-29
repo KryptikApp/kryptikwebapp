@@ -26,7 +26,7 @@ export async function BuildSolSwapTransaction(params:IBuildSolSwapParams):Promis
     }
     console.log(`Building swap tx. for account with address: ${fromAccount}`);
     // ensure swap is valid
-    let isValidSwap = isSwapAvailable(buyTokenAndNetwork.baseNetworkDb, sellTokenAndNetwork.baseNetworkDb);
+    let isValidSwap = isSwapAvailable(buyTokenAndNetwork, sellTokenAndNetwork);
     if(!isValidSwap) return null;
     
     // token decimals 
