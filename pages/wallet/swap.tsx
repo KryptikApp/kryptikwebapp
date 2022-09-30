@@ -257,12 +257,17 @@ const Swap: NextPage = () => {
     // publish approval tx first if needed
     if(approvalTx){
       setLoadingMessage("Publishing approval transaction.");
-      let approvalTxPubData:TransactionPublishedData|null = await approvalTx.SignAndSend(signParams);
+      const approvalTxPubData:TransactionPublishedData|null = await approvalTx.SignAndSend(signParams);
+      if(!approvalTxPubData){
+        setSwapProgress(TxProgress.Failure);
+        setFailureMsg("Error while creating transaction approval.");
+        return;
+      }
     }
     setLoadingMessage("Publishing swap transaction.");
-    let newPubData:TransactionPublishedData|null = await swapTx.SignAndSend(signParams)
+    const newPubData:TransactionPublishedData|null = await swapTx.SignAndSend(signParams)
     setTxPubData(newPubData);
-    if(newPubData){
+    if(newPubData !=null){
       setSwapProgress(TxProgress.Complete)
     }
     else{
@@ -303,7 +308,7 @@ const Swap: NextPage = () => {
       let tokenPriceCoinGecko:number = await kryptikService.getTokenPrice(coingeckoId);
       setTokenPrice(tokenPriceCoinGecko);
       if(coingeckoId!=sellTokenAndNetwork.baseNetworkDb.coingeckoId){
-        let networkCoinprice:number = await getPriceOfTicker(sellTokenAndNetwork.baseNetworkDb.coingeckoId);
+        let networkCoinprice:number = await kryptikService.getTokenPrice(sellTokenAndNetwork.baseNetworkDb.coingeckoId);
         setBaseCoinPrice(networkCoinprice);
       }
       else{
@@ -771,7 +776,7 @@ const Swap: NextPage = () => {
             </button>
 
               <div className="opacity-100 m-4 max-h-screen mx-auto">
-              <div className="h-[20vh]">
+              <div className="h-[4vh]">
           {/* padding div for space between bottom and main elements */}
         </div>
 
