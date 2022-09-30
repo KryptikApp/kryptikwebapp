@@ -1,6 +1,7 @@
 import { BigNumber, BigNumberish, Contract } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { IBuildSwapParams } from ".";
+import SolExplorers from "../../../components/nfts/SolExplorers";
 import { erc20Abi } from "../../abis/erc20Abi";
 import { ETH_CONTRACT_ADDRESS } from "../../constants/evmConstants";
 import { getPriceOfTicker } from "../../helpers/coinGeckoHelper";
@@ -80,7 +81,15 @@ export async function BuildEVMTokenApproval(sellTokenAndNetwork:TokenAndNetwork,
         tokenPriceUsd = await getPriceOfTicker(coingeckoId);
     }
     let kryptikFeeData:TransactionFeeData = await getTransactionFeeDataEVM({tx:tx, kryptikProvider:kryptikProvider, tokenPriceUsd:tokenPriceUsd, networkDb:sellTokenAndNetwork.baseNetworkDb});
-
+    tx.gasLimit = kryptikFeeData.EVMGas.gasLimit;
+    if(isEVMTxTypeTwo(sellTokenAndNetwork.baseNetworkDb)){
+        tx.type = 2;
+        tx.maxPriorityFeePerGas = kryptikFeeData.EVMGas.maxPriorityFeePerGas;
+        tx.maxFeePerGas = kryptikFeeData.EVMGas.maxFeePerGas;
+    }
+    else{
+        tx.gasPrice = kryptikFeeData.EVMGas.gasPrice;
+    }
     // build kryptik transaction 
     let kryptikTxParams:IKryptikTxParams = {
         feeData: kryptikFeeData,
@@ -90,15 +99,6 @@ export async function BuildEVMTokenApproval(sellTokenAndNetwork:TokenAndNetwork,
         txType: TxType.Approval,
         tokenAndNetwork: sellTokenAndNetwork,
         tokenPriceUsd: tokenPriceUsd,
-    }
-    tx.gasLimit = Number(kryptikFeeData.EVMGas.gasLimit) + Number(kryptikFeeData.EVMGas.gasLimit)*.05
-    if(isEVMTxTypeTwo(sellTokenAndNetwork.baseNetworkDb)){
-        tx.type = 2;
-        tx.maxPriorityFeePerGas = kryptikFeeData.EVMGas.maxPriorityFeePerGas;
-        tx.maxFeePerGas = kryptikFeeData.EVMGas.maxFeePerGas;
-    }
-    else{
-        tx.gasPrice = kryptikFeeData.EVMGas.gasPrice;
     }
     let kryptikTx:KryptikTransaction = new KryptikTransaction(kryptikTxParams);
     return kryptikTx;
@@ -159,8 +159,7 @@ export async function BuildEVMSwapTransaction(params:IBuildEVMSwapParams):Promis
             chainId: swapData.chainId,
     }
     let kryptikFeeData:TransactionFeeData = await getTransactionFeeDataEVM({tx:tx, kryptikProvider:kryptikProvider, tokenPriceUsd:baseCoinPrice, networkDb:sellTokenAndNetwork.baseNetworkDb});
-    let paddedGasLimit = Number(kryptikFeeData.EVMGas.gasLimit) + Math.ceil(Number(kryptikFeeData.EVMGas.gasLimit)*.025)
-    tx.gasLimit =  paddedGasLimit;
+    tx.gasLimit =  kryptikFeeData.EVMGas.gasLimit;
     if(isEVMTxTypeTwo(sellTokenAndNetwork.baseNetworkDb)){
         tx.maxFeePerGas = kryptikFeeData.EVMGas.maxFeePerGas;
         tx.maxPriorityFeePerGas = kryptikFeeData.EVMGas.maxPriorityFeePerGas;
