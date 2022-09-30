@@ -44,8 +44,17 @@ export async function getTransactionFeeDataEVM(params:FeeDataEvmParameters){
     }
     let ethNetworkProvider:JsonRpcProvider = kryptikProvider.ethProvider;
 
-    let gasLimit = await ethNetworkProvider.estimateGas(tx);
-    let feeData = await ethNetworkProvider.getFeeData();
+    const feeData = await ethNetworkProvider.getFeeData();
+    let gasLimit:BigNumber;
+    try{
+        gasLimit = await ethNetworkProvider.estimateGas(tx);
+    }
+    // if the node is unable to estimate the gas limit, do so manually
+    // TODO: switch manual transaction estimate based on tx type
+    catch(e){
+        gasLimit = BigNumber.from(330000)
+    }
+    let gasLimitAsNum = gasLimit.toNumber();
     // validate fee data response
     if(!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas || !feeData.gasPrice){
         // some networks like arbitrum uses pre EIP-1559 fee structure
