@@ -1,6 +1,7 @@
+import { lastDayOfYear } from "date-fns";
 import { Network, NetworkFamily } from "hdseedloop";
 import { NetworkDb } from "../../services/models/network";
-import { ChainData, TokenDb } from "../../services/models/token";
+import { ChainData, TokenAndNetwork, TokenDb } from "../../services/models/token";
 import { TransactionPublishedData } from "../../services/models/transaction";
 
 export const getTransactionExplorerPath = function(network:NetworkDb, txPublishedData:TransactionPublishedData):string|null{
@@ -81,9 +82,16 @@ export const isLayerOne = function(network:NetworkDb):boolean{
  * @returns true if the network is a layer 2, false otherwise
  */
 export const isLayerTwo = function(network:NetworkDb):boolean{
-    const networkFamily = networkFromNetworkDb(network).networkFamily;
-    if(network.ticker.toLowerCase()=="eth" || networkFamily != NetworkFamily.EVM){
-        return false;
+    const networkFamily:NetworkFamily = networkFromNetworkDb(network).networkFamily;
+    const networkName:string = network.fullName.toLowerCase();
+    // note: hop protocol appears to classify polygon as a layer two chain
+    if(networkFamily==NetworkFamily.EVM && (networkName.includes("arbitrum") || 
+    networkName.includes("optimism") || networkName.includes("polygon"))){
+        return true;
     }
-    return true;
+    return false;
+}
+
+export function isNativeToken(tokenAndNetwork:TokenAndNetwork){
+    return tokenAndNetwork.tokenData?false:true;
 }
