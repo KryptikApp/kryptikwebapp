@@ -1,7 +1,5 @@
-import { Connection } from "@solana/web3.js";
 import { Contract } from "ethers";
 import { IWallet } from "../../models/KryptikWallet";
-import { GetNetworkDbByTicker } from "../types";
 import { IBalance } from "./IBalance";
 import { NetworkDb } from "./network";
 
@@ -57,6 +55,35 @@ export interface TokenAndNetwork{
     // blockchain network the token resides on
     baseNetworkDb: NetworkDb
 }
+
+/**
+ * Determines whether two tokenAndNetwork objects represent equivalent assets
+ */
+export function tokenAndNetworksAreEqual(tn1:TokenAndNetwork, tn2:TokenAndNetwork, checkNetworks:boolean=true){
+    // check for equality between base network
+    if(checkNetworks && tn1.baseNetworkDb.fullName != tn2.baseNetworkDb.fullName) 
+    {
+        return false;
+    }
+    // shld be a correspondance between token data
+    if(tn1.tokenData && !tn2.tokenData){
+        return false;
+    }
+    if(!tn1.tokenData && tn2.tokenData){
+        return false;
+    }
+    if(!tn2.tokenData && tn1.tokenData){
+        return false;
+    }
+    // if token data... ensure same token name
+    if(tn1.tokenData && tn2.tokenData){
+        return tn1.tokenData.tokenDb.name == tn2.tokenData.tokenDb.name;
+    }
+    if(tn1.baseNetworkDb.fullName == tn2.baseNetworkDb.fullName) return true;
+    // if we got here the tn's just represent base networks and are equivalent
+    return false;
+}
+
 
 export interface ERC20Params{
     erc20Contract:Contract, 
