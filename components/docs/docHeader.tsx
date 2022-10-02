@@ -10,7 +10,7 @@ type Props = {
   const DocHeader = ({ title, image, lastUpdated, emoji}: Props) => {
     return (
       <div className="flex flex-col space-y-4">
-            <div className="flex flex-row space-x-2">
+            <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2">
               {
                 image!=undefined?
                 <img src={image} width="40"/>:
