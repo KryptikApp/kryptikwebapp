@@ -40,31 +40,24 @@ export function isValidHopBridge(buyTokenAndNetwork:TokenAndNetwork, sellTokenAn
     const isValidSellAsset:boolean = isValidHopBridgeAsset(sellTokenAndNetwork);
     // only L1 (ethereum) -> l2 bridge supported at the moment
     const isDestinationLayerTwo:boolean = isLayerTwo(buyTokenAndNetwork.baseNetworkDb)
+    // eth->warapped eth on polygon
+    if(sellTokenAndNetwork.baseNetworkDb.fullName.toLowerCase()=="ethereum" && 
+        buyTokenAndNetwork.baseNetworkDb.fullName.toLowerCase()=="polygon" 
+        && !sellTokenAndNetwork.tokenData && buyTokenAndNetwork.tokenData && 
+        buyTokenAndNetwork.tokenData.tokenDb.symbol.toLowerCase().trim()=="weth"){
+        return true;
+    }
+    // remove general matic token from consideration when swapping eth
+    if(sellTokenAndNetwork.baseNetworkDb.fullName.toLowerCase()=="ethereum" && 
+       buyTokenAndNetwork.baseNetworkDb.fullName.toLowerCase()=="polygon" && 
+       !sellTokenAndNetwork.tokenData && !buyTokenAndNetwork.tokenData){
+        return false
+    }
     const isValidNetworkPair = sellTokenAndNetwork.baseNetworkDb.fullName.toLowerCase().trim() == "ethereum" && isDestinationLayerTwo;
     // test for same token
     const isSameAsset:boolean = tokenAndNetworksAreEqual(buyTokenAndNetwork, sellTokenAndNetwork, false);
     // last condition ensures token assets are the same when bridging tokens
     return isValidNetworkPair && isValidBuyAsset && isValidSellAsset && ((!sellTokenAndNetwork.tokenData && !buyTokenAndNetwork.tokenData)|| isSameAsset);
-    // TODO: UNCOMMENT BELOW WHEN WE HAVE FULL HOP BRIDGE RANGE
-    // const buyTokenNetworkDb = buyTokenAndNetwork.baseNetworkDb;
-    // const sellTokenNetworkDb = sellTokenAndNetwork.baseNetworkDb;
-    // const isValidNetworkPair = (buyTokenNetworkDb.ticker == "eth" && sellTokenNetworkDb.ticker == "eth(optimism)") || 
-    // (buyTokenNetworkDb.ticker == "eth(optimism)" && sellTokenNetworkDb.ticker == "eth") || 
-    // // arbitrum-eth
-    // (buyTokenNetworkDb.ticker == "eth" && sellTokenNetworkDb.ticker == "eth(arbitrum)") ||
-    // (buyTokenNetworkDb.ticker == "eth(arbitrum)" && sellTokenNetworkDb.ticker == "eth") ||
-    // // polygon-eth
-    // (buyTokenNetworkDb.ticker == "eth" && sellTokenNetworkDb.ticker == "matic") ||
-    // (buyTokenNetworkDb.ticker == "matic" && sellTokenNetworkDb.ticker == "eth")||
-    // // polygon-optimism
-    // (buyTokenNetworkDb.ticker == "eth(optimism)" && sellTokenNetworkDb.ticker == "matic") ||
-    // (buyTokenNetworkDb.ticker == "matic" && sellTokenNetworkDb.ticker == "eth(optimism)") ||
-    // // polygon-arbitrum
-    // (buyTokenNetworkDb.ticker == "eth(arbitrum)" && sellTokenNetworkDb.ticker == "matic") ||
-    // (buyTokenNetworkDb.ticker == "matic" && sellTokenNetworkDb.ticker == "eth(arbitrum)") ||
-    // // optimsim-arbitrum
-    // (buyTokenNetworkDb.ticker == "eth(optimism)" && sellTokenNetworkDb.ticker == "eth(arbitrum)") ||
-    // (buyTokenNetworkDb.ticker == "eth(arbitrum)" && sellTokenNetworkDb.ticker == "eth(optimism)")
 }
 
 export function isValidHopBridgeAsset(tokenAndNetwork:TokenAndNetwork){
