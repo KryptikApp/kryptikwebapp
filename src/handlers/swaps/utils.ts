@@ -72,7 +72,8 @@ export function isValidHopBridgeAsset(tokenAndNetwork:TokenAndNetwork){
     // valid tokens are usdc, tether, and dai
     if(tokenName == "usdc" 
     || tokenName == "usdt" 
-    || tokenName == "dai"){
+    || tokenName == "dai"
+    || tokenName == "matic"){
         return true;
     }
     // if we got here... asset is not valid
