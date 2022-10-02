@@ -780,7 +780,7 @@ const Swap: NextPage = () => {
           {/* padding div for space between bottom and main elements */}
         </div>
 
-                <div className="dark:text-white bg-white dark:bg-black pt-4 rounded-lg w-[450px] max-w-[450px] min-h-[30rem] md:min-h-[40rem] h-fit md:max-h-[45rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
+                <div className="dark:text-white bg-white dark:bg-black pt-4 rounded-lg w-[450px] max-w-[450px] min-h-[30rem] min-h-[30rem] h-fit max-h-[38rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
                     <div className="flex px-2">
                         <div className="flex-1">
                          <RiArrowLeftLine size={28} className="ml-2 hover:cursor-pointer hover:text-sky-400" onClick={()=>setShowAssetSearch(false)}/>
