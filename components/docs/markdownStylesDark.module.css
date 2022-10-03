@@ -39,3 +39,7 @@
   .markdown tr{
     @apply border-b
   }
+
+  .markdown a{
+    @apply text-sky-400 hover:text-green-500
+  }
