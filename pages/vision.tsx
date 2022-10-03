@@ -11,7 +11,7 @@ const Vision: NextPage = () => {
         </div>
       
         <div className="dark:text-white">
-        <div className="max-w-2xl mx-auto px-4 md:px-0 min-h-[100vh]">
+        <div className="max-w-2xl mx-auto px-4 md:px-0">
 
           <h1 className="text-5xl font-bold sans mb-5">
                 The Vision
@@ -32,7 +32,7 @@ const Vision: NextPage = () => {
 
             <li>
                 <div className="content">
-                <h3 className="text-5xl">Crosschain Swaps</h3>
+                <h3 className="text-5xl">Crosschain Bridges</h3>
                 <p>Kryptik will provide integrated bridge support, so you can easily shift your tokens between blockchains.</p>
                 </div>
                 <div className="time">
@@ -42,11 +42,21 @@ const Vision: NextPage = () => {
 
             <li>
                 <div className="content">
+                <h3 className="text-5xl">Lens Protocol</h3>
+                <p>Kryptik will allow you to create and manage your Web3 social profile and connect with your social graph.</p>
+                </div>
+                <div className="time">
+                <h4>Winter 2022</h4>
+                </div>
+            </li>
+
+            <li>
+                <div className="content">
                 <h3 className="text-5xl">Bitcoin</h3>
                 <p>Bitcoin was the first, but it&apos;s often forgotten. Kryptik will make it simple to interact with Bitcoin and the lightning network.</p>
                 </div>
                 <div className="time">
-                <h4>Early 2022</h4>
+                <h4>Early 2023</h4>
                 </div>
             </li>
 
