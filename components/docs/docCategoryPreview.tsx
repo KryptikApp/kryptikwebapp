@@ -29,7 +29,7 @@ type Props = {
                             </div>
                         </div>
                         <div className="lg:w-[50%]">
-                            <div className="rounded-md border hover:border-sky-400 px-2 py-4">
+                            <div className="rounded-md border border-gray-500 hover:border-sky-400 px-2 py-4">
                             {   
                                 docs.map((doc:DocType, index:number)=>
                                 <DocPreview emoji={doc.emoji||undefined} title={doc.title} slug={doc.slug} oneLiner={doc.oneLiner} image={doc.image||undefined} key={"essentials"+index}/>
