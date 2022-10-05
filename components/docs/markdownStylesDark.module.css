@@ -43,3 +43,7 @@
   .markdown a{
     @apply text-sky-400 hover:text-green-500
   }
+
+  .markdown blockquote{
+    @apply px-3 py-[1px] bg-[#0f0f0f] rounded-lg border-l-4 border-sky-400 hover:bg-gray-900
+  }
