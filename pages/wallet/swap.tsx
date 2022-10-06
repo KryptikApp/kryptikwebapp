@@ -77,6 +77,8 @@ const Swap: NextPage = () => {
   const[searchresults, setSearchResults] = useState<ISearchResult[]>([]);
 
   const router = useRouter();
+  const swapDetailsExpandableId = "swapDetails";
+  const swapDetailsCardId = "swapDetailsCard"
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
     if ((!loadingAuthUser && (!authUser || !authUser.isLoggedIn)) || (walletStatus!=WalletStatus.Connected && walletStatus!=WalletStatus.Locked)) router.push('/');
@@ -84,6 +86,10 @@ const Swap: NextPage = () => {
     if(kryptikService.serviceState != ServiceState.started){
       router.push('/')
     }
+    // exapand to show token details when clicked
+    const cardInfo = document.getElementById(swapDetailsExpandableId);
+    if(!cardInfo) return;
+    cardInfo.style.setProperty('--originalHeight', `${cardInfo.scrollHeight}px`);
   }, [authUser, loadingAuthUser])
 
   // retrieves wallet balances
@@ -156,6 +162,10 @@ const Swap: NextPage = () => {
     let arrowIcon = document.getElementById("arrowDetails");
     if(arrowIcon){
       arrowIcon.classList.toggle("down");
+    }
+    const cardInfo = document.getElementById(swapDetailsExpandableId);
+    if(cardInfo){
+      cardInfo.classList.toggle('expand')
     }
     setShowDetails(!showDetails);
   }
@@ -570,7 +580,7 @@ const Swap: NextPage = () => {
                     </div>
                     {/* transaction data dropdown */}
                     <div className='pt-8 px-2 flex flex-col w-[90%] max-w-[90%] mx-auto'>
-                      <div className='flex-col border rounded hover:cursor-pointer hover:dark:bg-[#111112] py-2 px-2' onClick={()=>handleTxDetailsClick()}>
+                      <div id={`${swapDetailsCardId}`} className='flex-col border rounded hover:cursor-pointer hover:dark:bg-[#111112] py-2 px-2' onClick={()=>handleTxDetailsClick()}>
                           <div className="flex flex-row">
 
                               <div className="text-lg text-slate-600 text-left dark:text-slate-300 pb-1">
@@ -599,9 +609,8 @@ const Swap: NextPage = () => {
                               }
                             </div>
                          </div>
-                         {
-                          showDetails&&
-                          <div className='pt-2 flex flex-col mx-auto'>
+                         
+                          <div id={`${swapDetailsExpandableId}`} className='pt-2 flex flex-col mx-auto expandable'>
                           <div className="flex">
                                 <div className="flex-1">
                                   <p className="text-slate-600 text-left dark:text-slate-300">Wallet Used</p>
@@ -653,8 +662,8 @@ const Swap: NextPage = () => {
                                   }
                                 </div>
                           </div>
-                    </div>
-                         }
+                        </div>
+                        
 
                       </div>
                       <div className="">
