@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import DocCategoryPreview from '../../components/docs/docCategoryPreview';
 import { useKryptikThemeContext } from '../../components/ThemeProvider';
 import { getAllDocs } from '../../src/helpers/docs';
@@ -35,6 +36,22 @@ export default function DocsHome({allDocs}:Props){
                 <div className='flex flex-col space-y-8'>
                     <DocCategoryPreview docs={essentialDocs} categoryName={'The Essentials'} description={'Create your first wallet and start exploring the decentralized web.'} flip={false}/>
                     <DocCategoryPreview docs={web3BasicsDocs} categoryName={'Web3 Basics'} description={'Learn more about decentralized networks and emerging applications.'} flip={true}/>
+                </div>
+            </div>
+            {/* supported token */}
+            <div className="max-w-3xl mx-auto my-8">
+                <div className="flex flex-col lg:flex-row">
+                    <Link href="../support/supportedProtocols">
+                        <div className="rounded-md border-l-4 border-sky-400 px-2 py-4 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900">
+                            <h1 className="text-2xl text-left">
+                            Asset Finder
+                            </h1>
+                            <h2 className="text-lg text-gray-800 dark:text-gray-200">
+                                Learn about what tokens Kryptik supports.
+                            </h2>
+                        </div>
+                    </Link>
+                    
                 </div>
             </div>
         </div>
