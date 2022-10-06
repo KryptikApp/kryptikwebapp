@@ -17,7 +17,7 @@ import { CreateEVMContractParameters, ChainData, TokenDb, TokenAndNetwork, ERC20
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
 import { createEd25519PubKey, createSolTokenAccount, getAddressForNetworkDb } from "../helpers/utils/accountUtils";
-import { networkFromNetworkDb, getChainDataForNetwork, formatTicker, buildTokenAndNetwork } from "../helpers/utils/networkUtils";
+import { networkFromNetworkDb, getChainDataForNetwork, formatTicker } from "../helpers/utils/networkUtils";
 import { IWallet } from "../models/KryptikWallet";
 import { searchTokenListByTicker } from "../handlers/search/token";
 import { IWeb3Service } from "./models/IWeb3Service";
