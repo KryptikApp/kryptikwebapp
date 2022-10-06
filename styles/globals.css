@@ -385,3 +385,12 @@ a {
 }
 
 
+.expandable{
+  max-height: 0px;
+  overflow: hidden;
+  transition: all .3s ease;
+}
+
+.expandable.expand{
+  max-height: var(--originalHeight);
+}
