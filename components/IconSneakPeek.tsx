@@ -7,6 +7,7 @@ interface Props{
 }
 const IconSneakPeek:NextPage<Props> = (props) => {
     const{icons, groupTotal} = {...props}
+    const excludedTotal = groupTotal-icons.length;
     return(
         <div className="flex flex-row">
         <div className="flex flex-row">
@@ -16,7 +17,10 @@ const IconSneakPeek:NextPage<Props> = (props) => {
                 ))
             }
         </div>
-        <p className="text-gray-700 dark:text-gray-200">+{groupTotal-icons.length}</p>
+        {
+            excludedTotal>0 && 
+            <p className="text-gray-700 dark:text-gray-200">+{excludedTotal}</p>
+        }
         </div>
     )   
 }
