@@ -10,7 +10,7 @@ With Kryptik, you can make a payment without going through a financial instituti
 
 ## 1. Set the Amount
 
-Choose how much you want to send. The amount can be entered in dollars or the native token amount. A small network fee (required by the blockchain) will be added to the total amount.
+Decide how much you would like to send. The amount can be entered in dollars or the native token amount. A small network fee (required by the blockchain) will be added to the total amount.
 
 ## 2. Add a Recipient
 
