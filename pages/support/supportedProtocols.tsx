@@ -49,7 +49,7 @@ const SupportedProtocols: NextPage = () => {
               <h1 className="text-3xl text-left font-bold sans mb-5">
                     What tokens does Kryptik Support?
               </h1>
-              <p className="leading-loose mb-2 text-xl text-justify dark:text-gray-400">Kryptik Supports supports <b>all major tokens</b>, allowing you to track and manage your entire portfolio from one place. Supported tokens are shown below.</p>
+              <p className="leading-loose mb-2 text-xl text-justify dark:text-gray-400">Kryptik supports <b>all major tokens</b>, allowing you to track and manage your entire portfolio from one place. Supported tokens are shown below.</p>
               <p className="text-md mt-8 text-gray-700 dark:text-gray-200 text-right">Check out the Kryptik docs <span className="text-sky-400"><Link href="../docs">here</Link></span> 📜</p>
             </div>
 
