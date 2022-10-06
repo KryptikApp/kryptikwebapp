@@ -17,7 +17,7 @@ import { CreateEVMContractParameters, ChainData, TokenDb, TokenAndNetwork, ERC20
 import {erc20Abi} from "../abis/erc20Abi";
 import { KryptikProvider } from "./models/provider";
 import { createEd25519PubKey, createSolTokenAccount, getAddressForNetworkDb } from "../helpers/utils/accountUtils";
-import { networkFromNetworkDb, getChainDataForNetwork, formatTicker } from "../helpers/utils/networkUtils";
+import { networkFromNetworkDb, getChainDataForNetwork, formatTicker, buildTokenAndNetwork } from "../helpers/utils/networkUtils";
 import { IWallet } from "../models/KryptikWallet";
 import { searchTokenListByTicker } from "../handlers/search/token";
 import { IWeb3Service } from "./models/IWeb3Service";
@@ -252,18 +252,23 @@ class Web3Service extends BaseService implements IWeb3Service{
         return NetworkDbsResult;
     }
 
-    getAllNetworkDbs(onlySupported?:boolean){
+    getAllNetworkDbs(onlySupported:boolean=true):NetworkDb[]{
         if(this.serviceState != ServiceState.started) throw("Service is not running. NetworkDb data has not been populated.")
-        // set default to false if 
-        if(onlySupported == undefined){
-            onlySupported = false
-        }
         if(onlySupported){
             return this.getSupportedNetworkDbs();
         }
         else{
             return this.NetworkDbs;
         }
+    }
+
+    getAllTokens(onlySupported:boolean=true):TokenDb[]{
+        if(this.serviceState != ServiceState.started){
+            throw("Service is not running. NetworkDb data has not been populated.");
+        }
+        // update to respect onlySupported request
+        // currently assuming all tokens in service are supported
+        return this.tokenDbs;
     }
 
     // send rpc call given a NetworkDb
@@ -633,6 +638,7 @@ class Web3Service extends BaseService implements IWeb3Service{
         tokenAndNetwork;
         return tokenAndNetwork;
     }
+
 
     async getBalanceNep141Token(params:TokenBalanceParameters):Promise<TokenAndNetwork>{
         if(!params.nep141Params) throw(new Error("Error: Contract must be provided to fetch nep141 token balance."))
