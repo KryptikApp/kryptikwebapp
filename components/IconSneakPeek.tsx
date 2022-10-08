@@ -13,7 +13,7 @@ const IconSneakPeek:NextPage<Props> = (props) => {
         <div className="flex flex-row">
             {
                 icons.map((icon:string, index:number) => (
-                    <img className="rounded-full w-8 h-8 -ml-2 font-semibold" src={icon} key={index}/>
+                    <img className={`rounded-full w-8 h-8 ${icons.length>1 && "-ml-2"} font-semibold`} src={icon} key={index}/>
                 ))
             }
         </div>
