@@ -51,37 +51,54 @@ const TokenCard:NextPage<Props> = (props) => {
         const newSupportedNetworks:NetworkDb[] = []
         const newSupportedIcons:string[] = [];
         // UNCOMMENT below for fetching supported networks
-        // // ensure web3 service is started
-        // if(kryptikService.serviceState!=ServiceState.started){
-        //     return;
-        // }
-        // // iterate through chain data and populate supported networks
-        // for(const cd of token.chainData){
-        //     const newNetwork:NetworkDb|null = kryptikService.getNetworkDbByTicker(cd.ticker);
-        //     if(newNetwork){
-        //         newSupportedNetworks.push(newNetwork);
-        //         // only show max three icons
-        //         // if(newSupportedIcons.length<3){
-        //         //     newSupportedIcons.push(newNetwork.iconPath);
-        //         // }
-        //     }
-        // }
+        // ensure web3 service is started
+        if(kryptikService.serviceState!=ServiceState.started){
+            return;
+        }
+        // iterate through chain data and populate supported networks
+        for(const cd of token.chainData){
+            const newNetwork:NetworkDb|null = kryptikService.getNetworkDbByTicker(cd.ticker);
+            if(newNetwork){
+                newSupportedNetworks.push(newNetwork);
+                // only show max three icons
+                if(newSupportedIcons.length<3){
+                    newSupportedIcons.push(newNetwork.iconPath);
+                }
+            }
+        }
         // update ui state
         setSupportedNetworks(newSupportedNetworks);
         setNetworkIconsToShow(newSupportedIcons);
     }, [])
+    useEffect(()=>{
+        // update height of element to expand when we add network
+        const cardInfo = document.getElementById(cardDetailsId);
+        if(cardInfo){
+            cardInfo.style.setProperty('--originalHeight', `${cardInfo.scrollHeight}px`);
+        }
+    }, [supportedNetworks])
     return(
         <div id={`${cardId}`} className="border border-gray-100 dark:border-gray-800 rounded-lg px-2 py-4 hover:cursor-pointer">
             <div className="flex flex-row space-x-2">
                 <img className="w-8 h-8 rounded-full my-auto" src={token.logoURI} alt={`${token.name} image`}/>
                 <h1 id={`${cardTitleId}`} className="text-xl text-black dark:text-white">{token.name}</h1>
             </div>
-            <div id={`${cardDetailsId}`} className="expandable flex flex-col space-y-2">
-                    <p className="text-lg text-gray-700 dark:text-gray-200">{token.extensions.description}</p>
-                    {/* UNCOMMENT below for displaying icons of supported networks */}
-                    {/* <div className="mb-2 ml-2">
-                        <IconSneakPeek icons={networkIconsToShow} groupTotal={supportedNetworks.length}/>
-                    </div> */}
+            <div id={`${cardDetailsId}`} className="flex flex-col expandable">
+                <div className="flex flex-col space-y-2">
+                        <p className="text-lg text-gray-700 dark:text-gray-200 mt-4">{token.extensions.description}</p>
+                        
+                        {/* UNCOMMENT below for displaying icons of supported networks */}
+                        {
+                            (supportedNetworks.length !=0) &&
+                            <div>
+                            <h2 className="text-md text-gray-500 dark:text-gray-400 my-2">Supported Networks</h2>
+                            <div className={`${supportedNetworks.length>1 && "ml-2"}`}>
+                            <IconSneakPeek icons={networkIconsToShow} groupTotal={supportedNetworks.length}/>
+                            </div>
+                            </div>
+                            
+                        }
+                </div>
             </div>
         </div>
     )   
