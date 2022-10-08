@@ -6,6 +6,7 @@ import { DocType } from "../../src/helpers/docs/types"
 import DocHeader from "../../components/docs/docHeader"
 import DocContent from "../../components/docs/docContent"
 import DocKeepReadingPreview from "../../components/docs/docKeepReadingPreview"
+import EditThisPage from "../../components/EditThisPage"
 
 type Props = {
     doc: DocType
@@ -19,6 +20,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
       console.warn(`Unable to find this doc!`)
       return <Custom404/>;
     }
+    const githubLink:string = `https://github.com/KryptikApp/kryptikwebapp/blob/main/docs/${doc.slug}.md`
     const readNext:DocType[] = recommendedDocs?recommendedDocs:[];
     return (
           <div>
@@ -43,6 +45,10 @@ export default function Post({ doc, recommendedDocs }: Props) {
                     </div>
                 </div>
                 }
+                {/* edit this page */}
+                <div className="max-w-3xl mx-auto my-8">
+                    <EditThisPage link={githubLink}/>
+                </div>
             </div>
             <div className="h-[24vh]">
               {/* padding div for space between top and main elements */}
