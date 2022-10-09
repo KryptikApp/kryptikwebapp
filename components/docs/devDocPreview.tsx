@@ -9,11 +9,11 @@ type Props = {
   }
   
   const DocPreview = ({ title, image, oneLiner, slug, emoji}: Props) => {
-    const urlBase = "/docs/[slug]";
-    const urlAs = `/docs/${slug}`
+    const urlBase = "/developer/[slug]"
+    const urlAs = `/developer/${slug}`
     return (
     <Link as={urlAs} href={urlBase}>
-      <div className="rounded-md px-2 py-4 hover:cursor-pointer hover:bg-gray-100 hover:dark:bg-gray-900">
+      <div className="rounded-md px-2 py-1 hover:cursor-pointer hover:bg-gray-100 hover:dark:bg-gray-900">
         <div className="flex flex-col space-y-2">
                 <div className="flex flex-row space-x-2">
                   {
@@ -22,7 +22,7 @@ type Props = {
                     emoji&&
                     <p className="dark:text-white text-3xl">{emoji}</p>
                   }
-                    <h1 className="mt-1 text-xl font-semibold text-slate-700 dark:text-slate-200">{title}</h1>
+                    <h1 className="mt-1 text-lg font-semibold text-slate-700 dark:text-slate-200">{title}</h1>
                 </div>
         </div>
       </div>
