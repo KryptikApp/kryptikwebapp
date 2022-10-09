@@ -5,9 +5,10 @@ import { KryptikAuthProvider } from '../components/KryptikAuthProvider'
 import { KryptikThemeProvider } from '../components/ThemeProvider'
 import router from 'next/router'
 import { useEffect } from 'react'
+import LayoutDevDocs from '../components/LayoutDevDocs'
 
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ Component, pageProps, router }: AppProps) {
   const handleOffline = function(){
     router.push('../status/offline')
   }
@@ -25,7 +26,19 @@ function MyApp({ Component, pageProps }: AppProps) {
     addOfflineHandler(),[]
   )
   
-  return(
+  if(router.pathname.startsWith("/developer")){
+    return(
+        <KryptikAuthProvider>
+          <KryptikThemeProvider>
+            <LayoutDevDocs>
+              <Component {...pageProps} />
+            </LayoutDevDocs>
+          </KryptikThemeProvider>
+        </KryptikAuthProvider>
+    )
+  }
+  else{
+    return(
       <KryptikAuthProvider>
         <KryptikThemeProvider>
           <Layout>
@@ -33,7 +46,9 @@ function MyApp({ Component, pageProps }: AppProps) {
           </Layout>
         </KryptikThemeProvider>
       </KryptikAuthProvider>
-  )
+   )
+  }
+ 
 }
 
 export default MyApp
