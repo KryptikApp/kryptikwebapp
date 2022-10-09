@@ -32,17 +32,21 @@ export default function Post({ doc, recommendedDocs }: Props) {
                 <div>
                     <DocHeader title={doc.title} image={doc.image||undefined} lastUpdated={doc.lastUpdate} emoji={doc.emoji||undefined}/>
                     <DocContent content={doc.content}/>
-                    <div className="my-8">
-                      <h1 className="font-bold text-3xl text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-600 text-left">Keep Learning</h1>
-                      <hr className="mt-2 mb-4"/>
-                      <div className="flex flex-col space-y-4">
-                      {
-                        readNext.map((doc:DocType, index:number)=>
-                        <DocKeepReadingPreview key={`keep reading preview ${index}`} title={doc.title} image={doc.image||undefined} emoji={doc.emoji||undefined} oneLiner={doc.oneLiner} slug={doc.slug}/>
-                        )
-                      }
-                      </div>
+                    {
+                      readNext.length!=0 &&
+                      <div className="my-8">
+                        <h1 className="font-bold text-3xl text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-600 text-left">Keep Learning</h1>
+                        <hr className="mt-2 mb-4"/>
+                        <div className="flex flex-col space-y-4">
+                        {
+                          readNext.map((doc:DocType, index:number)=>
+                          <DocKeepReadingPreview key={`keep reading preview ${index}`} title={doc.title} image={doc.image||undefined} emoji={doc.emoji||undefined} oneLiner={doc.oneLiner} slug={doc.slug}/>
+                          )
+                        }
+                        </div>
                     </div>
+                    }
+                    
                 </div>
                 }
                 {/* edit this page */}
@@ -64,7 +68,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
   }
   
   export async function getStaticProps({ params }: Params) {
-    let newDoc:DocType = getDocBySlug(params.slug, [
+    let newDoc:DocType = getDocBySlug({slug: params.slug, fields:[
         "slug",
         "title",
         "lastUpdate",
@@ -73,11 +77,11 @@ export default function Post({ doc, recommendedDocs }: Props) {
         "content",
         "category",
         "emoji"
-    ])
+    ]})
     // create html from markdown content
     const content:string = await markdownToHtml(newDoc.content || '');
     newDoc.content = content
-    const newRecommendedDocs:DocType[] = getDocsByCategory(newDoc.category, [
+    const newRecommendedDocs:DocType[] = getDocsByCategory({category:newDoc.category, fields:[
       "slug",
       "title",
       "lastUpdate",
@@ -87,7 +91,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
       "category",
       "emoji"
     ],
-    newDoc.slug);
+    slugToExclude: newDoc.slug});
     return {
       props: {
         doc: newDoc,
@@ -97,7 +101,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
   }
   
   export async function getStaticPaths() {
-    const docs = getAllDocs(['slug'])
+    const docs = getAllDocs({fields:['slug']})
   
     return {
       paths: docs.map((doc) => {
