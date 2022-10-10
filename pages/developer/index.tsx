@@ -16,6 +16,7 @@ export default function DevDocsHome(){
                   <div className="text-lg">
                   <p>Kryptik is a noncustodial wallet for digital assets. The Kryptik wallet works across multiple blockchains and allows users to authenticate with simple magic links.</p>
                   </div>
+                  <p className="my-4 text-md font-semibold">Note: Developer docs are new and actively being created.</p>
                 </div>
           </div>
   

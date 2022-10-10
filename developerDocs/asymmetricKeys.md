@@ -6,7 +6,7 @@ lastUpdate: "2022-10-8"
 category: "getting started"
 ---
 
-Asymmetric cryptography refers to cryptographic systems that rely on key pairs. Each key pair contains a public and a private key. Public keys can be shared and are used to encrypt messages, but only those who know the private key can decrypt the incoming message. private keys can also be used to create unique signatures that can verify the authenticity of messages.
+Asymmetric cryptography refers to cryptographic systems that rely on key pairs. Each key pair contains a public and a private key. Public keys can be shared and are used to encrypt messages, but only those who know the private key can decrypt the incoming message. Private keys can also be used to create unique signatures that can verify the authenticity of messages.
 
 Asymmetric cryptography has enabled encrypted communication and global computing protocols like Ethereum. But managing keys is hard. Existing noncustodial key management solutions require memorizing long mnemonic phrases, using network specific smart contracts, or purchasing complicated hardware wallets. These solutions are insufficient for the majority of users who are looking for a simple way to manage private keys.
 
