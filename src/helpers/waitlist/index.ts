@@ -22,7 +22,7 @@ export const addEmailToWaitlist = async function(newEmail:string, errorHandler:(
     let waitlistData:IWaitlistData = {
         timeAdded: Date.now()
     }
-    await setDoc(doc(firestore, "waitlist", newEmail), waitlistData);
+    await setDoc(doc(firestore, "waitlist", newEmail.toLowerCase()), waitlistData);
     let position:number|null = await getWaitlistPosition(newEmail);
     return position;
 }
@@ -47,14 +47,14 @@ export const getWaitlistPosition = async function(newEmail:string):Promise<numbe
 
 // returns true if email is lready in waitlist.. otherwise false
 export const isEmailInWaitlist = async function(email:string):Promise<boolean>{
-    const docRef = doc(firestore, "waitlist", email);
+    const docRef = doc(firestore, "waitlist", email.toLowerCase());
     const docSnap = await getDoc(docRef);
     if(docSnap.exists()) return true;
     return false;
 }
 
 export const isOnAlphaTestList = async function(email:string):Promise<boolean>{
-    const docRef = doc(firestore, "alphaTesters", email);
+    const docRef = doc(firestore, "alphaTesters", email.toLowerCase());
     const docSnap = await getDoc(docRef);
     if(docSnap.exists()) return true;
     return false;
