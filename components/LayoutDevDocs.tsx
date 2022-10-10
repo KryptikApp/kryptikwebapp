@@ -21,7 +21,7 @@ export default function Layout(props:Props) {
         </Head>
         
       <main>
-        <div className="w-full h-[8vh] dark:bg-sky-400 shadow-sm shadow-slate-500 z-10">
+        <div className="w-full h-[8vh] bg-gray-300 dark:bg-gray-700 shadow-sm shadow-slate-500 z-10">
               <div className="flex flex-row space-x-2 px-4 py-3">
                     <Image src="/kryptikBrand/kryptikKGradient.png" width="28" height="28"></Image>
                     <h1 className="text-black dark:text-white text-xl font-bold">Kryptik Dev Docs</h1>
