@@ -30,7 +30,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
                 <h1 className="text-2xl text-black dark:text-white">Loading....</h1>
                 :
                 <div>
-                    <DocHeader title={doc.title} image={doc.image||undefined} lastUpdated={doc.lastUpdate} emoji={doc.emoji||undefined}/>
+                    <DocHeader title={doc.title} image={doc.image||undefined} lastUpdated={doc.lastUpdate} emoji={doc.emoji||undefined} hideBackButton={true}/>
                     <DocContent content={doc.content}/>
                     {
                       readNext.length!=0 &&

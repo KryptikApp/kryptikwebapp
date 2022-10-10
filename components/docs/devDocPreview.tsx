@@ -18,11 +18,11 @@ type Props = {
                 <div className="flex flex-row space-x-2">
                   {
                     image!=undefined && image!=null?
-                    <img src={image} className="w-8 h-auto"/>:
+                    <img src={image} className="w-6 h-auto"/>:
                     emoji&&
                     <p className="dark:text-white text-3xl">{emoji}</p>
                   }
-                    <h1 className="mt-1 text-lg font-semibold text-slate-700 dark:text-slate-200">{title}</h1>
+                    <h1 className="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</h1>
                 </div>
         </div>
       </div>
