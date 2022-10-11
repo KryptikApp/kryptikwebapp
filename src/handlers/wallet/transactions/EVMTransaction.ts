@@ -33,6 +33,8 @@ export const signAndSendEVMTransaction = async function(params:ISignAndSendEVMPa
         evmTransaction: txEVM
     }
     try{
+        console.log("transaction to sign:");
+        console.log(kryptikTxParams);
         let signedTx:SignedTransaction = await wallet.seedLoop.signTransaction(sendAccount, kryptikTxParams, network);
         if(!signedTx.evmFamilyTx) throw(new Error("Error: Unable to sign EVM transaction"));
         let txResponse = await evmProvider.sendTransaction(signedTx.evmFamilyTx);
@@ -105,6 +107,7 @@ export const createEVMTransferTransaction = async function(txIn:EVMTransferTxPar
     else{
         tx.gasLimit = kryptikFeeData.EVMGas.gasLimit;
         tx.gasPrice = kryptikFeeData.EVMGas.gasPrice;
+        tx.type = 1;
     }
 
     // create krptik tx. object
