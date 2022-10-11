@@ -23,7 +23,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
     const githubLink:string = `https://github.com/KryptikApp/kryptikwebapp/blob/main/developerDocs/${doc.slug}.md`
     const readNext:DocType[] = recommendedDocs?recommendedDocs:[];
     return (
-          <div className="max-h-[92vh] overflow-y-auto pt-10">
+          <div className="md:max-h-[92vh] md:overflow-y-auto pt-10">
                 {
                 router.isFallback?
                 <h1 className="text-2xl text-black dark:text-white">Loading....</h1>

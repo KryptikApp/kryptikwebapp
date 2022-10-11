@@ -10,7 +10,7 @@ Kryptik is completely open source. Anyone can download the Kryptik software from
 
 Note: this guide assumes you have a working version of Yarn, a common package manager. If you do not have Yarn, you can follow the Yarn [installation guide](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable).
 
-# Kryptik Seedloop
+## Kryptik Seedloop
 
 Kryptik Seedloop is an asymmetric key manager. The code allows users to sign transactions and generate addresses across multiple networks from a single seed. Kryptik Seedloop can be downloaded as an NPM package for immediate integration within your project. Otherwise, you can follow the steps below to start contributing to the Kryptik Seedloop codebase.
 
@@ -36,7 +36,7 @@ yarn test
 
 This will run unit tests on the codebase. If installation was successful, there should be all green checkmarks.
 
-# Kryptik Web Wallet
+## Kryptik Web Wallet
 
 The Kryptik Web Wallet is a browser based wallet that allows users to send, save, and collect digital assets. The current web interface can be found [here](https://kryptik.app/). The steps below will help you begin development on the Kryptik Web Wallet.
 

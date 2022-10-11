@@ -3,7 +3,7 @@ import { Toaster } from "react-hot-toast"
 
 export default function DevDocsHome(){
     return (
-      <div className="max-h-full overflow-y-auto pt-10">
+      <div className="md:max-h-[92vh] md:overflow-y-auto pt-10">
           <Toaster/>
           
           <div className="text-black dark:text-white max-w-3xl mx-auto">
