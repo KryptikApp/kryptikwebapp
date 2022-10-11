@@ -12,7 +12,7 @@ type Props = {
   
   const DocHeader = ({ title, image, lastUpdated, emoji, hideBackButton}: Props) => {
     return (
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-4 max-w-3xl mx-auto">
             {
               !hideBackButton &&
               <Link href={"./"}><AiOutlineArrowLeft size={24} className="text-slate-300 dark:text-slate-600 hover:cursor-pointer mb-2 hover:text-sky-400 hover:dark:text-sky-400"/></Link>

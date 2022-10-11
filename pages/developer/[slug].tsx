@@ -23,8 +23,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
     const githubLink:string = `https://github.com/KryptikApp/kryptikwebapp/blob/main/developerDocs/${doc.slug}.md`
     const readNext:DocType[] = recommendedDocs?recommendedDocs:[];
     return (
-          <div>
-            <div className="max-w-2xl mx-auto pt-10">
+          <div className="max-h-[92vh] overflow-y-auto pt-10">
                 {
                 router.isFallback?
                 <h1 className="text-2xl text-black dark:text-white">Loading....</h1>
@@ -34,7 +33,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
                     <DocContent content={doc.content}/>
                     {
                       readNext.length!=0 &&
-                      <div className="my-8">
+                      <div className="my-8 max-w-3xl mx-auto">
                         <h1 className="font-bold text-3xl text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-600 text-left">Keep Learning</h1>
                         <hr className="mt-2 mb-4"/>
                         <div className="flex flex-col space-y-4">
@@ -53,7 +52,6 @@ export default function Post({ doc, recommendedDocs }: Props) {
                 <div className="max-w-3xl mx-auto my-8">
                     <EditThisPage link={githubLink}/>
                 </div>
-            </div>
             <div className="h-[24vh]">
               {/* padding div for space between top and main elements */}
             </div>

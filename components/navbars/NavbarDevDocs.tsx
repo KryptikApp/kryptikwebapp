@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { DocType } from "../../src/helpers/docs/types";
 import { KryptikFetch } from "../../src/kryptikFetch";
-import DevDocPreview from "../docs/devDocPreview";
+import DocDevCategoryPreview from "../docs/docDevCategoryPreview";
 
 
   
@@ -10,6 +10,7 @@ import DevDocPreview from "../docs/devDocPreview";
 export default function NavbarDevDocs(){
     const [showMenu, setShowMenu] = useState(false);
     const [allDocs, setAllDocs] = useState<DocType[]>([]);
+
 
     async function fetchDevDocs(){
         let docsResponse = await KryptikFetch('/api/devDocs', {method:"POST", timeout:8000, headers:{'Content-Type': 'application/json',}})
@@ -19,6 +20,7 @@ export default function NavbarDevDocs(){
             setAllDocs(newDevDocs);
         }
     }
+
 
     useEffect(() => {
         fetchDevDocs()
@@ -37,17 +39,12 @@ export default function NavbarDevDocs(){
             <div className={`${!showMenu && "hidden"} flex-col md:flex px-8 md:py-4 h-[92vh] md:w-[18vw] md:min-w-[250px] md:border-r-2 border-gray-200 dark:border-gray-800 text-black dark:text-white`}>
                 
                 <div className="flex flex-col">
-                    <div className="">
-                        <p className="px-2 text-xl font-semibold mb-1">Getting Started</p>
-                        <div className="flex flex-col">
-                            {
-                                allDocs.filter(d=>d.category.toLowerCase()=="getting started").map((doc:DocType, index:number)=>
-                                <DevDocPreview emoji={doc.emoji||undefined} title={doc.title} slug={doc.slug} oneLiner={doc.oneLiner} image={doc.image||undefined} key={"essentials"+index}/>
-                                )
-                            }
-                        </div>
-                    </div>
+                    {
+                        allDocs.length != 0 &&
+                        <DocDevCategoryPreview alwaysOpen={true} docs={allDocs.filter(d=>d.category.toLowerCase()=="getting started")} categoryName="Getting Started" description="Essential knowledge to get started."/>
+                    }
                 </div>
+
             </div>
         </nav>
     )

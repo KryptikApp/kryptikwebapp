@@ -47,3 +47,7 @@
   .markdown blockquote{
     @apply px-3 py-[1px] bg-[#0f0f0f] rounded-lg border-l-4 border-sky-400 hover:bg-gray-900
   }
+
+  .markdown code{
+    @apply bg-gray-800 rounded-md p-2 text-green-400
+  }
