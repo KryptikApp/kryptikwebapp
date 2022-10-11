@@ -44,7 +44,7 @@
     "graphql": "^16.5.0",
     "graphql-tag": "^2.12.6",
     "gray-matter": "^4.0.3",
-    "hdseedloop": "^0.7.3",
+    "hdseedloop": "^0.7.4",
     "install-peers": "^1.0.4",
     "isomorphic-dompurify": "^0.22.0",
     "jose": "^4.6.2",
