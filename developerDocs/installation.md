@@ -31,7 +31,7 @@ yarn
 ### 3. Test the Installation
 
 ```
-yarn testFeatures
+yarn test
 ```
 
 This will run unit tests on the codebase. If installation was successful, there should be all green checkmarks.
