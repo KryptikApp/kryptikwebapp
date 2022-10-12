@@ -6,11 +6,12 @@ type Props = {
     oneLiner: string
     slug: string
     emoji?: string
+    baseUrl:string
   }
   
-  const DocKeepReadingPreview = ({ title, image, oneLiner, slug, emoji }: Props) => {
+  const DocKeepReadingPreview = ({ title, image, oneLiner, slug, emoji, baseUrl }: Props) => {
     return (
-    <Link as={`/docs/${slug}`} href="/docs/[slug]">
+    <Link as={`${baseUrl}${slug}`} href={`${baseUrl}[slug]`}>
       <div className="rounded-md px-2 py-4 hover:cursor-pointer hover:bg-gray-100 hover:dark:bg-gray-900 border border-gray-400 dark:border-gray-600">
         <div className="flex flex-col space-y-2">
                 <div className="flex flex-row space-x-2">

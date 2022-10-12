@@ -39,7 +39,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
                         <div className="flex flex-col space-y-4">
                         {
                           readNext.map((doc:DocType, index:number)=>
-                          <DocKeepReadingPreview key={`keep reading preview ${index}`} title={doc.title} image={doc.image||undefined} emoji={doc.emoji||undefined} oneLiner={doc.oneLiner} slug={doc.slug}/>
+                          <DocKeepReadingPreview baseUrl="/developer/" key={`keep reading preview ${index}`} title={doc.title} image={doc.image||undefined} emoji={doc.emoji||undefined} oneLiner={doc.oneLiner} slug={doc.slug}/>
                           )
                         }
                         </div>
