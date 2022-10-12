@@ -17,7 +17,7 @@ Kryptik Seedloop is an asymmetric key manager. The code allows users to sign tra
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/KryptikApp/kryptik-seedloop
+git clone [repo url]
 ```
 
 You can also fork the repository using 'git fork'.
@@ -43,7 +43,7 @@ The Kryptik Web Wallet is a browser based wallet that allows users to send, save
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/KryptikApp/kryptikwebapp
+git clone [repo url]
 ```
 
 You can also fork the repository using 'git fork'.
