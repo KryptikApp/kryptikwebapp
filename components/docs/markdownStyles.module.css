@@ -9,12 +9,16 @@
     @apply my-6;
   }
   
+  .markdown h1{
+    @apply text-3xl text-left font-semibold my-6 leading-snug;
+  }
+  
   .markdown h2 {
-    @apply text-3xl mt-12 mb-4 leading-snug;
+    @apply text-3xl text-left font-semibold my-6 leading-snug;
   }
   
   .markdown h3 {
-    @apply text-2xl mt-8 mb-4 leading-snug;
+    @apply text-2xl text-left mt-8 mb-4 leading-snug;
   }
 
   .markdown ol,
