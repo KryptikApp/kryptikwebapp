@@ -14,6 +14,8 @@ export default function NavbarDevDocs(){
 
 
     async function fetchDevDocs(){
+        // if we already have docs no need to fetch again
+        if(allDocs.length>0) return;
         setIsLoadingDocs(true);
         let docsResponse = await KryptikFetch('/api/devDocs', {method:"POST", timeout:8000, headers:{'Content-Type': 'application/json',}})
         if(docsResponse.status != 200) return;
