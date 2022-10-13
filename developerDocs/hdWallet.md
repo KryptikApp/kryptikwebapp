@@ -18,8 +18,8 @@ Each blockchain has a unique derivation path. The derivation path contains infor
 
 > ### Kryptik Derivation Paths
 >
-> _Ethereum:_ m/44'/${chainCode}'/0'/0/0
+> **EVM Networks:** m/44'/60'/0'/0/0
 >
-> _NEAR Protocol:_ m/44'/397'/0'
+> **NEAR Protocol:** m/44'/397'/0'
 >
-> _Solana:_ m/44'/501'/0'/0'
+> **Solana:** m/44'/501'/0'/0'
