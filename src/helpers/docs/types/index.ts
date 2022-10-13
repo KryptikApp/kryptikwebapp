@@ -8,3 +8,9 @@ export type DocType = {
     content: string
     category: string
   }
+
+export enum DocTypeEnum{
+  Blog = 0,
+  DevDoc = 1,
+  UserDoc = 2
+}

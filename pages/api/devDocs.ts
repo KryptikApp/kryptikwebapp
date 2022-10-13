@@ -1,4 +1,5 @@
 import { getAllDocs } from "../../src/helpers/docs"
+import { DocTypeEnum } from "../../src/helpers/docs/types";
 
 export default function handler(req:any, res:any) {
     // Get data submitted in request's body.
@@ -16,7 +17,7 @@ export default function handler(req:any, res:any) {
             "category",
             "emoji"
         ],
-        isDevDocs:true})
+        docEnum:DocTypeEnum.DevDoc})
         return res.status(200).json({devDocs:allDocs})
     }
     catch(e){

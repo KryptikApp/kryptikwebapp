@@ -2,7 +2,7 @@ import { useRouter } from "next/router"
 import { getAllDocs, getDocBySlug, getDocsByCategory } from "../../src/helpers/docs"
 import markdownToHtml from "../../src/helpers/docs/markdownFormat"
 import Custom404 from "../404"
-import { DocType } from "../../src/helpers/docs/types"
+import { DocType, DocTypeEnum } from "../../src/helpers/docs/types"
 import DocHeader from "../../components/docs/docHeader"
 import DocContent from "../../components/docs/docContent"
 import DocKeepReadingPreview from "../../components/docs/docKeepReadingPreview"
@@ -76,7 +76,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
         "category",
         "emoji"
     ],
-    isDevDocs:true})
+    docEnum:DocTypeEnum.DevDoc})
     // create html from markdown content
     const content:string = await markdownToHtml(newDoc.content || '');
     newDoc.content = content
@@ -91,7 +91,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
       "emoji"
     ],
     slugToExclude: newDoc.slug,
-    isDevDocs:true});
+    docEnum:DocTypeEnum.DevDoc});
     return {
       props: {
         doc: newDoc,
@@ -101,7 +101,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
   }
   
   export async function getStaticPaths() {
-    const docs = getAllDocs({fields:['slug'], isDevDocs:true})
+    const docs = getAllDocs({fields:['slug'], docEnum:DocTypeEnum.DevDoc})
   
     return {
       paths: docs.map((doc) => {

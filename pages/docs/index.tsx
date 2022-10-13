@@ -3,7 +3,7 @@ import Divider from '../../components/Divider';
 import DocCategoryPreview from '../../components/docs/docCategoryPreview';
 import { useKryptikThemeContext } from '../../components/ThemeProvider';
 import { getAllDocs } from '../../src/helpers/docs';
-import { DocType } from '../../src/helpers/docs/types';
+import { DocType, DocTypeEnum } from '../../src/helpers/docs/types';
 
 
 type Props = {
@@ -94,7 +94,7 @@ export const getStaticProps = async () => {
         "content",
         "category",
         "emoji"
-    ]})
+    ], docEnum:DocTypeEnum.UserDoc})
   
     return {
       props: { allDocs },
