@@ -14,10 +14,12 @@ Hierarchical deterministic keys are structured as a tree. A single master key is
 
 ## HD Derivation Path
 
-Each blockchain has a unique derivation path. The derivation path contains information about a key’s location within the tree structure. View [BIP44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) for more information on formatting. Kryptik uses three different derivation paths which are shown below:
+Each blockchain has a unique derivation path. The derivation path contains information about a key’s location within the tree structure. View [BIP44](https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki) for more information on formatting. Kryptik uses three different derivation paths which are shown below.
 
 > ### Kryptik Derivation Paths
 >
 > _Ethereum:_ m/44'/${chainCode}'/0'/0/0
-> _NEAR protocol:_ m/44'/397'/0'
+>
+> _NEAR Protocol:_ m/44'/397'/0'
+>
 > _Solana:_ m/44'/501'/0'/0'
