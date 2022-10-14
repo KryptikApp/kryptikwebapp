@@ -20,7 +20,7 @@ export default function BlogHome({allDocs}:Props){
 
   return (
 
-    <div className="h-[90vh] max-w-[100vw] -mx-4 bg-gradient-to-b from-black to-sky-800 bg-gradient-to-r">
+    <div className="min-h-[90vh] max-w-[100vw] -mx-4 bg-gradient-to-b from-black to-sky-800 bg-gradient-to-r">
         <div className="mx-4">
             <div className="dark:text-white">
             <div className="max-w-3xl mx-auto mb-[10vh] text-left">

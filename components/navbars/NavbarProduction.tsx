@@ -20,7 +20,7 @@ const NavbarProduction:NextPage = () => {
 
     // change style based on boolean
     const menuWrapperClassName = isMenuMobile
-        ? "flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0 min-h-[100vh] md:min-h-0 text-2xl space-y-2"
+        ? "flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0 min-h-[100vh] bg-white dark:bg-black md:min-h-0 text-2xl space-y-2"
         : "hidden text-xl md:flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0";
 
     const handleHideBalances = function(isHideBalances:boolean){
@@ -38,7 +38,7 @@ const NavbarProduction:NextPage = () => {
     }
         
     return(
-        <nav className="py-2 md:py-4 max-h-[11vh]">
+        <nav className="py-2 md:py-4">
             <div className="md:px-4 mx-auto md:flex md:items-center">
 
             <div className="flex justify-between items-center hover:cursor-pointer">
