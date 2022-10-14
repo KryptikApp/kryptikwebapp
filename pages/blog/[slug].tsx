@@ -20,7 +20,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
       console.warn(`Unable to find this doc!`)
       return <Custom404/>;
     }
-    const githubLink:string = `https://github.com/KryptikApp/kryptikwebapp/blob/main/docs/${doc.slug}.md`
+    const githubLink:string = `https://github.com/KryptikApp/kryptikwebapp/blob/main/blog/${doc.slug}.md`
     const readNext:DocType[] = recommendedDocs?recommendedDocs:[];
     return (
           <div>
@@ -30,7 +30,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
                 <h1 className="text-2xl text-black dark:text-white">Loading....</h1>
                 :
                 <div>
-                    <DocHeader title={doc.title} image={doc.image||undefined} lastUpdated={doc.lastUpdate} emoji={doc.emoji||undefined}/>
+                    <DocHeader title={doc.title} image={doc.image||undefined} hideIcon={true} lastUpdated={doc.lastUpdate} emoji={doc.emoji||undefined}/>
                     <DocContent content={doc.content}/>
                     {
                       readNext.length!=0 &&
