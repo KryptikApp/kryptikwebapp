@@ -7,6 +7,11 @@ export type DocType = {
     oneLiner: string
     content: string
     category: string
+    tags: string[]|null
+    // author props
+    authorAvatar: string|null
+    authorRole: string|null
+    authorName: string|null
   }
 
 export enum DocTypeEnum{

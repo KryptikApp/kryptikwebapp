@@ -31,8 +31,9 @@ export function getDocSlugs(docEnum:DocTypeEnum) {
   return fs.readdirSync(directory)
 }
 
+// update if we can add more specific type
 type Items = {
-  [key: string]: string
+  [key: string]: any
 }
 
 export function getDocBySlug(props:{slug: string, fields: string[], docEnum:DocTypeEnum}):DocType {
@@ -85,6 +86,10 @@ export function getDocBySlug(props:{slug: string, fields: string[], docEnum:DocT
     oneLiner: items.oneLiner || '',
     content: items.content || '',
     category: items.category || '',
+    tags: items.tags || null,
+    authorAvatar: items.authorAvatar || null,
+    authorName: items.authorName || null,
+    authorRole: items.authorRole || null
   }
   return docToReturn;
 }
