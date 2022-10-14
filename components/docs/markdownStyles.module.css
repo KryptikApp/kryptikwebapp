@@ -54,5 +54,5 @@
   }
 
   .markdown code{
-    @apply rounded-md
+    @apply rounded-md hover:cursor-copy
   }
