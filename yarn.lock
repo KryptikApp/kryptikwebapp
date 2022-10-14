@@ -7845,6 +7845,13 @@ fastq@^1.6.0:
   dependencies:
     reusify "^1.0.4"
 
+fault@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/fault/-/fault-2.0.1.tgz#d47ca9f37ca26e4bd38374a7c500b5a384755b6c"
+  integrity sha512-WtySTkS4OKev5JtpHXnib4Gxiurzh5NCGvWrFaZ34m6JehfTUhKZvn9njTfw48t6JumVQOmrKqpmGcdwxnhqBQ==
+  dependencies:
+    format "^0.2.0"
+
 faye-websocket@0.11.4, faye-websocket@^0.11.3:
   version "0.11.4"
   resolved "https://registry.yarnpkg.com/faye-websocket/-/faye-websocket-0.11.4.tgz#7f0d9275cfdd86a1c963dc8b65fcc451edcbb1da"
@@ -8104,6 +8111,11 @@ form-data@^4.0.0:
     asynckit "^0.4.0"
     combined-stream "^1.0.8"
     mime-types "^2.1.12"
+
+format@^0.2.0:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/format/-/format-0.2.2.tgz#d6170107e9efdc4ed30c9dc39016df942b5cb58b"
+  integrity sha512-wzsgA6WOq+09wrU1tsJ09udeR/YZRaeArL9e1wPbFg3GG2yDnC2ldKpxs4xunpFF9DgqCqOIra3bc1HWrJ37Ww==
 
 forwarded@0.2.0:
   version "0.2.0"
@@ -8657,6 +8669,15 @@ hast-util-to-html@^8.0.0:
     stringify-entities "^4.0.2"
     unist-util-is "^5.0.0"
 
+hast-util-to-text@^3.0.0:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/hast-util-to-text/-/hast-util-to-text-3.1.1.tgz#b7699a75f7a61af6e0befb67660cd78460d96dc6"
+  integrity sha512-7S3mOBxACy8syL45hCn3J7rHqYaXkxRfsX6LXEU5Shz4nt4GxdjtMUtG+T6G/ZLUHd7kslFAf14kAN71bz30xA==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    hast-util-is-element "^2.0.0"
+    unist-util-find-after "^4.0.0"
+
 hast-util-whitespace@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/hast-util-whitespace/-/hast-util-whitespace-2.0.0.tgz#4fc1086467cc1ef5ba20673cb6b03cec3a970f1c"
@@ -8698,6 +8719,11 @@ he@1.2.0, he@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
+
+highlight.js@~11.6.0:
+  version "11.6.0"
+  resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-11.6.0.tgz#a50e9da05763f1bb0c1322c8f4f755242cff3f5a"
+  integrity sha512-ig1eqDzJaB0pqEvlPVIpSSyMaO92bH1N2rJpLMN/nX396wTpDA4Eq0uK+7I/2XG17pFaaKE0kjV/XPeGt7Evjw==
 
 hmac-drbg@^1.0.1:
   version "1.0.1"
@@ -10550,6 +10576,15 @@ lower-case@^2.0.2:
   dependencies:
     tslib "^2.0.3"
 
+lowlight@^2.0.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/lowlight/-/lowlight-2.7.0.tgz#2d3f267aa3006bb20473db5363f9941ffd7bab11"
+  integrity sha512-RRdrHalFfjpxL91ITTX7KhJYH3QmX5bW9Uie2D2E5GPIR3XBYDYhScBjE291ewFZkStz/k2PN9KC+8deNLiI3Q==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    fault "^2.0.0"
+    highlight.js "~11.6.0"
+
 lru-cache@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-5.1.1.tgz#1da27e6710271947695daf6848e847f01d84b920"
@@ -10757,6 +10792,21 @@ mdast-util-to-hast@^12.0.0:
     mdast-util-definitions "^5.0.0"
     mdurl "^1.0.0"
     micromark-util-sanitize-uri "^1.0.0"
+    trim-lines "^3.0.0"
+    unist-builder "^3.0.0"
+    unist-util-generated "^2.0.0"
+    unist-util-position "^4.0.0"
+    unist-util-visit "^4.0.0"
+
+mdast-util-to-hast@^12.1.0:
+  version "12.2.4"
+  resolved "https://registry.yarnpkg.com/mdast-util-to-hast/-/mdast-util-to-hast-12.2.4.tgz#34c1ef2b6cf01c27b3e3504e2c977c76f722e7e1"
+  integrity sha512-a21xoxSef1l8VhHxS1Dnyioz6grrJkoaCUgGzMD/7dWHvboYX3VW53esRUfB5tgTyz4Yos1n25SPcj35dJqmAg==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    "@types/mdast" "^3.0.0"
+    mdast-util-definitions "^5.0.0"
+    micromark-util-sanitize-uri "^1.1.0"
     trim-lines "^3.0.0"
     unist-builder "^3.0.0"
     unist-util-generated "^2.0.0"
@@ -11095,6 +11145,15 @@ micromark-util-sanitize-uri@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/micromark-util-sanitize-uri/-/micromark-util-sanitize-uri-1.0.0.tgz#27dc875397cd15102274c6c6da5585d34d4f12b2"
   integrity sha512-cCxvBKlmac4rxCGx6ejlIviRaMKZc0fWm5HdCHEeDWRSkn44l6NdYVRyU+0nT1XC72EQJMZV8IPHF+jTr56lAg==
+  dependencies:
+    micromark-util-character "^1.0.0"
+    micromark-util-encode "^1.0.0"
+    micromark-util-symbol "^1.0.0"
+
+micromark-util-sanitize-uri@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/micromark-util-sanitize-uri/-/micromark-util-sanitize-uri-1.1.0.tgz#f12e07a85106b902645e0364feb07cf253a85aee"
+  integrity sha512-RoxtuSCX6sUNtxhbmsEFQfWzs8VN7cTctmBPvYivo98xb/kDEoTCtJQX5wyzIYEmk/lvNFTat4hL8oW0KndFpg==
   dependencies:
     micromark-util-character "^1.0.0"
     micromark-util-encode "^1.0.0"
@@ -13163,6 +13222,35 @@ regjsparser@^0.8.2:
   dependencies:
     jsesc "~0.5.0"
 
+rehype-highlight@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/rehype-highlight/-/rehype-highlight-6.0.0.tgz#8097219d8813b51f4c2b6d92db27dac6cbc9a641"
+  integrity sha512-q7UtlFicLhetp7K48ZgZiJgchYscMma7XjzX7t23bqEJF8m6/s+viXQEe4oHjrATTIZpX7RG8CKD7BlNZoh9gw==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    hast-util-to-text "^3.0.0"
+    lowlight "^2.0.0"
+    unified "^10.0.0"
+    unist-util-visit "^4.0.0"
+
+rehype-sanitize@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/rehype-sanitize/-/rehype-sanitize-5.0.1.tgz#dac01a7417bdd329260c74c74449697b4be5eb56"
+  integrity sha512-da/jIOjq8eYt/1r9GN6GwxIR3gde7OZ+WV8pheu1tL8K0D9KxM2AyMh+UEfke+FfdM3PvGHeYJU0Td5OWa7L5A==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    hast-util-sanitize "^4.0.0"
+    unified "^10.0.0"
+
+rehype-stringify@^9.0.3:
+  version "9.0.3"
+  resolved "https://registry.yarnpkg.com/rehype-stringify/-/rehype-stringify-9.0.3.tgz#70e3bd6d4d29e7acf36b802deed350305d2c3c17"
+  integrity sha512-kWiZ1bgyWlgOxpqD5HnxShKAdXtb2IUljn3hQAhySeak6IOQPPt6DeGnsIh4ixm7yKJWzm8TXFuC/lPfcWHJqw==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    hast-util-to-html "^8.0.0"
+    unified "^10.0.0"
+
 relateurl@^0.2.7:
   version "0.2.7"
   resolved "https://registry.yarnpkg.com/relateurl/-/relateurl-0.2.7.tgz#54dbf377e51440aca90a4cd274600d3ff2d888a9"
@@ -13196,6 +13284,16 @@ remark-parse@^10.0.0:
   dependencies:
     "@types/mdast" "^3.0.0"
     mdast-util-from-markdown "^1.0.0"
+    unified "^10.0.0"
+
+remark-rehype@^10.1.0:
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/remark-rehype/-/remark-rehype-10.1.0.tgz#32dc99d2034c27ecaf2e0150d22a6dcccd9a6279"
+  integrity sha512-EFmR5zppdBp0WQeDVZ/b66CWJipB2q2VLNFMabzDSGR66Z2fQii83G5gTBbgGEnEEA0QRussvrFHxk1HWGJskw==
+  dependencies:
+    "@types/hast" "^2.0.0"
+    "@types/mdast" "^3.0.0"
+    mdast-util-to-hast "^12.1.0"
     unified "^10.0.0"
 
 remark-stringify@^10.0.0:
@@ -14720,6 +14818,14 @@ unist-builder@^3.0.0:
   integrity sha512-GFxmfEAa0vi9i5sd0R2kcrI9ks0r82NasRq5QHh2ysGngrc6GiqD5CDf1FjPenY4vApmFASBIIlk/jj5J5YbmQ==
   dependencies:
     "@types/unist" "^2.0.0"
+
+unist-util-find-after@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/unist-util-find-after/-/unist-util-find-after-4.0.0.tgz#1101cebf5fed88ae3c6f3fa676e86fd5772a4f32"
+  integrity sha512-gfpsxKQde7atVF30n5Gff2fQhAc4/HTOV4CvkXpTg9wRfQhZWdXitpyXHWB6YcYgnsxLx+4gGHeVjCTAAp9sjw==
+  dependencies:
+    "@types/unist" "^2.0.0"
+    unist-util-is "^5.0.0"
 
 unist-util-generated@^2.0.0:
   version "2.0.0"

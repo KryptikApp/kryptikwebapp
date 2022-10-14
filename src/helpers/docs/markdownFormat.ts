@@ -1,8 +1,16 @@
-import { remark } from 'remark'
 import remarkGfm from 'remark-gfm'
-import html from 'remark-html'
+import {unified} from 'unified'
+import remarkRehype from 'remark-rehype'
+import highlight from "rehype-highlight"
+import rehypeStringify from 'rehype-stringify'
+import remarkParse from 'remark-parse'
+
+
 
 export default async function markdownToHtml(markdown: string) {
-  const result = await remark().use(remarkGfm).use(html).process(markdown)
+  const result = await unified().use(remarkParse)
+  .use(remarkGfm)
+  .use(remarkRehype)
+  .use(rehypeStringify).use(highlight).process(markdown);
   return result.toString()
 }

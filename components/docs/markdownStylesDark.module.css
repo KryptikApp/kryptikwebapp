@@ -53,5 +53,5 @@
   }
 
   .markdown code{
-    @apply bg-gray-800 rounded-md p-2 text-green-400
+    @apply rounded-md
   }

@@ -63,9 +63,13 @@
     "react-hot-toast": "^2.2.0",
     "react-icons": "^4.3.1",
     "react-scripts": ">=4.0.0",
+    "rehype-highlight": "^6.0.0",
+    "rehype-sanitize": "^5.0.1",
+    "rehype-stringify": "^9.0.3",
     "remark": "^14.0.2",
     "remark-gfm": "^3.0.1",
     "remark-html": "^15.0.1",
+    "remark-rehype": "^10.1.0",
     "secp256k1": "^4.0.3",
     "shamirs-secret-sharing-ts": "^1.0.2",
     "yarn": "^1.22.19"
