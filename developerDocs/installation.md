@@ -30,7 +30,7 @@ yarn
 
 ### 3. Test the Installation
 
-```
+```bash
 yarn test
 ```
 
@@ -60,7 +60,7 @@ This file will contain variables required to run the app. Follow the [example .e
 
 ### 4. Run Locally
 
-```
+```bash
 yarn dev
 ```
 
