@@ -9,11 +9,11 @@
   }
 
   .markdown h1{
-    @apply text-3xl text-left font-semibold my-6 leading-snug;
+    @apply text-3xl text-left font-semibold mt-6 mb-2 leading-snug;
   }
   
   .markdown h2 {
-    @apply text-3xl text-left font-semibold my-6 leading-snug;
+    @apply text-3xl text-left font-semibold mt-6 mb-2 leading-snug;
   }
   
   .markdown h3 {
