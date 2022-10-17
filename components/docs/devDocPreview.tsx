@@ -33,7 +33,7 @@ type Props = {
                     emoji&&
                     <p className="dark:text-white text-3xl">{emoji}</p>
                   }
-                    <h1 className={`mt-1 text-sm font-semibold hover:text-sky-400 ${activeSlug && activeSlug ==slug?"text-sky-400 font-bold":"text-slate-700 dark:text-slate-200"}`}>{title}</h1>
+                    <h1 className={`mt-1 text-sm hover:text-sky-400 dark:hover:text-sky-400 ${activeSlug && activeSlug ==slug?"text-sky-400 font-bold":"text-slate-700 dark:text-slate-200 font-semibold"}`}>{title}</h1>
                 </div>
         </div>
       </div>
