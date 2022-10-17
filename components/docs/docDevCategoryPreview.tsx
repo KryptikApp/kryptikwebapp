@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { useState } from "react"
 import { DocType } from "../../src/helpers/docs/types"
 import DevDocPreview from "./devDocPreview"
 
@@ -11,6 +12,7 @@ type Props = {
   
   const DocDevCategoryPreview = ({ categoryName, docs, description, alwaysOpen}: Props) => {
     const cardDetailsId:string = categoryName + "Details";
+    const [activeSlug, setActiveSlug] = useState("");
     
     function handleCategoryClicked(){
         // no need for animation plus exandable code below when always open
@@ -28,13 +30,17 @@ type Props = {
         }
     }
 
-      // update height of element to expand when we change all docs data
-      const expandableDetails = document.getElementById(cardDetailsId);
-      if(expandableDetails){
-          expandableDetails.style.setProperty('--originalHeight', `${expandableDetails.scrollHeight}px`);
-      }
+    // update height of element to expand when we change all docs data
+    const expandableDetails = document.getElementById(cardDetailsId);
+    if(expandableDetails){
+        expandableDetails.style.setProperty('--originalHeight', `${expandableDetails.scrollHeight}px`);
+    }
 
-
+    // handler forn when individual doc is selected
+    function handleDocSelection(slug:string){
+        // update active slug
+        setActiveSlug(slug);
+    }
 
     return (
         <div className="">
@@ -52,7 +58,7 @@ type Props = {
             <div id={cardDetailsId} className={`${!alwaysOpen && "expandable"} flex flex-col`}>
                 {
                     docs.filter(d=>d.category.toLowerCase()=="getting started").map((doc:DocType, index:number)=>
-                    <DevDocPreview emoji={doc.emoji||undefined} title={doc.title} slug={doc.slug} oneLiner={doc.oneLiner} image={doc.image||undefined} key={"essentials"+index}/>
+                    <DevDocPreview activeSlug={activeSlug} onSelection={handleDocSelection} emoji={doc.emoji||undefined} title={doc.title} slug={doc.slug} oneLiner={doc.oneLiner} image={doc.image||undefined} key={"essentials"+index}/>
                     )
                 }
             </div>
