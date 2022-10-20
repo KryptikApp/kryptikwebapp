@@ -28,6 +28,12 @@ const UserLandingPage: NextPage = () => {
     router.push("/sync")
   }
 
+  function handleClickAddy(){
+    if(loadingWallet || loadingAuthUser || walletStatus!=WalletStatus.Connected) return;
+    navigator.clipboard.writeText(kryptikWallet.resolvedEthAccount.address);
+    toast.success("Ethereum Address Copied")
+  }
+
   const handleUnlockWallet = async function(){
     if(kryptikWallet.status != WalletStatus.Locked) return;
     if(!authUser){
@@ -131,11 +137,11 @@ const UserLandingPage: NextPage = () => {
                                 <p className="text-slate-600 text-left dark:text-slate-300">Ethereum Address</p>
                             </div>
                             <div className="flex-1 px-1">
-                                <div className='text-right float-right'>
+                                <div onClick={()=>handleClickAddy()} className='text-right float-right'>
                                 {
                                     (loadingAuthUser||loadingWallet)?
                                     <div className="text-sm font-medium text-gray-900 truncate w-20 mx-auto mb-2 h-4 bg-gray-400 animate-pulse rounded"/>:
-                                    <p>
+                                    <p className={`${walletStatus==WalletStatus.Connected && "hover:cursor-pointer"}`}>
                                          {walletStatus==WalletStatus.Connected?kryptikWallet.resolvedEthAccount.names?kryptikWallet.resolvedEthAccount.names[0]:truncateAddress(kryptikWallet.resolvedEthAccount.address, NetworkFromTicker("eth")):"0x---------"}
                                     </p>
                                 }
