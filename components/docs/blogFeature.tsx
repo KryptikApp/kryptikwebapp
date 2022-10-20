@@ -45,7 +45,7 @@ const  BlogFeature = ({ doc}: Props) => {
                 </div>  
                 {
                 doc.image &&
-                <Image width="600" height="600" src={doc.image} />
+                <Image width="600" height="600" className="object-cover" src={doc.image} />
                 }
             </div>
             
