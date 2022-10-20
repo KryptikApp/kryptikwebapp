@@ -102,7 +102,7 @@ export function getAllDocs(props:{fields: string[], docEnum:DocTypeEnum}):DocTyp
     .map((slug) => getDocBySlug({slug: slug, fields: fields, docEnum: docEnum}))
     // sort posts by date in descending order
     // TODO: check efficiency of date operation... maybe store on object?
-    .sort((post1, post2) => (new Date(post1.lastUpdate).getTime() < new Date(post2.lastUpdate).getTime()? -1 : 1))
+    .sort((post1, post2) => (new Date(post1.lastUpdate).getTime() > new Date(post2.lastUpdate).getTime()? -1 : 1))
   return docs
 }
 

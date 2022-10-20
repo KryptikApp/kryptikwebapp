@@ -16,7 +16,7 @@ type Props = {
 export default function BlogHome({allDocs}:Props){
   const {isDark} = useKryptikThemeContext();
   // get the most recent blog post
-  const mostRecentDoc:DocType = allDocs.reverse()[0];
+  const mostRecentDoc:DocType = allDocs[0];
 
   return (
 
