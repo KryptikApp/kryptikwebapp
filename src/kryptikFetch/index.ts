@@ -3,6 +3,7 @@ export const KRYPTIK_FETCH_ERROR = 'KryptikFetchError';
 export interface KryptikFetchRequestOpts extends RequestInit {
   params?: ConstructorParameters<typeof URLSearchParams>[0]; // type of first argument of URLSearchParams constructor.
   timeout?: number;
+  dropAbortController?: boolean; // some server requests may not want to use abort controller
 }
 
 export interface IKryptikFetchResponse{
@@ -27,9 +28,12 @@ export async function KryptikFetch(
 
   if (!url) throw new Error('KryptikFetch: Missing url argument');
 
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), opts.timeout);
-
+  const controller:AbortController|undefined = opts.dropAbortController?undefined:new AbortController();
+  if(controller){
+    const id = setTimeout(() => controller.abort(), opts.timeout);
+    clearTimeout(id);
+  }
+ 
   const { body, params, headers, ...otherOpts } = opts;
 
   const requestBody =
@@ -43,9 +47,9 @@ export async function KryptikFetch(
       'Content-Type': 'application/json',
       ...headers,
     },
-    signal: controller.signal,
+    signal: controller?controller.signal:null
   });
-  clearTimeout(id);
+  
 
   const responseBody = await getBody(response);
 

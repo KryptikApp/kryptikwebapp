@@ -30,13 +30,13 @@ let flipKey:boolean = false;
 export default async( req: NextApiRequest, res: NextApiResponse<Data> )=>
 {
     if (req.method !== 'POST') return res.status(405).end();
-    
     const body = req.body;
     if(!body.accountAddress || !body.currency || !body.chainId){
         console.warn("Error: required balance params not provided.");
     }
     // const apiKey = flipKey?process.env.CovalentApiKey1:process.env.CovalentApiKey2
     // let reqParams:BalanceReqParams = {accountAddress:body.accountAddress, currency:body.currency, chainId:body.chainId};
+    // TODO: 2X CHECK TIMEOUT
     let dataToReturn = await getAssetsFromCovalent(body.chainId, body.accountAddress, body.currency);
     if(dataToReturn){
         res.status(200).json({ balanceData:dataToReturn});

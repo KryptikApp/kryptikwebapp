@@ -45,7 +45,7 @@ export const getAssetsFromCovalent = async (
   ): Promise<CovalentAddressBalanceResponseData|null> => {
     try {
         const url = `https://api.covalenthq.com/v1/${chainId}/address/${accountAddress}/balances_v2/`;
-        const covalentKey = apiKey || process.env.CovalentApiKey;
+        const covalentKey = apiKey || process.env.COVALENT_API_KEY;
         if(!covalentKey) return null;
         const params = {
             'key': covalentKey,
@@ -55,9 +55,9 @@ export const getAssetsFromCovalent = async (
         const response = await KryptikFetch(url, {
             method: 'get',
             params,
-            timeout: 10000, // 10 secs
+            timeout: 10000, // 10 secs]
+            dropAbortController: true
         });
-    
         if (response?.data?.data && !response?.data.error) {
             return response.data.data;
         }
