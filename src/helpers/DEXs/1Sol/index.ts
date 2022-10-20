@@ -15,7 +15,7 @@ export async function getOneSolSwapRoutes(params:IOneSOlSwapParams):Promise<Dist
     const{kryptikProvider, amountSellToken, sellTokenAddress, buyTokenAddress} = {...params};
     if(!kryptikProvider.solProvider) return null;
     const onesolProtocol = new OnesolProtocol(kryptikProvider.solProvider);
-    let routes:Distribution[] = await onesolProtocol.getRoutes({amount:amountSellToken, sourceMintAddress:sellTokenAddress, destinationMintAddress:buyTokenAddress, size:10, programIds:["9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP"]});
+    let routes:Distribution[] = await onesolProtocol.getRoutes({amount:amountSellToken, sourceMintAddress:sellTokenAddress, onlyDirect:true, destinationMintAddress:buyTokenAddress, size:10, programIds:["9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP"]});
     if(!routes) return null;
     return routes;
 }
