@@ -12,6 +12,46 @@ export interface IKryptikBalanceParams{
     freshWindow?:number
 }
 
+
+ /**
+ * Returns a  positive number if token b has a greater token value than token a
+ *
+ * @remarks
+ * This method is useful as a sorting function.
+ */
+function sortTokenAndBalances(a:TokenAndNetwork, b:TokenAndNetwork){
+    let tokenAAmount:number = 0;
+    let tokenBAmount:number = 0
+    // set a token amount
+    if(a.tokenData && a.tokenData.tokenBalance){
+        tokenAAmount = Number(a.tokenData.tokenBalance.amountUSD)
+    }
+    else if(a.networkBalance){
+        tokenAAmount = Number(a.networkBalance.amountUSD)
+    }
+    else{
+        tokenAAmount = 0
+    }
+    // set b token amount
+    if(b.tokenData && b.tokenData.tokenBalance){
+        tokenBAmount = Number(b.tokenData.tokenBalance.amountUSD)
+    }
+    else if(b.networkBalance){
+        tokenBAmount = Number(b.networkBalance.amountUSD)
+    }
+    else{
+        tokenBAmount = 0
+    }
+
+    const difference = tokenBAmount-tokenAAmount;
+    if(difference<0){
+        return -1;
+    }
+    else{
+        return 1
+    }
+}
+
 export class KryptikBalanceHolder{
     id:number
     private lastUpdated:number
@@ -20,12 +60,14 @@ export class KryptikBalanceHolder{
     private tokenAndBalances:TokenAndNetwork[]
     // null if not calculated yet
     private totalBalanceFiat:number|null
+
     
     constructor(params:IKryptikBalanceParams) {
         const{
             tokenAndBalances,
             freshWindow} = {...params};
-        this.tokenAndBalances = tokenAndBalances;
+        tokenAndBalances.sort(sortTokenAndBalances)
+        this.tokenAndBalances = tokenAndBalances
         this.lastUpdated = Date.now();
         // use provided number of seconds or default to five minutes
         this.freshWindow = freshWindow?freshWindow:300
@@ -90,6 +132,7 @@ export class KryptikBalanceHolder{
     }
 
     updateBalances(newTokenAndBalances:TokenAndNetwork[]){
+        newTokenAndBalances.sort(sortTokenAndBalances);
         this.tokenAndBalances = newTokenAndBalances;
         this.lastUpdated = Date.now();
     }
