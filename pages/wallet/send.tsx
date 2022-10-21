@@ -647,8 +647,8 @@ const Send: NextPage = () => {
                     <div className='flex-2'>
                       <h4 className="font-bold text-xl mx-auto content-center text-green-600">Transaction Complete <AiFillCheckCircle className="inline ml-3"/></h4>
                     </div>
-                    <div className='flex-1 text-right'>
-                      <AiOutlineCloseCircle className="ml-1 hover:cursor-pointer text-gray-700 dark:text-gray-200 mt-1" onClick={()=>handleClickBack()} size="20"/>
+                    <div className='flex-1'>
+                      <AiOutlineCloseCircle className="ml-1 float-right mr-1 hover:cursor-pointer text-gray-700 dark:text-gray-200 mt-1" onClick={()=>handleClickBack()} size="20"/>
                     </div>
                   </div>
                   <div className="border border-solid border-1 border-gray-300 py-4 rounded-lg mx-2">
