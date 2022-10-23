@@ -90,7 +90,7 @@ const NftDisplay:NextPage<Props> = (props) => {
                     
                 {/* nft info card */}
                 <div id={nftCardId} className="flex-1 bg-white dark:bg-black md:ml-6 mt-8 md:mt-0 rounded-lg min-h-[30rem] md:min-h-[25rem] h-fit md:max-h-[40rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
-                    <div className="mx-3 mt-3 dark:text-white">
+                    <div className="mx-3 mt-3 text-black dark:text-white">
                         <div>
                             {
                                 nftMetaData.collection.image_url?
