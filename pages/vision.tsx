@@ -74,8 +74,8 @@ const Vision: NextPage = () => {
 
         </div>
 
-        <div className="h-[4rem]">
-          {/* padding div for space between top and main elements */}
+        <div className="h-[20vh]">
+          {/* padding div for space between bottom and main elements */}
         </div>
 
     </div>
