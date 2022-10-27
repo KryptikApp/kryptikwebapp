@@ -34,7 +34,7 @@ const cleanContent = DOMPurify.sanitize(content);
     <div className="max-w-3xl mx-auto">
       <Toaster/>
       <div
-        className="prose dark:prose-invert md:prose-xl prose-img:rounded-md prose-a:text-sky-400 prose-li:marker:text-sky-400"
+        className="prose dark:prose-invert md:prose-xl prose-blockquote:border-sky-400 prose-code:rounded-md prose-code:hover:cursor-pointer prose-blockquote:rounded-md prose-img:rounded-md prose-a:text-sky-400 prose-li:marker:text-sky-400 prose-quoteless prose-blockquote:not-italic"
         dangerouslySetInnerHTML={{ __html: cleanContent}}
       />
     </div>
