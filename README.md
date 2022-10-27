@@ -2,7 +2,7 @@
 Key pairs can do wonderful things, but existing wallets like Metamask confine their magic to a single blockchain. 
 The Kryptik wallet is built to break through the borders of Ethereum and streamline digital ownership across the internet. One secure wallet. One simple interface. One magical future.
 
-<img src="https://jetthays.com/media/external/kryptikSearch.png" alt="Wallet Page screenshot" width="150">
+<img src="https://www.kryptik.app/kryptikBrand/kryptik%20balance%20screen.svg" alt="Wallet Page screenshot" width="250">
 
 ## Developing
 Note: these steps will help you run a local version of the Kryptik wallet, which is useful for testing changes to the app.
