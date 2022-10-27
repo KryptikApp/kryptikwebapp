@@ -2,6 +2,7 @@
 
 export function timeElapsedString(startDate: Date, endDate: Date){
     const numDaysElapsed = getDaysElapsed(startDate, endDate);
+    const daysInAWeek = 7;
     const daysInAMonth = 31;
     const daysInaYear = 365;
     // days
@@ -16,7 +17,7 @@ export function timeElapsedString(startDate: Date, endDate: Date){
     }
     // weeks
     else if(numDaysElapsed<daysInAMonth){
-        const numWeeksElapsed = Math.floor(numDaysElapsed/daysInAMonth);
+        const numWeeksElapsed = Math.floor(numDaysElapsed/daysInAWeek);
         // case for correct plural
         if(numWeeksElapsed <= 1){
             return `1 week ago`
@@ -36,7 +37,7 @@ export function timeElapsedString(startDate: Date, endDate: Date){
         }
     }
     else{
-        const numYearsElapsed = Math.floor(numDaysElapsed/daysInAMonth);
+        const numYearsElapsed = Math.floor(numDaysElapsed/daysInaYear);
         if(numYearsElapsed <= 1){
             return `1 year ago`
         }
