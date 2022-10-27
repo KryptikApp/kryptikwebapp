@@ -10,63 +10,51 @@ Kryptik is completely open source. Anyone can download the Kryptik software from
 
 Note: this guide assumes you have a working version of Yarn, a common package manager. If you do not have Yarn, you can follow the Yarn [installation guide](https://classic.yarnpkg.com/lang/en/docs/install/#windows-stable).
 
-# Kryptik Seedloop
+## Kryptik Seedloop
 
 Kryptik Seedloop is an asymmetric key manager. The code allows users to sign transactions and generate addresses across multiple networks from a single seed. Kryptik Seedloop can be downloaded as an NPM package for immediate integration within your project. Otherwise, you can follow the steps below to start contributing to the Kryptik Seedloop codebase.
 
-### 1. Clone the Repository
+1. **Clone the repository.** You can also fork the repository using 'git fork'.
 
 ```bash
-git clone [repo url]
+git clone https://github.com/KryptikApp/kryptik-seedloop
 ```
 
-You can also fork the repository using 'git fork'.
-
-### 2. Install Dependencies
+2. **Install dependencies.**
 
 ```bash
 yarn
 ```
 
-### 3. Test the Installation
+3. **Test the installation.** This will run unit tests on the codebase. If installation was successful, there should be all green checkmarks.
 
 ```bash
 yarn test
 ```
 
-This will run unit tests on the codebase. If installation was successful, there should be all green checkmarks.
-
-# Kryptik Web Wallet
+## Kryptik Web Wallet
 
 The Kryptik Web Wallet is a browser based wallet that allows users to send, save, and collect digital assets. The current web interface can be found [here](https://kryptik.app/). The steps below will help you begin development on the Kryptik Web Wallet.
 
-### 1. Clone the Repository
+1. **Clone the repository.** You can also fork the repository using 'git fork'.
 
 ```bash
-git clone [repo url]
+git clone https://github.com/KryptikApp/kryptikwebapp
 ```
 
-You can also fork the repository using 'git fork'.
-
-### 2. Install Dependencies
+2. **Install Dependencies.**
 
 ```bash
 yarn
 ```
 
-### 3. Add .env File
+3. **Add .env File.** This file will contain variables required to run the app. Follow the [example .env file](https://github.com/KryptikApp/kryptikwebapp/blob/main/.env.example) to structure your variables.
 
-This file will contain variables required to run the app. Follow the [example .env file](https://github.com/KryptikApp/kryptikwebapp/blob/main/.env.example) to structure your variables.
-
-### 4. Run Locally
+4. **Run Locally.** This command will pop open a local version of the wallet.
 
 ```bash
 yarn dev
 ```
-
-This command will pop open a local version of the wallet.
-
-You can also fork the repository using 'git fork'.
 
 > ### You're All Set
 >
