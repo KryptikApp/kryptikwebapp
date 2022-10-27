@@ -8,7 +8,7 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    container: {
+  container: {
       center: true,
       padding: {
         DEFAULT: '1rem',
@@ -18,9 +18,17 @@ module.exports = {
         '2xl': '6rem',
       },
     },
-    extend: {},
+    extend: {typography: {
+      quoteless: {
+        css: {
+          'blockquote p:first-of-type::before': { content: 'none' },
+          'blockquote p:first-of-type::after': { content: 'none' },
+        },
+      },
+    },},
   },
   plugins: [
+    require('@tailwindcss/typography'),
     plugin(function({ addUtilities }) {
     addUtilities({
       /* Hide scrollbar for Chrome, Safari and Opera */
