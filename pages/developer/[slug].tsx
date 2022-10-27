@@ -66,30 +66,12 @@ export default function Post({ doc, recommendedDocs }: Props) {
   }
   
   export async function getStaticProps({ params }: Params) {
-    let newDoc:DocType = getDocBySlug({slug: params.slug, fields:[
-        "slug",
-        "title",
-        "lastUpdate",
-        "image",
-        "oneLiner",
-        "content",
-        "category",
-        "emoji"
-    ],
+    let newDoc:DocType = getDocBySlug({slug: params.slug,
     docEnum:DocTypeEnum.DevDoc})
     // create html from markdown content
     const content:string = await markdownToHtml(newDoc.content || '');
     newDoc.content = content
-    const newRecommendedDocs:DocType[] = getDocsByCategory({category:newDoc.category, fields:[
-      "slug",
-      "title",
-      "lastUpdate",
-      "image",
-      "oneLiner",
-      "content",
-      "category",
-      "emoji"
-    ],
+    const newRecommendedDocs:DocType[] = getDocsByCategory({category:newDoc.category,
     slugToExclude: newDoc.slug,
     docEnum:DocTypeEnum.DevDoc});
     return {

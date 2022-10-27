@@ -3,10 +3,24 @@ import { join } from 'path'
 /// <reference path="node_modules\gray-matter\gray-matter.d.ts" />
 import matter from 'gray-matter'
 import { DocType, DocTypeEnum } from './types'
+import { getContributorById } from './contributors'
 
 const docsDirectory = join(process.cwd(), 'docs')
 const developerDocsDirectory = join(process.cwd(), 'developerDocs')
 const blogDocsDirectory = join(process.cwd(), 'blog')
+
+const defaultFields = [
+  "slug",
+  "title",
+  "lastUpdate",
+  "image",
+  "oneLiner",
+  "content",
+  "category",
+  "emoji",
+  "tags",
+  "contributorId"
+]
 
 export function getDocSlugs(docEnum:DocTypeEnum) {
   let directory:string;
@@ -36,7 +50,7 @@ type Items = {
   [key: string]: any
 }
 
-export function getDocBySlug(props:{slug: string, fields: string[], docEnum:DocTypeEnum}):DocType {
+export function getDocBySlug(props:{slug: string,  fields?:string[], docEnum:DocTypeEnum}):DocType {
   const {slug, fields, docEnum} = {...props};
   const realSlug = slug.replace(/\.md$/, '')
   let directory:string;
@@ -63,9 +77,9 @@ export function getDocBySlug(props:{slug: string, fields: string[], docEnum:DocT
   const { data, content } = matter(fileContents)
 
   const items:Items = {}
-
+  const fieldsToUse:string[] = fields || defaultFields;
   // Ensure only the minimal needed data is exposed
-  fields.forEach((field) => {
+  fieldsToUse.forEach((field) => {
     if (field === 'slug') {
       items[field] = realSlug
     }
@@ -77,6 +91,8 @@ export function getDocBySlug(props:{slug: string, fields: string[], docEnum:DocT
       items[field] = data[field]
     }
   })
+  const contributorId:string = items.contributorId || "";
+  const contributor = getContributorById(contributorId);
   const docToReturn:DocType = {
     slug: items.slug || "",
     title: items.title ||'',
@@ -87,29 +103,28 @@ export function getDocBySlug(props:{slug: string, fields: string[], docEnum:DocT
     content: items.content || '',
     category: items.category || '',
     tags: items.tags || null,
-    authorAvatar: items.authorAvatar || null,
-    authorName: items.authorName || null,
-    authorRole: items.authorRole || null
+    contributor:contributor
   }
   return docToReturn;
 }
 
-export function getAllDocs(props:{fields: string[], docEnum:DocTypeEnum}):DocType[] {
-  const {fields, docEnum} = {...props}
+export function getAllDocs(props:{docEnum:DocTypeEnum, fields?:string[]}):DocType[] {
+  const {docEnum} = {...props}
+
 
   const slugs = getDocSlugs(docEnum);
   const docs:DocType[] = slugs
-    .map((slug) => getDocBySlug({slug: slug, fields: fields, docEnum: docEnum}))
+    .map((slug) => getDocBySlug({slug: slug, docEnum: docEnum}))
     // sort posts by date in descending order
     // TODO: check efficiency of date operation... maybe store on object?
     .sort((post1, post2) => (new Date(post1.lastUpdate).getTime() > new Date(post2.lastUpdate).getTime()? -1 : 1))
   return docs
 }
 
-export function getDocsByCategory(props:{category:string, fields:string[], docEnum:DocTypeEnum, slugToExclude?:string}):DocType[]{
-  const {category, fields, slugToExclude, docEnum} = {...props}
+export function getDocsByCategory(props:{category:string, fields?:string[], docEnum:DocTypeEnum, slugToExclude?:string}):DocType[]{
+  const {category, slugToExclude, fields, docEnum} = {...props}
   // TODO: examine efficiency if we call getalldocs this for every page
-  const allDocs = getAllDocs({fields: fields, docEnum:docEnum});
+  const allDocs = getAllDocs({docEnum:docEnum, fields:fields});
   const recommendedDocs = allDocs.filter(d=>d.category.toLowerCase().trim() == category.toLowerCase().trim() 
   && (!slugToExclude || d.slug.toLowerCase().trim() != slugToExclude.toLowerCase().trim()));
   return recommendedDocs;
