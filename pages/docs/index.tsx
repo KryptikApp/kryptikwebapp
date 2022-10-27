@@ -66,6 +66,16 @@ export default function DocsHome({allDocs}:Props){
                             </h2>
                         </div>
                     </Link>
+                    <Link href="../blog">
+                        <div className="rounded-md border-l-4 border-sky-400 px-2 py-4 hover:cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900">
+                            <h1 className="text-2xl text-left">
+                            Blog
+                            </h1>
+                            <h2 className="text-lg text-gray-800 dark:text-gray-200">
+                                Dive into the world of online privacy and ownership.
+                            </h2>
+                        </div>
+                    </Link>
                     
                 </div>
             </div>
