@@ -6,7 +6,7 @@ import { KryptikThemeProvider } from '../components/ThemeProvider'
 import router from 'next/router'
 import { useEffect } from 'react'
 import LayoutDevDocs from '../components/LayoutDevDocs'
-import 'highlight.js/styles/gradient-dark.css';
+import 'highlight.js/styles/github-dark-dimmed.css';
 
 
 function MyApp({ Component, pageProps, router }: AppProps) {
