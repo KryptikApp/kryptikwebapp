@@ -1,7 +1,7 @@
 ---
 title: "Kryptik Research Questions"
 oneLiner: "Kryptik has created a novel way to manage private keys online. These are the questions we're exploring as we continue to refine key management."
-image: "/blog/questions.svg"
+image: "/blog/questions.jpg"
 lastUpdate: "2022-10-13"
 category: "Research"
 authorName: "Jett Hays"
