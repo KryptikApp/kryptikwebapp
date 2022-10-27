@@ -9,13 +9,23 @@ export type DocType = {
     category: string
     tags: string[]|null
     // author props
-    authorAvatar: string|null
-    authorRole: string|null
-    authorName: string|null
+    contributor: Contributor
   }
 
 export enum DocTypeEnum{
   Blog = 0,
   DevDoc = 1,
   UserDoc = 2
+}
+
+export type Contributor = {
+  id: string
+  name: string,
+  role: string,
+  avatarPath:string
+}
+
+export enum ContributorRole{
+  Builder = 0,
+  Writer = 1
 }
