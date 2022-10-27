@@ -1,6 +1,4 @@
 import { useKryptikThemeContext } from '../ThemeProvider';
-import markdownStylesLight from './markdownStyles.module.css'
-import markdownStylesDark from './markdownStylesDark.module.css'
 import DOMPurify from 'isomorphic-dompurify';
 import { useEffect } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
@@ -36,7 +34,7 @@ const cleanContent = DOMPurify.sanitize(content);
     <div className="max-w-3xl mx-auto">
       <Toaster/>
       <div
-        className={isDark?markdownStylesDark['markdown']:markdownStylesLight['markdown']}
+        className="prose dark:prose-invert md:prose-xl prose-img:rounded-md prose-a:text-sky-400 prose-li:marker:text-sky-400"
         dangerouslySetInnerHTML={{ __html: cleanContent}}
       />
     </div>
