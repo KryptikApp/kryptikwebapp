@@ -28,8 +28,8 @@ export default function BlogHome({allDocs}:Props){
 
     <div className="">
        <Head>
-          <title>Thoughts: Jett Hays</title>
-          <meta name="description" content="Thoughts on technology and philosophy." />
+          <title>Kryptik Blog</title>
+          <meta name="description" content="A blog on privacy and ownership." />
         </Head>
         <div className="">
             <div className="dark:text-white">

@@ -7,6 +7,7 @@ import DocHeader from "../../components/docs/docHeader"
 import DocContent from "../../components/docs/docContent"
 import DocKeepReadingPreview from "../../components/docs/docKeepReadingPreview"
 import EditThisPage from "../../components/EditThisPage"
+import Head from "next/head"
 
 type Props = {
     doc: DocType
@@ -24,6 +25,10 @@ export default function Post({ doc, recommendedDocs }: Props) {
     const readNext:DocType[] = recommendedDocs?recommendedDocs:[];
     return (
           <div>
+            <Head>
+              <title>{doc.title}</title>
+              <meta name="description" content={doc.oneLiner} />
+            </Head>
             <div className="max-w-2xl mx-auto">
                 {
                 router.isFallback?
