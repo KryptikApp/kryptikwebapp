@@ -2,9 +2,9 @@ import Head from "next/head";
 import { useKryptikThemeContext } from "./ThemeProvider";
 import NavbarDevDocs from "./navbars/NavbarDevDocs";
 import Image from "next/image"
-import { DocType } from "../src/helpers/docs/types";
-import { getAllDocs } from "../src/helpers/docs";
 import Link from "next/link";
+import { RiMoonFill, RiSunFill } from "react-icons/ri";
+import { useKryptikAuthContext } from "./KryptikAuthProvider";
 
 type Props = {
   children:any
@@ -12,7 +12,14 @@ type Props = {
 // TODO: Update to support dynamic headers
 export default function Layout(props:Props) {
   const {children} = {...props};
-  const {isDark, themeLoading} = useKryptikThemeContext();
+  const {isDark, themeLoading, updateIsDark} = useKryptikThemeContext();
+  const {authUser} = useKryptikAuthContext()
+
+  function handleDarkToggle(){
+    // uid to update theme for if persisting
+    const uid:string = authUser?authUser.uid:"default";
+    updateIsDark(!isDark, uid, false);
+}
     return (
         <div className={`min-h-screen ${(themeLoading || isDark)?"dark":""} ${(themeLoading || isDark)?"bg-black":"bg-white"}`}>
         <Head>
@@ -22,14 +29,22 @@ export default function Layout(props:Props) {
         </Head>
         
       <main>
-        <div className="w-full h-[8vh] bg-gray-300 dark:bg-gray-700 shadow-sm shadow-slate-500 z-10">
+        <div className="w-full h-[8vh] shadow-sm shadow-slate-500 z-10">
               <div className="flex flex-row space-x-2 px-4 py-3">
-                    <Image src="/kryptikBrand/kryptikKGradient.png" width="28" height="28"></Image>
-                    <h1 className="text-black dark:text-white text-xl font-bold">Kryptik Dev Docs</h1>
-                    <div className="flex-grow">
-                      <Link href='/'>
-                       <div className="bg-gray-100 dark:bg-gray-800 hover:text-green-400 hover:dark:text-green-400 float-right p-2 rounded-md text-gray-700 dark:text-gray-300 hover:cursor-pointer">Go to Wallet</div>
-                      </Link>
+                    <Image className="object-cover rounded-md" src="/kryptikBrand/kryptikKGradient.png" alt="Kryptik logo" width="34" height="20"></Image>
+                    <h1 className="text-black dark:text-white text-xl font-bold my-auto">Kryptik Dev Docs</h1>
+                    <div className="flex-grow flex flex-row-reverse">
+                    <Link href='/'>
+                       <div className="bg-gray-100 dark:bg-gray-800 hover:text-green-400 hover:dark:text-green-400 float-right p-2 rounded-md text-gray-700 dark:text-gray-300 hover:cursor-pointer md:ml-6">Back to Wallet</div>
+                    </Link>
+                     <div className="invisible md:visible my-auto float-right w-fit h-fit p-1 hover:outline hover:outline-1 hover:outline-black hover:dark:outline-white rounded-full text-slate-400 dark:text-white" onClick={()=>handleDarkToggle()}>
+                        {
+                            isDark?
+                            <RiMoonFill size={20}/>:
+                            <RiSunFill size={20}/>
+                        }
+      
+                      </div>
                     </div>
               </div>
         </div>
