@@ -11,6 +11,7 @@ export default function NavbarDevDocs(){
     const [showMenu, setShowMenu] = useState(false);
     const [isLoadingDocs, setIsLoadingDocs] = useState(false);
     const [allDocs, setAllDocs] = useState<DocType[]>([]);
+    const [activeSlug, setActiveSlug] = useState("");
 
 
     async function fetchDevDocs(){
@@ -24,6 +25,12 @@ export default function NavbarDevDocs(){
             setAllDocs(newDevDocs);
         }
         setIsLoadingDocs(false);
+    }
+
+    // handler forn when individual doc is selected
+    function handleDocSelection(slug:string){
+        // update active slug
+        setActiveSlug(slug);
     }
 
 
@@ -55,11 +62,15 @@ export default function NavbarDevDocs(){
                     <div className="flex flex-col space-y-4">
                     {
                         allDocs.length != 0 &&
-                        <DocDevCategoryPreview alwaysOpen={true} docs={allDocs.filter(d=>d.category.toLowerCase()=="getting started")} categoryName="Getting Started" description="Essential knowledge to get started."/>
+                        <DocDevCategoryPreview activeSlug={activeSlug} onDocSelection={handleDocSelection} alwaysOpen={true} docs={allDocs.filter(d=>d.category.toLowerCase().trim()=="getting started")} categoryName="Getting Started" description="First steps when getting started with Kryptik."/>
                     }
                     {
                         allDocs.length != 0 &&
-                        <DocDevCategoryPreview alwaysOpen={true} docs={allDocs.filter(d=>d.category.toLowerCase()=="guides")} categoryName="Guides" description="Simple examples with code."/>
+                        <DocDevCategoryPreview activeSlug={activeSlug} onDocSelection={handleDocSelection} alwaysOpen={true} docs={allDocs.filter(d=>d.category.toLowerCase().trim()=="core concepts")} categoryName="Core concepts" description="Essential knowledge to get started."/>
+                    }
+                    {
+                        allDocs.length != 0 &&
+                        <DocDevCategoryPreview activeSlug={activeSlug} onDocSelection={handleDocSelection} alwaysOpen={true} docs={allDocs.filter(d=>d.category.toLowerCase().trim()=="guides")} categoryName="Guides" description="Simple wallet examples with code."/>
                     }
                 </div>
                 }

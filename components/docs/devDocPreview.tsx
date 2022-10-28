@@ -24,7 +24,7 @@ type Props = {
     }
     return (
     <div onClick={()=>handleSelection()}>
-      <div className="rounded-md px-2 py-1 hover:cursor-pointer hover:bg-gray-100 hover:dark:bg-gray-900">
+      <div className={`rounded-md px-2 py-1 hover:cursor-pointer hover:bg-gray-100 hover:dark:bg-gray-900 ${(activeSlug && activeSlug == slug)?"rounded-none border-l-2 border-sky-400 hover:rounded-md":""}`}>
         <div className="flex flex-col space-y-2">
                 <div className="flex flex-row space-x-2">
                   {

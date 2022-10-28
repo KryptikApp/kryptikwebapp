@@ -8,11 +8,12 @@ type Props = {
     description: string,
     docs: DocType[],
     alwaysOpen?:boolean
+    activeSlug:string
+    onDocSelection?: (slug:string)=>void
   }
   
-  const DocDevCategoryPreview = ({ categoryName, docs, description, alwaysOpen}: Props) => {
+  const DocDevCategoryPreview = ({ categoryName, docs, description, activeSlug, alwaysOpen, onDocSelection}: Props) => {
     const cardDetailsId:string = categoryName + "Details";
-    const [activeSlug, setActiveSlug] = useState("");
     
     function handleCategoryClicked(){
         // no need for animation plus exandable code below when always open
@@ -36,16 +37,11 @@ type Props = {
         expandableDetails.style.setProperty('--originalHeight', `${expandableDetails.scrollHeight}px`);
     }
 
-    // handler forn when individual doc is selected
-    function handleDocSelection(slug:string){
-        // update active slug
-        setActiveSlug(slug);
-    }
 
     return (
         <div className="">
             <div className="flex flex-row textbalck dark:text-white" onClick={()=>handleCategoryClicked()}>
-            <p className="px-2 text-xl font-semibold mb-1 hover:cursor-pointer hover:text-sky-400">Getting Started</p>
+            <p className={`px-2 text-xl font-semibold mb-1 ${!alwaysOpen && "hover:cursor-pointer hover:text-sky-400"}`}>{categoryName}</p>
             {
                 !alwaysOpen && 
                 <div className="flex-grow">
@@ -57,8 +53,8 @@ type Props = {
             </div>
             <div id={cardDetailsId} className={`${!alwaysOpen && "expandable"} flex flex-col`}>
                 {
-                    docs.filter(d=>d.category.toLowerCase()=="getting started").map((doc:DocType, index:number)=>
-                    <DevDocPreview activeSlug={activeSlug} onSelection={handleDocSelection} emoji={doc.emoji||undefined} title={doc.title} slug={doc.slug} oneLiner={doc.oneLiner} image={doc.image||undefined} key={"essentials"+index}/>
+                    docs.map((doc:DocType, index:number)=>
+                    <DevDocPreview activeSlug={activeSlug} onSelection={onDocSelection} emoji={doc.emoji||undefined} title={doc.title} slug={doc.slug} oneLiner={doc.oneLiner} image={doc.image||undefined} key={"essentials"+index}/>
                     )
                 }
             </div>
