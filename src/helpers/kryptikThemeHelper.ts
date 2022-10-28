@@ -60,19 +60,21 @@ export function useKryptikTheme() {
         }
     }
 
-    const updateIsDark = function(newIsDark:boolean, uid:string){
+    const updateIsDark = function(newIsDark:boolean, uid:string, persist:boolean=true){
         console.log("updating is dark...");
-        let newTheme:ITheme = {
-            isAdvanced: isAdvanced,
-            isDark: newIsDark,
-            isVisible: isVisible,
-            hideBalances: hideBalances,
-            lastUpdated: Date.now()
-        }
         // update app state
         setIsDark(newIsDark);
-        // update stored theme
-        updateTheme(newTheme, uid);
+        if(persist){
+            let newTheme:ITheme = {
+                isAdvanced: isAdvanced,
+                isDark: newIsDark,
+                isVisible: isVisible,
+                hideBalances: hideBalances,
+                lastUpdated: Date.now()
+            }
+            // update stored theme
+            updateTheme(newTheme, uid);
+        }   
     }
 
     const updateIsVisible = async function(newIsVisible:boolean, uid:string, wallet:IWallet){
