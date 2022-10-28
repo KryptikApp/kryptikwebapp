@@ -17,5 +17,7 @@ The steps below will help you import an existing wallet into Kryptik!
 ## Instructions
 
 1. On the _connect page_, press the **import existing seed** button.
+
 2. Enter your seedphrase below your email. Your email will be used for two factor authentication.
+
 3. Click **create wallet**. You will then be asked to confirm your account.

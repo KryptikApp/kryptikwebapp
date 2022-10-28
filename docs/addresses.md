@@ -12,7 +12,7 @@ Anyone who knows your public address can see your transaction history and what a
 
 ## Ethereum Address
 
-> ### Example:
+> **Example:**
 >
 > _0xq7pM6...7049_
 
@@ -20,15 +20,15 @@ An Ethereum address is a 42-character hexadecimal address derived from the last 
 
 ## Solana Address
 
-> ### Example:
+> **Example:**
 >
 > _M2toEo...RheK_
 
 A Solana address is a Base58-encoded string of a 256-bit ed25519 public key
 
-## NEAR Protocol Address
+### NEAR Protocol Address
 
-> ### Example:
+> **Example:**
 >
 > _98793c...d6de_
 

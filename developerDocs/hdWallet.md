@@ -3,7 +3,7 @@ title: "HD Wallets"
 oneLiner: "The Hierarchical Deterministic key structure enables multi-currency wallets."
 emoji: "🌲"
 lastUpdate: "2022-10-12"
-category: "getting started"
+category: "core concepts"
 ---
 
 Hierarchical deterministic wallets can derive multiple accounts from a single seed. This allows Kryptik to offer multi-currency support and streamline the wallet experience.

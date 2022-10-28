@@ -3,7 +3,7 @@ title: "Seeds"
 oneLiner: "Public key cryptography grows from random seeds."
 emoji: "🌱"
 lastUpdate: "2022-10-11"
-category: "getting started"
+category: "core concepts"
 ---
 
 A seed is a string of randomness. As a seed grows in length and randomness, the less likely it is to be guessed by an attacker.

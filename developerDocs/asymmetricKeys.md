@@ -3,7 +3,7 @@ title: "Asymmetric Keys"
 oneLiner: "Asymmetric key pairs power the decentralized internet."
 emoji: "🗝️"
 lastUpdate: "2022-10-8"
-category: "getting started"
+category: "core concepts"
 ---
 
 Asymmetric cryptography refers to cryptographic systems that rely on key pairs. Each key pair contains a public and a private key. Public keys can be shared and are used to encrypt messages, but only those who know the private key can decrypt the incoming message. Private keys can also be used to create unique signatures that can verify the authenticity of messages.
