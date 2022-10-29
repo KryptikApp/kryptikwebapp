@@ -73,6 +73,7 @@
     "remark-rehype": "^10.1.0",
     "secp256k1": "^4.0.3",
     "shamirs-secret-sharing-ts": "^1.0.2",
+    "tailwind-scrollbar": "^2.0.1",
     "yarn": "^1.22.19"
   },
   "devDependencies": {
