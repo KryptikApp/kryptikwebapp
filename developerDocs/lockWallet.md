@@ -19,5 +19,3 @@ const passphrase: string = "yourpassword";
 seedloop.addPassword(passphrase);
 seedloop.lock();
 ```
-
-The _addPassword_ method only needs to be ran once. To relock your wallet with the original password, just call the _lock_ method.
