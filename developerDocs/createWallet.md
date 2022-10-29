@@ -1,7 +1,7 @@
 ---
-title: "Create a Wallet"
+title: "Create Wallet"
 oneLiner: "Initialize a multichain wallet using the Kryptik seedloop."
-lastUpdate: "2022-10-27"
+lastUpdate: "2022-10-28"
 category: "guides"
 ---
 

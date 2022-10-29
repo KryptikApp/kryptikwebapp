@@ -24,7 +24,7 @@ An Ethereum address is a 42-character hexadecimal address derived from the last 
 >
 > _M2toEo...RheK_
 
-A Solana address is a Base58-encoded string of a 256-bit ed25519 public key
+A Solana address is a Base58-encoded string of a 256-bit ed25519 public key.
 
 ### NEAR Protocol Address
 
