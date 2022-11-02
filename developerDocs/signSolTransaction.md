@@ -5,7 +5,7 @@ lastUpdate: "2022-11-1"
 category: "guides"
 ---
 
-A Solana transaction includes instructions that update the state of the Solana blockchain. Each Solana transaction is serilialized and signed as a buffer before being submitted to a node.
+A Solana transaction includes instructions that update the state of the Solana blockchain. Each Solana transaction is serialized and signed as a buffer before being submitted to a node.
 
 ### Transaction Example
 
@@ -16,7 +16,7 @@ import { PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import HDSeedLoop, { Network } from "hdseedloop";
 
 const seedLoop: HDSeedLoop = new HDSeedLoop({ mnemonic: m });
-const networkSol = NetworkFromTicker("sol");
+const networkSol: Network = NetworkFromTicker("sol");
 
 let fromPubKey: PublicKey = new PublicKey(fromAddress);
 let toPubKey: PublicKey = new PublicKey(toAddress);
