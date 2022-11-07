@@ -6,7 +6,7 @@ category: "guides"
 tags: ["Solana"]
 ---
 
-A Solana transaction includes instructions that update the state of the Solana blockchain. Each Solana transaction is serialized and signed as a buffer before being submitted to a node.
+A Solana transaction includes instructions that update the state of the Solana blockchain. Each Solana transaction is serialized and signed as a buffer before being submitted to a node. Solana transactions are signed using the ed25519 signature scheme.
 
 ### Transaction Example
 
