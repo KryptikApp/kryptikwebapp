@@ -7,6 +7,7 @@ import DocHeader from "../../components/docs/docHeader"
 import DocContent from "../../components/docs/docContent"
 import DocKeepReadingPreview from "../../components/docs/docKeepReadingPreview"
 import EditThisPage from "../../components/EditThisPage"
+import { sampleSize } from "lodash"
 
 type Props = {
     doc: DocType
@@ -21,7 +22,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
       return <Custom404/>;
     }
     const githubLink:string = `https://github.com/KryptikApp/kryptikwebapp/blob/main/developerDocs/${doc.slug}.md`
-    const readNext:DocType[] = recommendedDocs?recommendedDocs:[];
+    let readNext:DocType[] = recommendedDocs?recommendedDocs:[];
     return (
           <div className="md:max-h-[92vh] md:overflow-y-auto pt-10">
                 {
@@ -71,9 +72,14 @@ export default function Post({ doc, recommendedDocs }: Props) {
     // create html from markdown content
     const content:string = await markdownToHtml(newDoc.content || '');
     newDoc.content = content
-    const newRecommendedDocs:DocType[] = getDocsByCategory({category:newDoc.category,
+    let newRecommendedDocs:DocType[] = getDocsByCategory({category:newDoc.category,
     slugToExclude: newDoc.slug,
     docEnum:DocTypeEnum.DevDoc});
+    // cap number of recommended docs at 3
+    // randomly choose 3 docs
+    if(newRecommendedDocs.length>3){
+      newRecommendedDocs = sampleSize(newRecommendedDocs, 3)
+    }
     return {
       props: {
         doc: newDoc,
