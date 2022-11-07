@@ -3,6 +3,7 @@ title: "Sign Solana Transaction"
 oneLiner: "Sign a Solana transfer transaction with the Kryptik seedloop."
 lastUpdate: "2022-11-1"
 category: "guides"
+tags: ["Solana"]
 ---
 
 A Solana transaction includes instructions that update the state of the Solana blockchain. Each Solana transaction is serialized and signed as a buffer before being submitted to a node.
