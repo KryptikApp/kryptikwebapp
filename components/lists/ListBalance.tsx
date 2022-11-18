@@ -20,7 +20,7 @@ const ListBalance:NextPage = () => {
     const {kryptikService, kryptikWallet} = useKryptikAuthContext();
     // ensure service is started
     const router = useRouter();
-    const {isAdvanced, isVisible} = useKryptikThemeContext()
+    const {isAdvanced, hideBalances} = useKryptikThemeContext()
     const initTokenAndBalances:TokenAndNetwork[] = [];
     const [isFetchedBalances, setIsFetchedBalances] = useState(false);
     const [isManualRefresh, setIsManualRefresh] = useState(false);
@@ -100,7 +100,7 @@ const ListBalance:NextPage = () => {
                         (isFetchedBalances&& balanceHolder)?
                         <div className="flex flex-col">
                             <h1 className="text-lg font-semibold text-slate-700 dark:text-slate-200">Your Balance</h1>
-                            <h1 className={`text-left text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-sky-500 to-green-400 hover:text-sky-400 ${isVisible?"blur-sm":""}`}>${roundToDecimals(totalBalance, 2)}</h1>
+                            <h1 className={`text-left text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-sky-500 to-green-400 hover:text-sky-400 ${hideBalances?"blur-md":""}`}>${roundToDecimals(totalBalance, 2)}</h1>
                         </div>:
                         <div className="flex flex-col space-y-4">
                             <h1 className="text-lg font-semibold text-slate-700 dark:text-slate-200">Your Balance</h1>
