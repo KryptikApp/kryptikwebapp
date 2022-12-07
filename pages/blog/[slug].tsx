@@ -28,6 +28,8 @@ export default function Post({ doc, recommendedDocs }: Props) {
             <Head>
               <title>{doc.title}</title>
               <meta name="description" content={doc.oneLiner} />
+               {/* to do: defer loading to speed up page load. ensure doesn't request on each page. */}
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css" integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC" crossOrigin="anonymous"></link>
             </Head>
             <div className="max-w-2xl mx-auto">
                 {
