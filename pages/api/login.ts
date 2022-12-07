@@ -29,7 +29,7 @@ export default async( req: NextApiRequest, res: NextApiResponse<Data> )=>
     magic.token.validate(didToken);
     // get user metadata from didtoken
     const { email, issuer } = await magic.users.getMetadataByToken(didToken);
-    // ensure the auid was passed along 
+    // ensure the uid was passed along 
     let uid:string = email?email:"not set";
     if(issuer == "not set"){
       res.status(401).send({ done: true });
