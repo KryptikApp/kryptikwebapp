@@ -31,8 +31,15 @@ export default function Layout(props:Props) {
       <main>
         <div className="w-full h-[8vh] shadow-sm shadow-slate-500 z-10">
               <div className="flex flex-row space-x-2 px-4 py-3">
-                    <Image className="object-cover rounded-md" src="/kryptikBrand/kryptikKGradient.png" alt="Kryptik logo" width="34" height="20"></Image>
-                    <h1 className="text-black dark:text-white text-xl font-bold my-auto">Kryptik Dev Docs</h1>
+                    
+                      <Link href={"/developer"}>
+                      <Image className="object-cover rounded-md hover:cursor-pointer" src="/kryptikBrand/kryptikKGradient.png" alt="Kryptik logo" width="34" height="20"></Image>
+                      </Link>
+                      <Link href={"/developer"}>
+                       <h1 className="text-black dark:text-white text-xl font-bold my-auto hover:cursor-pointer">Kryptik Dev Docs</h1>
+                       </Link>
+                    
+                    
                     <div className="flex-grow flex flex-row-reverse">
                     <Link href='/'>
                        <div className="bg-gray-100 dark:bg-gray-800 hover:text-green-400 hover:dark:text-green-400 float-right p-2 rounded-md text-gray-700 dark:text-gray-300 hover:cursor-pointer md:ml-6">Back to Wallet</div>
