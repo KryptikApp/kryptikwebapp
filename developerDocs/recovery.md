@@ -14,7 +14,7 @@ Most wallets offer the ability to back up your seed phrase with a cloud provider
 
 ## Distributed Key Management
 
-Kryptik’s web application provides passwordless authentication and account recovery. Instead of relying on trusted cloud backups, Kryptik distributes shares of an encryption key to a group of shareholders; k of n shares are required to reconstruct the original secret. The encryption key creates an encrypted version of the wallet. Whenever a user wants to regain access to their wallet, the shares are reassembled, and the wallet is decrypted.
+Kryptik’s web application provides passwordless authentication and account recovery. Instead of relying on trusted cloud backups, Kryptik distributes shares of an encryption key to a group of shareholders; **k of n** shares are required to reconstruct the original secret. The encryption key creates an encrypted version of the wallet. Whenever a user wants to regain access to their wallet, the shares are reassembled, and the wallet is decrypted.
 
 Kryptik key management has several favorable properties:
 
