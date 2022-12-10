@@ -10,6 +10,19 @@ tags: ["cryptography", "internet", "computers", "keys", "security"]
 
 Digital wallets enable essential applications like encrypted messaging and online banking. However, digital wallets are vulnerable to loss and theft; compromised wallets are a severe issue, costing innocent people billions of dollars. Kryptik improves the security of digital wallets by distributing account recovery across a group of shareholders. In addition to removing a single point of failure, Kryptik simplifies the wallet experience by incorporating passwordless authentication. The Kryptik key management system has been adopted and is used in the open-source Kryptik wallet.
 
+## Reading Guide
+
+- [Introduction](#introduction)
+- [Random Seeds](#random-seeds)
+- [Deterministic Wallets](#deterministic-wallets)
+- [HD Wallets](#Hierarchical-deterministic-wallets)
+- [Security Problem](#wallets-are-hard-to-protect)
+- [Standard Solutions](#standard-solutions)
+- [Distributed Key Management](#distributed-key-management)
+- [Challenges](#challenges)
+- [Kryptik Implementation Details](#kryptik-implementation-details)
+- [Conclusion](#conclusion)
+
 ## Introduction
 
 The internet relies on a peer-to-peer connection between computers, but the majority of services we use daily are centralized. While corporations like Chase and Facebook are easy to use, centralized convenience often comes at the cost of privacy and ownership.
