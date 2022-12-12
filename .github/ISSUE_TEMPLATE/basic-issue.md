@@ -1,5 +1,5 @@
 ---
-name: Custom Issue Template
+name: Basic Issue
 about: 'A simple template for basic issues. '
 title: ''
 labels: ''
