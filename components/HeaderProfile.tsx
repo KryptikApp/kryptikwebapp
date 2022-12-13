@@ -35,13 +35,13 @@ const HeaderProfile:NextPage<Props> = (props) => {
                 <div className="flex px-4 pt-12">
                     <AvatarMain photoPath={getUserPhotoPath(authUser?authUser:defaultUser)}/>
                     <div className="w-9/12 flex items-center">
-                        <div className="w-10/12 flex flex-col leading-none items-start">
+                        <div className="ml-2 w-10/12 flex flex-col leading-none items-start">
                             <div>
                             <ProfileName/>
                             </div>
                             <div>
                                 {
-                                    showBio && <p className="ml-2 text-slate-500 text-sm dark:text-white">{authUser?authUser.bio:""}</p>
+                                    showBio && <p className="text-slate-500 text-sm dark:text-white">{authUser?authUser.bio:""}</p>
                                 }
                             </div>
                         </div>
