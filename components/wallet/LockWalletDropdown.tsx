@@ -1,6 +1,7 @@
 import { NextPage } from "next";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { updateVaultSeedloop } from "../../src/handlers/wallet/vaultHandler";
 import { readExtraUserData } from "../../src/helpers/firebaseHelper";
 import { WalletStatus } from "../../src/models/KryptikWallet";
@@ -14,6 +15,7 @@ const LockWalletDropdown: NextPage = () => {
   const [password, setPassword] = useState("");
   //details state
   const [showLockDetails, setShowLockDetails] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLockWallet = async function () {
     if (kryptikWallet.status != WalletStatus.Connected) return;
@@ -62,7 +64,7 @@ const LockWalletDropdown: NextPage = () => {
   };
 
   return (
-    <div className="mt-8 flex-col border rounded hover:cursor-pointer py-2 px-2">
+    <div className="mt-8 bg-white dark:bg-black flex-col border rounded hover:cursor-pointer py-2 px-2">
       <div
         className="flex flex-row py-2"
         onClick={() => handleLockDetailsClick()}
@@ -87,20 +89,38 @@ const LockWalletDropdown: NextPage = () => {
               Lock your wallet with a password. You will need this password to
               unlock your wallet the next time you make a transaction.
             </p>
+          </div>
+          <div>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="bg-gray-200 dark:bg-gray-700 appearance-none border border-gray-200 dark:border-gray-800 rounded w-full py-3 px-4 text-gray-800 dark:text-white leading-tight focus:outline-none focus:bg-white focus:border-sky-400 dark:focus:border-sky-500 text-xl"
+                id="inline-full-name"
+                placeholder="Enter your password"
+                required
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+                {showPassword ? (
+                  <AiOutlineEyeInvisible
+                    size={30}
+                    className="text-blue-400 hover:cursor-pointer"
+                    onClick={() => setShowPassword(false)}
+                  />
+                ) : (
+                  <AiOutlineEye
+                    size={30}
+                    className="text-blue-400 hover:cursor-pointer"
+                    onClick={() => setShowPassword(true)}
+                  />
+                )}
+              </div>
+            </div>
+
             <p className="text-md text-justify text-gray-400 dark:text-gray-500">
               Kryptik does not store your password, so it is up to you to store
               your password properly.
             </p>
-          </div>
-          <div>
-            <input
-              type="password"
-              className="bg-gray-200 dark:bg-gray-700 appearance-none border border-gray-200 rounded w-full py-3 px-4 text-gray-800 dark:text-white leading-tight focus:outline-none focus:bg-white focus:border-sky-400 dark:focus:border-sky-500 text-xl"
-              id="inline-full-name"
-              placeholder="Enter your password"
-              required
-              onChange={(e) => setPassword(e.target.value)}
-            />
             <div className="my-4 text-right float-right">
               <button
                 onClick={() => handleLockWallet()}
