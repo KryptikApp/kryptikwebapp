@@ -1,4 +1,4 @@
-export interface IQuestionAnswer{
-    question:string,
-    answer:string
+export interface IQuestionAnswer {
+  question: string;
+  answer: string;
 }

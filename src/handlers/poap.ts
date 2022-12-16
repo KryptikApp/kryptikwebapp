@@ -1,6 +1,5 @@
 import { KryptikFetch } from "../kryptikFetch";
-import { parsePoaps } from '../parsers/poap';
-
+import { parsePoaps } from "../parsers/poap";
 
 export const fetchPoaps = async (address: string) => {
   try {
@@ -10,6 +9,6 @@ export const fetchPoaps = async (address: string) => {
     });
     return parsePoaps(data);
   } catch (error) {
-    console.log('Error getting POAPs', error);
+    console.log("Error getting POAPs", error);
   }
 };

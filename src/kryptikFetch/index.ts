@@ -1,4 +1,4 @@
-export const KRYPTIK_FETCH_ERROR = 'KryptikFetchError';
+export const KRYPTIK_FETCH_ERROR = "KryptikFetchError";
 
 export interface KryptikFetchRequestOpts extends RequestInit {
   params?: ConstructorParameters<typeof URLSearchParams>[0]; // type of first argument of URLSearchParams constructor.
@@ -6,10 +6,10 @@ export interface KryptikFetchRequestOpts extends RequestInit {
   dropAbortController?: boolean; // some server requests may not want to use abort controller
 }
 
-export interface IKryptikFetchResponse{
-  data:any,
-  headers:Headers,
-  status:number
+export interface IKryptikFetchResponse {
+  data: any;
+  headers: Headers;
+  status: number;
 }
 
 /**
@@ -18,38 +18,39 @@ export interface IKryptikFetchResponse{
 export async function KryptikFetch(
   url: RequestInfo,
   opts: KryptikFetchRequestOpts
-):Promise<IKryptikFetchResponse> {
+): Promise<IKryptikFetchResponse> {
   opts = {
     headers: {},
-    method: 'get',
+    method: "get",
     timeout: 30000, // 30 secs
     ...opts, // Any other fetch options
   };
 
-  if (!url) throw new Error('KryptikFetch: Missing url argument');
+  if (!url) throw new Error("KryptikFetch: Missing url argument");
 
-  const controller:AbortController|undefined = opts.dropAbortController?undefined:new AbortController();
-  if(controller){
+  const controller: AbortController | undefined = opts.dropAbortController
+    ? undefined
+    : new AbortController();
+  if (controller) {
     const id = setTimeout(() => controller.abort(), opts.timeout);
     clearTimeout(id);
   }
- 
+
   const { body, params, headers, ...otherOpts } = opts;
 
   const requestBody =
-    body && typeof body === 'object' ? JSON.stringify(opts.body) : opts.body;
+    body && typeof body === "object" ? JSON.stringify(opts.body) : opts.body;
 
   const response = await fetch(`${url}${createParams(params)}`, {
     ...otherOpts,
     body: requestBody,
     headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
+      Accept: "application/json",
+      "Content-Type": "application/json",
       ...headers,
     },
-    signal: controller?controller.signal:null
+    signal: controller ? controller.signal : null,
   });
-  
 
   const responseBody = await getBody(response);
 
@@ -58,7 +59,7 @@ export async function KryptikFetch(
     return { data: responseBody, headers, status };
   } else {
     const errorResponseBody =
-      typeof responseBody === 'string' ? { error: responseBody } : responseBody;
+      typeof responseBody === "string" ? { error: responseBody } : responseBody;
 
     const error = generateError({
       requestBody: body,
@@ -71,22 +72,22 @@ export async function KryptikFetch(
 }
 
 function getBody(response: Response) {
-  const contentType = response.headers.get('Content-Type');
-  if (contentType?.startsWith('application/json')) {
+  const contentType = response.headers.get("Content-Type");
+  if (contentType?.startsWith("application/json")) {
     return response.json();
   } else {
     return response.text();
   }
 }
 
-function createParams(params: KryptikFetchRequestOpts['params']) {
-  return params ? `?${new URLSearchParams(params)}` : '';
+function createParams(params: KryptikFetchRequestOpts["params"]) {
+  return params ? `?${new URLSearchParams(params)}` : "";
 }
 
 interface KryptikFetchError extends Error {
   response?: Response;
   responseBody?: any;
-  requestBody?: RequestInit['body'];
+  requestBody?: RequestInit["body"];
 }
 
 function generateError({
@@ -94,14 +95,14 @@ function generateError({
   response,
   responseBody,
 }: {
-  requestBody: RequestInit['body'];
+  requestBody: RequestInit["body"];
   response: Response;
   responseBody: any;
 }) {
   const message =
     responseBody?.error ||
     response?.statusText ||
-    'There was an error with the request.';
+    "There was an error with the request.";
 
   const error: KryptikFetchError = new Error(message);
 
@@ -121,7 +122,7 @@ export class KryptikFetchClient {
   opts: KryptikFetchRequestOpts;
 
   constructor(opts: KryptikFetchClientOpts = {}) {
-    const { baseURL = '', ...otherOpts } = opts;
+    const { baseURL = "", ...otherOpts } = opts;
     this.baseURL = baseURL;
     this.opts = otherOpts;
   }
@@ -132,7 +133,7 @@ export class KryptikFetchClient {
   get(url?: RequestInfo, opts?: KryptikFetchRequestOpts) {
     return KryptikFetch(`${this.baseURL}${url}`, {
       ...opts,
-      method: 'get',
+      method: "get",
     });
   }
 
@@ -142,7 +143,7 @@ export class KryptikFetchClient {
   delete(url?: RequestInfo, opts?: KryptikFetchRequestOpts) {
     return KryptikFetch(`${this.baseURL}${url}`, {
       ...opts,
-      method: 'delete',
+      method: "delete",
     });
   }
 
@@ -152,7 +153,7 @@ export class KryptikFetchClient {
   head(url?: RequestInfo, opts?: KryptikFetchRequestOpts) {
     return KryptikFetch(`${this.baseURL}${url}`, {
       ...opts,
-      method: 'head',
+      method: "head",
     });
   }
 
@@ -162,7 +163,7 @@ export class KryptikFetchClient {
   options(url?: RequestInfo, opts?: KryptikFetchRequestOpts) {
     return KryptikFetch(`${this.baseURL}${url}`, {
       ...opts,
-      method: 'options',
+      method: "options",
     });
   }
 
@@ -173,7 +174,7 @@ export class KryptikFetchClient {
     return KryptikFetch(`${this.baseURL}${url}`, {
       ...opts,
       body,
-      method: 'post',
+      method: "post",
     });
   }
 
@@ -184,7 +185,7 @@ export class KryptikFetchClient {
     return KryptikFetch(`${this.baseURL}${url}`, {
       ...opts,
       body,
-      method: 'put',
+      method: "put",
     });
   }
 
@@ -195,7 +196,7 @@ export class KryptikFetchClient {
     return KryptikFetch(`${this.baseURL}${url}`, {
       ...opts,
       body,
-      method: 'patch',
+      method: "patch",
     });
   }
 }

@@ -1,36 +1,48 @@
 import { KryptikFetch } from "../../kryptikFetch";
 import { ISwapData, parse0xdata } from "../../parsers/0xData";
 
-
-export interface zeroXParams{
-  baseUrl:string, buyTokenId:string, sellTokenId:string, sellAmount:number, takerAddress?:string, slippagePercentage?:number
+export interface zeroXParams {
+  baseUrl: string;
+  buyTokenId: string;
+  sellTokenId: string;
+  sellAmount: number;
+  takerAddress?: string;
+  slippagePercentage?: number;
 }
 
-export const fetch0xSwapOptions = async function(params:zeroXParams):Promise<null|ISwapData>{
-  const {baseUrl, buyTokenId, sellTokenId, sellAmount, takerAddress, slippagePercentage} = {...params};
-    try { // add support for multiple pages
-        let url:string;
-        // add taker address if provide
-        if(takerAddress){
-          url = `${baseUrl}swap/v1/quote?buyToken=${buyTokenId}&sellToken=${sellTokenId}&sellAmount=${sellAmount}&takerAddress=${takerAddress}`;
-        }
-        else{
-          url = `${baseUrl}swap/v1/quote?buyToken=${buyTokenId}&sellToken=${sellTokenId}&sellAmount=${sellAmount}`;
-        }
-        if(slippagePercentage){
-          url.concat(`&slippagePercentage=${slippagePercentage}`)
-        }
-        const dataResponse = await KryptikFetch(url, {
-          timeout: 10000, // 10 secs
-        });
-        if(!dataResponse || !dataResponse.data) return null;
-        // parse api response and return
-        const evmSwapData:ISwapData = parse0xdata(dataResponse.data);
-        return evmSwapData;
-      }
-    catch(e){
-      console.log("Error while fetching 0x swap data");
-      console.warn(e);
-      return null; 
+export const fetch0xSwapOptions = async function (
+  params: zeroXParams
+): Promise<null | ISwapData> {
+  const {
+    baseUrl,
+    buyTokenId,
+    sellTokenId,
+    sellAmount,
+    takerAddress,
+    slippagePercentage,
+  } = { ...params };
+  try {
+    // add support for multiple pages
+    let url: string;
+    // add taker address if provide
+    if (takerAddress) {
+      url = `${baseUrl}swap/v1/quote?buyToken=${buyTokenId}&sellToken=${sellTokenId}&sellAmount=${sellAmount}&takerAddress=${takerAddress}`;
+    } else {
+      url = `${baseUrl}swap/v1/quote?buyToken=${buyTokenId}&sellToken=${sellTokenId}&sellAmount=${sellAmount}`;
     }
-}
+    if (slippagePercentage) {
+      url.concat(`&slippagePercentage=${slippagePercentage}`);
+    }
+    const dataResponse = await KryptikFetch(url, {
+      timeout: 10000, // 10 secs
+    });
+    if (!dataResponse || !dataResponse.data) return null;
+    // parse api response and return
+    const evmSwapData: ISwapData = parse0xdata(dataResponse.data);
+    return evmSwapData;
+  } catch (e) {
+    console.log("Error while fetching 0x swap data");
+    console.warn(e);
+    return null;
+  }
+};

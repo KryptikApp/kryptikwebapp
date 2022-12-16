@@ -1,65 +1,66 @@
 import { Network, NetworkFamily, isValidEVMAddress } from "hdseedloop";
-import {
-    StaticJsonRpcProvider,
-} from '@ethersproject/providers';
+import { StaticJsonRpcProvider } from "@ethersproject/providers";
 
 import { defaultNetworkDb } from "../../services/models/network";
 import { networkFromNetworkDb } from "../utils/networkUtils";
 import { IAccountResolverParams, IResolvedAccount } from "./accountResolver";
 
-export const resolveEVMAccount = async function(params:IAccountResolverParams):Promise<IResolvedAccount|null>{
-    const{account, kryptikProvider, networkDB} = params;
-    let network:Network = networkFromNetworkDb(networkDB);
-    if(!kryptikProvider.ethProvider) return null;
-    if(network.networkFamily != NetworkFamily.EVM) return null;
-    let evmProvider = kryptikProvider.ethProvider;
-    let address:string|null = null;
-    let avatarPath:string|null = null;
-    let name:string|null = null;
-    // default ENS is ethereum... other chains are text records 
-    if(networkDB.ticker.toLowerCase() == "eth"){
-        address = await evmProvider.resolveName(account);
-        avatarPath = await evmProvider.getAvatar(account);
+export const resolveEVMAccount = async function (
+  params: IAccountResolverParams
+): Promise<IResolvedAccount | null> {
+  const { account, kryptikProvider, networkDB } = params;
+  let network: Network = networkFromNetworkDb(networkDB);
+  if (!kryptikProvider.ethProvider) return null;
+  if (network.networkFamily != NetworkFamily.EVM) return null;
+  let evmProvider = kryptikProvider.ethProvider;
+  let address: string | null = null;
+  let avatarPath: string | null = null;
+  let name: string | null = null;
+  // default ENS is ethereum... other chains are text records
+  if (networkDB.ticker.toLowerCase() == "eth") {
+    address = await evmProvider.resolveName(account);
+    avatarPath = await evmProvider.getAvatar(account);
+  }
+  // else{
+  //     // get eth provider, for default ENS service
+  //     evmProvider = new StaticJsonRpcProvider(defaultNetworkDb.provider, {name:"homestead", chainId:1});
+  //     let resolver= await evmProvider.getResolver(account);
+  //     if(resolver){
+  //         address = await resolver.getAddress(networkDB.chainId);
+  //         avatarPath = await evmProvider.getAvatar(account);
+  //     }
+  // }
+  // if account resolves then account is an ENS name...
+  // check if address is a valid EVM address and set
+  // otherwise... no ens name set for account, check if account is valid address
+  // if so.. set as address
+  if (
+    address &&
+    address.toLowerCase() != account.toLowerCase() &&
+    isValidEVMAddress(address)
+  ) {
+    address = address;
+    name = account;
+  } else {
+    if (isValidEVMAddress(account)) {
+      address = account;
+      // try reverse lookup
+      //may fail on chains that aren't eth
+      // TODO: LOOKUP W/ ETH PROVIDER?
+      try {
+        name = await evmProvider.lookupAddress(account);
+      } catch (e) {
+        name = account;
+      }
+    } else {
+      return null;
     }
-    // else{
-    //     // get eth provider, for default ENS service
-    //     evmProvider = new StaticJsonRpcProvider(defaultNetworkDb.provider, {name:"homestead", chainId:1});
-    //     let resolver= await evmProvider.getResolver(account);
-    //     if(resolver){
-    //         address = await resolver.getAddress(networkDB.chainId);
-    //         avatarPath = await evmProvider.getAvatar(account);
-    //     }
-    // }
-    // if account resolves then account is an ENS name...
-    // check if address is a valid EVM address and set
-    // otherwise... no ens name set for account, check if account is valid address
-    // if so.. set as address
-    if(address && address.toLowerCase()!=account.toLowerCase() && isValidEVMAddress(address)){
-       address = address;
-       name = account;
-    }
-    else{
-        if(isValidEVMAddress(account)){
-            address = account;
-            // try reverse lookup
-            //may fail on chains that aren't eth
-            // TODO: LOOKUP W/ ETH PROVIDER?
-            try{
-                name = await evmProvider.lookupAddress(account);
-            }
-            catch(e){
-                name = account;
-            }
-        }
-        else{
-            return null;
-        }
-    }
-    let resolvedAccount:IResolvedAccount = {
-        address: address,
-        isResolved: true,
-        avatarPath: avatarPath?avatarPath:undefined,
-        names: name?[name]:undefined
-    }
-    return resolvedAccount;
-}
+  }
+  let resolvedAccount: IResolvedAccount = {
+    address: address,
+    isResolved: true,
+    avatarPath: avatarPath ? avatarPath : undefined,
+    names: name ? [name] : undefined,
+  };
+  return resolvedAccount;
+};

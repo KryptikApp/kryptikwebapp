@@ -1,11 +1,14 @@
 ## About
-Key pairs can do wonderful things, but existing wallets like Metamask confine their magic to a single blockchain. 
+
+Key pairs can do wonderful things, but existing wallets like Metamask confine their magic to a single blockchain.
 The Kryptik wallet is built to break through the borders of Ethereum and streamline digital ownership across the internet. One secure wallet. One simple interface. One magical future.
 
 <img src="https://www.kryptik.app/kryptikBrand/kryptik%20balance%20screen.svg" alt="Wallet Page screenshot" width="250">
 
 ## Developing
+
 Note: these steps will help you run a local version of the Kryptik wallet, which is useful for testing changes to the app.
+
 1. Install project packages:
 
 ```bash
@@ -28,5 +31,5 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 ## Disclaimer
-The Kryptik web app. has yet to receive a formal security audit. We welcome feedback on the usability, architecture, and security of this implementation.
 
+The Kryptik web app. has yet to receive a formal security audit. We welcome feedback on the usability, architecture, and security of this implementation.

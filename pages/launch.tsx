@@ -1,15 +1,13 @@
-import type { NextPage } from 'next'
+import type { NextPage } from "next";
 
-import LaunchPage from '../components/LaunchPage';
-
+import LaunchPage from "../components/LaunchPage";
 
 const Launch: NextPage = () => {
   return (
     <div>
-      <LaunchPage/>
+      <LaunchPage />
     </div>
- 
-  )
-}
+  );
+};
 
-export default Launch
+export default Launch;
