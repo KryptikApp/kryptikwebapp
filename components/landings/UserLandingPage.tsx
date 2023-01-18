@@ -1,7 +1,8 @@
 import { NetworkFromTicker, truncateAddress } from "hdseedloop";
 import type { NextPage } from "next";
+import Link from "next/link";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
@@ -10,6 +11,7 @@ import { readExtraUserData } from "../../src/helpers/firebaseHelper";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 import { UserExtraData } from "../../src/models/user";
 import AvailableNetworks from "../networks/AvailableNetworks";
+import { useKryptikWalletConnectContext } from "../WalletConnectProvider";
 
 // landing page for users who are logged in and have a wallet
 const UserLandingPage: NextPage = () => {
@@ -22,6 +24,12 @@ const UserLandingPage: NextPage = () => {
     walletStatus,
     updateWalletStatus,
   } = useKryptikAuthContext();
+  const { initialized, signClient } = useKryptikWalletConnectContext();
+  useEffect(() => {
+    console.log(authUser?.uid);
+    console.log(initialized);
+    console.log(signClient?.metadata);
+  }, []);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -115,6 +123,14 @@ const UserLandingPage: NextPage = () => {
             </div>
             <div className="flex flex-col text-xl">
               <div className="flex flex-col">
+                {/* connect to app */}
+                <div className="flex flex-row">
+                  <Link href="/wallet/connect">
+                    <p className="text-blue-400 hover:cursor-pointer">
+                      Connect
+                    </p>
+                  </Link>
+                </div>
                 {/* wallet status */}
                 <div className="flex flex-row">
                   <div className="flex-1">

@@ -48,7 +48,7 @@ const Profile: NextPage = () => {
             </Link>
           </div>
           <div className="flex-1">
-            <Link href="../wallet/receive">
+            <Link href="../wallet/connect">
               <div className="w-full px-3 text-center text-sky-500 hover:cursor-pointer hover:text-sky-800 hover:font-semibold hover:animate-pulse">
                 <AiFillDownCircle className="mx-auto" size="30" />
                 <span className="text-gray-700 dark:text-gray-200 font-semibold">

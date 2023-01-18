@@ -6,7 +6,7 @@ import {
   UserCredential,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   firebaseAuth,
   firestore,
@@ -14,6 +14,8 @@ import {
   readExtraUserData,
   getUserPhotoPath,
 } from "./firebaseHelper";
+import SignClient from "@walletconnect/sign-client";
+import { SignClientTypes } from "@walletconnect/types";
 
 import { updateVaultSeedloop } from "../handlers/wallet/vaultHandler";
 import { defaultWallet } from "../models/defaultWallet";
@@ -23,6 +25,8 @@ import { networkFromNetworkDb } from "./utils/networkUtils";
 import { IWallet, WalletStatus } from "../models/KryptikWallet";
 import { connectKryptikWallet } from "./wallet";
 import { NetworkDb } from "../services/models/network";
+import { createSignClient } from "../handlers/connect/walletConnect";
+import ModalStore from "../handlers/store/ModalStore";
 
 export function useKryptikAuth() {
   //create service
@@ -34,7 +38,9 @@ export function useKryptikAuth() {
   const [authUser, setAuthUser] = useState<UserDB | null>(defaultUser);
   const [loadingAuthUser, setLoadingAuthUser] = useState<boolean>(false);
   const [loadingWallet, setLoadingWallet] = useState<boolean>(false);
-
+  const [signClient, setSignClient] = useState<SignClient | null>(null);
+  const [walletConnectInitialized, setWalletConnectInitialized] =
+    useState(false);
   // wallet state change event handler
   const walletStateChanged = function (wallet: IWallet) {
     console.log("Wallet event handler fired!");
@@ -52,6 +58,8 @@ export function useKryptikAuth() {
     }
     try {
       await updateAuthContext(user);
+      // update wallet connect client
+      await initializeSignClient();
     } catch (e) {
       // TODO: ADD BETTER ERROR HANDLER... redirect?
       console.warn(e);
@@ -144,6 +152,65 @@ export function useKryptikAuth() {
     updateAuthContext(userCred.user, seed, "sign in with token function call");
     // note: auth state changed will run after the line above
   };
+
+  /******************************************************************************
+   * WC: Open session proposal modal for confirmation / rejection
+   *****************************************************************************/
+  const onSessionProposal = useCallback(
+    (proposal: SignClientTypes.EventArguments["session_proposal"]) => {
+      console.log("PROPOSAL REQUESTED");
+      ModalStore.open("SessionProposalModal", { proposal });
+    },
+    []
+  );
+
+  /******************************************************************************
+   * WC: Open request handling modal based on method that was used
+   *****************************************************************************/
+  const onSessionRequest = useCallback(
+    async (requestEvent: SignClientTypes.EventArguments["session_request"]) => {
+      console.log("session_request", requestEvent);
+      const { topic, params } = requestEvent;
+      const { request } = params;
+      // ensure sign client is defined
+      if (!signClient) return;
+      const requestSession = signClient.session.get(topic);
+      switch (request.method) {
+        default:
+          return console.log("Wallet connect request received!");
+          console.log(request);
+      }
+    },
+    []
+  );
+
+  async function initializeSignClient() {
+    const newSignClient: SignClient = await createSignClient();
+    // set up event listners
+    if (newSignClient) {
+      console.log("Attaching wc event listners.");
+      newSignClient.on("session_proposal", onSessionProposal);
+      newSignClient.on("session_request", onSessionRequest);
+      // TODOs
+      newSignClient.on("session_ping", (data: any) =>
+        console.log("ping", data)
+      );
+      newSignClient.on("session_event", (data: any) =>
+        console.log("event", data)
+      );
+      newSignClient.on("session_update", (data: any) =>
+        console.log("update", data)
+      );
+      newSignClient.on("session_delete", (data: any) =>
+        console.log("delete", data)
+      );
+    }
+    setSignClient(newSignClient);
+  }
+
+  /******************************************************************************
+   * Back to non wallet connect methods...
+   *****************************************************************************/
 
   const updateAuthContext = async (user: User, seed?: string, id?: string) => {
     let isSigningInWithToken = sessionStorage.getItem("isSigniningInWithToken");
@@ -261,6 +328,7 @@ export function useKryptikAuth() {
     kryptikWallet,
     walletStatus,
     updateWalletStatus,
+    signClient,
     clear,
   };
 }

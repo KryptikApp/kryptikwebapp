@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import SignClient from "@walletconnect/sign-client";
 
 import { defaultWallet } from "../src/models/defaultWallet";
 import { UserDB } from "../src/models/user";
@@ -20,6 +21,7 @@ interface IAuthContext {
   walletStatus: WalletStatus;
   updateWalletStatus: (newStatus: WalletStatus) => void;
   signOut: () => void;
+  signClient: SignClient | null;
 }
 
 const kryptikAuthContext = createContext<IAuthContext>({
@@ -39,6 +41,7 @@ const kryptikAuthContext = createContext<IAuthContext>({
   getUserPhotoPath: (user: UserDB): string => {
     return "";
   },
+  signClient: null,
   signOut: () => {},
   walletStatus: defaultWallet.status,
   updateWalletStatus: (newStatus: WalletStatus) => {},

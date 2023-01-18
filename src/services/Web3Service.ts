@@ -231,6 +231,7 @@ class Web3Service extends BaseService implements IWeb3Service {
           decimals: docData.decimals ? docData.decimals : 6,
           evmData: docData.evmData ? docData.evmData : undefined,
           about: docData.about,
+          blockchainId: docData.blockchainId ? docData.blockchainId : "",
           blockExplorerURL: docData.blockExplorerURL,
           dateCreated: docData.dateCreated,
           iconPath: docData.iconPath,
@@ -366,6 +367,14 @@ class Web3Service extends BaseService implements IWeb3Service {
     let networkDbRes: NetworkDb = this.TickerToNetworkDbs[ticker];
     if (networkDbRes) return networkDbRes;
     return null;
+  }
+
+  getNetworkDbByBlockchainId(id: string): NetworkDb | null {
+    const networkDbRes: NetworkDb | null =
+      this.NetworkDbs.find(
+        (nd) => nd.blockchainId.toLowerCase() == id.toLowerCase()
+      ) || null;
+    return networkDbRes;
   }
 
   // creates and returns an erc20 contract

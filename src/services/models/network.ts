@@ -25,6 +25,7 @@ export interface NetworkDb {
   coingeckoId: string;
   isTestnet: boolean;
   blockExplorerURL: string;
+  blockchainId: string;
 }
 
 export const defaultNetworkDb: NetworkDb = {
@@ -36,6 +37,7 @@ export const defaultNetworkDb: NetworkDb = {
   about:
     "Ethereum is the community-run technology powering the cryptocurrency ether (ETH) and thousands of decentralized applications.",
   whitePaperPath: "https://ethereum.org/en/whitepaper/",
+  blockchainId: "eip155:1",
   blockExplorerURL: "https://etherscan.io/",
   chainId: 60,
   decimals: 18,

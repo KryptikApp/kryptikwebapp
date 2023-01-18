@@ -28,6 +28,7 @@ export interface IWeb3Service {
     networkDb: NetworkDb
   ): Promise<KryptikProvider>;
   getNetworkDbByTicker: GetNetworkDbByTicker;
+  getNetworkDbByBlockchainId: GetNetworkDbByTicker;
   getTokenAndNetworkFromTickers(
     networkTicker: string,
     tokenTicker?: string

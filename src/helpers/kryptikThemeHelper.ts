@@ -16,7 +16,6 @@ export function useKryptikTheme() {
   const [hideBalances, setHideBalances] = useState(false);
   const [themeLoading, setThemeLoading] = useState(true);
   const { authUser } = useKryptikAuthContext();
-
   const defaultTheme: ITheme = {
     isAdvanced: false,
     isDark: true,
