@@ -1,4 +1,7 @@
-import { SessionTypes, SignClientTypes } from "@walletconnect/types";
+import {
+  SessionTypes,
+  SignClientTypes,
+} from "@walletconnect/types/dist/types/sign-client";
 import { proxy } from "valtio";
 
 // model data types
@@ -14,7 +17,8 @@ interface State {
     | "SessionProposalModal"
     | "SessionSignModal"
     | "SessionSignTypedDataModal"
-    | "SessionSendTransactionModal";
+    | "SessionSendTransactionModal"
+    | "SessionUnsuportedMethodModal";
   data?: ModalData;
 }
 
