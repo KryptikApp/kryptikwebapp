@@ -11,7 +11,6 @@ import { readExtraUserData } from "../../src/helpers/firebaseHelper";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 import { UserExtraData } from "../../src/models/user";
 import AvailableNetworks from "../networks/AvailableNetworks";
-import { useKryptikWalletConnectContext } from "../WalletConnectProvider";
 
 // landing page for users who are logged in and have a wallet
 const UserLandingPage: NextPage = () => {
@@ -22,12 +21,11 @@ const UserLandingPage: NextPage = () => {
     loadingAuthUser,
     loadingWallet,
     walletStatus,
+    signClient,
     updateWalletStatus,
   } = useKryptikAuthContext();
-  const { initialized, signClient } = useKryptikWalletConnectContext();
   useEffect(() => {
     console.log(authUser?.uid);
-    console.log(initialized);
     console.log(signClient?.metadata);
   }, []);
   const [password, setPassword] = useState("");
