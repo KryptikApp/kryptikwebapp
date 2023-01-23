@@ -10,6 +10,7 @@ import { TokenAndNetwork } from "../../src/services/models/token";
 import { ServiceState } from "../../src/services/types";
 import DropdownNetworks from "../DropdownNetworks";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
+import Modal from "../modals/modal";
 import SearchResultItem from "./searchResultItem";
 
 const SearchNetwork: NextPage = () => {
@@ -47,6 +48,10 @@ const SearchNetwork: NextPage = () => {
     setSearchResults(newSearchResults);
   };
 
+  function handleModalClose() {
+    setShowNetworkModal(false);
+  }
+
   const handleSelectedNetworkChange = function (
     newSelectedTokenAndNetwork: TokenAndNetwork
   ) {
@@ -65,7 +70,7 @@ const SearchNetwork: NextPage = () => {
         >
           <div
             onClick={() => setShowNetworkModal(true)}
-            className="flex-grow p-4 bg-gray-50 dark:bg-gray-700 hover:bg-[#F9FBFD] hover:dark:bg-[#1c1c1c] hover:cursor-pointer rounded-l-xl border border-slate-300 dark:border-slate-700"
+            className="flex-grow p-4 bg-gray-50 dark:bg-gray-700 hover:bg-[#F9FBFD] hover:dark:bg-[#1c1c1c] hover:cursor-pointer rounded-l-xl border border-slate-300 dark:border-slate-500"
           >
             <img
               className="flex-1 rounded-lg w-8 h-8 dropshadow-lg"
@@ -81,7 +86,7 @@ const SearchNetwork: NextPage = () => {
             type="search"
             autoComplete="off"
             id="search-dropdown"
-            className="w-[88%]  p-4 text-gray-900 text-lg bg-gray-50 border rounded-r-xl border-gray-300 dark:bg-gray-700 dark:border-l-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-bold outline-none"
+            className="w-[88%]  p-4 text-gray-900 text-lg bg-gray-50 border rounded-r-xl border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-bold outline-none"
             placeholder={`Search ${
               selectedTokenAndNetwork.tokenData
                 ? formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol)
@@ -116,58 +121,12 @@ const SearchNetwork: NextPage = () => {
         style={{ backgroundColor: `rgba(0, 0, 0, 0.2)` }}
       ></div>
 
-      {/* network modal */}
-      <div
-        className={`${
-          !showNetworkModal && "hidden"
-        } modal fixed w-full h-full top-0 left-0 z-50 flex items-center justify-center overflow-y-auto`}
-        style={{ backgroundColor: `rgba(0, 0, 0, 0.9)` }}
+      <Modal
+        isOpen={showNetworkModal}
+        dark={true}
+        onRequestClose={handleModalClose}
       >
-        {/* top right fixed close button  */}
-        <button
-          type="button"
-          className="invisible md:visible text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto fixed top-4 right-5 items-center dark:hover:bg-gray-600 dark:hover:text-white"
-          onClick={() => setShowNetworkModal(false)}
-        >
-          <svg
-            className="w-5 h-5"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fillRule="evenodd"
-              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            ></path>
-          </svg>
-        </button>
-        {/* flex with card and image */}
-        <div className="flex flex-col md:flex-row opacity-100 m-4 md:min-w-[60%] max-w-[90%] md:max-w-[900px] max-h-screen">
-          <div className="md:hidden min-h-[2rem] dark:text-white">
-            {/* padding div for space between top and main elements */}
-          </div>
-
-          {/* close button shown on small screens */}
-          <button
-            type="button"
-            className="md:hidden mt-2 mb-2 text-black bg-white rounded-full font-bold text-sm p-1.5 ml-auto items-center dark:bg-white dark:text-black transition ease-in-out hover:scale-110"
-            onClick={() => setShowNetworkModal(false)}
-          >
-            <svg
-              className="w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              ></path>
-            </svg>
-          </button>
-
+        <div className="flex md:flex-row flex-col">
           <div className="flex-1 text-left py-4 px-3 dark:text-white bg-white dark:bg-black md:ml-6 mt-8 md:mt-0 rounded-lg min-h-[30rem] md:min-h-[25rem] h-fit md:max-h-[40rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
             <h1 className="text-3xl font-bold mb-2">What is this?</h1>
             <p>
@@ -235,11 +194,11 @@ const SearchNetwork: NextPage = () => {
               names.
             </p>
           </div>
-
-          <div className="md:hidden min-h-[4rem] dark:text-white">
-            {/* padding div for space between top and main elements */}
-          </div>
         </div>
+      </Modal>
+
+      <div className="md:hidden min-h-[4rem] dark:text-white">
+        {/* padding div for space between top and main elements */}
       </div>
     </div>
   );
