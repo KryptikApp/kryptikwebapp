@@ -8,13 +8,13 @@ import Button from "./buttons/Button";
  * Types
  */
 interface IProps {
-  onConnect: (uri: string) => Promise<void>;
+  onScan: (uri: string) => Promise<void>;
 }
 
 /**
  * Component
  */
-export default function QrReader({ onConnect }: IProps) {
+export default function QrReader({ onScan }: IProps) {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -22,12 +22,12 @@ export default function QrReader({ onConnect }: IProps) {
     setShow(false);
   }
 
-  async function onScan(data: string | null) {
-    if (data) {
-      await onConnect(data);
+  const handleScan = async function (data: any) {
+    if (data && data.text && typeof data.text == "string") {
+      await onScan(data.text);
       setShow(false);
     }
-  }
+  };
 
   function onShowScanner() {
     setLoading(true);
@@ -41,6 +41,7 @@ export default function QrReader({ onConnect }: IProps) {
           <ReactQrReader
             constraints={{ facingMode: "user" }}
             className="scale-150"
+            onResult={(data) => handleScan(data)}
           />
         </div>
       ) : (
