@@ -50,7 +50,7 @@ export const resolveEVMAccount = async function (
       try {
         name = await evmProvider.lookupAddress(account);
       } catch (e) {
-        name = account;
+        // will hit if no name
       }
     } else {
       return null;
