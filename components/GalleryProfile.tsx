@@ -78,12 +78,11 @@ const GalleryProfile: NextPage<Props> = (props) => {
         setAddyToDisplay(newAddy);
         setNameToDisplay(newResolvedAccount.names[0]);
       } else {
-        setNameToDisplay(
-          truncateAddress(
-            newResolvedAccount.address,
-            networkFromNetworkDb(networkDb ? networkDb : defaultNetworkDb)
-          )
+        const truncatedAddress: string = truncateAddress(
+          newResolvedAccount.address,
+          networkFromNetworkDb(networkDb ? networkDb : defaultNetworkDb)
         );
+        setNameToDisplay(truncatedAddress);
       }
     }
     let avatarPath: string;
