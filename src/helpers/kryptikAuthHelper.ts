@@ -15,7 +15,7 @@ import {
   getUserPhotoPath,
 } from "./firebaseHelper";
 import SignClient from "@walletconnect/sign-client";
-import { SignClientTypes } from "@walletconnect/types";
+import { SignClientTypes } from "@walletconnect/types/dist/types/sign-client";
 
 import { updateVaultSeedloop } from "../handlers/wallet/vaultHandler";
 import { defaultWallet } from "../models/defaultWallet";
@@ -27,6 +27,7 @@ import { connectKryptikWallet } from "./wallet";
 import { NetworkDb } from "../services/models/network";
 import { createSignClient } from "../handlers/connect/walletConnect";
 import ModalStore from "../handlers/store/ModalStore";
+import { signingMethods } from "../handlers/connect/types";
 
 export function useKryptikAuth() {
   //create service
@@ -176,9 +177,52 @@ export function useKryptikAuth() {
       if (!signClient) return;
       const requestSession = signClient.session.get(topic);
       switch (request.method) {
+        case signingMethods.ETH_SIGN:
+        case signingMethods.PERSONAL_SIGN:
+          return ModalStore.open("SessionSignModal", {
+            requestEvent,
+            requestSession,
+          });
+
+        case signingMethods.ETH_SIGN_TYPED_DATA:
+        case signingMethods.ETH_SIGN_TYPED_DATA_V3:
+        case signingMethods.ETH_SIGN_TYPED_DATA_V4:
+          return ModalStore.open("SessionSignTypedDataModal", {
+            requestEvent,
+            requestSession,
+          });
+
+        case signingMethods.ETH_SEND_TRANSACTION:
+        case signingMethods.ETH_SIGN_TRANSACTION:
+          return ModalStore.open("SessionSendTransactionModal", {
+            requestEvent,
+            requestSession,
+          });
+
+        case signingMethods.SOLANA_SIGN_MESSAGE:
+        case signingMethods.SOLANA_SIGN_TRANSACTION:
+          return ModalStore.open("SessionSignModal", {
+            requestEvent,
+            requestSession,
+          });
+
+        case signingMethods.NEAR_SIGN_IN:
+        case signingMethods.NEAR_SIGN_OUT:
+        case signingMethods.NEAR_SIGN_TRANSACTION:
+        case signingMethods.NEAR_SIGN_AND_SEND_TRANSACTION:
+        case signingMethods.NEAR_SIGN_TRANSACTIONS:
+        case signingMethods.NEAR_SIGN_AND_SEND_TRANSACTIONS:
+        case signingMethods.NEAR_VERIFY_OWNER:
+          return ModalStore.open("SessionSignModal", {
+            requestEvent,
+            requestSession,
+          });
+
         default:
-          return console.log("Wallet connect request received!");
-          console.log(request);
+          return ModalStore.open("SessionUnsuportedMethodModal", {
+            requestEvent,
+            requestSession,
+          });
       }
     },
     []

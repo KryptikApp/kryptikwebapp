@@ -10,20 +10,22 @@ const Connect: NextPage = () => {
   const [uri, setUri] = useState<string>("");
   const { signClient } = useKryptikAuth();
   const [loading, setLoading] = useState(false);
-  const handleConnect = async function () {
+  const handleConnect = async function (newUri?: string) {
+    const uriToConnect = newUri ? newUri : uri;
     if (!signClient) {
+      console.log("No sign client.");
       toast.error("Unable to create sign client. Please try again later.");
       return;
     }
-    console.log(uri);
     // ensure uri has length
-    if (uri.length < 2) {
+    if (uriToConnect.length < 2) {
       toast.error("Please enter a valid uri.");
       return;
     }
     try {
       // initiate pair request
-      signClient.pair({ uri });
+      signClient.pair({ uri: uriToConnect });
+      setUri("");
     } catch (e) {
       console.warn(e);
       toast.error("Unable to pair.");
@@ -36,7 +38,7 @@ const Connect: NextPage = () => {
         <p className="text-xl font-semibold dark:text-white">Connect App</p>
         <Divider />
       </div>
-      <QrReader onConnect={handleConnect} />
+      <QrReader onScan={handleConnect} />
       <div className="mx-auto flex flex-col space-y-2 mt-4">
         <p className="text-md text-gray-300 dark:text-gray-600 text-center">
           or enter uri

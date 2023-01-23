@@ -1,5 +1,5 @@
-import { SignClientTypes } from "@walletconnect/types";
 import { Network, SignedTransaction, TransactionParameters } from "hdseedloop";
+import { useCallback } from "react";
 import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
 import { IWallet } from "../../models/KryptikWallet";
 import { NetworkDb } from "../../services/models/network";
@@ -7,6 +7,10 @@ import { KryptikProvider } from "../../services/models/provider";
 import Web3Service from "../../services/Web3Service";
 import { signingMethods } from "./types";
 import { formatJsonRpcResult, getSignParamsMessage } from "./utils";
+import { SignClientTypes } from "@walletconnect/types/dist/types/sign-client";
+import ModalStore from "../store/ModalStore";
+import { SignClient } from "@walletconnect/sign-client";
+import { SignClientTypes as SignClientType } from "@walletconnect/types/dist/types/sign-client/client";
 
 type Params = {
   requestEvent: SignClientTypes.EventArguments["session_request"];
@@ -59,4 +63,16 @@ export async function approveRequest(requestParams: Params): Promise<any> {
       );
     }
   }
+}
+
+export function createSignClient() {
+  const newSignClient = SignClient.init({
+    relayUrl: "wss://us-east-1.relay.walletconnect.com",
+    projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_ID,
+    name: "Kryptik Walet",
+    description: "A multichain noncustodial wallet.",
+    url: "https://kryptik.app",
+    icons: ["https://www.kryptik.app/kryptikBrand/kryptikEyez.png"],
+  });
+  return newSignClient;
 }
