@@ -1,4 +1,4 @@
-import { ProposalTypes } from "@walletconnect/types";
+import { ProposalTypes } from "@walletconnect/types/dist/types/sign-client";
 import { Fragment } from "react";
 import { namespaceIdToName } from "../../src/handlers/connect/utils";
 import { NetworkDb } from "../../src/services/models/network";
@@ -16,13 +16,6 @@ export default function PermissionsCard({ requiredNamespace }: IProps) {
         const extensionMethods: ProposalTypes.RequiredNamespace["methods"] = [];
         const extensionEvents: ProposalTypes.RequiredNamespace["events"] = [];
 
-        requiredNamespace.extension?.map(({ chains, methods, events }: any) => {
-          if (chains.includes(chainId)) {
-            extensionMethods.push(...methods);
-            extensionEvents.push(...events);
-          }
-        });
-
         const allMethods = [...requiredNamespace.methods, ...extensionMethods];
         const allEvents = [...requiredNamespace.events, ...extensionEvents];
 
@@ -30,27 +23,28 @@ export default function PermissionsCard({ requiredNamespace }: IProps) {
           kryptikService.getNetworkDbByBlockchainId(chainId);
 
         return (
-          <Fragment key={chainId}>
+          <div key={chainId} className="w-full">
             {networkDb ? (
               <div
-                className="text-white flex flex-col bg-gray-200 dark:bg-gray-700 rounded rounded-lg px-2 py-2"
+                className="text-white flex flex-col bg-gray-200 dark:bg-gray-700 rounded rounded-lg px-2 py-2
+                "
                 style={{ outline: "solid", outlineColor: networkDb.hexColor }}
               >
                 <p
-                  className="text-lg font-bold mb-2"
+                  className="text-lg font-bold mb-1"
                   style={{ color: networkDb.hexColor }}
                 >
                   {namespaceIdToName(chainId)}
                 </p>
-                <div className="flex-col space-y-2">
-                  <p>Methods:</p>
-                  <p className="text-gray-500 dark:text-gray-400">
+                <div className="flex-col">
+                  <p className="text-gray-600 dark:text-gray-100">Methods:</p>
+                  <p className="text-md text-gray-500 dark:text-gray-400">
                     {allMethods.length ? allMethods.join(", ") : "None"}
                   </p>
                 </div>
-                <div className="flex-col space-y-2">
+                <div className="flex-col">
                   <p>Events:</p>
-                  <p className="text-gray-500 dark:text-gray-400">
+                  <p className="text-md text-gray-500 dark:text-gray-400">
                     {allEvents.length ? allEvents.join(", ") : "None"}
                   </p>
                 </div>
@@ -60,7 +54,7 @@ export default function PermissionsCard({ requiredNamespace }: IProps) {
                 <p>Unknown permissions.</p>
               </div>
             )}
-          </Fragment>
+          </div>
         );
       })}
     </Fragment>

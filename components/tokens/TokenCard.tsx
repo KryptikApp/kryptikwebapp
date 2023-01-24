@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { NetworkDb } from "../../src/services/models/network";
 import { TokenDb } from "../../src/services/models/token";
 import { ServiceState } from "../../src/services/types";
+import Expandable from "../Expandable";
 import IconSneakPeek from "../IconSneakPeek";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import { useKryptikThemeContext } from "../ThemeProvider";
@@ -21,6 +22,7 @@ const TokenCard: NextPage<Props> = (props) => {
   const cardDetailsId = cardId + "Details";
   const [supportedNetworks, setSupportedNetworks] = useState<NetworkDb[]>([]);
   const [networkIconsToShow, setNetworkIconsToShow] = useState<string[]>([]);
+  const [showDetails, setShowDetails] = useState(false);
   useEffect(() => {
     if (typeof document !== "undefined") {
       // change title color on hover
@@ -46,9 +48,6 @@ const TokenCard: NextPage<Props> = (props) => {
         "--originalHeight",
         `${cardInfo.scrollHeight}px`
       );
-      document.getElementById(cardId)?.addEventListener("click", () => {
-        cardInfo.classList.toggle("expand");
-      });
     }
     const newSupportedNetworks: NetworkDb[] = [];
     const newSupportedIcons: string[] = [];
@@ -88,6 +87,7 @@ const TokenCard: NextPage<Props> = (props) => {
     <div
       id={`${cardId}`}
       className="border border-gray-100 dark:border-gray-800 rounded-lg px-2 py-4 hover:cursor-pointer"
+      onClick={() => setShowDetails(!showDetails)}
     >
       <div className="flex flex-row space-x-2">
         <img
@@ -102,7 +102,7 @@ const TokenCard: NextPage<Props> = (props) => {
           {token.name}
         </h1>
       </div>
-      <div id={`${cardDetailsId}`} className="flex flex-col expandable">
+      <Expandable isOpen={showDetails}>
         <div className="flex flex-col space-y-2">
           <p className="text-lg text-gray-700 dark:text-gray-200 mt-4">
             {token.extensions.description}
@@ -123,7 +123,7 @@ const TokenCard: NextPage<Props> = (props) => {
             </div>
           )}
         </div>
-      </div>
+      </Expandable>
     </div>
   );
 };
