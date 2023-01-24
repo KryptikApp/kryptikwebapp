@@ -18,7 +18,7 @@ const ConnectionCard: NextPage<Props> = (props) => {
         <Divider />
       </div>
       {children}
-      <div>
+      <div className="mt-2">
         <Button
           text="Approve"
           color={ColorEnum.green}
