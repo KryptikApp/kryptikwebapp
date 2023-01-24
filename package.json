@@ -23,6 +23,7 @@
     "@tailwindcss/typography": "^0.5.7",
     "@types/bn.js": "^5.1.0",
     "@types/crypto-js": "^4.1.1",
+    "@types/lodash": "^4.14.191",
     "@walletconnect/sign-client": "^2.1.4",
     "@walletconnect/types": "^2.3.0",
     "@walletconnect/utils": "^2.1.4",
