@@ -1,6 +1,6 @@
 import { SessionTypes } from "@walletconnect/types";
 import { NextPage } from "next";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 import { IConnectCardProps } from "../../src/handlers/connect";
@@ -14,14 +14,14 @@ import ConnectionCard from "./ConnectionCard";
 import PermissionsCard from "./Permissionscard";
 import { NetworkDb } from "../../src/services/models/network";
 import AppDetails from "./AppDetails";
+import Expandable from "../Expandable";
 
 const SessionProposalCard: NextPage<IConnectCardProps> = (props) => {
   const { signClient, kryptikWallet, kryptikService } = useKryptikAuth();
   const { onRequestClose } = { ...props };
+  const [showPermissions, setShowPermissions] = useState(false);
   // Get proposal data and wallet address from store
   const proposal = ModalStore.state.data?.proposal;
-  console.log("proposal data:");
-  console.log(proposal);
   // Ensure proposal is defined
   if (!proposal) {
     return <p>Missing proposal data</p>;
@@ -83,20 +83,34 @@ const SessionProposalCard: NextPage<IConnectCardProps> = (props) => {
         icon={proposal.params.proposer.metadata.icons[0]}
         description={proposal.params.proposer.metadata.description}
       />
-      <div className="flex flex-col space-y-2">
+      <p>
+        This action will create a connection between your wallet and "
+        {proposal.params.proposer.metadata.name}" . No funds will leave your
+        wallet without your permission.
+      </p>
+      <p
+        onClick={() => setShowPermissions(!showPermissions)}
+        className="text-md text-sky-400 hover:cursor-pointer"
+      >
+        {showPermissions ? "Hide Permissions" : "Show Permissions"}
+      </p>
+      <Expandable isOpen={showPermissions}>
         <div className="flex flex-col space-y-2">
-          {Object.keys(requiredNamespaces).map((chain) => {
-            return (
-              <Fragment key={chain}>
-                <p className="dark:text-white font-bold">{`Review ${chain} permissions`}</p>
-                <PermissionsCard
-                  requiredNamespace={requiredNamespaces[chain]}
-                />
-              </Fragment>
-            );
-          })}
+          <div className="flex flex-col space-y-2">
+            {Object.keys(requiredNamespaces).map((chain) => {
+              return (
+                <Fragment key={chain}>
+                  <p className="dark:text-white font-bold">{`Review ${chain} permissions`}</p>
+                  <PermissionsCard
+                    requiredNamespace={requiredNamespaces[chain]}
+                  />
+                </Fragment>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </Expandable>
+
       <div></div>
     </ConnectionCard>
   );
