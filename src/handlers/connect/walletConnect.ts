@@ -69,10 +69,12 @@ export function createSignClient() {
   const newSignClient = SignClient.init({
     relayUrl: "wss://us-east-1.relay.walletconnect.com",
     projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_ID,
-    name: "Kryptik Walet",
-    description: "A multichain noncustodial wallet.",
-    url: "https://kryptik.app",
-    icons: ["https://www.kryptik.app/kryptikBrand/kryptikEyez.png"],
+    metadata: {
+      name: "Kryptik Wallet",
+      description: "A multichain noncustodial wallet.",
+      url: "https://kryptik.app",
+      icons: ["https://www.kryptik.app/kryptikBrand/kryptikEyez.png"],
+    },
   });
   return newSignClient;
 }
