@@ -26,10 +26,10 @@ Kryptik key management has several favorable properties:
 
 Kryptik uses an authentication provider to generate a decentralized identifier (DID) token, which is shared via email. After validation, the DID is exchanged with the database for an access token, and the user session begins. No passwords are required.
 
-| **Kryptik Authentication Flow**                                                                                                                 |
-| :---------------------------------------------------------------------------------------------------------------------------------------------- |
-| ![Kryptik Authentication Flow](/blog/authenticationFlowPlain.png)                                                                               |
-| _Kryptik’s passwordless authentication flow. The DID token is sent via email. After validation, the user can access the server’s secret share._ |
+| **Kryptik Authentication Flow**                                                                                                                     |
+| :-------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ![Kryptik Authentication Flow](/blog/authenticationFlowPlain.png)                                                                                   |
+| _Kryptik’s passwordless authentication flow. The one time code is sent via email. After validation, the user can access the server’s secret share._ |
 
 ## Recovery
 
