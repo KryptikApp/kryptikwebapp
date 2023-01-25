@@ -12,7 +12,11 @@ export default function PairingsPage() {
       toast.error("Unable to disconnect.");
       return;
     }
-    await signClient.disconnect({ topic, reason: "User Disconnected" });
+    // TODO: ENSURE CODE IS CORECT FOR ERROR RESPONSE
+    await signClient.disconnect({
+      topic,
+      reason: { code: 0, message: "User disconnected." },
+    });
     const newPairings = pairings.filter((pairing) => pairing.topic !== topic);
     setPairings(newPairings);
   }
