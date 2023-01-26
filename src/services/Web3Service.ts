@@ -542,8 +542,8 @@ class Web3Service extends BaseService implements IWeb3Service {
     };
     // default try cached value is true
     const getCached = tryCached != undefined ? tryCached : true;
-    // default use covalent is true
-    const getCovalentBals = useCovalent != undefined ? useCovalent : true;
+    // default use covalent is false
+    const getCovalentBals = useCovalent != undefined ? useCovalent : false;
     // use cached balances if fresh
     if (getCached && this.kryptikBalances && this.kryptikBalances.isFresh()) {
       console.log("Returning cached balances...");
@@ -567,39 +567,70 @@ class Web3Service extends BaseService implements IWeb3Service {
     // get remaining balances manually via rpc provider
     let tickerToNetworkBalance: { [ticker: string]: IBalance } = {};
     // fetch balances by sector
-    let networkBalances = await this.getBalanceAllNetworks({
-      walletUser: walletUser,
-      indexedNetworks: indexedNetworksList,
-      isAdvanced: isAdvanced ? isAdvanced : false,
-      onFetch: onFetch,
-    });
+    // let networkBalances = await this.getBalanceAllNetworks({
+    //   walletUser: walletUser,
+    //   indexedNetworks: indexedNetworksList,
+    //   isAdvanced: isAdvanced ? isAdvanced : false,
+    //   onFetch: onFetch,
+    // });
     // create dictionary of network balances
+    // for (const tokenAndNetwork of networkBalances) {
+    //   if (tokenAndNetwork.networkBalance) {
+    //     tickerToNetworkBalance[tokenAndNetwork.baseNetworkDb.ticker] =
+    //       tokenAndNetwork.networkBalance;
+    //   }
+    // }
+    // let erc20Balances = await this.getBalanceAllERC20Tokens({
+    //   walletUser: walletUser,
+    //   indexedNetworks: indexedNetworksList,
+    //   onFetch: onFetch,
+    // });
+    // let nep141Balances = await this.getBalanceAllNep141Tokens({
+    //   walletUser: walletUser,
+    //   indexedNetworks: indexedNetworksList,
+    //   onFetch: onFetch,
+    // });
+    // let splBalances = await this.getBalanceAllSplTokens({
+    //   walletUser: walletUser,
+    //   indexedNetworks: indexedNetworksList,
+    //   onFetch: onFetch,
+    // });
+    // run  parallel requests for network and token balances
+    const [networkBalances, erc20Balances, nep141Balances, splBalances] =
+      await Promise.all([
+        this.getBalanceAllNetworks({
+          walletUser: walletUser,
+          indexedNetworks: indexedNetworksList,
+          isAdvanced: isAdvanced ? isAdvanced : false,
+          onFetch: onFetch,
+        }),
+        this.getBalanceAllERC20Tokens({
+          walletUser: walletUser,
+          indexedNetworks: indexedNetworksList,
+          onFetch: onFetch,
+        }),
+        this.getBalanceAllNep141Tokens({
+          walletUser: walletUser,
+          indexedNetworks: indexedNetworksList,
+          onFetch: onFetch,
+        }),
+        this.getBalanceAllSplTokens({
+          walletUser: walletUser,
+          indexedNetworks: indexedNetworksList,
+          onFetch: onFetch,
+        }),
+      ]);
     for (const tokenAndNetwork of networkBalances) {
       if (tokenAndNetwork.networkBalance) {
         tickerToNetworkBalance[tokenAndNetwork.baseNetworkDb.ticker] =
           tokenAndNetwork.networkBalance;
       }
     }
-    let erc20Balances = await this.getBalanceAllERC20Tokens({
-      walletUser: walletUser,
-      indexedNetworks: indexedNetworksList,
-      onFetch: onFetch,
-    });
-    let nep141Balances = await this.getBalanceAllNep141Tokens({
-      walletUser: walletUser,
-      indexedNetworks: indexedNetworksList,
-      onFetch: onFetch,
-    });
-    let splBalances = await this.getBalanceAllSplTokens({
-      walletUser: walletUser,
-      indexedNetworks: indexedNetworksList,
-      onFetch: onFetch,
-    });
     // add base network balance to token and network objects... in place
     // TODO: update, so we don't take a second pass over balances
     this.addBaseBalance(tickerToNetworkBalance, erc20Balances);
-    this.addBaseBalance(tickerToNetworkBalance, erc20Balances);
-    this.addBaseBalance(tickerToNetworkBalance, erc20Balances);
+    this.addBaseBalance(tickerToNetworkBalance, nep141Balances);
+    this.addBaseBalance(tickerToNetworkBalance, splBalances);
     // add to master balance list
     masterBalances = masterBalances.concat(networkBalances);
     masterBalances = masterBalances.concat(erc20Balances);
