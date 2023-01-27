@@ -30,20 +30,18 @@ const ListBalance: NextPage = () => {
     useState<KryptikBalanceHolder | null>(null);
   const [totalBalance, setTotalBalance] = useState<number>(0);
   const [progressPercent, setProgressPercent] = useState(0);
+  //TODO: ACCOUNT FOR TOKENS ON MULTIPLE NETWORKS
   const totalToFetch =
-    kryptikService.NetworkDbs.length + kryptikService.tokenDbs.length;
-  const stepSize: number = Number((1 / totalToFetch) * 100);
-
+    kryptikService.NetworkDbs.length + kryptikService.tokenDbs.length * 2;
+  let progressCounter = 0;
   const incrementLoadProgress = function (
     tokenAndBalance: TokenAndNetwork | null
   ) {
-    let progressBar = document.getElementById("progressBar");
+    progressCounter++;
+    //TODO: SEE IF POSSIBLE TO ONLY GET ONCE
+    const progressBar = document.getElementById("progressBar");
     if (progressBar) {
-      let currentWidth = progressBar.style.width;
-      // remove % from element width
-      let lastIndex = currentWidth.indexOf("%");
-      let currentProgress = Number(currentWidth.slice(0, lastIndex));
-      currentProgress = currentProgress + stepSize;
+      const currentProgress = (progressCounter / totalToFetch) * 100;
       // update ui progress percent.. not to exceed 100%
       if (currentProgress > 100) {
         progressBar.style.width = `${100}%`;
