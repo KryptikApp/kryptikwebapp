@@ -63,7 +63,7 @@ However, multi-party computation protocols have high computation and communicati
 
 Multi-party computation also encourages walled gardens. Users are limited to the provider’s ecosystem without access to the wallet seed.
 
-## 4. Standard Solutions
+## 4. Wallet Basics
 
 **Random Seeds.** At the core of every wallet is a single seed: a string of randomness. As a seed grows in length, the less likely it is to be guessed by an attacker.
 
