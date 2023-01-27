@@ -185,7 +185,6 @@ class Web3Service extends BaseService implements IWeb3Service {
   }
 
   private async populateTokenDbsAsync(): Promise<TokenDb[]> {
-    console.log("Populating erc20 data from db");
     const q = query(ALLTOKENSRef);
     const querySnapshot = await getDocs(q);
     let tokenDbsResult: TokenDb[] = [];
@@ -209,7 +208,7 @@ class Web3Service extends BaseService implements IWeb3Service {
   }
 
   private async populateNetworkDbsAsync(): Promise<NetworkDb[]> {
-    console.log("POPULATING Networks from db");
+    console.log("Populating Networks from db");
     console.log("Service ID:");
     console.log(this.serviceId);
     const q = query(NetworkDbsRef);
@@ -293,7 +292,6 @@ class Web3Service extends BaseService implements IWeb3Service {
         ) {
           // build NetworkDb object from doc result
           NetworkDbsResult.push(NetworkDb);
-          // console.log(doc.id, " => ", doc.data());
         }
       });
     } else {
@@ -305,7 +303,6 @@ class Web3Service extends BaseService implements IWeb3Service {
         ) {
           // build NetworkDb object from doc result
           NetworkDbsResult.push(NetworkDb);
-          // console.log(doc.id, " => ", doc.data());
         }
       });
     }
@@ -546,7 +543,6 @@ class Web3Service extends BaseService implements IWeb3Service {
     const getCovalentBals = useCovalent != undefined ? useCovalent : false;
     // use cached balances if fresh
     if (getCached && this.kryptikBalances && this.kryptikBalances.isFresh()) {
-      console.log("Returning cached balances...");
       return this.kryptikBalances;
     }
     if (!this.kryptikPrices) {
@@ -554,8 +550,8 @@ class Web3Service extends BaseService implements IWeb3Service {
       this.getAllSupportedPrices();
     }
     let masterBalances: TokenAndNetwork[] = [];
-    // get indexed balances... currently fetching from covalent
     let indexedNetworksList: NetworkDb[] = [];
+    // get indexed balances... currently fetching from covalent
     if (getCovalentBals) {
       let indexedData = await this.getAllIndexedBalances({
         walletUser: walletUser,
@@ -859,11 +855,7 @@ class Web3Service extends BaseService implements IWeb3Service {
       contractAddress: params.erc20Params.erc20Contract.address,
     };
     // fetch price
-    let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
-    // fetch balance
-    console.log(
-      `getting ${params.tokenDb.name} ERC20 balance for ${params.accountAddress}`
-    );
+    let priceUSD = await this.getTokenPrice(params.tokenDb.coingeckoId);
     let fetchedTokenAmount: number = Number(
       await params.erc20Params.erc20Contract.balanceOf(params.accountAddress)
     );
@@ -912,13 +904,9 @@ class Web3Service extends BaseService implements IWeb3Service {
         `Error: no provider specified for ${params.networkDb.fullName}`
       );
 
-    let nearNetworkProvider: Near = kryptikProvider.nearProvider;
+    const nearNetworkProvider: Near = kryptikProvider.nearProvider;
     // fetch price
-    let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
-    // fetch balance
-    console.log(
-      `getting ${params.tokenDb.name} balance for ${params.accountAddress}`
-    );
+    const priceUSD = await this.getTokenPrice(params.tokenDb.coingeckoId);
     let networkBalance: number;
     try {
       let nearAccount = await nearNetworkProvider.account(
@@ -974,7 +962,7 @@ class Web3Service extends BaseService implements IWeb3Service {
         `Error: no provider specified for ${params.networkDb.fullName}`
       );
     // fetch price
-    let priceUSD = await getPriceOfTicker(params.tokenDb.coingeckoId);
+    let priceUSD = await this.getTokenPrice(params.tokenDb.coingeckoId);
     // fetch balance
     // UPDATE TO SUPPORT ARRAY OF CHAIN DATA
     let tokenAccount = await createSolTokenAccount(
@@ -1028,7 +1016,7 @@ class Web3Service extends BaseService implements IWeb3Service {
     let erc20balances: TokenAndNetwork[] = [];
 
     for (const erc20Db of this.tokenDbs) {
-      const tokenPrice = this.kryptikPrices?.getPriceById(erc20Db.coingeckoId);
+      const tokenPrice = await this.getTokenPrice(erc20Db.coingeckoId);
       for (const chainInfo of erc20Db.chainData) {
         // get ethereum network db
         let networkDb: NetworkDb | null = this.getNetworkDbByTicker(
@@ -1039,9 +1027,6 @@ class Web3Service extends BaseService implements IWeb3Service {
           NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) !=
             NetworkFamily.EVM
         ) {
-          if (onFetch) {
-            onFetch(null);
-          }
           continue;
         }
         if (indexedNetworks.includes(networkDb)) continue;
@@ -1103,6 +1088,7 @@ class Web3Service extends BaseService implements IWeb3Service {
           console.warn(
             `Unable to get balance for ${tokenBalParams.tokenDb.name} on ${networkDb.fullName}`
           );
+          console.log(e);
           continue;
         }
       }
@@ -1120,7 +1106,7 @@ class Web3Service extends BaseService implements IWeb3Service {
     const { walletUser, indexedNetworks, onFetch } = { ...params };
     let nep141Balances: TokenAndNetwork[] = [];
     for (const nep141Db of this.tokenDbs) {
-      const tokenPrice = this.kryptikPrices?.getPriceById(nep141Db.coingeckoId);
+      const tokenPrice = await this.getTokenPrice(nep141Db.coingeckoId);
       for (const chainInfo of nep141Db.chainData) {
         let networkDb: NetworkDb | null = this.getNetworkDbByTicker(
           chainInfo.ticker
@@ -1130,12 +1116,8 @@ class Web3Service extends BaseService implements IWeb3Service {
           NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) !=
             NetworkFamily.Near
         ) {
-          if (onFetch) {
-            onFetch(null);
-          }
           continue;
         }
-        console.log(`GETTING Nep141 balance FOR ${chainInfo.ticker}`);
         let accountAddress = await getAddressForNetworkDb(
           walletUser,
           networkDb
@@ -1180,7 +1162,7 @@ class Web3Service extends BaseService implements IWeb3Service {
     let splBalances: TokenAndNetwork[] = [];
     const { walletUser, indexedNetworks, onFetch } = { ...params };
     for (const splDb of this.tokenDbs) {
-      const tokenPrice = this.kryptikPrices?.getPriceById(splDb.coingeckoId);
+      const tokenPrice = await this.getTokenPrice(splDb.coingeckoId);
       for (const chainInfo of splDb.chainData) {
         let networkDb: NetworkDb | null = this.getNetworkDbByTicker(
           chainInfo.ticker
@@ -1190,13 +1172,9 @@ class Web3Service extends BaseService implements IWeb3Service {
           NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) !=
             NetworkFamily.Solana
         ) {
-          if (onFetch) {
-            onFetch(null);
-          }
           continue;
         }
         if (indexedNetworks.includes(networkDb)) continue;
-        console.log(`GETTING SPL balance FOR ${chainInfo.ticker}`);
         let accountAddress = await getAddressForNetworkDb(
           walletUser,
           networkDb
