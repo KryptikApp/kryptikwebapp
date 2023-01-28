@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @unique @default(uuid())
+  email         String         @unique
+  Profile   Profile?
+  remoteShare String
+  refreshTokens RefreshToken[]
+  oneTimeTokens OneTimeToken[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Profile {
+  id     Int  @id @default(autoincrement())
+  name String?
+  bio String?
+  user   User @relation(fields: [userId], references: [id])
+  userId String  @unique // relation scalar field (used in the `@relation` attribute above)
+}
+
+model RefreshToken {
+  id          String   @id @unique @default(uuid())
+  hashedToken String
+  userId      String
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model OneTimeToken{
+  id          String   @id @unique @default(uuid())
+  userId      String
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code        String
+  expiration  DateTime 
+}
+
+model NetworkDb{
+id     Int  @id @default(autoincrement())
+about String
+chainId Float
+decimals Float
+fullName String
+iconPath String
+isSupported Boolean
+networkFamily String
+whitePaperPath String
+tokens TokenDb[]
+}
+
+model TokenDb{
+id     Int  @id @default(autoincrement())
+coingeckoId String
+description String
+link String
+hexColor String
+logoURI String
+name String
+tags String[]
+networks NetworkDb[]
+}
+
+
