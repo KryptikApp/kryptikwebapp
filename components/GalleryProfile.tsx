@@ -61,13 +61,7 @@ const GalleryProfile: NextPage<Props> = (props) => {
     let network: Network = networkFromNetworkDb(
       networkDb ? networkDb : defaultNetworkDb
     );
-    if (
-      authUser &&
-      authUser.isLoggedIn &&
-      authUser.name &&
-      !newResolvedAccount.names &&
-      !account
-    ) {
+    if (authUser && authUser.name && !newResolvedAccount.names && !account) {
       setNameToDisplay(authUser.name);
       let newAddy = truncateAddress(newResolvedAccount.address, network);
       setAddyToDisplay(newAddy);
@@ -87,7 +81,7 @@ const GalleryProfile: NextPage<Props> = (props) => {
     }
     let avatarPath: string;
     // is this a view of authuser or someone else?
-    if (authUser && authUser.isLoggedIn && forAuthUser) {
+    if (authUser && forAuthUser) {
       avatarPath = getUserPhotoPath(authUser);
     } else {
       avatarPath = getRandomAvatarPhoto();
