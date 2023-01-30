@@ -18,8 +18,7 @@ const DeleteWallet: NextPage = () => {
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loadingAuthUser && (!authUser || !authUser.isLoggedIn))
-      router.push("/");
+    if (!loadingAuthUser && !authUser) router.push("/");
   }, [authUser, loadingAuthUser]);
 
   const handleDeleteWallet = async function () {

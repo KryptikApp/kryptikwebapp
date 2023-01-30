@@ -28,8 +28,7 @@ const Sync: NextPage = () => {
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loadingAuthUser and authUser, redirect if needed
   useEffect(() => {
-    if (!loadingAuthUser && (!authUser || !authUser.isLoggedIn))
-      router.push("/");
+    if (!loadingAuthUser && !authUser) router.push("/");
     // ensure service is started
     if (kryptikService.serviceState != ServiceState.started) {
       router.push("/");

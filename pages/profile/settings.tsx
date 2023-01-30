@@ -11,8 +11,7 @@ import { defaultUser } from "../../src/models/user";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 
 const Settings: NextPage = () => {
-  const { authUser, loadingAuthUser, signOut, kryptikWallet } =
-    useKryptikAuthContext();
+  const { authUser, signOut, kryptikWallet } = useKryptikAuthContext();
   const {
     updateIsDark,
     isDark,
@@ -23,10 +22,6 @@ const Settings: NextPage = () => {
   } = useKryptikThemeContext();
   const [updateVisibleLoading, setUpdateVisibleLoading] = useState(false);
   const router = useRouter();
-  // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
-  useEffect(() => {
-    if (!loadingAuthUser && !authUser?.isLoggedIn) router.push("/");
-  }, [authUser, loadingAuthUser]);
 
   const handleLogout = function () {
     try {

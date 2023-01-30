@@ -1,23 +1,14 @@
 import type { NextPage } from "next";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 import Divider from "../../components/Divider";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import HeaderProfile from "../../components/HeaderProfile";
 import NavProfile from "../../components/navbars/NavProfile";
-import Link from "next/link";
 
 const Profile: NextPage = () => {
-  const { authUser, loadingAuthUser, updateCurrentUserKryptik } =
-    useKryptikAuthContext();
-  const router = useRouter();
-  // ROUTE PROTECTOR: Listen for changes on loadingAuthUser and authUser, redirect if needed
-  useEffect(() => {
-    if (!loadingAuthUser && (!authUser || !authUser.isLoggedIn))
-      router.push("/");
-  }, [authUser, loadingAuthUser]);
+  const { authUser, updateCurrentUserKryptik } = useKryptikAuthContext();
 
   const [name, setName] = useState(authUser ? authUser.name : "");
   const [bio, setBio] = useState(authUser ? authUser.bio : "");
@@ -73,7 +64,7 @@ const Profile: NextPage = () => {
             disabled
             className="hover:cursor-not-allowed bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-blue-400 dark:bg-[#141414] dark:text-white disabled"
             id="inline-full-name"
-            placeholder={authUser ? authUser.uid : "your@email"}
+            placeholder={authUser ? authUser.email : "your@email"}
           />
         </div>
 

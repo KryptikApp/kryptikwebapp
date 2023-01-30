@@ -14,16 +14,12 @@ import HeaderProfile from "../../components/HeaderProfile";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 
 const Profile: NextPage = () => {
-  const { authUser, loadingAuthUser, walletStatus } = useKryptikAuthContext();
+  const { walletStatus } = useKryptikAuthContext();
   // ROUTE PROTECTOR: Listen for changes on loadingAuthUser and authUser, redirect if needed
   const router = useRouter();
   useEffect(() => {
-    if (
-      (!loadingAuthUser && (!authUser || !authUser.isLoggedIn)) ||
-      walletStatus != WalletStatus.Connected
-    )
-      router.push("/");
-  }, [authUser, loadingAuthUser]);
+    if (walletStatus != WalletStatus.Connected) router.push("/");
+  }, []);
 
   const handleStartAddName = function () {
     router.push("../wallet/createName");
@@ -48,7 +44,7 @@ const Profile: NextPage = () => {
             </Link>
           </div>
           <div className="flex-1">
-            <Link href="../wallet/connect">
+            <Link href="../wallet/receive">
               <div className="w-full px-3 text-center text-sky-500 hover:cursor-pointer hover:text-sky-800 hover:font-semibold hover:animate-pulse">
                 <AiFillDownCircle className="mx-auto" size="30" />
                 <span className="text-gray-700 dark:text-gray-200 font-semibold">

@@ -35,7 +35,7 @@ const Recieve: NextPage = () => {
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
     if (
-      (!loadingAuthUser && (!authUser || !authUser.isLoggedIn)) ||
+      (!loadingAuthUser && !authUser) ||
       (walletStatus != WalletStatus.Connected &&
         walletStatus != WalletStatus.Locked)
     )

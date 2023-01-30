@@ -59,11 +59,7 @@ const CreateName: NextPage = () => {
 
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (
-      (!loadingAuthUser && (!authUser || !authUser.isLoggedIn)) ||
-      walletStatus != WalletStatus.Connected
-    )
-      router.push("/");
+    if (walletStatus != WalletStatus.Connected) router.push("/");
     // ensure service is started
     if (kryptikService.serviceState != ServiceState.started) {
       router.push("/");
