@@ -27,3 +27,7 @@ export interface JsonRpcResult<T = any> {
   jsonrpc: string;
   result: T;
 }
+
+export interface IConnectCardProps {
+  onRequestClose: () => any;
+}
