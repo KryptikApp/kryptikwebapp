@@ -56,7 +56,6 @@ export const formatAuthUser = function (user: any): UserDB {
     bio: user.bio,
     photoUrl: user.photoURL,
     isAdvanced: user.isAdvanced,
-    isLoggedIn: true,
   };
 };
 
