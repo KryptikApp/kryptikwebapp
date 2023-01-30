@@ -52,7 +52,6 @@ const ProfileName: NextPage<Props> = (props) => {
     }
     if (
       authUser &&
-      authUser.isLoggedIn &&
       authUser.name &&
       !newResolvedAccount.names &&
       !accountPassedIn

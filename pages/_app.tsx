@@ -21,8 +21,11 @@ function MyApp({ Component, pageProps, router }: AppProps) {
     // add connection handler
     window.addEventListener("offline", () => handleOffline());
   };
-  // on page load... add offline handler to DOM
-  useEffect(() => addOfflineHandler(), []);
+
+  useEffect(() => {
+    // on page load... add offline handler to DOM
+    addOfflineHandler();
+  }, []);
 
   if (router.pathname.startsWith("/developer")) {
     return (
