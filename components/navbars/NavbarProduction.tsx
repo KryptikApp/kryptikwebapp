@@ -67,7 +67,7 @@ const NavbarProduction: NextPage = () => {
           onClick={() => setMenuMobile(false)}
         >
           {authUser && (
-            <div className="mt-2 ml-2 md:ml-0 md:mr-2">
+            <div className="ml-2 md:ml-0 md:mr-2">
               {hideBalances ? (
                 <RiEyeCloseLine
                   className="dark:text-white hover:cursor-pointer hover:animate-pulse"
