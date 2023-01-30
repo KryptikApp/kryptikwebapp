@@ -5,7 +5,15 @@ export interface UserDB {
   bio: string;
   photoUrl: string;
   isAdvanced: boolean;
-  isLoggedIn: boolean;
+}
+
+export interface UserTemp {
+  uid: string;
+  email: string;
+  name?: string;
+  bio?: string;
+  photoUrl?: string;
+  isAdvanced?: boolean;
 }
 
 export const defaultUser: UserDB = {
@@ -15,7 +23,6 @@ export const defaultUser: UserDB = {
   bio: "",
   photoUrl: "",
   isAdvanced: false,
-  isLoggedIn: false,
 };
 
 // interface for extra user data
