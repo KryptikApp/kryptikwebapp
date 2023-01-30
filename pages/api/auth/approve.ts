@@ -7,7 +7,7 @@ import {
   validateUserOneTimeCode,
 } from "../../../prisma/script";
 import { setCookie } from "cookies-next";
-import { generateTokens } from "../../../src/helpers/utils/auth/jwt";
+import { generateTokens } from "../../../src/helpers/auth/jwt";
 
 type Data = {
   accessToken?: string;

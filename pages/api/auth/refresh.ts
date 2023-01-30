@@ -8,8 +8,8 @@ import {
 } from "../../../prisma/script";
 import { getCookie, setCookie } from "cookies-next";
 import { v4 } from "uuid";
-import hashToken from "../../../src/helpers/utils/auth/hashtoken";
-import { generateTokens } from "../../../src/helpers/utils/auth/jwt";
+import hashToken from "../../../src/helpers/auth/hashtoken";
+import { generateTokens } from "../../../src/helpers/auth/jwt";
 
 type Data = {
   accessToken?: string;

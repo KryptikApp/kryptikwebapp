@@ -5,7 +5,7 @@ import {
 } from "../../../prisma/script";
 import { OneTimeToken, User } from "@prisma/client";
 
-import { sendEmailCode } from "../../../src/helpers/utils/auth/email";
+import { sendEmailCode } from "../../../src/helpers/auth/email";
 
 type Data = {
   accessToken?: string;
@@ -24,14 +24,12 @@ export default async function handler(
     const sendLink: boolean = body.sendLink;
     // reject if no email is supplied
     if (!email) {
-      return res.status(400).json({ msg: "Email is required for login." });
+      throw new Error("Email is required for login.");
     }
     // find or create user
     const user: User | null = await findOrCreateUserByEmail(email);
     if (!user) {
-      return res
-        .status(400)
-        .json({ msg: "Unable to find or create new user." });
+      throw new Error("Unable to find or create new user.");
     }
     const oneTimeCode: OneTimeToken = await createOneTimeToken(user.id);
     // send one time code via email
