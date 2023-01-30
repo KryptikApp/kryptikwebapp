@@ -9,6 +9,11 @@ export interface ChainData {
   ticker: string;
 }
 
+type Extensions = {
+  link: string;
+  description: string;
+};
+
 export interface TokenDb {
   name: string;
   symbol: string;
@@ -17,11 +22,22 @@ export interface TokenDb {
   hexColor: string;
   chainData: ChainData[];
   logoURI: string;
-  extensions: {
-    link: string;
-    description: string;
-  };
+  extensions: Extensions;
   tags: string[];
+}
+
+export interface TokenDbTemp {
+  name: string;
+  ticker: string;
+  decimals: number;
+  description: string;
+  coingeckoId: string;
+  hexColor: string;
+  chainData: ChainData[];
+  link: string;
+  logoURI: string;
+  extensions: Extensions;
+  networks: NetworkDb[];
 }
 
 export interface TokenParamsEVM {

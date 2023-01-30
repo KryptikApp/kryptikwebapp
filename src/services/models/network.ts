@@ -28,6 +28,22 @@ export interface NetworkDb {
   blockchainId: string;
 }
 
+export type NetworkDbTemp = {
+  id: number;
+  about: string;
+  blockExplorerURL: string;
+  blockchainId: string;
+  chainId: number;
+  decimals: number;
+  fullName: string;
+  iconPath: string;
+  isSupported: boolean;
+  networkFamily: string;
+  whitePaperPath: string;
+  ticker: string;
+  tokens: TokenDb[];
+};
+
 export const defaultNetworkDb: NetworkDb = {
   fullName: "Ethereum",
   ticker: "eth",
