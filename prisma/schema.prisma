@@ -13,19 +13,29 @@ datasource db {
 model User {
   id            String         @id @unique @default(uuid())
   email         String         @unique
-  Profile   Profile?
-  remoteShare String
+  Profile       Profile?
+  remoteShare   RemoteShare?
   refreshTokens RefreshToken[]
   oneTimeTokens OneTimeToken[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
 
+model RemoteShare{
+  id     Int  @id @default(autoincrement())
+  share  String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String  @unique // relation scalar field (used in the `@relation` attribute above)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
 model Profile {
   id     Int  @id @default(autoincrement())
-  name String?
-  bio String?
-  user   User @relation(fields: [userId], references: [id])
+  avatarPath String?
+  name   String?
+  bio    String?
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String  @unique // relation scalar field (used in the `@relation` attribute above)
 }
 
@@ -50,6 +60,8 @@ model OneTimeToken{
 model NetworkDb{
 id     Int  @id @default(autoincrement())
 about String
+blockExplorerURL String
+blockchainId String
 chainId Float
 decimals Float
 fullName String
@@ -57,6 +69,7 @@ iconPath String
 isSupported Boolean
 networkFamily String
 whitePaperPath String
+ticker String
 tokens TokenDb[]
 }
 
