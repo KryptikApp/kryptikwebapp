@@ -1,16 +1,10 @@
-import { OneTimeToken, PrismaClient, User } from "@prisma/client";
+import { OneTimeToken, PrismaClient, Profile, User } from "@prisma/client";
+import { Console } from "console";
 import { add } from "date-fns";
-import hashToken from "../src/helpers/utils/auth/hashtoken";
-import { generateCode } from "../src/helpers/utils/auth/jwt";
+import hashToken from "../src/helpers/auth/hashtoken";
+import { generateCode } from "../src/helpers/auth/jwt";
 
 const prisma = new PrismaClient();
-
-export async function addFriend(name: string, email: string): Promise<Friend> {
-  const friend: Friend = await prisma.friend.create({
-    data: { name: name, email: email },
-  });
-  return friend;
-}
 
 export async function findUserByEmail(email: string): Promise<User | null> {
   return prisma.user.findUnique({
@@ -24,6 +18,10 @@ export function findUserById(id: string) {
   return prisma.user.findUnique({
     where: {
       id,
+    },
+    include: {
+      Profile: true,
+      remoteShare: true,
     },
   });
 }
@@ -41,10 +39,14 @@ export async function validateUserOneTimeCode(id: string, code: string) {
   const tokens: OneTimeToken[] = await prisma.oneTimeToken.findMany({
     where: { userId: id },
   });
+  console.log(tokens);
+  console.log(id);
+  console.log(code);
   const currentDate: Date = new Date();
   // TODO: UPDATE SO WE DON'T CYCLE THROUGH ALL CODES
   for (const token of tokens) {
     if (token.expiration > currentDate && code == token.code) {
+      console.log("Heyyyy!");
       return true;
     }
   }
@@ -57,6 +59,51 @@ export async function validateUserOneTimeCode(id: string, code: string) {
 export function createUserByEmail(email: string) {
   return prisma.user.create({
     data: { email: email },
+  });
+}
+
+export function getShareByUserId(userId: string) {
+  return prisma.remoteShare.findFirst({
+    where: {
+      userId: userId,
+    },
+  });
+}
+
+export function getAllNetworks() {
+  return prisma.networkDb.findMany({ include: { tokens: true } });
+}
+
+export function getAllTokens() {
+  return prisma.tokenDb.findMany({ include: { networks: true } });
+}
+
+export function updateShareByUserId(newShare: string, userId: string) {
+  prisma.remoteShare.update({
+    where: { userId: userId },
+    data: { share: newShare },
+  });
+}
+
+export function createShare(newShare: string, userId: string) {
+  prisma.remoteShare.create({
+    data: { share: newShare, userId: userId },
+  });
+}
+export type ProfileInfo = { name?: string; bio?: string; avatarPath?: string };
+export function updateProfileByUserId(
+  newProfileInfo: ProfileInfo,
+  userId: string
+) {
+  prisma.profile.update({
+    where: {
+      userId: userId,
+    },
+    data: {
+      name: newProfileInfo.name,
+      bio: newProfileInfo.bio,
+      avatarPath: newProfileInfo.avatarPath,
+    },
   });
 }
 
