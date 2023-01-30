@@ -12,6 +12,7 @@ import { getUserPhotoPath } from "../src/helpers/firebaseHelper";
 import { getAddressForNetworkDb } from "../src/helpers/utils/accountUtils";
 import { networkFromNetworkDb } from "../src/helpers/utils/networkUtils";
 import { WalletStatus } from "../src/models/KryptikWallet";
+import { defaultUser } from "../src/models/user";
 import { INFTMetadata } from "../src/parsers/nftEthereum";
 import { listNearNftsByAddress } from "../src/requests/nearIndexApi";
 import { listNftsByAddress } from "../src/requests/nfts/ethereumApi";
@@ -83,7 +84,11 @@ const Gallery: NextPage = () => {
     "https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/eth.png?alt=media&token=cc1091fb-ef28-4008-a91e-5709818c452e";
 
   const fetchNFTDataKryptik = async function () {
-    if (kryptikWallet.status != WalletStatus.Connected || !authUser?.isLoggedIn)
+    if (
+      kryptikWallet.status != WalletStatus.Connected ||
+      !authUser ||
+      authUser == defaultUser
+    )
       return;
     setIsNFTFetched(false);
     let solanaNetworkDb = kryptikService.getNetworkDbByTicker("sol");
