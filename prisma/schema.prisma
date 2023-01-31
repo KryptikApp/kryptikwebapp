@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,76 +10,91 @@ datasource db {
 model User {
   id            String         @id @unique @default(uuid())
   email         String         @unique
-  Profile       Profile?
-  remoteShare   RemoteShare?
-  refreshTokens RefreshToken[]
-  oneTimeTokens OneTimeToken[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  oneTimeTokens OneTimeToken[]
+  Profile       Profile?
+  refreshTokens RefreshToken[]
+  remoteShare   RemoteShare?
 }
 
-model RemoteShare{
-  id     Int  @id @default(autoincrement())
-  share  String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String  @unique // relation scalar field (used in the `@relation` attribute above)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+model RemoteShare {
+  id        Int      @id @default(autoincrement())
+  share     String
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Profile {
-  id     Int  @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
+  name       String?
+  bio        String?
+  userId     String  @unique
   avatarPath String?
-  name   String?
-  bio    String?
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String  @unique // relation scalar field (used in the `@relation` attribute above)
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model RefreshToken {
   id          String   @id @unique @default(uuid())
   hashedToken String
   userId      String
-  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   revoked     Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-}
-
-model OneTimeToken{
-  id          String   @id @unique @default(uuid())
-  userId      String
   User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  code        String
-  expiration  DateTime 
 }
 
-model NetworkDb{
-id     Int  @id @default(autoincrement())
-about String
-blockExplorerURL String
-blockchainId String
-chainId Float
-decimals Float
-fullName String
-iconPath String
-isSupported Boolean
-networkFamily String
-whitePaperPath String
-ticker String
-tokens TokenDb[]
+model OneTimeToken {
+  id         String   @id @unique @default(uuid())
+  userId     String
+  code       String
+  expiration DateTime
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model TokenDb{
-id     Int  @id @default(autoincrement())
-coingeckoId String
-description String
-link String
-hexColor String
-logoURI String
-name String
-tags String[]
-networks NetworkDb[]
+model NetworkDb {
+  id                Int             @id @default(autoincrement())
+  about             String
+  chainId           Float
+  decimals          Float
+  fullName          String          @unique
+  iconPath          String
+  isSupported       Boolean
+  whitePaperPath    String
+  blockExplorerURL  String
+  blockchainId      String
+  ticker            String          @unique
+  provider          String
+  zeroXSwapUrl      String?
+  coingeckoId       String
+  hexColor          String
+  isTestnet         Boolean?
+  networkFamilyName String
+  TokenContract     TokenContract[]
 }
 
+model TokenDb {
+  id            Int             @id @default(autoincrement())
+  coingeckoId   String
+  description   String
+  link          String
+  hexColor      String
+  logoURI       String
+  name          String          @unique
+  tags          String[]
+  decimals      Float
+  ticker        String          @unique
+  TokenContract TokenContract[]
+}
 
+model TokenContract {
+  id         Int       @id @default(autoincrement())
+  address    String
+  networkId  Int
+  tokenId    Int
+  contractId String    @unique
+  NetworkDb  NetworkDb @relation(fields: [networkId], references: [id], onDelete: Cascade)
+  TokenDb    TokenDb   @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+}
