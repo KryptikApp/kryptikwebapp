@@ -29,7 +29,7 @@ const ListItemBalance: NextPage<Props> = (props) => {
     ? tokenAndNetwork.baseNetworkDb.iconPath
     : null;
   const subtitle = tokenAndNetwork.tokenData
-    ? formatTicker(tokenAndNetwork.tokenData.tokenDb.symbol)
+    ? formatTicker(tokenAndNetwork.tokenData.tokenDb.ticker)
     : formatTicker(formatTicker(tokenAndNetwork.baseNetworkDb.ticker));
   let amount = null;
   let amountFiat = null;
@@ -59,7 +59,7 @@ const ListItemBalance: NextPage<Props> = (props) => {
           pathname: "../coins/coinInfo",
           query: {
             networkTicker: tokenAndNetwork.baseNetworkDb.ticker,
-            tokenTicker: tokenAndNetwork.tokenData.tokenDb.symbol,
+            tokenTicker: tokenAndNetwork.tokenData.tokenDb.ticker,
           },
         });
       } else {
