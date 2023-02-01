@@ -1,7 +1,4 @@
 import { NextPage } from "next";
-import { ColorEnum } from "../../src/helpers/utils";
-import Button from "../buttons/Button";
-import Divider from "../Divider";
 
 type Props = {
   icon: string | undefined;
