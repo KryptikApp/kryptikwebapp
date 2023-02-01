@@ -10,7 +10,7 @@ import NavProfile from "../../components/navbars/NavProfile";
 const Profile: NextPage = () => {
   const { authUser, updateCurrentUserKryptik } = useKryptikAuthContext();
 
-  const [name, setName] = useState(authUser ? authUser.name : "");
+  const [name, setName] = useState(authUser?.name || "");
   const [bio, setBio] = useState(authUser ? authUser.bio : "");
   const [loadingUpdate, setloadingUpdate] = useState(false);
 
