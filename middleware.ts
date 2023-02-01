@@ -43,6 +43,8 @@ export async function middleware(req: NextRequest, res: NextApiResponse) {
 export const config = {
   matcher: [
     "/api/user/:path*",
+    "/api/shares/:path*",
+    "/api/account/:path*",
     "/wallet/send",
     "/wallet/receive",
     "/wallet/createName",
