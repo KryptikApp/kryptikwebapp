@@ -52,11 +52,7 @@ import {
 import { IWallet } from "../models/KryptikWallet";
 import { searchTokenListByTicker } from "../handlers/search/token";
 import { IWeb3Service } from "./models/IWeb3Service";
-import {
-  getPriceOfMultipleTickers,
-  getPriceOfTicker,
-  PricesDict,
-} from "../helpers/coinGeckoHelper";
+import { getPriceOfTicker, PricesDict } from "../helpers/coinGeckoHelper";
 import {
   lamportsToSol,
   divByDecimals,
@@ -88,9 +84,6 @@ import {
   getNetworkChainId,
 } from "../helpers/assets";
 import { TokenContract } from "@prisma/client";
-
-const NetworkDbsRef = collection(firestore, "networks");
-const ALLTOKENSRef = collection(firestore, "tokens");
 
 export interface IConnectWalletReturn {
   wallet: IWallet;
