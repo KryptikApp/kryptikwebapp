@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getShareByUserId } from "../../../prisma/script";
 
 type Data = {
-  remoteShare: string | null;
+  share: string | null;
   msg?: string;
 };
 
@@ -24,14 +24,14 @@ export default async function handler(
     const remoteShare: RemoteShare | null = await getShareByUserId(userId);
     if (!remoteShare) {
       return res.status(200).json({
-        remoteShare: null,
+        share: null,
         msg: "Share has been updated.",
       });
     }
     return res
       .status(200)
-      .json({ remoteShare: remoteShare.share, msg: "Share has been updated." });
+      .json({ share: remoteShare.share, msg: "Share has been updated." });
   } catch (e: any) {
-    return res.status(400).json({ remoteShare: null, msg: `${e.message}` });
+    return res.status(400).json({ share: null, msg: `${e.message}` });
   }
 }
