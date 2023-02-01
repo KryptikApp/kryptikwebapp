@@ -22,7 +22,6 @@ interface IAuthContext {
     isRefresh?: boolean
   ) => void;
   updateCurrentUserKryptik: (user: UserDB) => void;
-  getUserPhotoPath: (user: UserDB) => string;
   walletStatus: WalletStatus;
   updateWalletStatus: (newStatus: WalletStatus) => void;
   refreshUserAndWallet: () => void;
@@ -45,9 +44,6 @@ const kryptikAuthContext = createContext<IAuthContext>({
     isRefresh?: boolean
   ) => {},
   updateCurrentUserKryptik: async (user: UserDB) => {},
-  getUserPhotoPath: (user: UserDB): string => {
-    return "";
-  },
   signClient: null,
   signOut: () => {},
   refreshUserAndWallet: () => {},
