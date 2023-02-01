@@ -57,7 +57,7 @@ export function getNetworkChainId(network: NetworkDb): number {
 export async function getAllPrices(): Promise<PricesDict | null> {
   // try to fetch tokens from db
   try {
-    const res = await KryptikFetch("/api/prices/update", {
+    const res = await KryptikFetch("/api/prices/all", {
       method: "POST",
       timeout: 8000,
       headers: { "Content-Type": "application/json" },
