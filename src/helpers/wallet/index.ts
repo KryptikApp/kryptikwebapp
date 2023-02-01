@@ -40,20 +40,21 @@ interface ConnectParams {
   uid: string;
   networksToAdd: NetworkDb[];
   seed?: string;
-  // TO DO: UPDATE SO ASSIGNMENT IS MORE EXPLICIT
-  // NOT EXPECTED TO BE PASSED IN RIGHT NOW
+}
+
+interface ConnectKryptikParams extends ConnectParams {
   remoteShare?: string;
 }
 
-// connects wallet with local service and updates remote share on server if necessary
+// TODO: ENSURE NEW WALLET IS NOT CREATED IF VAULT EXISTS, BUT MISSING SHARE
+/** connects wallet with local service and updates remote share on server if necessary */
 export async function ConnectWalletLocalandRemote(
   params: ConnectParams
 ): Promise<IConnectWalletReturn> {
-  const { networksToAdd, uid, remoteShare, seed } = { ...params };
+  const { networksToAdd, uid, seed } = { ...params };
   console.log("running kryptik connect method...");
   // fetch remote share from server if not provided
-  const remoteShareToUse: string | null =
-    remoteShare || (await getRemoteShare());
+  const remoteShareToUse: string | null = await getRemoteShare();
   let kryptikConnectionObject: IConnectWalletReturn =
     await connectKryptikWallet({
       uid: uid,
@@ -63,7 +64,10 @@ export async function ConnectWalletLocalandRemote(
     });
   console.log("finished kryptik connect!");
   // update remote share on db if undefined or value generated on local computer is different
-  if (!remoteShare || kryptikConnectionObject.remoteShare != remoteShare) {
+  if (
+    !remoteShareToUse ||
+    kryptikConnectionObject.remoteShare != remoteShareToUse
+  ) {
     console.log("UPDATING REMOTE SHARE ON DB");
     // update extra user data to reflect updated remote share
     try {
@@ -79,7 +83,7 @@ export async function ConnectWalletLocalandRemote(
 }
 
 export async function connectKryptikWallet(
-  params: ConnectParams
+  params: ConnectKryptikParams
 ): Promise<IConnectWalletReturn> {
   let seedloopKryptik: HDSeedLoop;
   let remoteShareReturn: string;
@@ -165,7 +169,7 @@ export function getSeedPhrase(wallet: IWallet): string | null {
   return seedPhrase;
 }
 
-// update wallets on local seedloop to match networks supported by app.
+/** update wallets on local seedloop to match networks supported by app. */
 function updateWalletNetworks(
   uid: string,
   wallet: IWallet,
