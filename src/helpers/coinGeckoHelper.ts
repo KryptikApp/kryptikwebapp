@@ -26,7 +26,7 @@ export const getPriceOfMultipleTickers = async function (
 ): Promise<PricesDict> {
   const client = new CoinGeckoClient({
     timeout: 10000,
-    autoRetry: true,
+    autoRetry: false,
   });
   const idString: string = ids.join();
   let input = {
