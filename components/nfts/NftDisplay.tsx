@@ -1,5 +1,5 @@
 import { NextPage } from "next";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { INFTMetadata, ITraitType } from "../../src/parsers/nftEthereum";
 import { defaultNetworkDb } from "../../src/services/models/network";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
