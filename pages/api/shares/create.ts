@@ -27,7 +27,7 @@ export default async function handler(
     try {
       await createShare(newShare, userId);
     } catch (e) {
-      throw new Error("Unable to create share.");
+      throw new Error("Unable to create share. Share likely already exists.");
     }
     return res.status(200).json({ msg: "Share has been updated." });
   } catch (e: any) {
