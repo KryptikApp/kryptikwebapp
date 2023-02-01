@@ -16,6 +16,7 @@ model User {
   Profile       Profile?
   refreshTokens RefreshToken[]
   remoteShare   RemoteShare?
+  blockchainAccount BlockchainAccount?
 }
 
 model RemoteShare {
@@ -97,4 +98,13 @@ model TokenContract {
   contractId String    @unique
   NetworkDb  NetworkDb @relation(fields: [networkId], references: [id], onDelete: Cascade)
   TokenDb    TokenDb   @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+}
+
+model BlockchainAccount{
+  id         Int       @id @default(autoincrement())
+  evmAddress String
+  solAddress String
+  nearAddress String
+  userId     String  @unique
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

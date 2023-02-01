@@ -1,6 +1,13 @@
-import { OneTimeToken, PrismaClient, Profile, User } from "@prisma/client";
+import {
+  BlockchainAccount,
+  OneTimeToken,
+  PrismaClient,
+  Profile,
+  User,
+} from "@prisma/client";
 import { Console } from "console";
 import { add } from "date-fns";
+import { BlockchainAccountDb } from "../src/helpers/accounts";
 import hashToken from "../src/helpers/auth/hashtoken";
 import { generateCode } from "../src/helpers/auth/jwt";
 
@@ -71,11 +78,11 @@ export function getShareByUserId(userId: string) {
 }
 
 export function getAllNetworks() {
-  return prisma.networkDb.findMany({ include: { tokens: true } });
+  return prisma.networkDb.findMany({});
 }
 
 export function getAllTokens() {
-  return prisma.tokenDb.findMany({ include: { networks: true } });
+  return prisma.tokenDb.findMany({ include: { TokenContract: true } });
 }
 
 export function updateShareByUserId(newShare: string, userId: string) {
@@ -187,4 +194,63 @@ export async function findOrCreateUserByEmail(
     existingUser = await createUserByEmail(email);
   }
   return existingUser;
+}
+
+/**Deletes user with the provided id. UIser must be loged in. Returns true if succesful. */
+export async function deleteUserById(id: string): Promise<boolean> {
+  try {
+    await prisma.user.delete({ where: { id: id } });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export async function deleteBlockChainAccountByUserId(
+  userId: string
+): Promise<boolean> {
+  try {
+    await prisma.blockchainAccount.delete({ where: { userId: userId } });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export async function addBlockChainAccountByUserId(
+  blockchainAccount: BlockchainAccountDb,
+  userId: string
+): Promise<boolean> {
+  try {
+    const newAcccount: BlockchainAccount =
+      await prisma.blockchainAccount.create({
+        data: {
+          evmAddress: blockchainAccount.evmAddress,
+          nearAddress: blockchainAccount.nearAddress,
+          solAddress: blockchainAccount.solAddress,
+          userId: userId,
+        },
+      });
+    return true;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
+export async function getBlockchainAccountByEmail(
+  email: string
+): Promise<BlockchainAccount | null> {
+  try {
+    const res = await prisma.user.findFirst({
+      where: { email: email },
+      include: { blockchainAccount: true },
+    });
+    if (!res || !res.blockchainAccount) {
+      throw new Error("unable to find blockchain account.");
+    }
+    return res.blockchainAccount;
+  } catch (e) {
+    return null;
+  }
 }
