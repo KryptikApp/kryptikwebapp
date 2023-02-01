@@ -2,21 +2,17 @@ import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { SignedTransaction, TransactionParameters } from "hdseedloop";
 import { erc20Abi } from "../../../abis/erc20Abi";
+import { getNetworkChainId } from "../../../helpers/assets";
 import {
   networkFromNetworkDb,
   getTransactionExplorerPath,
   isEVMTxTypeTwo,
-  getChainDataForNetwork,
 } from "../../../helpers/utils/networkUtils";
-import {
-  roundDecimalsByNetworkToken,
-  roundToDecimals,
-} from "../../../helpers/utils/numberUtils";
+import { roundToDecimals } from "../../../helpers/utils/numberUtils";
 import {
   IKryptikTxParams,
   KryptikTransaction,
 } from "../../../models/transactions";
-import { ChainData } from "../../../services/models/token";
 import {
   TransactionPublishedData,
   defaultTxPublishedData,
@@ -96,17 +92,12 @@ export const createEVMTransferTransaction = async function (
       `Error: No EVM provider specified for ${tokenAndNetwork.baseNetworkDb.fullName}`
     );
   }
-  if (!tokenAndNetwork.baseNetworkDb.evmData) {
-    throw new Error(
-      `Error: No EVM DATA specified for ${tokenAndNetwork.baseNetworkDb.fullName} network model`
-    );
-  }
   let ethProvider = kryptikProvider.ethProvider;
   let accountNonce = await ethProvider.getTransactionCount(
     sendAccount,
     "latest"
   );
-  let chainIdEVM = tokenAndNetwork.baseNetworkDb.evmData.chainId;
+  let chainIdEVM = getNetworkChainId(tokenAndNetwork.baseNetworkDb);
   let tx: TransactionRequest;
   let tokenDecimals: number = tokenAndNetwork.tokenData
     ? tokenAndNetwork.tokenData.tokenDb.decimals

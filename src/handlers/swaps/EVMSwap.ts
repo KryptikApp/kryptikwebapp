@@ -1,11 +1,11 @@
 import { BigNumber, BigNumberish, Contract } from "ethers";
 import { formatUnits, parseUnits } from "ethers/lib/utils";
 import { IBuildSwapParams } from ".";
-import SolExplorers from "../../../components/nfts/SolExplorers";
 import { erc20Abi } from "../../abis/erc20Abi";
 import { ETH_CONTRACT_ADDRESS } from "../../constants/evmConstants";
+import { getNetworkChainId } from "../../helpers/assets";
 import { getPriceOfTicker } from "../../helpers/coinGeckoHelper";
-import { formatTicker, isEVMTxTypeTwo } from "../../helpers/utils/networkUtils";
+import { isEVMTxTypeTwo } from "../../helpers/utils/networkUtils";
 import {
   multByDecimals,
   roundToDecimals,
@@ -49,10 +49,6 @@ export async function BuildEVMTokenApproval(
 ): Promise<KryptikTransaction | null> {
   // no need to approve base network coin sell- not part of ERC20 token standard
   if (!sellTokenAndNetwork.tokenData) return null;
-  // TODO: THROW ERROR IF NO EVM DATA PROVIDED?
-  if (!sellTokenAndNetwork.baseNetworkDb.evmData) {
-    return null;
-  }
   if (!kryptikProvider.ethProvider) {
     throw new Error(
       `Error: No EVM provider specified for: ${sellTokenAndNetwork.baseNetworkDb}`
@@ -64,7 +60,7 @@ export async function BuildEVMTokenApproval(
     sendAccount,
     "latest"
   );
-  let chainIdEVM = sellTokenAndNetwork.baseNetworkDb.evmData.chainId;
+  let chainIdEVM = getNetworkChainId(sellTokenAndNetwork.baseNetworkDb);
   let contractAddress = sellTokenAndNetwork.tokenData.selectedAddress;
   // ensure address is selected
   if (!contractAddress) return null;
@@ -164,17 +160,11 @@ export async function BuildEVMSwapTransaction(
     ? buyTokenAndNetwork.tokenData.selectedAddress
     : ETH_CONTRACT_ADDRESS;
   // ensure we have required params for 0x fetch
-  if (
-    !sellTokenId ||
-    !buyTokenId ||
-    !sellTokenAndNetwork.baseNetworkDb.evmData ||
-    !sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl
-  )
-    return null;
+  if (!sellTokenAndNetwork.baseNetworkDb.zeroXSwapUrl) return null;
   // slippage currently set as default of 3%
   let slippagePercentage: number = slippage ? slippage : 0.03;
   let swapReqParams: zeroXParams = {
-    baseUrl: sellTokenAndNetwork.baseNetworkDb.evmData.zeroXSwapUrl,
+    baseUrl: sellTokenAndNetwork.baseNetworkDb.zeroXSwapUrl,
     buyTokenId: buyTokenId,
     sellTokenId: sellTokenId,
     sellAmount: swapAmount.asNumber,
