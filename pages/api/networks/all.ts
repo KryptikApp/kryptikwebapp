@@ -18,10 +18,7 @@ export default async function handler(
     const networks = await getAllNetworks();
 
     if (!networks) {
-      return res.status(200).json({
-        networks: null,
-        msg: "Share has been updated.",
-      });
+      throw new Error("Unable to fetch tokens from DB.");
     }
     return res
       .status(200)
