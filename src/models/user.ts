@@ -1,9 +1,9 @@
 export interface UserDB {
   uid: string;
   email: string;
-  name: string;
-  bio: string;
-  photoUrl: string;
+  name?: string;
+  bio?: string;
+  photoUrl?: string;
   isAdvanced: boolean;
 }
 
