@@ -30,7 +30,7 @@ export async function getRemoteShare(): Promise<string | null> {
       timeout: 8000,
       headers: { "Content-Type": "application/json" },
     });
-    const share = res.data.share;
+    const share: string | null | undefined = res.data.share;
     if (res.status != 200 || !share) {
       throw "Unable to get share.";
     }
