@@ -108,3 +108,11 @@ model BlockchainAccount{
   userId     String  @unique
   user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Price{
+  ticker String @unique
+  coinGeckoId String @unique
+  price Float
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}

@@ -1,7 +1,16 @@
 // helps with integrating web3service into app. context
+import { Price } from "@prisma/client";
 import { CoinGeckoClient, CoinMarketChartResponse } from "coingecko-api-v3";
 
 export type PricesDict = { [id: string]: number };
+
+export function pricesDictFromPrices(prices: Price[]) {
+  const newDict: PricesDict = {};
+  prices.map((p) => {
+    newDict[p.coinGeckoId] = p.price;
+  });
+  return newDict;
+}
 
 export const getPriceOfTicker = async function (id: string): Promise<number> {
   const client = new CoinGeckoClient({
@@ -21,13 +30,19 @@ export const getPriceOfTicker = async function (id: string): Promise<number> {
   return priceResponse[id].usd;
 };
 
+export type CoingeckoIdAndTicker = {
+  id: string;
+  ticker: string;
+};
+
 export const getPriceOfMultipleTickers = async function (
-  ids: string[]
+  idAndTickers: CoingeckoIdAndTicker[]
 ): Promise<PricesDict> {
   const client = new CoinGeckoClient({
     timeout: 10000,
     autoRetry: false,
   });
+  const ids: string[] = idAndTickers.map((t) => t.id);
   const idString: string = ids.join();
   let input = {
     vs_currencies: "usd",

@@ -1,6 +1,7 @@
 import {
   BlockchainAccount,
   OneTimeToken,
+  Price,
   PrismaClient,
   Profile,
   User,
@@ -86,14 +87,14 @@ export function getAllTokens() {
 }
 
 export function updateShareByUserId(newShare: string, userId: string) {
-  prisma.remoteShare.update({
+  return prisma.remoteShare.update({
     where: { userId: userId },
     data: { share: newShare },
   });
 }
 
 export function createShare(newShare: string, userId: string) {
-  prisma.remoteShare.create({
+  return prisma.remoteShare.create({
     data: { share: newShare, userId: userId },
   });
 }
@@ -252,5 +253,38 @@ export async function getBlockchainAccountByEmail(
     return res.blockchainAccount;
   } catch (e) {
     return null;
+  }
+}
+
+export async function allPrices(): Promise<Price[]> {
+  try {
+    const prices: Price[] = await prisma.price.findMany();
+    if (!prices) {
+      throw new Error("unable to fetch prices.");
+    }
+    return prices;
+  } catch (e) {
+    return [];
+  }
+}
+
+export type PriceToUpload = {
+  ticker: string;
+  coinGeckoId: string;
+  price: number;
+};
+
+export async function updatePrices(prices: PriceToUpload[]) {
+  for (const price of prices) {
+    try {
+      await prisma.price.upsert({
+        where: { ticker: price.ticker },
+        create: price,
+        update: price,
+      });
+    } catch (e) {
+      // if fail to upsert one price.. keep trying with rest
+      continue;
+    }
   }
 }
