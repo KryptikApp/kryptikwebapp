@@ -9,7 +9,7 @@ import { defaultWallet } from "../../models/defaultWallet";
 import { IWallet, WalletStatus } from "../../models/KryptikWallet";
 import { NetworkDb } from "../../services/models/network";
 import { IConnectWalletReturn } from "../../services/Web3Service";
-import { createShareOnDb, getRemoteShare } from "../user";
+import { createShareOnDb, getRemoteShare } from "../shares";
 import { networkFromNetworkDb } from "../utils/networkUtils";
 
 export function createSeedloop(
