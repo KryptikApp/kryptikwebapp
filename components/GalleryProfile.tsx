@@ -1,23 +1,17 @@
 import { Network, truncateAddress } from "hdseedloop";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import {
-  getRandomAvatarPhoto,
-  getUserPhotoPath,
-} from "../src/helpers/firebaseHelper";
+import { getRandomAvatarPhoto, getUserPhotoPath } from "../src/helpers/auth";
 import {
   defaultResolvedAccount,
   IAccountResolverParams,
   IResolvedAccount,
   resolveAccount,
 } from "../src/helpers/resolvers/accountResolver";
-import { resolveEVMAccount } from "../src/helpers/resolvers/evmResolver";
 import { networkFromNetworkDb } from "../src/helpers/utils/networkUtils";
-import { defaultUser } from "../src/models/user";
 import { defaultNetworkDb, NetworkDb } from "../src/services/models/network";
 import { KryptikProvider } from "../src/services/models/provider";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
-import ProfileName from "./ProfileName";
 interface Props {
   account?: string;
   networkDb?: NetworkDb;
