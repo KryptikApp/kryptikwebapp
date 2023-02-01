@@ -1,6 +1,5 @@
 // helps with integrating web3service into app. context
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getUserPhotoPath } from "./firebaseHelper";
 import SignClient from "@walletconnect/sign-client";
 import { SignClientTypes } from "@walletconnect/types/dist/types/sign-client";
 
@@ -76,6 +75,7 @@ export function useKryptikAuth() {
     if (!user) return false;
     // now we are manually updating the context and connecting the wallet
     // only done when not a refresh of authentication
+    console.log("runnnningggg update auth context");
     await updateAuthContext(user, seed);
     return true;
   }
@@ -94,10 +94,6 @@ export function useKryptikAuth() {
   }
 
   const updateAuthContext = async (user: UserDB, seed?: string) => {
-    let isSigningInWithToken = sessionStorage.getItem("isSigniningInWithToken");
-    if (isSigningInWithToken) {
-      return;
-    }
     // update loading state
     setLoadingAuthUser(true);
     setLoadingWallet(true);
@@ -111,7 +107,7 @@ export function useKryptikAuth() {
     const networksToAdd: NetworkDb[] = ks.getAllNetworkDbs(true);
     const uid: string = formattedUser.uid;
     // connect with provided seed
-    if (seed != "") {
+    if (seed && seed != "") {
       const connectionObject = await ConnectWalletLocalandRemote({
         uid: uid,
         seed: seed,
@@ -267,7 +263,6 @@ export function useKryptikAuth() {
     refreshUserAndWallet,
     signInWithToken,
     updateCurrentUserKryptik,
-    getUserPhotoPath,
     signOut,
     kryptikService,
     setKryptikWallet,
