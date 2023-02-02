@@ -10,7 +10,7 @@ export async function middleware(req: NextRequest, res: NextApiResponse) {
   console.log("running middleware!!");
   if (!accessToken || !refreshToken || !process.env.JWT_ACCESS_SECRET) {
     req.nextUrl.searchParams.set("from", req.nextUrl.pathname);
-    req.nextUrl.pathname = "/login";
+    req.nextUrl.pathname = "/wallet/create";
     return NextResponse.redirect(req.nextUrl);
   }
   const secret = process.env.JWT_ACCESS_SECRET;
