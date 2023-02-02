@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RiMoonFill, RiSunFill } from "react-icons/ri";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
+import { Toaster } from "react-hot-toast";
 
 type Props = {
   children: any;
@@ -31,7 +32,7 @@ export default function Layout(props: Props) {
         <meta name="description" content="Crypto made simple." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      <Toaster />
       <main>
         <div className="w-full h-[8vh] shadow-sm shadow-slate-500 z-10">
           <div className="flex flex-row space-x-2 px-4 py-3">

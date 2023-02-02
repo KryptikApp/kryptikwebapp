@@ -272,11 +272,11 @@ const Swap: NextPage = () => {
       toast.error(
         `Error building ${toUpper(
           sellTokenAndNetwork.tokenData
-            ? sellTokenAndNetwork.tokenData.tokenDb.symbol
+            ? sellTokenAndNetwork.tokenData.tokenDb.ticker
             : sellTokenAndNetwork.baseNetworkDb.ticker
         )}-${toUpper(
           buyTokenAndNetwork.tokenData
-            ? buyTokenAndNetwork.tokenData.tokenDb.symbol
+            ? buyTokenAndNetwork.tokenData.tokenDb.ticker
             : buyTokenAndNetwork.baseNetworkDb.ticker
         )} swap request`
       );
@@ -480,11 +480,11 @@ const Swap: NextPage = () => {
       toast.error(
         `${toUpper(
           sellTokenAndNetwork.tokenData
-            ? sellTokenAndNetwork.tokenData.tokenDb.symbol
+            ? sellTokenAndNetwork.tokenData.tokenDb.ticker
             : sellTokenAndNetwork.baseNetworkDb.ticker
         )}-${toUpper(
           newTokenAndNetwork.tokenData
-            ? newTokenAndNetwork.tokenData.tokenDb.symbol
+            ? newTokenAndNetwork.tokenData.tokenDb.ticker
             : newTokenAndNetwork.baseNetworkDb.ticker
         )} are not yet supported`
       );
@@ -507,7 +507,7 @@ const Swap: NextPage = () => {
     } else {
       defaultSearchResults = getTokenSearchSuggestions(
         query,
-        kryptikService.TickerToNetworkDbs,
+        kryptikService.NetworkDbs,
         kryptikService.NetworkDbs,
         kryptikService.tokenDbs,
         true,
@@ -556,7 +556,7 @@ const Swap: NextPage = () => {
     } else {
       newSearchResults = getTokenSearchSuggestions(
         query,
-        kryptikService.TickerToNetworkDbs,
+        kryptikService.NetworkDbs,
         kryptikService.NetworkDbs,
         kryptikService.tokenDbs,
         false,
@@ -592,7 +592,6 @@ const Swap: NextPage = () => {
 
   return (
     <div className="dark:text-white">
-      <Toaster />
       <div className="h-[20vh]">
         {/* padding div for space between bottom and main elements */}
       </div>
@@ -616,7 +615,7 @@ const Swap: NextPage = () => {
                       {!isInputCrypto
                         ? `${roundCryptoAmount(Number(amountCrypto))} ${
                             sellTokenAndNetwork.tokenData
-                              ? sellTokenAndNetwork.tokenData.tokenDb.symbol
+                              ? sellTokenAndNetwork.tokenData.tokenDb.ticker
                               : formatTicker(
                                   sellTokenAndNetwork.baseNetworkDb.ticker
                                 )
@@ -833,7 +832,7 @@ const Swap: NextPage = () => {
                             {formatTicker(
                               swapTx.swapData.sellTokenAndNetwork.tokenData
                                 ? swapTx.swapData.sellTokenAndNetwork.tokenData
-                                    .tokenDb.symbol
+                                    .tokenDb.ticker
                                 : swapTx.swapData.sellTokenAndNetwork
                                     .baseNetworkDb.ticker
                             )}
@@ -874,7 +873,7 @@ const Swap: NextPage = () => {
                             {formatTicker(
                               swapTx.swapData.buyTokenAndNetwork.tokenData
                                 ? swapTx.swapData.buyTokenAndNetwork.tokenData
-                                    .tokenDb.symbol
+                                    .tokenDb.ticker
                                 : swapTx.swapData.buyTokenAndNetwork
                                     .baseNetworkDb.ticker
                             )}
@@ -1164,7 +1163,7 @@ const Swap: NextPage = () => {
                           )}{" "}
                           {formatTicker(
                             sellTokenAndNetwork.tokenData
-                              ? sellTokenAndNetwork.tokenData.tokenDb.symbol
+                              ? sellTokenAndNetwork.tokenData.tokenDb.ticker
                               : sellTokenAndNetwork.baseNetworkDb.ticker
                           )}
                         </span>{" "}
@@ -1190,7 +1189,7 @@ const Swap: NextPage = () => {
                           {formatTicker(
                             swapTx.swapData.buyTokenAndNetwork.tokenData
                               ? swapTx.swapData.buyTokenAndNetwork.tokenData
-                                  .tokenDb.symbol
+                                  .tokenDb.ticker
                               : swapTx.swapData.buyTokenAndNetwork.baseNetworkDb
                                   .ticker
                           )}

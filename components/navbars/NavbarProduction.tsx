@@ -185,7 +185,6 @@ const NavbarProduction: NextPage = () => {
           )}
         </div>
       </div>
-      <Toaster />
     </nav>
   );
 };

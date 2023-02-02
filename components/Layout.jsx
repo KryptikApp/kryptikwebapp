@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useKryptikThemeContext } from "./ThemeProvider";
 import Navbar from "./navbars/Navbar";
+import { Toaster } from "react-hot-toast";
 
 // TODO: Update to support dynamic headers
 export default function Layout({ children }) {
@@ -16,6 +17,7 @@ export default function Layout({ children }) {
         <meta name="description" content="Crypto made simple." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+      <Toaster />
 
       <main className={`px-4 mx-auto`}>
         <Navbar></Navbar>

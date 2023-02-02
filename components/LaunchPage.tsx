@@ -55,7 +55,6 @@ const LaunchPage: NextPage = () => {
 
   return (
     <div className="">
-      <Toaster />
       {
         <div className="h-[6vh] md:h-[20vh]">
           {/* padding div for space between top and main elements */}

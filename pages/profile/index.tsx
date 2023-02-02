@@ -36,7 +36,6 @@ const Profile: NextPage = () => {
 
   return (
     <div>
-      <Toaster />
       <div className="text-center max-w-2xl mx-auto content-center">
         <HeaderProfile showBio={true} center={false} />
         <Divider />

@@ -6,7 +6,6 @@ import SearchNetwork from "../components/search/searchNetwork";
 const Explore: NextPage = () => {
   return (
     <div>
-      <Toaster />
       <div className="h-[24vh]">
         {/* padding div for space between top and main elements */}
       </div>

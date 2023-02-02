@@ -11,7 +11,6 @@ const CreateWallet: NextPage = () => {
 
   return (
     <div>
-      <Toaster />
       <div className="h-[15vh]">
         {/* padding div for space between top and main elements */}
       </div>

@@ -14,10 +14,10 @@ import { getFileName } from "../../src/helpers/utils";
 import toast, { Toaster } from "react-hot-toast";
 import NavProfile from "../../components/navbars/NavProfile";
 import { defaultUser } from "../../src/models/user";
+import { getUserPhotoPath } from "../../src/helpers/auth";
 
 const Profile: NextPage = () => {
-  const { authUser, getUserPhotoPath, updateCurrentUserKryptik } =
-    useKryptikAuthContext();
+  const { authUser, updateCurrentUserKryptik } = useKryptikAuthContext();
   const router = useRouter();
 
   const imageUrlInit: string = getUserPhotoPath(
@@ -91,7 +91,6 @@ const Profile: NextPage = () => {
 
   return (
     <div>
-      <Toaster />
       <div className="h-[5vh]">
         {/* padding div for space between top and main elements */}
       </div>

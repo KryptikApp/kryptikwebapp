@@ -7,7 +7,6 @@ import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 const Offline: NextPage = () => {
   return (
     <div>
-      <Toaster />
       <div className="h-[10rem]">
         {/* padding div for space between top and main elements */}
       </div>
