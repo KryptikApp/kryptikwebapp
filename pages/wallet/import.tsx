@@ -13,6 +13,7 @@ import {
 } from "../../src/helpers/waitlist";
 import { useRouter } from "next/router";
 import LoginCard from "../../components/auth/LoginCard";
+import LoginWithSeedCard from "../../components/auth/LoginWithSeedCard";
 
 const ImportSeed: NextPage = () => {
   // const { signInWithToken } = useKryptikAuthContext();
@@ -72,7 +73,7 @@ const ImportSeed: NextPage = () => {
         {/* padding div for space between top and main elements */}
       </div>
       <div className="max-w-2xl mx-auto">
-        <LoginCard />
+        <LoginWithSeedCard />
       </div>
     </div>
   );
