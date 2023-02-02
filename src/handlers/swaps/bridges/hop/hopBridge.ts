@@ -30,6 +30,7 @@ import TransactionFeeData, {
 import { getTransactionFeeDataEVM } from "../../../fees/EVMFees";
 import { ISwapData } from "../../../../parsers/0xData";
 import { parseUnits } from "ethers/lib/utils";
+import { getNetworkChainId } from "../../../../helpers/assets";
 
 export interface IBuildHopBridgeParams extends IBuildSwapParams {
   // empty for now
@@ -61,8 +62,7 @@ export async function BuildHopBridgeTransaction(
     ? buyTokenAndNetwork.tokenData.selectedAddress
     : ETH_CONTRACT_ADDRESS;
   // ensure we have required params for Hop Bridge
-  if (!sellTokenId || !buyTokenId || !sellTokenAndNetwork.baseNetworkDb.evmData)
-    return null;
+  if (!sellTokenId || !buyTokenId) return null;
   // must be different networks
   if (
     sellTokenAndNetwork.baseNetworkDb.ticker ==
@@ -72,7 +72,7 @@ export async function BuildHopBridgeTransaction(
   // check if valid network combo
   let isValidSwap = isValidHopBridge(buyTokenAndNetwork, sellTokenAndNetwork);
   if (!isValidSwap) return null;
-  const chainIdEVM = sellTokenAndNetwork.baseNetworkDb.evmData.chainId;
+  const chainIdEVM = getNetworkChainId(sellTokenAndNetwork.baseNetworkDb);
 
   // TODO: Add sufficient bonder liquidity check... skipping for now
   // TODO: ensure recipient address is ok... currently ASSUMING it is
@@ -215,11 +215,6 @@ async function populateHopBridgeL1ToL2(
   if (isLayerOne(buyTokenAndNetwork.baseNetworkDb)) {
     throw new Error("Cannot send from layer 1 to layer 1");
   }
-  if (!buyTokenAndNetwork.baseNetworkDb.evmData) {
-    throw new Error(
-      `No evm data is specified for ${buyTokenAndNetwork.baseNetworkDb.fullName}`
-    );
-  }
   const isSellTokenNative: boolean = isNativeToken(sellTokenAndNetwork);
   // hop bridge slippage currently set as default of 3%
   const slippagePercentage: number = slippage ? slippage : 0.03;
@@ -244,7 +239,7 @@ async function populateHopBridgeL1ToL2(
   // set required contract paramters
   // can safely set to zero for now, per: https://docs.hop.exchange/smart-contracts/integration#l1-greater-than-l2
   const destinationChainId: BigNumber = BigNumber.from(
-    buyTokenAndNetwork.baseNetworkDb.evmData?.chainId
+    getNetworkChainId(buyTokenAndNetwork.baseNetworkDb)
   );
   const relayer: string = EVM_NULL_ADDRESS;
   const relayerFee: BigNumber = BigNumber.from(0);
@@ -341,7 +336,7 @@ function isRelayerFeeEnabled(networkName: string): boolean {
 function getL1BridgeAddress(sellTokenAndNetwork: TokenAndNetwork) {
   // format token ticker
   const tokenTicker = sellTokenAndNetwork.tokenData
-    ? formatTicker(sellTokenAndNetwork.tokenData.tokenDb.symbol)
+    ? formatTicker(sellTokenAndNetwork.tokenData.tokenDb.ticker)
     : formatTicker(sellTokenAndNetwork.baseNetworkDb.ticker);
   // get corresponding bridge address
   const allBridges: Record<string, any> = hopAddresses.bridges;
@@ -354,7 +349,7 @@ function getBonderAddress(
   buyTokenAndNetwork: TokenAndNetwork
 ): string | null {
   const tokenTicker = sellTokenAndNetwork.tokenData
-    ? formatTicker(sellTokenAndNetwork.tokenData.tokenDb.symbol)
+    ? formatTicker(sellTokenAndNetwork.tokenData.tokenDb.ticker)
     : formatTicker(sellTokenAndNetwork.baseNetworkDb.ticker);
   // format network name for hop address config schema
   const sellNetworkName = getHopNetworkName(
