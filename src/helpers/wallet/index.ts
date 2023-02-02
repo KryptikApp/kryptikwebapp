@@ -4,6 +4,7 @@ import {
   VaultAndShares,
   createVault,
   updateVaultSeedloop,
+  vaultExists,
 } from "../../handlers/wallet/vaultHandler";
 import { defaultWallet } from "../../models/defaultWallet";
 import { IWallet, WalletStatus } from "../../models/KryptikWallet";
@@ -65,8 +66,9 @@ export async function ConnectWalletLocalandRemote(
   console.log("finished kryptik connect!");
   // update remote share on db if undefined or value generated on local computer is different
   if (
-    !remoteShareToUse ||
-    kryptikConnectionObject.remoteShare != remoteShareToUse
+    kryptikConnectionObject.remoteShare &&
+    (!remoteShareToUse ||
+      kryptikConnectionObject.remoteShare != remoteShareToUse)
   ) {
     console.log("UPDATING REMOTE SHARE ON DB");
     // update extra user data to reflect updated remote share
@@ -112,6 +114,15 @@ export async function connectKryptikWallet(
   }
   // CASE: Remote share not provided...create new seedloop
   else {
+    // no remote share, but there is a local vault
+    if (!vaultExists(uid)) {
+      const walletToReturn: IWallet = new IWallet({
+        ...defaultWallet,
+        walletProviderName: "kryptik",
+        status: WalletStatus.OutOfSync,
+      });
+      return { wallet: walletToReturn };
+    }
     // create new vault for seedloop
     seedloopKryptik = createSeedloop(networksToAdd, seed);
     let newVaultandShare: VaultAndShares = createVault(seedloopKryptik, uid);
@@ -127,7 +138,6 @@ export async function connectKryptikWallet(
     ? WalletStatus.Locked
     : WalletStatus.Connected;
 
-  console.log("New kryptik wallet:");
   // set values for new wallet
   let newKryptikWallet: IWallet = new IWallet({
     ...defaultWallet,
@@ -137,7 +147,6 @@ export async function connectKryptikWallet(
     resolvedEthAccount: { address: ethAddyFirst, isResolved: false },
     uid: uid,
   });
-  console.log(newKryptikWallet);
 
   // update wallet networks if necessesary
   if (updateNetworks) {
