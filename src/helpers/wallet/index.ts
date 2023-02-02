@@ -115,7 +115,7 @@ export async function connectKryptikWallet(
   // CASE: Remote share not provided...create new seedloop
   else {
     // no remote share, but there is a local vault
-    if (!vaultExists(uid)) {
+    if (vaultExists(uid)) {
       const walletToReturn: IWallet = new IWallet({
         ...defaultWallet,
         walletProviderName: "kryptik",
