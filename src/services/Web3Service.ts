@@ -87,7 +87,7 @@ import { TokenContract } from "@prisma/client";
 
 export interface IConnectWalletReturn {
   wallet: IWallet;
-  remoteShare: string;
+  remoteShare?: string;
 }
 
 // todo: update to route all price requests through this service
