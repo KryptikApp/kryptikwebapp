@@ -17,14 +17,16 @@ export async function sendEmailCode(
   const fullUrl: string =
     baseUrl + `approve` + `?email=${email}` + `&code=${code}`;
   const fromEmail = process.env.SENDGRID_EMAIL;
-  const msgText = useLink
-    ? `Hi there! I hope you're having a wonderful day. You can follow this link to login: ${fullUrl}`
-    : `Hi there! I hope you're having a wonderful day. Your login code is: ${code}`;
+  // const msgText = useLink
+  //   ? `Hi there! I hope you're having a wonderful day. You can follow this link to login: ${fullUrl}`
+  //   : `Hi there! I hope you're having a wonderful day. Your login code is: ${code}`;
   const msg = {
     to: email,
     from: fromEmail || "",
-    subject: "Jett Blu Website Login",
-    text: msgText,
+    templateId: "d-6a860cc7ed4a40cf9694322253a4ff3e",
+    dynamic_template_data: {
+      code: code,
+    },
   };
   try {
     await sendgrid.send(msg);
