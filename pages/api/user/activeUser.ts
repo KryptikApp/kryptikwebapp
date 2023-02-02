@@ -16,8 +16,6 @@ export default async function handler(
   // Get data submitted in request's body.
   try {
     const userId: string | string[] | undefined = req.headers["user-id"];
-    console.log(req.headers);
-    console.log(userId);
     if (!userId || typeof userId != "string") {
       return res.status(400).json({
         msg: "No user id available or user id was of the wrong type (expected string).",
