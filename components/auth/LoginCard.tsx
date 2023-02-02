@@ -7,12 +7,13 @@ import ReactCodeInput from "react-code-input";
 import { useRouter } from "next/router";
 import LoadingSpinner from "../loadingSpinner";
 import { useKryptikThemeContext } from "../ThemeProvider";
-import { useKryptikAuth } from "../../src/helpers/kryptikAuthHelper";
 import { KryptikFetch } from "../../src/kryptikFetch";
 import Link from "next/link";
 import { isValidEmailAddress } from "../../src/helpers/resolvers/kryptikResolver";
+import { useKryptikAuthContext } from "../KryptikAuthProvider";
 
 const LoginCard: NextPage = () => {
+  const { signInWithToken } = useKryptikAuthContext();
   const [email, setEmail] = useState("");
   const [sentEmail, setSentEmail] = useState(false);
   const [loadingApproval, setLoadingApproval] = useState(false);
@@ -20,7 +21,6 @@ const LoginCard: NextPage = () => {
   const [redirectToPath, setRedirectToPath] = useState<null | string>(null);
   const sendLink: boolean = false;
   const { isDark } = useKryptikThemeContext();
-  const { signInWithToken } = useKryptikAuth();
   const [code, setCode] = useState("");
   const router = useRouter();
   const [loadingMessage, setLoadingMessage] = useState("");
