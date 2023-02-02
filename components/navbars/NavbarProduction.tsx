@@ -6,10 +6,10 @@ import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 
 // wallet SDK helpers
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
-import { getUserPhotoPath } from "../../src/helpers/firebaseHelper";
 import { useKryptikThemeContext } from "../ThemeProvider";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { WalletStatus } from "../../src/models/KryptikWallet";
+import { getUserPhotoPath } from "../../src/helpers/auth";
 
 const NavbarProduction: NextPage = () => {
   const [isMenuMobile, setMenuMobile] = useState(false);
@@ -67,7 +67,7 @@ const NavbarProduction: NextPage = () => {
           onClick={() => setMenuMobile(false)}
         >
           {authUser && (
-            <div className="mt-2 ml-2 md:ml-0 md:mr-2">
+            <div className="ml-2 md:ml-0 md:mr-2">
               {hideBalances ? (
                 <RiEyeCloseLine
                   className="dark:text-white hover:cursor-pointer hover:animate-pulse"
@@ -185,7 +185,6 @@ const NavbarProduction: NextPage = () => {
           )}
         </div>
       </div>
-      <Toaster />
     </nav>
   );
 };

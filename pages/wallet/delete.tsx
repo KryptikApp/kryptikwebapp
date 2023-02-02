@@ -4,13 +4,9 @@ import { useRouter } from "next/router";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import toast, { Toaster } from "react-hot-toast";
 import Divider from "../../components/Divider";
-import { removeUserAndWallet } from "../../src/helpers/firebaseHelper";
-import {
-  ILoginUserParams,
-  loginUser,
-} from "../../src/handlers/profile/loginHandler";
 import { defaultWallet } from "../../src/models/defaultWallet";
 import NavProfile from "../../components/navbars/NavProfile";
+import { removeUserAndWallet } from "../../src/helpers/auth";
 
 const DeleteWallet: NextPage = () => {
   const { authUser, loadingAuthUser, signInWithToken, setKryptikWallet } =
@@ -18,14 +14,11 @@ const DeleteWallet: NextPage = () => {
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (!loadingAuthUser && (!authUser || !authUser.isLoggedIn))
-      router.push("/");
+    if (!loadingAuthUser && !authUser) router.push("/");
   }, [authUser, loadingAuthUser]);
 
   const handleDeleteWallet = async function () {
     try {
-      // refresh login
-      await handleRefreshLogin();
       // delete user and local wallet
       await removeUserAndWallet();
       // set wallet to default
@@ -39,28 +32,8 @@ const DeleteWallet: NextPage = () => {
     }
   };
 
-  const handleRefreshLogin = async function () {
-    if (!authUser) return;
-    try {
-      // login user with undefined seed
-      // seed will be created when wallet is created
-      const loginParams: ILoginUserParams = {
-        email: authUser.uid,
-        signInWithTokenFunc: signInWithToken,
-        isRefresh: true,
-      };
-      await loginUser(loginParams);
-      // If we reach this line, it means our
-      // authentication succeeded, so we'll
-      // redirect to the home page!
-    } catch (e) {
-      throw new Error("Error: Unable to refresh login.");
-    }
-  };
-
   return (
     <div>
-      <Toaster />
       <div className="h-[2rem]">
         {/* padding div for space between top and main elements */}
       </div>

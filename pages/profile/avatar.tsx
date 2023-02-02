@@ -1,5 +1,5 @@
 import type { NextPage } from "next";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import {
   getDownloadURL,
@@ -14,20 +14,11 @@ import { getFileName } from "../../src/helpers/utils";
 import toast, { Toaster } from "react-hot-toast";
 import NavProfile from "../../components/navbars/NavProfile";
 import { defaultUser } from "../../src/models/user";
+import { getUserPhotoPath } from "../../src/helpers/auth";
 
 const Profile: NextPage = () => {
-  const {
-    authUser,
-    loadingAuthUser,
-    getUserPhotoPath,
-    updateCurrentUserKryptik,
-  } = useKryptikAuthContext();
+  const { authUser, updateCurrentUserKryptik } = useKryptikAuthContext();
   const router = useRouter();
-  // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
-  useEffect(() => {
-    if (!loadingAuthUser && (!authUser || !authUser.isLoggedIn))
-      router.push("/");
-  }, [authUser, loadingAuthUser]);
 
   const imageUrlInit: string = getUserPhotoPath(
     authUser ? authUser : defaultUser
@@ -100,7 +91,6 @@ const Profile: NextPage = () => {
 
   return (
     <div>
-      <Toaster />
       <div className="h-[5vh]">
         {/* padding div for space between top and main elements */}
       </div>

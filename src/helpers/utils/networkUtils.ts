@@ -1,3 +1,4 @@
+import { TokenContract } from "@prisma/client";
 import { lastDayOfYear } from "date-fns";
 import { Network, NetworkFamily } from "hdseedloop";
 import { NetworkDb } from "../../services/models/network";
@@ -63,22 +64,14 @@ export const networkFromNetworkDb = function (nw: NetworkDb): Network {
   return network;
 };
 
-export const getChainDataForNetwork = function (
+export function getContractByNetwork(
   network: NetworkDb,
-  tokenData: TokenDb
-): ChainData | null {
-  let chainDataArray: ChainData[] = tokenData.chainData;
-  for (const chainInfo of chainDataArray) {
-    // each contract has a different address depending on the chain
-    // we use the network chainId + symbol to extract the correct chaindata
-    // remember: chainId may be specific to network
-    if (network.ticker.toLowerCase() == chainInfo.ticker.toLowerCase()) {
-      return chainInfo;
-    }
-  }
-  // we return null if there is no chain data specified for network
-  return null;
-};
+  token: TokenDb
+): TokenContract | null {
+  const contract = token.contracts.find((c) => c.networkId == network.id);
+  if (!contract) return null;
+  return contract;
+}
 
 /**
  * Determines whether a network is a `layer 1'

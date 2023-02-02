@@ -15,11 +15,16 @@ interface IAuthContext {
   authUser: UserDB | null;
   loadingAuthUser: boolean;
   loadingWallet: boolean;
-  signInWithToken: (token: string, seed?: string, isRefresh?: boolean) => void;
+  signInWithToken: (
+    token: string,
+    email: string,
+    seed?: string,
+    isRefresh?: boolean
+  ) => Promise<boolean>;
   updateCurrentUserKryptik: (user: UserDB) => void;
-  getUserPhotoPath: (user: UserDB) => string;
   walletStatus: WalletStatus;
   updateWalletStatus: (newStatus: WalletStatus) => void;
+  refreshUserAndWallet: () => void;
   signOut: () => void;
   signClient: SignClient | null;
 }
@@ -34,15 +39,14 @@ const kryptikAuthContext = createContext<IAuthContext>({
   loadingWallet: false,
   signInWithToken: async (
     token: string,
+    email: string,
     seed?: string,
     isRefresh?: boolean
-  ) => {},
+  ) => true,
   updateCurrentUserKryptik: async (user: UserDB) => {},
-  getUserPhotoPath: (user: UserDB): string => {
-    return "";
-  },
   signClient: null,
   signOut: () => {},
+  refreshUserAndWallet: () => {},
   walletStatus: defaultWallet.status,
   updateWalletStatus: (newStatus: WalletStatus) => {},
 });

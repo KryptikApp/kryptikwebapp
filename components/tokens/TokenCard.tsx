@@ -1,5 +1,3 @@
-import { ca } from "date-fns/locale";
-import { Token } from "graphql";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import { NetworkDb } from "../../src/services/models/network";
@@ -57,9 +55,9 @@ const TokenCard: NextPage<Props> = (props) => {
       return;
     }
     // iterate through chain data and populate supported networks
-    for (const cd of token.chainData) {
-      const newNetwork: NetworkDb | null = kryptikService.getNetworkDbByTicker(
-        cd.ticker
+    for (const cd of token.contracts) {
+      const newNetwork: NetworkDb | null = kryptikService.getNetworkDbById(
+        cd.networkId
       );
       if (newNetwork) {
         newSupportedNetworks.push(newNetwork);
@@ -105,7 +103,7 @@ const TokenCard: NextPage<Props> = (props) => {
       <Expandable isOpen={showDetails}>
         <div className="flex flex-col space-y-2">
           <p className="text-lg text-gray-700 dark:text-gray-200 mt-4">
-            {token.extensions.description}
+            {token.description}
           </p>
 
           {/* UNCOMMENT below for displaying icons of supported networks */}

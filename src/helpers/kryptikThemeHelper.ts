@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import { IWallet } from "../models/KryptikWallet";
 import {
-  addUserBlockchainAccountsDB,
-  deleteUserBlockchainAccountsDB,
-} from "./firebaseHelper";
+  addUserBlockchainAccountDB,
+  BlockchainAccountDb,
+  deleteUserBlockchainAccountDB,
+} from "./accounts";
 import { getAddressForNetwork } from "./utils/accountUtils";
 
 export function useKryptikTheme() {
@@ -93,9 +94,14 @@ export function useKryptikTheme() {
       hideBalances: hideBalances,
       lastUpdated: Date.now(),
     };
+    let success: boolean = false;
     if (newIsVisible) {
-      let blockchainAccounts: any = {};
-      // PERPETUAL TODO: UPDATE WHEN NETWORK WITH DIFFERENT ADDY IS ADDED
+      let blockchainAccounts: BlockchainAccountDb = {
+        evmAddress: "",
+        nearAddress: "",
+        solAddress: "",
+      };
+      // PERPETUAL TODO: UPDATE WHEN NETWORK WITH DIFFERENT NETWORK FAMILY IS ADDED
       const solNetwork = defaultNetworks["sol"];
       const ethNetwork = defaultNetworks["eth"];
       const nearNetwork = defaultNetworks["near"];
@@ -103,19 +109,23 @@ export function useKryptikTheme() {
       const ethAddy = getAddressForNetwork(wallet, ethNetwork);
       const nearAddy = getAddressForNetwork(wallet, nearNetwork);
       // add data to ticker-addy dictionary
-      blockchainAccounts[solNetwork.ticker] = solAddy;
-      blockchainAccounts[ethNetwork.ticker] = ethAddy;
-      blockchainAccounts[nearNetwork.ticker] = nearAddy;
+      blockchainAccounts.solAddress = solAddy;
+      blockchainAccounts.evmAddress = ethAddy;
+      blockchainAccounts.nearAddress = nearAddy;
       console.log("adding addys to remote...");
-      await addUserBlockchainAccountsDB(blockchainAccounts);
+      success = await addUserBlockchainAccountDB(blockchainAccounts);
       console.log("----");
     } else {
-      await deleteUserBlockchainAccountsDB();
+      success = await deleteUserBlockchainAccountDB();
     }
-    // update app state
-    setIsVisible(newIsVisible);
-    // update stored theme
-    updateTheme(newTheme, uid);
+    if (success) {
+      // update app state
+      setIsVisible(newIsVisible);
+      // update stored theme
+      updateTheme(newTheme, uid);
+    } else {
+      throw new Error("Unable to add blockchain accounts");
+    }
   };
 
   const updateIsAdvanced = function (newIsAdvanced: boolean, uid: string) {

@@ -1,11 +1,6 @@
-import { Transaction as SolTransaction } from "@solana/web3.js";
 import { NetworkFamily } from "hdseedloop";
-import {
-  getChainDataForNetwork,
-  networkFromNetworkDb,
-} from "../../../helpers/utils/networkUtils";
+import { networkFromNetworkDb } from "../../../helpers/utils/networkUtils";
 import { KryptikTransaction } from "../../../models/transactions";
-import { ChainData, TokenParamsSpl } from "../../../services/models/token";
 import {
   CreateTransferTransactionParameters,
   EVMTransferTxParams,

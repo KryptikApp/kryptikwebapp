@@ -18,10 +18,7 @@ import { parseNearAmount } from "near-api-js/lib/utils/format";
 
 import { numberToBN } from "../../../helpers/utils";
 import { multByDecimals } from "../../../helpers/utils/numberUtils";
-import {
-  getChainDataForNetwork,
-  getTransactionExplorerPath,
-} from "../../../helpers/utils/networkUtils";
+import { getTransactionExplorerPath } from "../../../helpers/utils/networkUtils";
 import TransactionFeeData, {
   TransactionPublishedData,
   NearTransactionParams,
@@ -38,7 +35,6 @@ import {
   KryptikTransaction,
 } from "../../../models/transactions";
 import { getTransactionFeeDataNear } from "../../fees/NearFees";
-import { ChainData } from "../../../services/models/token";
 import { TransactionParameters } from "hdseedloop";
 
 export interface ISignAndSendNearParameters extends ISignAndSendParameters {

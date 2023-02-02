@@ -55,7 +55,7 @@ export const searchSuggestionsFromTokenAndNetworks = function (
       let queryOnClickParams: ITokenClickHandlerParams = {
         networkTicker: token.baseNetworkDb.ticker,
         tokenTicker: token.tokenData
-          ? token.tokenData.tokenDb.symbol
+          ? token.tokenData.tokenDb.ticker
           : undefined,
       };
       newSuggestion = {
@@ -80,7 +80,7 @@ export const searchSuggestionsFromTokenAndNetworks = function (
 // TODO: update to support any passed in click handler
 export const getTokenSearchSuggestions = function (
   query: string,
-  tickerToNetworkDict: { [ticker: string]: NetworkDb },
+  networks: NetworkDb[],
   networksToSearch: NetworkDb[],
   tokensToSearch: TokenDb[],
   returnAll = false,
@@ -133,10 +133,10 @@ export const getTokenSearchSuggestions = function (
   // filter tokens
   for (const token of tokenList) {
     // iterate through network specific aspects of chain data
-    for (const chainData of token.chainData) {
+    for (const chainData of token.contracts) {
       let newSuggestion: ISearchResult;
       // find base network for token by network ticker
-      let baseNetwork = tickerToNetworkDict[chainData.ticker];
+      let baseNetwork = networks.find((n) => n.id == chainData.id);
       if (!baseNetwork) continue;
       let tokenAndNetwork: TokenAndNetwork = {
         baseNetworkDb: baseNetwork,
@@ -158,7 +158,7 @@ export const getTokenSearchSuggestions = function (
       } else {
         let queryOnClickParams: ITokenClickHandlerParams = {
           networkTicker: baseNetwork.ticker,
-          tokenTicker: token.symbol,
+          tokenTicker: token.ticker,
         };
         newSuggestion = {
           resultString: token.name,
@@ -182,7 +182,7 @@ export function filterTokenAndNetworkListByQuery(
   query = query.toLowerCase();
   let filteredResult: TokenAndNetwork[] = tokenAndNetworks.filter((t) =>
     t.tokenData
-      ? t.tokenData.tokenDb.symbol.toLowerCase().includes(query) ||
+      ? t.tokenData.tokenDb.ticker.toLowerCase().includes(query) ||
         t.tokenData.tokenDb.name.toLowerCase().includes(query)
       : t.baseNetworkDb.fullName.toLowerCase().includes(query) ||
         t.baseNetworkDb.ticker.toLowerCase().includes(query)
@@ -198,7 +198,7 @@ export function filterTokenListByQuery(
   let filteredResult: TokenDb[] = tokenList.filter(
     (token) =>
       token.name.toLowerCase().includes(query) ||
-      token.symbol.toLowerCase().includes(query)
+      token.ticker.toLowerCase().includes(query)
   );
   return filteredResult;
 }
@@ -222,7 +222,7 @@ export function searchTokenListByTicker(
 ): TokenDb | null {
   ticker = ticker.toLowerCase();
   for (const tokenDb of tokenList) {
-    if (tokenDb.symbol.toLowerCase() == ticker) {
+    if (tokenDb.ticker.toLowerCase() == ticker) {
       return tokenDb;
     }
   }

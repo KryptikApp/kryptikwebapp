@@ -4,12 +4,11 @@ import { useRouter } from "next/router";
 
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import Divider from "../../components/Divider";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import {
   checkNEARAccountAvailable,
   INEARAccountAvailableParams,
   INearReservationParams,
-  isLegitNEARAccountId,
   reserveNearAccountName,
 } from "../../src/helpers/utils/nearAccountUtils";
 import { NetworkDb } from "../../src/services/models/network";
@@ -17,10 +16,7 @@ import { defaultKryptikProvider } from "../../src/services/models/provider";
 import { Network, truncateAddress } from "hdseedloop";
 import { networkFromNetworkDb } from "../../src/helpers/utils/networkUtils";
 import { TransactionPublishedData } from "../../src/services/models/transaction";
-import {
-  getAddressForNetwork,
-  getAddressForNetworkDb,
-} from "../../src/helpers/utils/accountUtils";
+import { getAddressForNetwork } from "../../src/helpers/utils/accountUtils";
 import {
   defaultResolvedAccount,
   IAccountResolverParams,
@@ -59,11 +55,7 @@ const CreateName: NextPage = () => {
 
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (
-      (!loadingAuthUser && (!authUser || !authUser.isLoggedIn)) ||
-      walletStatus != WalletStatus.Connected
-    )
-      router.push("/");
+    if (walletStatus != WalletStatus.Connected) router.push("/");
     // ensure service is started
     if (kryptikService.serviceState != ServiceState.started) {
       router.push("/");
@@ -186,7 +178,6 @@ const CreateName: NextPage = () => {
 
   return (
     <div>
-      <Toaster />
       <div className="h-[2rem]">
         {/* padding div for space between top and main elements */}
       </div>

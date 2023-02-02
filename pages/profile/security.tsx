@@ -23,8 +23,7 @@ const Security: NextPage = () => {
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loadingAuthUser and authUser, redirect if needed
   useEffect(() => {
-    if (!loadingAuthUser && (!authUser || !authUser.isLoggedIn))
-      router.push("/");
+    if (!loadingAuthUser && !authUser) router.push("/");
   }, [authUser, loadingAuthUser]);
 
   const [isVisible, setIsVisible] = useState(false);
@@ -55,7 +54,6 @@ const Security: NextPage = () => {
       <div className="h-[2rem]">
         {/* padding div for space between top and main elements */}
       </div>
-      <Toaster />
 
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-bold sans mb-5 dark:text-white">

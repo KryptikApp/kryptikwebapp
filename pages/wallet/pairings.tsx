@@ -23,7 +23,6 @@ export default function PairingsPage() {
 
   return (
     <Fragment>
-      <Toaster />
       <p className="text-2xl text-black dark:text-white">Pairings</p>
       {pairings.length ? (
         pairings.map((pairing) => {

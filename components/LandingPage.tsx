@@ -20,7 +20,6 @@ const LandingPage: NextPage = () => {
 
   return (
     <div>
-      <Toaster />
       <div className="h-[10vh]">
         {/* padding div for space between top and main elements */}
       </div>

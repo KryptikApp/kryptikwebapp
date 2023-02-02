@@ -56,6 +56,7 @@ const BlogFeature = ({ doc }: Props) => {
           </div>
           {doc.image && (
             <Image
+              alt="Blog feature image"
               width="600"
               height="600"
               className="object-cover rounded-md"

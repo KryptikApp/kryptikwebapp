@@ -1,19 +1,16 @@
 import { SessionTypes } from "@walletconnect/types";
 import { NextPage } from "next";
 import { Fragment } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
-import { IConnectCardProps } from "../../src/handlers/connect";
 import ModalStore from "../../src/handlers/store/ModalStore";
 import { useKryptikAuth } from "../../src/helpers/kryptikAuthHelper";
-import { ColorEnum } from "../../src/helpers/utils";
 import { getAddressForNetworkDb } from "../../src/helpers/utils/accountUtils";
-import Button from "../buttons/Button";
-import Divider from "../Divider";
 import ConnectionCard from "./ConnectionCard";
 import PermissionsCard from "./Permissionscard";
 import { NetworkDb } from "../../src/services/models/network";
 import AppDetails from "./AppDetails";
+import { IConnectCardProps } from "../../src/handlers/connect/types";
 
 const SignCard: NextPage<IConnectCardProps> = (props) => {
   const { signClient, kryptikWallet, kryptikService } = useKryptikAuth();

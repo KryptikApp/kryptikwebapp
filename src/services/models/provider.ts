@@ -4,6 +4,7 @@ import { Connection } from "@solana/web3.js";
 import { Network, NetworkFamily } from "hdseedloop";
 import { Near } from "near-api-js";
 import { NearConfig } from "near-api-js/lib/near";
+import { getNetworkChainId } from "../../helpers/assets";
 import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
 import { defaultNetworkDb, NetworkDb } from "./network";
 
@@ -29,19 +30,14 @@ export class KryptikProvider {
         break;
       }
       case NetworkFamily.EVM: {
-        if (networkDb.evmData) {
-          this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, {
-            name:
-              networkDb.fullName.toLowerCase() == "ethereum"
-                ? "homestead"
-                : networkDb.fullName,
-            chainId: networkDb.evmData.chainId,
-          });
-        } else {
-          throw new Error(
-            `Error: ${network.fullName} required chain id was not provided.`
-          );
-        }
+        const chainId = getNetworkChainId(networkDb);
+        this.ethProvider = new StaticJsonRpcProvider(rpcEndpoint, {
+          name:
+            networkDb.fullName.toLowerCase() == "ethereum"
+              ? "homestead"
+              : networkDb.fullName,
+          chainId: chainId,
+        });
         break;
       }
       case NetworkFamily.Solana: {

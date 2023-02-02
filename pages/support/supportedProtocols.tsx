@@ -9,13 +9,10 @@ import { TokenAndNetwork, TokenDb } from "../../src/services/models/token";
 import { ServiceState } from "../../src/services/types";
 
 const SupportedProtocols: NextPage = () => {
-  const { isDark } = useKryptikThemeContext();
-  const { kryptikService, kryptikWallet } = useKryptikAuthContext();
+  const { kryptikService } = useKryptikAuthContext();
   const [allTokens, setAllTokens] = useState<TokenDb[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   // ensure service is started
-  const router = useRouter();
-  const { isAdvanced } = useKryptikThemeContext();
 
   async function fetchAllProtocols() {
     setIsLoading(true);

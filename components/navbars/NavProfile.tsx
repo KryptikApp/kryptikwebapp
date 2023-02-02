@@ -13,9 +13,9 @@ const NavProfile: NextPage = () => {
   const router = useRouter();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 bg-slate-50 dark:bg-[#171717] dark:text-sky-400 opacity-80 flex justify-between text-sm text-sky-600 hover:cursor-pointer">
-      <Link href="../profile/security">
-        <div className="w-full block py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800">
+    <nav className="fixed bottom-0 inset-x-0 bg-slate-50 dark:bg-[#171717] dark:text-sky-400 opacity-80 flex flex-row justify-between text-sm text-sky-600 hover:cursor-pointer">
+      <div className="flex-grow py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800">
+        <Link href="../profile/security">
           <AiOutlineLock className="w-6 h-6 mb-2 mx-auto" size="20" />
           <span
             className={`${
@@ -24,22 +24,22 @@ const NavProfile: NextPage = () => {
           >
             Security
           </span>
-        </div>
-      </Link>
+        </Link>
+      </div>
 
-      <Link href="../profile/">
-        <div className="w-full block py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800">
+      <div className="w-bg-red-500 flex-grow  block py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800">
+        <Link href="../profile/">
           <AiOutlineUser className="w-6 h-6 mb-2 mx-auto" size="20" />
           <span
             className={`${router.pathname == "/profile" ? "font-bold" : ""}`}
           >
             Profile
           </span>
-        </div>
-      </Link>
+        </Link>
+      </div>
 
-      <Link href="../profile/avatar">
-        <div className="w-full block py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800">
+      <div className="flex-grow py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800">
+        <Link href="../profile/avatar">
           <AiOutlineCamera className="w-6 h-6 mb-2 mx-auto" size="20" />
           <span
             className={`${
@@ -48,11 +48,11 @@ const NavProfile: NextPage = () => {
           >
             Avatar
           </span>
-        </div>
-      </Link>
+        </Link>
+      </div>
 
-      <Link href="../profile/settings">
-        <div className="w-full block py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800">
+      <div className="flex-grow py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800">
+        <Link href="../profile/settings">
           <AiOutlineSetting className="w-6 h-6 mb-2 mx-auto" size="20" />
           <span
             className={`${
@@ -61,8 +61,8 @@ const NavProfile: NextPage = () => {
           >
             Settings
           </span>
-        </div>
-      </Link>
+        </Link>
+      </div>
     </nav>
   );
 };

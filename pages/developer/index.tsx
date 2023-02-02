@@ -4,8 +4,6 @@ import { Toaster } from "react-hot-toast";
 export default function DevDocsHome() {
   return (
     <div className="md:max-h-[92vh] md:overflow-y-auto pt-10">
-      <Toaster />
-
       <div className="text-black dark:text-white max-w-3xl mx-auto">
         <div className="mb-4">
           <p className="text-4xl font-bold mb-2">Developer Documentation</p>

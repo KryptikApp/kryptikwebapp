@@ -14,6 +14,7 @@ const EditThisPage: NextPage<Props> = (props) => {
       rel="noopener noreferrer"
     >
       <Image
+        alt="Github icon."
         src="/media/partners/githubLogo.png"
         width="28"
         height="28"

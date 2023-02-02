@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @unique @default(uuid())
+  email         String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  oneTimeTokens OneTimeToken[]
+  Profile       Profile?
+  refreshTokens RefreshToken[]
+  remoteShare   RemoteShare?
+  blockchainAccount BlockchainAccount?
+}
+
+model RemoteShare {
+  id        Int      @id @default(autoincrement())
+  share     String
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Profile {
+  id         Int     @id @default(autoincrement())
+  name       String?
+  bio        String?
+  userId     String  @unique
+  avatarPath String?
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id          String   @id @unique @default(uuid())
+  hashedToken String
+  userId      String
+  revoked     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OneTimeToken {
+  id         String   @id @unique @default(uuid())
+  userId     String
+  code       String
+  expiration DateTime
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model NetworkDb {
+  id                Int             @id @default(autoincrement())
+  about             String
+  chainId           Float
+  decimals          Float
+  fullName          String          @unique
+  iconPath          String
+  isSupported       Boolean
+  whitePaperPath    String
+  blockExplorerURL  String
+  blockchainId      String
+  ticker            String          @unique
+  provider          String
+  zeroXSwapUrl      String?
+  coingeckoId       String
+  hexColor          String
+  isTestnet         Boolean?
+  networkFamilyName String
+  TokenContract     TokenContract[]
+}
+
+model TokenDb {
+  id            Int             @id @default(autoincrement())
+  coingeckoId   String
+  description   String
+  link          String
+  hexColor      String
+  logoURI       String
+  name          String          @unique
+  tags          String[]
+  decimals      Float
+  ticker        String          @unique
+  TokenContract TokenContract[]
+}
+
+model TokenContract {
+  id         Int       @id @default(autoincrement())
+  address    String
+  networkId  Int
+  tokenId    Int
+  contractId String    @unique
+  NetworkDb  NetworkDb @relation(fields: [networkId], references: [id], onDelete: Cascade)
+  TokenDb    TokenDb   @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+}
+
+model BlockchainAccount{
+  id         Int       @id @default(autoincrement())
+  evmAddress String
+  solAddress String
+  nearAddress String
+  userId     String  @unique
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Price{
+  ticker String @unique
+  coinGeckoId String @unique
+  price Float
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}

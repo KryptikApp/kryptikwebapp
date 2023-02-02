@@ -1,23 +1,17 @@
 import { Network, truncateAddress } from "hdseedloop";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import {
-  getRandomAvatarPhoto,
-  getUserPhotoPath,
-} from "../src/helpers/firebaseHelper";
+import { getRandomAvatarPhoto, getUserPhotoPath } from "../src/helpers/auth";
 import {
   defaultResolvedAccount,
   IAccountResolverParams,
   IResolvedAccount,
   resolveAccount,
 } from "../src/helpers/resolvers/accountResolver";
-import { resolveEVMAccount } from "../src/helpers/resolvers/evmResolver";
 import { networkFromNetworkDb } from "../src/helpers/utils/networkUtils";
-import { defaultUser } from "../src/models/user";
 import { defaultNetworkDb, NetworkDb } from "../src/services/models/network";
 import { KryptikProvider } from "../src/services/models/provider";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
-import ProfileName from "./ProfileName";
 interface Props {
   account?: string;
   networkDb?: NetworkDb;
@@ -61,13 +55,7 @@ const GalleryProfile: NextPage<Props> = (props) => {
     let network: Network = networkFromNetworkDb(
       networkDb ? networkDb : defaultNetworkDb
     );
-    if (
-      authUser &&
-      authUser.isLoggedIn &&
-      authUser.name &&
-      !newResolvedAccount.names &&
-      !account
-    ) {
+    if (authUser && authUser.name && !newResolvedAccount.names && !account) {
       setNameToDisplay(authUser.name);
       let newAddy = truncateAddress(newResolvedAccount.address, network);
       setAddyToDisplay(newAddy);
@@ -87,7 +75,7 @@ const GalleryProfile: NextPage<Props> = (props) => {
     }
     let avatarPath: string;
     // is this a view of authuser or someone else?
-    if (authUser && authUser.isLoggedIn && forAuthUser) {
+    if (authUser && forAuthUser) {
       avatarPath = getUserPhotoPath(authUser);
     } else {
       avatarPath = getRandomAvatarPhoto();

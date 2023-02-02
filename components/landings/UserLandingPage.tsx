@@ -7,9 +7,8 @@ import toast, { Toaster } from "react-hot-toast";
 
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import { updateVaultSeedloop } from "../../src/handlers/wallet/vaultHandler";
-import { readExtraUserData } from "../../src/helpers/firebaseHelper";
+import { getRemoteShare } from "../../src/helpers/shares";
 import { WalletStatus } from "../../src/models/KryptikWallet";
-import { UserExtraData } from "../../src/models/user";
 import AvailableNetworks from "../networks/AvailableNetworks";
 
 // landing page for users who are logged in and have a wallet
@@ -24,10 +23,6 @@ const UserLandingPage: NextPage = () => {
     signClient,
     updateWalletStatus,
   } = useKryptikAuthContext();
-  useEffect(() => {
-    console.log(authUser?.uid);
-    console.log(signClient?.metadata);
-  }, []);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -61,8 +56,7 @@ const UserLandingPage: NextPage = () => {
       let unlocked = kryptikWallet.seedLoop.unlock(password);
       if (unlocked) {
         // update persistent wallet in vault
-        let remoteData: UserExtraData = await readExtraUserData(authUser);
-        let remoteShare: string = remoteData.remoteShare;
+        let remoteShare: string | null = await getRemoteShare();
         if (remoteShare) {
           updateVaultSeedloop(authUser.uid, remoteShare, kryptikWallet);
         } else {
@@ -86,7 +80,6 @@ const UserLandingPage: NextPage = () => {
 
   return (
     <div>
-      <Toaster />
       <div className="h-[10vh]">
         {/* padding div for space between top and main elements */}
       </div>
@@ -207,7 +200,7 @@ const UserLandingPage: NextPage = () => {
                                   kryptikWallet.resolvedEthAccount.address,
                                   NetworkFromTicker("eth")
                                 )
-                            : "0x---------"}
+                            : ""}
                         </p>
                       )}
                     </div>

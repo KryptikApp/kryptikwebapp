@@ -2,6 +2,7 @@ import { Contract } from "ethers";
 import { IWallet } from "../../models/KryptikWallet";
 import { IBalance } from "./IBalance";
 import { NetworkDb } from "./network";
+import { TokenContract, TokenDb as PrismaTokenDb } from "@prisma/client";
 
 export interface ChainData {
   chainId: number;
@@ -9,19 +10,13 @@ export interface ChainData {
   ticker: string;
 }
 
-export interface TokenDb {
-  name: string;
-  symbol: string;
-  decimals: number;
-  coingeckoId: string;
-  hexColor: string;
-  chainData: ChainData[];
-  logoURI: string;
-  extensions: {
-    link: string;
-    description: string;
-  };
-  tags: string[];
+type Extensions = {
+  link: string;
+  description: string;
+};
+
+export interface TokenDb extends PrismaTokenDb {
+  contracts: TokenContract[];
 }
 
 export interface TokenParamsEVM {
@@ -53,6 +48,34 @@ export interface TokenAndNetwork {
   networkBalance?: IBalance;
   // blockchain network the token resides on
   baseNetworkDb: NetworkDb;
+}
+
+export interface ERC20Params {
+  erc20Contract: Contract;
+}
+
+export interface SplParams {
+  tokenAddress: string;
+}
+
+export interface Nep141Params {
+  tokenAddress: string;
+}
+
+export interface TokenBalanceParameters {
+  tokenDb: TokenDb;
+  splParams?: SplParams;
+  nep141Params?: Nep141Params;
+  erc20Params?: ERC20Params;
+  accountAddress: string;
+  priceUsd?: number;
+  networkDb: NetworkDb;
+}
+
+export interface CreateEVMContractParameters {
+  erc20Db: TokenDb;
+  networkDb: NetworkDb;
+  wallet: IWallet;
 }
 
 /**
@@ -89,30 +112,21 @@ export function tokenAndNetworksAreEqual(
   return false;
 }
 
-export interface ERC20Params {
-  erc20Contract: Contract;
-}
-
-export interface SplParams {
-  tokenAddress: string;
-}
-
-export interface Nep141Params {
-  tokenAddress: string;
-}
-
-export interface TokenBalanceParameters {
-  tokenDb: TokenDb;
-  splParams?: SplParams;
-  nep141Params?: Nep141Params;
-  erc20Params?: ERC20Params;
-  accountAddress: string;
-  priceUsd?: number;
-  networkDb: NetworkDb;
-}
-
-export interface CreateEVMContractParameters {
-  erc20Db: TokenDb;
-  networkDb: NetworkDb;
-  wallet: IWallet;
+export function dbToClientToken(
+  tokenFromDb: PrismaTokenDb & { TokenContract: TokenContract[] }
+) {
+  const clientToken: TokenDb = {
+    contracts: tokenFromDb.TokenContract,
+    id: tokenFromDb.id,
+    coingeckoId: tokenFromDb.coingeckoId,
+    description: tokenFromDb.description,
+    link: tokenFromDb.link,
+    hexColor: tokenFromDb.hexColor,
+    logoURI: tokenFromDb.logoURI,
+    name: tokenFromDb.name,
+    tags: tokenFromDb.tags,
+    decimals: tokenFromDb.decimals,
+    ticker: tokenFromDb.ticker,
+  };
+  return clientToken;
 }

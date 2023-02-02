@@ -2,7 +2,6 @@ import type { NextPage } from "next";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
-import { getHistoricalPriceForTicker } from "../../src/helpers/coinGeckoHelper";
 import React from "react";
 import { Chart } from "react-chartjs-2";
 import "chartjs-adapter-date-fns";
@@ -15,7 +14,6 @@ import {
   Tooltip,
   LineController,
 } from "chart.js";
-import { defaultTokenAndNetwork } from "../../src/services/models/network";
 import Divider from "../../components/Divider";
 import { removeHttp } from "../../src/helpers/utils";
 import { formatTicker } from "../../src/helpers/utils/networkUtils";
@@ -137,7 +135,7 @@ const CoinInfo: NextPage = () => {
         {
           label: `${formatTicker(
             tokenAndNetwork.tokenData
-              ? tokenAndNetwork.tokenData.tokenDb.symbol
+              ? tokenAndNetwork.tokenData.tokenDb.ticker
               : tokenAndNetwork.baseNetworkDb.ticker
           )} Price`,
           data: newPrices,
@@ -240,7 +238,7 @@ const CoinInfo: NextPage = () => {
                       (
                       {formatTicker(
                         tokenAndNetwork.tokenData
-                          ? tokenAndNetwork.tokenData.tokenDb.symbol
+                          ? tokenAndNetwork.tokenData.tokenDb.ticker
                           : tokenAndNetwork.baseNetworkDb.ticker
                       )}
                       )
@@ -440,7 +438,7 @@ const CoinInfo: NextPage = () => {
               <h2 className="font-semibold">About</h2>
               <p>
                 {tokenAndNetwork.tokenData
-                  ? tokenAndNetwork.tokenData.tokenDb.extensions.description
+                  ? tokenAndNetwork.tokenData.tokenDb.description
                   : tokenAndNetwork.baseNetworkDb.about}
               </p>
             </div>
@@ -455,7 +453,7 @@ const CoinInfo: NextPage = () => {
                 <a
                   href={
                     tokenAndNetwork.tokenData
-                      ? tokenAndNetwork.tokenData.tokenDb.extensions.link
+                      ? tokenAndNetwork.tokenData.tokenDb.link
                       : tokenAndNetwork.baseNetworkDb.whitePaperPath
                   }
                   target="_blank"
@@ -466,7 +464,7 @@ const CoinInfo: NextPage = () => {
                       <span>
                         {tokenAndNetwork.tokenData
                           ? `${removeHttp(
-                              tokenAndNetwork.tokenData.tokenDb.extensions.link
+                              tokenAndNetwork.tokenData.tokenDb.link
                             )}`
                           : "Whitepaper"}
                       </span>

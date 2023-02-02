@@ -1,7 +1,12 @@
 // converts a registered email address to a blockchain address if present
 
 import { collection, doc, getDoc, query } from "firebase/firestore";
-import { isValidEVMAddress, NetworkFamily } from "hdseedloop";
+import {
+  isValidEVMAddress,
+  NetworkFamily,
+  NetworkFamilyFromFamilyName,
+} from "hdseedloop";
+import { BlockchainAccountDb, getBlockchainAccountByEmail } from "../accounts";
 import { firestore } from "../firebaseHelper";
 import { networkFromNetworkDb } from "../utils/networkUtils";
 import { IAccountResolverParams, IResolvedAccount } from "./accountResolver";
@@ -29,35 +34,44 @@ export const resolveKryptikAccount = async function (
   // if not a valid email return null
   if (!isValidEmailAddress(account)) return null;
   console.log(`is valid email addy`);
-  let docRef = doc(firestore, EMAIL_TO_ACCOUNT_DB_LOCATION, account);
-  let dbRes = await getDoc(docRef);
-  let dbResData = dbRes.data();
-  let network = networkFromNetworkDb(networkDB);
-  //maps ticker to blockchain address
-  const tickerToAddress: { [ticker: string]: string } = {};
-  for (const ticker in dbResData) {
-    const addressDb: string = dbResData[ticker];
-    // workaround...match any evm address and return
-    if (
-      network.networkFamily == NetworkFamily.EVM &&
-      isValidEVMAddress(addressDb)
-    ) {
-      return {
-        address: addressDb,
-        isResolved: true,
-        names: [account],
-      };
-    }
-    tickerToAddress[ticker.toLowerCase()] = addressDb;
-    // now key and value are the property name and value
-  }
-  let addressMatched = tickerToAddress[networkDB.ticker.toLowerCase()];
-  if (!addressMatched) return null;
-  let resolvedAccount: IResolvedAccount = {
-    address: addressMatched,
+
+  const blockchainAccounts: BlockchainAccountDb | null =
+    await getBlockchainAccountByEmail(account);
+  if (!blockchainAccounts) return null;
+
+  const resolvedAccount: IResolvedAccount = {
+    address: "",
     isResolved: true,
     names: [account],
   };
+
+  const networkFamily = NetworkFamilyFromFamilyName(
+    networkDB.networkFamilyName
+  );
+  switch (networkFamily) {
+    case NetworkFamily.EVM: {
+      const address: string = blockchainAccounts.evmAddress;
+      if (isValidEVMAddress(address)) {
+        resolvedAccount.address = address;
+      } else {
+        return null;
+      }
+      break;
+    }
+    case NetworkFamily.Near: {
+      const address: string = blockchainAccounts.nearAddress;
+      resolvedAccount.address = address;
+      break;
+    }
+    case NetworkFamily.Solana: {
+      const address: string = blockchainAccounts.solAddress;
+      resolvedAccount.address = address;
+      break;
+    }
+    default: {
+      return null;
+    }
+  }
   return resolvedAccount;
 };
 

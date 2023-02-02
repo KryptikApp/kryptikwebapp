@@ -75,7 +75,6 @@ const NavbarPrelaunch: NextPage = () => {
           </Link>
         </div>
       </div>
-      <Toaster />
     </nav>
   );
 };

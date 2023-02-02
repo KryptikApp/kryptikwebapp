@@ -107,11 +107,7 @@ const Send: NextPage = () => {
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
   useEffect(() => {
-    if (
-      (!loadingAuthUser && (!authUser || !authUser.isLoggedIn)) ||
-      walletStatus != WalletStatus.Connected
-    )
-      router.push("/");
+    if (walletStatus != WalletStatus.Connected) router.push("/");
     // ensure service is started
     if (kryptikService.serviceState != ServiceState.started) {
       router.push("/");
@@ -487,7 +483,6 @@ const Send: NextPage = () => {
 
   return (
     <div>
-      <Toaster />
       <div className="text-center max-w-xl mx-auto content-center">
         {progress == TxProgress.SetParamaters && (
           <div className="align-left m-7">
@@ -526,7 +521,7 @@ const Send: NextPage = () => {
               {!isInputCrypto
                 ? `${roundCryptoAmount(Number(amountCrypto))} ${
                     selectedTokenAndNetwork.tokenData
-                      ? selectedTokenAndNetwork.tokenData.tokenDb.symbol
+                      ? selectedTokenAndNetwork.tokenData.tokenDb.ticker
                       : formatTicker(
                           selectedTokenAndNetwork.baseNetworkDb.ticker
                         )
@@ -1158,7 +1153,7 @@ const Send: NextPage = () => {
                       }}
                       className="font-semibold"
                     >
-                      {selectedTokenAndNetwork.tokenData.tokenDb.symbol}
+                      {selectedTokenAndNetwork.tokenData.tokenDb.ticker}
                     </span>{" "}
                     available
                   </p>

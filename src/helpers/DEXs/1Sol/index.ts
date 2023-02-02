@@ -2,7 +2,6 @@
 //TODO: UPDATE TO REMOVE DEPENDENCY ON ONESOL LIB (USES API ON BACKEND)
 import { Distribution, OnesolProtocol } from "@onesol/onesol-sdk";
 import { PublicKey, Transaction } from "@solana/web3.js";
-import { ISwapData } from "../../../parsers/0xData";
 
 import { KryptikProvider } from "../../../services/models/provider";
 

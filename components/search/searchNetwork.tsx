@@ -89,7 +89,7 @@ const SearchNetwork: NextPage = () => {
             className="w-[88%]  p-4 text-gray-900 text-lg bg-gray-50 border rounded-r-xl border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-bold outline-none"
             placeholder={`Search ${
               selectedTokenAndNetwork.tokenData
-                ? formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol)
+                ? formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.ticker)
                 : formatTicker(selectedTokenAndNetwork.baseNetworkDb.ticker)
             } name or address`}
             value={query}
@@ -187,7 +187,7 @@ const SearchNetwork: NextPage = () => {
             <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">
               You will now be able to search and find{" "}
               {selectedTokenAndNetwork.tokenData
-                ? formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.symbol)
+                ? formatTicker(selectedTokenAndNetwork.tokenData.tokenDb.ticker)
                 : formatTicker(
                     selectedTokenAndNetwork.baseNetworkDb.ticker
                   )}{" "}

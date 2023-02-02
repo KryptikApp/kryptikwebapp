@@ -102,7 +102,6 @@ const CreateNft: NextPage = () => {
 
   return (
     <div>
-      <Toaster />
       <div className="h-[2rem]">
         {/* padding div for space between top and main elements */}
       </div>

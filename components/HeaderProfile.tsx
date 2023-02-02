@@ -1,6 +1,6 @@
 import { NextPage } from "next";
+import { getUserPhotoPath } from "../src/helpers/auth";
 
-import { getUserPhotoPath } from "../src/helpers/firebaseHelper";
 import { defaultUser } from "../src/models/user";
 import AvatarMain from "./AvatarMain";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
