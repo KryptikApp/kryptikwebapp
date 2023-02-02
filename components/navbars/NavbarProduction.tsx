@@ -7,7 +7,7 @@ import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 // wallet SDK helpers
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import { useKryptikThemeContext } from "../ThemeProvider";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 import { getUserPhotoPath } from "../../src/helpers/auth";
 

@@ -6,9 +6,7 @@ import GalleryProfile from "../components/GalleryProfile";
 
 import { useKryptikAuthContext } from "../components/KryptikAuthProvider";
 import NftDisplay from "../components/nfts/NftDisplay";
-import ProfileName from "../components/ProfileName";
-import SearchNetwork from "../components/search/searchNetwork";
-import { getUserPhotoPath } from "../src/helpers/firebaseHelper";
+
 import { getAddressForNetworkDb } from "../src/helpers/utils/accountUtils";
 import { networkFromNetworkDb } from "../src/helpers/utils/networkUtils";
 import { WalletStatus } from "../src/models/KryptikWallet";
@@ -17,10 +15,7 @@ import { INFTMetadata } from "../src/parsers/nftEthereum";
 import { listNearNftsByAddress } from "../src/requests/nearIndexApi";
 import { listNftsByAddress } from "../src/requests/nfts/ethereumApi";
 import { listPoapsByAddress } from "../src/requests/nfts/poapApi";
-import {
-  fetchServerSolNfts,
-  listSolanaNftsByAddress,
-} from "../src/requests/nfts/solanaApi";
+import { fetchServerSolNfts } from "../src/requests/nfts/solanaApi";
 import { defaultNetworkDb, NetworkDb } from "../src/services/models/network";
 import { ServiceState } from "../src/services/types";
 
