@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import * as crypt from "crypto-js";
 import HDSeedLoop, { SerializedSeedLoop } from "hdseedloop";
 import { IWallet } from "../../models/KryptikWallet";
+import { UserDB } from "../../models/user";
 
 import { combineShares, createShares } from "./shareHandler";
 
@@ -138,3 +139,16 @@ export const deleteVault = function (uid: string) {
   console.log(vaultName);
   localStorage.removeItem(vaultName);
 };
+
+/**Updates vault name from email to id based */
+export function updateVaultName(user: UserDB) {
+  // only run if legacy vault name version with email
+  if (vaultExists(user.email)) {
+    const oldVaultName = createVaultName(user.email);
+    const vaultContents: string | null = localStorage.getItem(oldVaultName);
+    if (!vaultContents) return;
+    const newVaultName = createVaultName(user.uid);
+    localStorage.setItem(newVaultName, vaultContents);
+    localStorage.removeItem(oldVaultName);
+  }
+}

@@ -14,6 +14,7 @@ import ModalStore from "../handlers/store/ModalStore";
 import { signingMethods } from "../handlers/connect/types";
 import { getActiveUser, updateProfile } from "./user";
 import { handleApprove, logout } from "./auth";
+import { updateVaultName, vaultExists } from "../handlers/wallet/vaultHandler";
 
 export function useKryptikAuth() {
   //create service
@@ -85,6 +86,8 @@ export function useKryptikAuth() {
     // get networks to add to seedloop
     const networksToAdd: NetworkDb[] = ks.getAllNetworkDbs(true);
     const uid: string = formattedUser.uid;
+    // migrate legacy vault versions
+    updateVaultName(formattedUser);
     // connect with provided seed
     if (seed && seed != "") {
       const connectionObject = await ConnectWalletLocalandRemote({
