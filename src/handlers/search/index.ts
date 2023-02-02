@@ -16,7 +16,7 @@ export const getAllNetworkSearchSuggestions = async function (
   let suggestions: ISearchResult[] = [];
   let tokenResults = getTokenSearchSuggestions(
     query,
-    tickerToNetworkDict,
+    networkToSearch,
     networkToSearch,
     tokensToSearch
   );
