@@ -30,26 +30,6 @@ export function useKryptikAuth() {
     useState(false);
   const authWorker = useRef<Worker>();
 
-  // routine to run when auth. state changes
-  async function authStateChanged(user: UserDB) {
-    // TODO: ADD CONDITION FOR INTERNET CONNECTION
-    // if(window && window.)
-    if (!user) {
-      setAuthUser(null);
-      setLoadingAuthUser(false);
-      return;
-    }
-    try {
-      await updateAuthContext(user);
-      // update wallet connect client
-      await initializeSignClient();
-    } catch (e) {
-      // TODO: ADD BETTER ERROR HANDLER... redirect?
-      console.warn(e);
-      console.warn("Error: unable to update kryptik auth context");
-    }
-  }
-
   // update standard firestore user's profile
   async function updateCurrentUserKryptik(user: UserDB) {
     try {
@@ -71,38 +51,37 @@ export function useKryptikAuth() {
   ): Promise<boolean> {
     const approved = await handleApprove(email, token);
     if (!approved) return false;
+    setLoadingAuthUser(true);
     const user: UserDB | null = await getActiveUser();
-    if (!user) return false;
-    // now we are manually updating the context and connecting the wallet
-    // only done when not a refresh of authentication
-    console.log("runnnningggg update auth context");
-    await updateAuthContext(user, seed);
+    setAuthUser(user);
+    if (!user) {
+      console.log("No user available. Running clear...");
+      clear();
+      return false;
+    }
+    // begin update, but don't wait...
+    updateAuthContext(user, seed);
     return true;
   }
 
   async function refreshUserAndWallet() {
     const user: UserDB | null = await getActiveUser();
-    console.log("RUNNING REFRESH USER AND WALLET");
     if (!user) {
-      console.log("No user available. Running clear...");
-      clear();
+      console.log("No user available.");
       return;
     }
-    console.log("UPDATING AUTH CONTEXT");
     await updateAuthContext(user);
-    console.log("finished running refresh...");
   }
 
   const updateAuthContext = async (user: UserDB, seed?: string) => {
     // update loading state
     setLoadingAuthUser(true);
     setLoadingWallet(true);
-    let formattedUser: UserDB = user;
+    const formattedUser: UserDB = user;
     // start web3 kryptik service
-    let ks = await kryptikService.StartSevice();
+    const ks = await kryptikService.StartSevice();
     setKryptikService(ks);
     let newWalletKryptik: IWallet;
-    console.log("connecting kryptik wallet local and remote");
     // get networks to add to seedloop
     const networksToAdd: NetworkDb[] = ks.getAllNetworkDbs(true);
     const uid: string = formattedUser.uid;
@@ -123,7 +102,6 @@ export function useKryptikAuth() {
       });
       newWalletKryptik = connectionObject.wallet;
     }
-    console.log("finished connecting");
     // set data
     setKryptikWallet(newWalletKryptik);
     setWalletStatus(newWalletKryptik.status);
@@ -143,6 +121,7 @@ export function useKryptikAuth() {
     setAuthUser(null);
     setKryptikWallet(defaultWallet);
     setKryptikService(new Web3Service());
+    setWalletStatus(defaultWallet.status);
     setLoadingAuthUser(false);
     setLoadingWallet(false);
   };
