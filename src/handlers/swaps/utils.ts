@@ -69,7 +69,7 @@ export function isValidHopBridge(
     buyTokenAndNetwork.baseNetworkDb.fullName.toLowerCase() == "polygon" &&
     !sellTokenAndNetwork.tokenData &&
     buyTokenAndNetwork.tokenData &&
-    buyTokenAndNetwork.tokenData.tokenDb.symbol.toLowerCase().trim() == "weth"
+    buyTokenAndNetwork.tokenData.tokenDb.ticker.toLowerCase().trim() == "weth"
   ) {
     return true;
   }
@@ -114,7 +114,7 @@ export function isValidHopBridgeAsset(tokenAndNetwork: TokenAndNetwork) {
   }
   // no token data and not part of the evm family
   if (!tokenAndNetwork.tokenData) return false;
-  const tokenName = tokenAndNetwork.tokenData.tokenDb.symbol
+  const tokenName = tokenAndNetwork.tokenData.tokenDb.ticker
     .toLowerCase()
     .trim();
   // valid tokens are usdc, tether, and dai
