@@ -3,7 +3,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { updateVaultSeedloop } from "../../src/handlers/wallet/vaultHandler";
-import { readExtraUserData } from "../../src/helpers/firebaseHelper";
+import { getRemoteShare } from "../../src/helpers/shares";
+
 import { WalletStatus } from "../../src/models/KryptikWallet";
 import { UserExtraData } from "../../src/models/user";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
@@ -36,8 +37,7 @@ const LockWalletDropdown: NextPage = () => {
       // lock successful...update state
       if (isWalletLocked) {
         // update persistent wallet in vault
-        let remoteData: UserExtraData = await readExtraUserData(authUser);
-        let remoteShare: string = remoteData.remoteShare;
+        const remoteShare: string | null = await getRemoteShare();
         if (remoteShare) {
           updateVaultSeedloop(authUser.uid, remoteShare, kryptikWallet);
         } else {
