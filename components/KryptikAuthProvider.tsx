@@ -20,7 +20,7 @@ interface IAuthContext {
     email: string,
     seed?: string,
     isRefresh?: boolean
-  ) => void;
+  ) => Promise<boolean>;
   updateCurrentUserKryptik: (user: UserDB) => void;
   walletStatus: WalletStatus;
   updateWalletStatus: (newStatus: WalletStatus) => void;
@@ -42,7 +42,7 @@ const kryptikAuthContext = createContext<IAuthContext>({
     email: string,
     seed?: string,
     isRefresh?: boolean
-  ) => {},
+  ) => true,
   updateCurrentUserKryptik: async (user: UserDB) => {},
   signClient: null,
   signOut: () => {},
