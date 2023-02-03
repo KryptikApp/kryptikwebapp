@@ -65,11 +65,7 @@ export async function ConnectWalletLocalandRemote(
     });
   console.log("finished kryptik connect!");
   // update remote share on db if undefined or value generated on local computer is different
-  if (
-    kryptikConnectionObject.remoteShare &&
-    (!remoteShareToUse ||
-      kryptikConnectionObject.remoteShare != remoteShareToUse)
-  ) {
+  if (!remoteShareToUse && kryptikConnectionObject.remoteShare) {
     console.log("UPDATING REMOTE SHARE ON DB");
     // update extra user data to reflect updated remote share
     try {
@@ -164,7 +160,7 @@ export async function connectKryptikWallet(
       throw new Error("Error: unable to synchronize remote networks.");
     }
   }
-
+  console.log("returning....");
   // set return values
   const connectionReturnObject: IConnectWalletReturn = {
     wallet: newKryptikWallet,
