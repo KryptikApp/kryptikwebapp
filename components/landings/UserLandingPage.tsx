@@ -115,13 +115,13 @@ const UserLandingPage: NextPage = () => {
             <div className="flex flex-col text-xl">
               <div className="flex flex-col">
                 {/* connect to app */}
-                <div className="flex flex-row">
+                {/* <div className="flex flex-row">
                   <Link href="/wallet/connect">
                     <p className="text-blue-400 hover:cursor-pointer">
                       Connect
                     </p>
                   </Link>
-                </div>
+                </div> */}
                 {/* wallet status */}
                 <div className="flex flex-row">
                   <div className="flex-1">
