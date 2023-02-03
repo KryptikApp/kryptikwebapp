@@ -1,9 +1,8 @@
 import { NetworkFromTicker, truncateAddress } from "hdseedloop";
 import type { NextPage } from "next";
-import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import { updateVaultSeedloop } from "../../src/handlers/wallet/vaultHandler";
