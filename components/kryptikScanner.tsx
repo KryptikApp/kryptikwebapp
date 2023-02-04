@@ -24,14 +24,14 @@ export default function KryptikScanner(iprops: IProps) {
   };
   
   const previewStyle = {
-      height: 240,
-      width: 320,
+      height: 300,
+      width: 1000,
     }
 
   return (
-    <div className="mx-auto">
+    <div>
       {show ? (
-      <div className="mx-auto w-[400px] max-h-[300px] relative rounded overflow-hidden">
+      <div className="w-[400px] max-h-[300px] rounded overflow-hidden">
         <ReactQrReader
           videoStyle={previewStyle}
           constraints={{facingMode: "user"}}
