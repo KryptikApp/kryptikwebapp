@@ -4,6 +4,9 @@
     "react/no-unescaped-entities": "off",
     "@next/next/no-page-custom-font": "off",
     "react-hooks/exhaustive-deps": "off",
-    "@next/next/no-img-element": "off"
+    "@next/next/no-img-element": "off",
+    "jsx-a11y/alt-text": "off",
+    "jsx-a11y/role-has-required-aria-props": "off",
+    "import/no-anonymous-default-export": "off"
   }
 }
