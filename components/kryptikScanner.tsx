@@ -31,12 +31,11 @@ export default function KryptikScanner(iprops: IProps) {
   return (
     <div className="mx-auto">
       {show ? (
-      <div className="mx-auto w-[400px] max-h-[300px] relative rounded rounded-lg overflow-hidden">
+      <div className="mx-auto w-[400px] max-h-[300px] relative rounded overflow-hidden">
         <ReactQrReader
-          delay={5000}
-          style={previewStyle}
-          //constraints={{facingMode: "user"}}
-          className="scale-150"
+          videoStyle={previewStyle}
+          constraints={{facingMode: "user"}}
+          className={"scale-150"}
           onResult={(data) => handleScan(data)}
         />
       </div> 
