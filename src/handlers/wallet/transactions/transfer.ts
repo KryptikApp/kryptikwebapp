@@ -2,12 +2,17 @@ import { NetworkFamily } from "hdseedloop";
 import { networkFromNetworkDb } from "../../../helpers/utils/networkUtils";
 import { KryptikTransaction } from "../../../models/transactions";
 import {
+  AlgoTransactionParams,
   CreateTransferTransactionParameters,
   EVMTransferTxParams,
   NearTransactionParams,
   SolTransactionParams,
   TxType,
 } from "../../../services/models/transaction";
+import {
+  createAlgoTokenTransferTransaction,
+  createAlgoTransferTransaction,
+} from "./AlgorandTransaction";
 import { createEVMTransferTransaction } from "./EVMTransaction";
 import { BuildNEARTransfer } from "./NearTransactions";
 import {
@@ -35,6 +40,7 @@ export async function BuildTransferTx(
   // UPDATE TO REFLECT ERROR IN UI
   switch (network.networkFamily) {
     case NetworkFamily.EVM: {
+      console.log("building evm transfer");
       let txIn: EVMTransferTxParams = {
         sendAccount: fromAddress,
         toAddress: toAddress,
@@ -46,6 +52,40 @@ export async function BuildTransferTx(
       let tx: KryptikTransaction | null = await createEVMTransferTransaction(
         txIn
       );
+      return tx;
+      break;
+    }
+    case NetworkFamily.Algorand: {
+      console.log("Building algorand transfer transaction.");
+      let txIn: AlgoTransactionParams = {
+        sendAccount: fromAddress,
+        toAddress: toAddress,
+        valueAlgo: Number(amountCrypto),
+        kryptikProvider: kryptikProvider,
+        decimals: tokenAndNetwork.tokenData
+          ? tokenAndNetwork.tokenData.tokenDb.decimals
+          : tokenAndNetwork.baseNetworkDb.decimals,
+        tokenAndNetwork: tokenAndNetwork,
+        tokenPriceUsd: tokenPriceUsd,
+      };
+      let tx: KryptikTransaction;
+      if (txType == TxType.TransferToken) {
+        /// add contract address
+        if (!tokenAndNetwork.tokenData) {
+          throw new Error(
+            "Error: Token Data not provided for SPL token transfer."
+          );
+        }
+        // add algo token data to input params
+        txIn.tokenParamsAlgo = {
+          contractAddress: tokenAndNetwork.tokenData.selectedAddress,
+        };
+        tx = await createAlgoTokenTransferTransaction(txIn);
+      }
+      // create base layer sol tx.
+      else {
+        tx = await createAlgoTransferTransaction(txIn);
+      }
       return tx;
       break;
     }
