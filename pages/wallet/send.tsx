@@ -636,9 +636,9 @@ const Send: NextPage = () => {
           </div>
         )}
         {progress == TxProgress.SetParamaters && (
-          <div>
+          <div className="items-center">
             {/* Top Text */}
-            <h1 className="text-4xl fond-bold text-white mt-0 mb-6">You are about to send</h1>
+            <h1 className="text-2xl text-center fond-bold text-gray-500 mt-0 mb-6">You are about to send</h1>
             {/* amount indicator */}
             <div className="py-3 items-center">
               <img
