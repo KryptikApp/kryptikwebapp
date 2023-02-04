@@ -170,6 +170,7 @@ export function useKryptikTheme() {
     // fetch current theme
     fetchTheme(authUser?.uid);
     setThemeLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -177,6 +178,7 @@ export function useKryptikTheme() {
     // fetch current theme
     fetchTheme(authUser?.uid);
     setThemeLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
 
   return {
