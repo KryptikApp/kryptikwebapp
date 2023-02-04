@@ -1,8 +1,5 @@
 import type { NextPage } from "next";
-import toast, { Toaster } from "react-hot-toast";
 
-import { useKryptikAuthContext } from "../components/KryptikAuthProvider";
-import Link from "next/link";
 import LaunchPage from "../components/LaunchPage";
 import LandingPage from "../components/LandingPage";
 
