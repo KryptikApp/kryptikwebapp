@@ -39,7 +39,7 @@ export interface TxFamilyWrapper {
   evmTx?: TransactionRequest;
   solTx?: SolTransaction[];
   nearTx?: NearTransaction;
-  algoTx?: AlgoTransaction;
+  algoTx?: AlgoTransaction[];
 }
 
 export const handleSignAndSendTransaction = async function (

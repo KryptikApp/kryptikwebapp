@@ -23,9 +23,10 @@ import {
   Transaction as AlgoTransaction,
 } from "algosdk";
 import { getFeeDataAlgorand } from "../../fees/AlgoFees";
+import { checkAlgoApprovalStatus } from "../../assets/approve/algorandAssetApprover";
 
 export interface ISignAndSendAlgoParameters extends ISignAndSendParameters {
-  algoTx: AlgoTransaction;
+  algoTxs: AlgoTransaction[];
 }
 
 // signs and sends any sol transaction
@@ -33,25 +34,32 @@ export const signAndSendAlgoTransaction = async function (
   txIn: ISignAndSendAlgoParameters
 ): Promise<TransactionPublishedData> {
   let txDoneData: TransactionPublishedData = { hash: "" };
-  const { wallet, sendAccount, kryptikProvider, algoTx } = txIn;
+  const { wallet, sendAccount, kryptikProvider, algoTxs } = txIn;
 
   let network = networkFromNetworkDb(kryptikProvider.networkDb);
   if (!kryptikProvider.algorandProvider) {
     throw new Error(`Error: Provider not set for ${network.fullName}`);
   }
   const algoProvider: AlgodClient = kryptikProvider.algorandProvider;
-  console.log("Signing algo tx");
-  const { tx, txEncoded } = await SignTransaction(
-    algoTx,
-    wallet,
-    sendAccount,
-    network
-  );
+  // signed transactions to push to network
+  const txsToPush: Uint8Array[] = [];
+  // will be set as last signed transaction
+  let txId: string = "";
+  for (const algoTx of algoTxs) {
+    const { tx, txEncoded } = await SignTransaction(
+      algoTx,
+      wallet,
+      sendAccount,
+      network
+    );
+    txsToPush.push(txEncoded);
+    txId = tx.txID();
+  }
   console.log("Converting signed algo tx to buffer.");
-  const txId: string = tx.txID();
+
   try {
     console.log("posting algo tx to network");
-    const txPostResult = await algoProvider.sendRawTransaction(txEncoded).do();
+    const txPostResult = await algoProvider.sendRawTransaction(txsToPush).do();
     console.log("Algorand publish result:");
     console.log(txPostResult);
   } catch (e) {
@@ -104,7 +112,7 @@ export async function createAlgoTransferTransaction(
   let kryptikTxParams: IKryptikTxParams = {
     feeData: kryptikFeeData,
     kryptikTx: {
-      algoTx: algoTx,
+      algoTx: [algoTx],
     },
     txType: TxType.TransferNative,
     tokenAndNetwork: txIn.tokenAndNetwork,
@@ -129,7 +137,7 @@ export async function createAlgoTokenTransferTransaction(
     );
   }
   // similar to a contract address on other networks
-  const assetID: number = Number(txIn.tokenParamsAlgo.contractAddress);
+  const assetId: number = Number(txIn.tokenParamsAlgo.contractAddress);
   const algorProvider = txIn.kryptikProvider.algorandProvider;
   let amountAlgo: number = multByDecimals(
     txIn.valueAlgo,
@@ -142,6 +150,16 @@ export async function createAlgoTokenTransferTransaction(
   const closeRemainderTo = undefined;
   const note = undefined;
 
+  // ensure recipient has opted in to token contract
+  if (
+    !checkAlgoApprovalStatus({
+      account: txIn.toAddress,
+      assetId: assetId,
+      provider: txIn.kryptikProvider,
+    })
+  ) {
+    throw new Error("Recipiant must approve token before transfer.");
+  }
   const algoTx: AlgoTransaction = makeAssetTransferTxnWithSuggestedParams(
     txIn.sendAccount,
     txIn.toAddress,
@@ -149,7 +167,7 @@ export async function createAlgoTokenTransferTransaction(
     revocationTarget,
     amountAlgo,
     note,
-    assetID,
+    assetId,
     networkParams
   );
 
@@ -163,7 +181,7 @@ export async function createAlgoTokenTransferTransaction(
   let kryptikTxParams: IKryptikTxParams = {
     feeData: kryptikFeeData,
     kryptikTx: {
-      algoTx: algoTx,
+      algoTx: [algoTx],
     },
     txType: TxType.TransferNative,
     tokenAndNetwork: txIn.tokenAndNetwork,

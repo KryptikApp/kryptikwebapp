@@ -188,7 +188,7 @@ export class KryptikTransaction {
         if (!this.txData.algoTx) return null;
         txSignParams.algoParams = {
           ...baseParams,
-          algoTx: this.txData.algoTx,
+          algoTxs: this.txData.algoTx,
         };
         break;
       }
