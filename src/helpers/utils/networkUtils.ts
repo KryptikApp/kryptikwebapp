@@ -1,12 +1,7 @@
 import { TokenContract } from "@prisma/client";
-import { lastDayOfYear } from "date-fns";
 import { Network, NetworkFamily } from "hdseedloop";
 import { NetworkDb } from "../../services/models/network";
-import {
-  ChainData,
-  TokenAndNetwork,
-  TokenDb,
-} from "../../services/models/token";
+import { TokenAndNetwork, TokenDb } from "../../services/models/token";
 import { TransactionPublishedData } from "../../services/models/transaction";
 
 export const getTransactionExplorerPath = function (
@@ -22,6 +17,10 @@ export const getTransactionExplorerPath = function (
   // near explorer has unique transaction path
   if (network.ticker.toLowerCase() == "near") {
     linkPathToReturn = `${explorerUrl}transactions/${txPublishedData.hash}`;
+  }
+  // algo explorer has unique transaction path
+  if (network.ticker.toLowerCase() == "algo") {
+    linkPathToReturn = `${explorerUrl}tx/${txPublishedData.hash}`;
   }
   return linkPathToReturn;
 };
