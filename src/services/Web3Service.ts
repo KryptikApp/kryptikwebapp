@@ -1,5 +1,3 @@
-import { firestore } from "../helpers/firebaseHelper";
-import { collection } from "firebase/firestore";
 import { OnFetch, ServiceState } from "./types";
 import BaseService from "./BaseService";
 import {
@@ -554,30 +552,40 @@ class Web3Service extends BaseService implements IWeb3Service {
     }
     // get remaining balances manually via rpc provider
     let tickerToNetworkBalance: { [ticker: string]: IBalance } = {};
-    const [networkBalances, erc20Balances, nep141Balances, splBalances] =
-      await Promise.all([
-        this.getBalanceAllNetworks({
-          walletUser: walletUser,
-          indexedNetworks: indexedNetworksList,
-          isAdvanced: isAdvanced ? isAdvanced : false,
-          onFetch: onFetch,
-        }),
-        this.getBalanceAllERC20Tokens({
-          walletUser: walletUser,
-          indexedNetworks: indexedNetworksList,
-          onFetch: onFetch,
-        }),
-        this.getBalanceAllNep141Tokens({
-          walletUser: walletUser,
-          indexedNetworks: indexedNetworksList,
-          onFetch: onFetch,
-        }),
-        this.getBalanceAllSplTokens({
-          walletUser: walletUser,
-          indexedNetworks: indexedNetworksList,
-          onFetch: onFetch,
-        }),
-      ]);
+    const [
+      networkBalances,
+      erc20Balances,
+      nep141Balances,
+      splBalances,
+      algoBalances,
+    ] = await Promise.all([
+      this.getBalanceAllNetworks({
+        walletUser: walletUser,
+        indexedNetworks: indexedNetworksList,
+        isAdvanced: isAdvanced ? isAdvanced : false,
+        onFetch: onFetch,
+      }),
+      this.getBalanceAllERC20Tokens({
+        walletUser: walletUser,
+        indexedNetworks: indexedNetworksList,
+        onFetch: onFetch,
+      }),
+      this.getBalanceAllNep141Tokens({
+        walletUser: walletUser,
+        indexedNetworks: indexedNetworksList,
+        onFetch: onFetch,
+      }),
+      this.getBalanceAllSplTokens({
+        walletUser: walletUser,
+        indexedNetworks: indexedNetworksList,
+        onFetch: onFetch,
+      }),
+      this.getBlanceAllAlgoTokens({
+        walletUser: walletUser,
+        indexedNetworks: indexedNetworksList,
+        onFetch: onFetch,
+      }),
+    ]);
     for (const tokenAndNetwork of networkBalances) {
       if (tokenAndNetwork.networkBalance) {
         tickerToNetworkBalance[tokenAndNetwork.baseNetworkDb.ticker] =
@@ -589,11 +597,13 @@ class Web3Service extends BaseService implements IWeb3Service {
     this.addBaseBalance(tickerToNetworkBalance, erc20Balances);
     this.addBaseBalance(tickerToNetworkBalance, nep141Balances);
     this.addBaseBalance(tickerToNetworkBalance, splBalances);
+    this.addBaseBalance(tickerToNetworkBalance, algoBalances);
     // add to master balance list
     masterBalances = masterBalances.concat(networkBalances);
     masterBalances = masterBalances.concat(erc20Balances);
     masterBalances = masterBalances.concat(nep141Balances);
     masterBalances = masterBalances.concat(splBalances);
+    masterBalances = masterBalances.concat(algoBalances);
     // init new kryptik balance holder
     let newBalanceHolder: KryptikBalanceHolder = new KryptikBalanceHolder({
       tokenAndBalances: masterBalances,
@@ -965,6 +975,86 @@ class Web3Service extends BaseService implements IWeb3Service {
     return tokenAndNetwork;
   }
 
+  async getBlanceAllAlgoTokens(params: {
+    walletUser: IWallet;
+    onFetch?: OnFetch;
+    indexedNetworks: NetworkDb[];
+  }): Promise<TokenAndNetwork[]> {
+    const { walletUser, indexedNetworks, onFetch } = { ...params };
+    let algobalances: TokenAndNetwork[] = [];
+    for (const token of this.tokenDbs) {
+      for (const contract of token.contracts) {
+        const networkDb: NetworkDb | null = this.getNetworkDbById(
+          contract.networkId
+        );
+        // ensure network is part of algorand family
+        if (
+          !networkDb ||
+          NetworkFamilyFromFamilyName(networkDb?.networkFamilyName) !=
+            NetworkFamily.Algorand
+        ) {
+          continue;
+        }
+        // get provider
+        let provider = await this.getKryptikProviderForNetworkDb(networkDb);
+        if (!provider.algorandProvider) {
+          throw new Error(
+            `Error: no provider specified for ${networkDb.fullName}`
+          );
+        }
+        const algoProvider: AlgodClient = provider.algorandProvider;
+        const accountAddress = await getAddressForNetworkDb(
+          walletUser,
+          networkDb
+        );
+        // now fetch balance for network
+        try {
+          const assetAccountInfo = await algoProvider
+            .accountAssetInformation(accountAddress, Number(contract.address))
+            .do();
+
+          const tokenAmount = divByDecimals(
+            assetAccountInfo["asset-holding"].amount,
+            token.decimals
+          );
+
+          const priceUSD = await this.getTokenPrice(token.coingeckoId);
+          // prettify token balance
+          let networkBalanceString = tokenAmount.asString;
+          let amountUSD = roundUsdAmount(priceUSD * tokenAmount.asNumber);
+          // create new object for balance data
+          let newBalanceObj: IBalance = {
+            fullName: token.name,
+            ticker: token.ticker,
+            iconPath: token.logoURI,
+            iconPathSecondary: networkDb.iconPath,
+            amountCrypto: networkBalanceString,
+            amountUSD: amountUSD.toString(),
+            baseNetworkTicker: networkDb.ticker,
+          };
+          let tokenAndNetwork: TokenAndNetwork = {
+            baseNetworkDb: networkDb,
+            tokenData: {
+              tokenDb: token,
+              tokenBalance: newBalanceObj,
+              selectedAddress: contract.address,
+            },
+          };
+          // add formatted balance to result
+          algobalances.push(tokenAndNetwork);
+        } catch (e) {
+          if (onFetch) {
+            onFetch(null);
+          }
+          console.warn(
+            `Unable to get balance for ${token.name} on ${networkDb.fullName}`
+          );
+        }
+      }
+    }
+    return algobalances;
+  }
+
   // TODO: UPDATE TOKEN BALANCE FUNCS TO FILTER ON FAMILY
   // get balances for all erc20 networks
   async getBalanceAllERC20Tokens(params: {
@@ -1048,7 +1138,7 @@ class Web3Service extends BaseService implements IWeb3Service {
           console.warn(
             `Unable to get balance for ${tokenBalParams.tokenDb.name} on ${networkDb.fullName}`
           );
-          console.log(e);
+          // console.log(e);
           continue;
         }
       }
@@ -1078,13 +1168,13 @@ class Web3Service extends BaseService implements IWeb3Service {
         ) {
           continue;
         }
-        let accountAddress = await getAddressForNetworkDb(
+        const accountAddress = await getAddressForNetworkDb(
           walletUser,
           networkDb
         );
         // get balance for contract
-        let nep141Params: Nep141Params = { tokenAddress: contract.address };
-        let tokenParams: TokenBalanceParameters = {
+        const nep141Params: Nep141Params = { tokenAddress: contract.address };
+        const tokenParams: TokenBalanceParameters = {
           priceUsd: tokenPrice || undefined,
           tokenDb: nep141Db,
           nep141Params: nep141Params,
