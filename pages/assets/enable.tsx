@@ -52,7 +52,7 @@ const Enable: NextPage = () => {
       {algoNetwork &&
         algoAssets.length != 0 &&
         algoAssets.map((token) => (
-          <EnableAsset token={token} network={algoNetwork} />
+          <EnableAsset token={token} network={algoNetwork} key={token.ticker} />
         ))}
     </div>
   );
