@@ -5,6 +5,7 @@ import {
   AiFillDownCircle,
   AiFillUpCircle,
   AiFillPayCircle,
+  AiFillDollarCircle,
 } from "react-icons/ai";
 import Link from "next/link";
 
@@ -59,6 +60,16 @@ const Profile: NextPage = () => {
                 <AiFillUpCircle className="mx-auto" size="30" />
                 <span className="text-gray-700 dark:text-gray-200 font-semibold">
                   Send
+                </span>
+              </div>
+            </Link>
+          </div>
+          <div className="flex-1">
+            <Link href="../wallet/save">
+              <div className="w-full px-3 text-center text-sky-500 hover:cursor-pointer hover:text-sky-800 hover:font-semibold hover:animate-pulse">
+                <AiFillDollarCircle className="mx-auto" size="30" />
+                <span className="text-gray-700 dark:text-gray-200 font-semibold">
+                  Save
                 </span>
               </div>
             </Link>

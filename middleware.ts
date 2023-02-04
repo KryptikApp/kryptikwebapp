@@ -46,6 +46,7 @@ export const config = {
     "/api/shares/:path*",
     "/api/account/:path*",
     "/wallet/send",
+    "/wallet/save",
     "/wallet/receive",
     "/wallet/createName",
     "/wallet/delete",
