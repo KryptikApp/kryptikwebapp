@@ -84,6 +84,7 @@ import {
   getNetworkChainId,
 } from "../helpers/assets";
 import { TokenContract } from "@prisma/client";
+import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
 export interface IConnectWalletReturn {
   wallet: IWallet;
@@ -439,6 +440,20 @@ class Web3Service extends BaseService implements IWeb3Service {
             await ethNetworkProvider.getBalance(params.accountAddress)
           )
         );
+        break;
+      }
+      case NetworkFamily.Algorand: {
+        if (!kryptikProvider.algorandProvider) return null;
+        const algoNetworkProvider: AlgodClient =
+          kryptikProvider.algorandProvider;
+        const res = await algoNetworkProvider
+          .accountInformation(params.accountAddress)
+          .do();
+        const formattedAmount = divByDecimals(
+          res.amount,
+          params.networkDb.decimals
+        );
+        balanceNetwork = formattedAmount.asNumber;
         break;
       }
       case NetworkFamily.Solana: {
