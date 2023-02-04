@@ -10,6 +10,7 @@ import {
   AiOutlineArrowLeft,
   AiOutlineCloseCircle,
   AiOutlineWallet,
+  AiOutlineQrcode,
 } from "react-icons/ai";
 import { RiSwapLine } from "react-icons/ri";
 import {
@@ -54,6 +55,9 @@ import { KryptikTransaction } from "../../src/models/transactions";
 import { BuildTransferTx } from "../../src/handlers/wallet/transactions/transfer";
 import { hexToBase58 } from "hdseedloop/dist/utils";
 import { WalletStatus } from "../../src/models/KryptikWallet";
+import KryptikScanner from "../../components/kryptikScanner"
+import { useKryptikTheme } from "../../src/helpers/kryptikThemeHelper";
+import Modal from "../../components/modals/modal";
 
 const Send: NextPage = () => {
   const {
@@ -305,6 +309,46 @@ const Send: NextPage = () => {
     }
   };
 
+  const { isDark } = useKryptikTheme();
+  // modal state
+  const [showModal, setShowModal] = useState(false);
+
+  const closeModal = function () {
+    setShowModal(false);
+  };
+
+  const openModal = function () {
+    console.log("Showing modal....");
+    setShowModal(true);
+  };
+
+  const [showScanner, setShowScanner] = useState(false)
+
+  const closeScanner = function () {
+    setShowScanner(false);
+  };
+
+  const openScanner = function () {
+    setShowScanner(true);
+  };
+
+  const closeModalWrapper = function () {
+    closeScanner();
+    closeModal();
+  }
+
+  const handleOnScan = function (uri: string) {
+    console.log(uri);
+    handleToAddressChange(uri);
+    closeScanner();
+    closeModal();
+  };
+
+  const handleQrScanner = function () {
+    openScanner();
+    openModal();
+  };
+
   const validateAmount = function (): boolean {
     if (amountCrypto == "0") {
       toast.error("Please enter a nonzero amount.");
@@ -388,6 +432,7 @@ const Send: NextPage = () => {
       setIsResolverLoading(false);
       return;
     }
+
     // build kryptik tx
     let transferBuildParams: CreateTransferTransactionParameters = {
       kryptikProvider: kryptikProvider,
@@ -485,12 +530,26 @@ const Send: NextPage = () => {
     <div>
       <div className="text-center max-w-xl mx-auto content-center">
         {progress == TxProgress.SetParamaters && (
-          <div className="align-left m-7">
-            <AiOutlineArrowLeft
-              className="hover:cursor-pointer dark:text-white"
-              onClick={() => handleClickBack()}
-              size="30"
-            />
+          <div>
+            <div>
+              <AiOutlineQrcode
+                className="hover:cursor-pointer dark:text-white inline"
+                onClick={() => handleQrScanner()}
+                size="30"
+              />
+            </div>
+            <div>
+              <Modal isOpen={showModal} onRequestClose={closeModalWrapper} dark={isDark}>
+                <KryptikScanner show={showScanner} onScan={handleOnScan} />
+              </Modal> 
+            </div>
+            <div className="align-left m-7">
+              <AiOutlineArrowLeft
+                className="hover:cursor-pointer dark:text-white"
+                onClick={() => handleClickBack()}
+                size="30"
+              />
+            </div>
           </div>
         )}
         {progress == TxProgress.Begin && (
@@ -606,7 +665,6 @@ const Send: NextPage = () => {
                 ${roundUsdAmount(Number(amountUSD))}
               </span>
             </div>
-
             <div className="px-5 py-5 m-2 rounded mt-0 mb-0">
               {/* to label */}
               <div className="text-left">
@@ -639,19 +697,7 @@ const Send: NextPage = () => {
                 onChange={(e) => handleToAddressChange(e.target.value)}
                 id="inline-to"
               />
-              {/* for input */}
-              <label className="block text-gray-500 font-bold text-left mb-1 md:mb-0 pr-4">
-                For
-              </label>
-              <textarea
-                maxLength={150}
-                className="bg-white appearance-none border-2 border-gray-400 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:dark:bg-[#141414] focus:border-blue-400 dark:bg-[#141414] dark:text-white"
-                id="inline-forMessage"
-                placeholder={"Pizza, rent, etc."}
-                value={forMessage}
-                onChange={(e) => setForMessage(e.target.value)}
-              />
-              {/* next button... to review */}
+              {/* next button... to review */} */
               <button
                 onClick={() => handleStartReview()}
                 className={`bg-transparent hover:bg-sky-400 text-sky-500 font-semibold hover:text-white text-2xl py-2 px-20 ${
