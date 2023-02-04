@@ -3,6 +3,7 @@ import { defaultWallet } from "../../models/defaultWallet";
 import { NetworkDb } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
 import { networkFromNetworkDb } from "../utils/networkUtils";
+import { resolveAlgoAccount } from "./algorandResolver";
 import { resolveEVMAccount } from "./evmResolver";
 import { resolveKryptikAccount } from "./kryptikResolver";
 import { resolveNEARAccount } from "./nearResolver";
@@ -37,6 +38,12 @@ export const resolveAccount = async function (
   );
   if (kryptikResolved) return kryptikResolved;
   switch (network.networkFamily) {
+    case NetworkFamily.Algorand: {
+      let resolvedAccount: IResolvedAccount | null = await resolveAlgoAccount(
+        params
+      );
+      return resolvedAccount;
+    }
     case NetworkFamily.EVM: {
       let resolvedAccount: IResolvedAccount | null = await resolveEVMAccount(
         params
