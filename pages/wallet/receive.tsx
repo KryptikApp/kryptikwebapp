@@ -14,6 +14,7 @@ import { getAddressForNetworkDb } from "../../src/helpers/utils/accountUtils";
 import { useRouter } from "next/router";
 import { ServiceState } from "../../src/services/types";
 import { WalletStatus } from "../../src/models/KryptikWallet";
+import Link from "next/link";
 
 const Recieve: NextPage = () => {
   const {
@@ -96,103 +97,115 @@ const Recieve: NextPage = () => {
         {/* padding div for space between top and main elements */}
       </div>
 
-      <div className="max-w-lg mx-auto content-center rounded-lg border border-solid border-gray-600 py-10 hover:border-gray-800 dark:border-gray-400 dark:hover:border-gray-200">
-        <h1 className="text-center text-3xl font-bold lg:mb-2 dark:text-white">
-          Recieve
-          <img
-            src="/kryptikBrand/kryptikEyez.png"
-            alt="Kryptik Eyes"
-            className="rounded-full w-10 ml-2 inline max-h-sm h-auto align-middle border-none"
-          />
-        </h1>
-
-        {/* QR CODE */}
-        <div className="flex">
-          <div className="flex-1" />
-          <div className="flex-2">
-            <Canvas
-              text={toAddress}
-              options={{
-                type: "image/jpeg",
-                quality: 0.3,
-                level: "M",
-                margin: 3,
-                scale: 4,
-                width: 300,
-                color: {
-                  dark: "#20d0f7",
-                  light: "##fcfcfc",
-                },
-              }}
+      <div className="max-w-lg mx-auto content-center dark:text-white">
+        <div className="rounded-lg border border-solid border-gray-600 py-10 hover:border-gray-800 dark:border-gray-400 dark:hover:border-gray-200">
+          <h1 className="text-center text-3xl font-bold lg:mb-2 dark:text-white">
+            Recieve
+            <img
+              src="/kryptikBrand/kryptikEyez.png"
+              alt="Kryptik Eyes"
+              className="rounded-full w-10 ml-2 inline max-h-sm h-auto align-middle border-none"
             />
+          </h1>
+
+          {/* QR CODE */}
+          <div className="flex">
+            <div className="flex-1" />
+            <div className="flex-2">
+              <Canvas
+                text={toAddress}
+                options={{
+                  type: "image/jpeg",
+                  quality: 0.3,
+                  level: "M",
+                  margin: 3,
+                  scale: 4,
+                  width: 300,
+                  color: {
+                    dark: "#20d0f7",
+                    light: "##fcfcfc",
+                  },
+                }}
+              />
+            </div>
+            <div className="flex-1" />
           </div>
-          <div className="flex-1" />
-        </div>
-        <div className="text-center">
-          {isCopied ? (
-            <p
-              className="font-bold text-green-600 hover:cursor-pointer"
-              onClick={() => handleIsCopiedToggle()}
-            >
-              <AiFillCheckCircle className="inline mr-3" />
-              Copied to Clipboard
+          <div className="text-center">
+            {isCopied ? (
+              <p
+                className="font-bold text-green-600 hover:cursor-pointer"
+                onClick={() => handleIsCopiedToggle()}
+              >
+                <AiFillCheckCircle className="inline mr-3" />
+                Copied to Clipboard
+              </p>
+            ) : (
+              <p
+                className="hover:cursor-pointer dark:text-white"
+                onClick={() => handleIsCopiedToggle()}
+              >
+                <AiOutlineCopy className="inline mr-3" />
+                Copy address to clipboard
+              </p>
+            )}
+            {/* network dropdown */}
+            <div className="max-w-xs mx-auto">
+              <DropdownNetworks
+                selectedTokenAndNetwork={selectedTokenAndNetwork}
+                onlyNetworks={true}
+                selectFunction={handleTokenAndNetworkChange}
+              />
+            </div>
+          </div>
+          {selectedTokenAndNetwork.tokenData ? (
+            <p className="mx-auto text-center text-slate-500 text-sm px-4 dark:text-slate-400 mt-3">
+              Easily receive{" "}
+              <span
+                style={{
+                  color: `${selectedTokenAndNetwork.tokenData.tokenDb.hexColor}`,
+                }}
+                className="font-medium"
+              >
+                {selectedTokenAndNetwork.tokenData.tokenDb.name}
+              </span>{" "}
+              on{" "}
+              <span
+                style={{
+                  color: `${selectedTokenAndNetwork.baseNetworkDb.hexColor}`,
+                }}
+                className="font-medium"
+              >
+                {selectedTokenAndNetwork.baseNetworkDb.fullName}
+              </span>{" "}
+              by having someone scan the code below.
             </p>
           ) : (
-            <p
-              className="hover:cursor-pointer dark:text-white"
-              onClick={() => handleIsCopiedToggle()}
-            >
-              <AiOutlineCopy className="inline mr-3" />
-              Copy address to clipboard
+            <p className="mx-auto text-center text-slate-500 text-sm px-4 dark:text-slate-400 mt-3">
+              Easily receive money on{" "}
+              <span
+                style={{
+                  color: `${selectedTokenAndNetwork.baseNetworkDb.hexColor}`,
+                }}
+                className="font-medium"
+              >
+                {selectedTokenAndNetwork.baseNetworkDb.fullName}
+              </span>{" "}
+              by having someone scan the code above.
             </p>
           )}
-          {/* network dropdown */}
-          <div className="max-w-xs mx-auto">
-            <DropdownNetworks
-              selectedTokenAndNetwork={selectedTokenAndNetwork}
-              onlyNetworks={true}
-              selectFunction={handleTokenAndNetworkChange}
-            />
-          </div>
+          {selectedTokenAndNetwork.baseNetworkDb.ticker.toLowerCase() ==
+            "algo" && (
+            <div className="mx-auto w-max mt-8">
+              <Link
+                href={"../assets/enable"}
+                className="text-md font-semibold my-2 px-2 py-2 border rounded-md hover:text-sky-400"
+              >
+                Enable Algorand Assets
+              </Link>
+            </div>
+          )}
         </div>
-        {selectedTokenAndNetwork.tokenData ? (
-          <p className="mx-auto text-center text-slate-500 text-sm px-4 dark:text-slate-400 mt-3">
-            Easily receive{" "}
-            <span
-              style={{
-                color: `${selectedTokenAndNetwork.tokenData.tokenDb.hexColor}`,
-              }}
-              className="font-medium"
-            >
-              {selectedTokenAndNetwork.tokenData.tokenDb.name}
-            </span>{" "}
-            on{" "}
-            <span
-              style={{
-                color: `${selectedTokenAndNetwork.baseNetworkDb.hexColor}`,
-              }}
-              className="font-medium"
-            >
-              {selectedTokenAndNetwork.baseNetworkDb.fullName}
-            </span>{" "}
-            by having someone scan the code below.
-          </p>
-        ) : (
-          <p className="mx-auto text-center text-slate-500 text-sm px-4 dark:text-slate-400 mt-3">
-            Easily receive money on{" "}
-            <span
-              style={{
-                color: `${selectedTokenAndNetwork.baseNetworkDb.hexColor}`,
-              }}
-              className="font-medium"
-            >
-              {selectedTokenAndNetwork.baseNetworkDb.fullName}
-            </span>{" "}
-            by having someone scan the code above.
-          </p>
-        )}
       </div>
-
       <div className="h-[12rem]">
         {/* padding div for space between bottom and main elements */}
       </div>
