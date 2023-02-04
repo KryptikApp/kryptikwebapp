@@ -9,7 +9,7 @@ import Button from "./buttons/Button";
  */
 interface IProps {
   show: boolean;
-  onScan: (uri: string) => Promise<void>;
+  onScan: (uri: string) => void;
 }
 
 /**
