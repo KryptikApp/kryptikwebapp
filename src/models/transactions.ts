@@ -184,6 +184,14 @@ export class KryptikTransaction {
         };
         break;
       }
+      case NetworkFamily.Algorand: {
+        if (!this.txData.algoTx) return null;
+        txSignParams.algoParams = {
+          ...baseParams,
+          algoTx: this.txData.algoTx,
+        };
+        break;
+      }
       default: {
         return null;
       }
