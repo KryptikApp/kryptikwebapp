@@ -7,10 +7,13 @@ import { NearConfig } from "near-api-js/lib/near";
 import { getNetworkChainId } from "../../helpers/assets";
 import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
 import { defaultNetworkDb, NetworkDb } from "./network";
+import { Algodv2 } from "algosdk";
+import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
 export class KryptikProvider {
   public ethProvider: StaticJsonRpcProvider | undefined;
   public solProvider: Connection | undefined;
+  public algorandProvider: AlgodClient | undefined;
   public nearProvider: Near | undefined;
   public network: Network;
   public networkDb: NetworkDb;
@@ -42,6 +45,10 @@ export class KryptikProvider {
       }
       case NetworkFamily.Solana: {
         this.solProvider = new Connection(rpcEndpoint);
+        break;
+      }
+      case NetworkFamily.Algorand: {
+        this.algorandProvider = new Algodv2("", rpcEndpoint, "");
         break;
       }
       default: {
