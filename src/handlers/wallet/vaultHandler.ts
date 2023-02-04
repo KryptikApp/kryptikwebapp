@@ -107,6 +107,8 @@ export const unlockVault = function (
       passwordRecovered
     ).toString();
     vaultRecovered.seedloopSerlializedCipher = seedloopEncrypted;
+    const updatedVaultToStore: string = JSON.stringify(vaultRecovered);
+    localStorage.setItem(vaultName, updatedVaultToStore);
   }
   // update local storage vault
   // string that represents vault with encrypted seedloop
