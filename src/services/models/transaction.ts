@@ -5,7 +5,12 @@ import { Network } from "hdseedloop";
 import { IWallet } from "../../models/KryptikWallet";
 import { defaultNetwork, NetworkDb } from "./network";
 import { KryptikProvider } from "./provider";
-import { TokenAndNetwork, TokenData, TokenParamsSpl } from "./token";
+import {
+  TokenAndNetwork,
+  TokenData,
+  TokenParamsAlgo,
+  TokenParamsSpl,
+} from "./token";
 
 // TODO: UPDATE TO BE CLASS WITH PERSISTENT CHECKS FOR FRESHNESS
 export default interface TransactionFeeData {
@@ -57,6 +62,12 @@ export interface NearTransactionParams extends TransactionParams {
   txType: TxType;
   decimals: number;
   valueNear: number;
+}
+
+export interface AlgoTransactionParams extends TransactionParams {
+  decimals: number;
+  valueAlgo: number;
+  tokenParamsAlgo?: TokenParamsAlgo;
 }
 
 export interface EVMTransferTxParams extends TransactionParams {

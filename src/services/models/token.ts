@@ -27,6 +27,10 @@ export interface TokenParamsSpl {
   contractAddress: string;
 }
 
+export interface TokenParamsAlgo {
+  contractAddress: string;
+}
+
 export interface TokenParamsNep141 {
   contractAddress: string;
 }
