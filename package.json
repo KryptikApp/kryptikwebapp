@@ -31,6 +31,7 @@
     "@walletconnect/utils": "^2.1.4",
     "accounting-js": "^1.1.1",
     "add": "^2.0.6",
+    "algosdk": "^2.1.0",
     "axios": "^0.26.1",
     "bn.js": "^5.2.1",
     "buffer-layout": "^1.2.2",
