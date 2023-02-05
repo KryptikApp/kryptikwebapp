@@ -55,7 +55,7 @@ import { KryptikTransaction } from "../../src/models/transactions";
 import { BuildTransferTx } from "../../src/handlers/wallet/transactions/transfer";
 import { hexToBase58 } from "hdseedloop/dist/utils";
 import { WalletStatus } from "../../src/models/KryptikWallet";
-import KryptikScanner from "../../components/kryptikScanner"
+import KryptikScanner from "../../components/kryptikScanner";
 import { useKryptikTheme } from "../../src/helpers/kryptikThemeHelper";
 import Modal from "../../components/modals/modal";
 
@@ -101,7 +101,7 @@ const Send: NextPage = () => {
     "Unable to complete transaction"
   );
   const [isLoading, setisLoading] = useState(false);
-  const [progress, setProgress] = useState<TxProgress>(TxProgress.SetParamaters);
+  const [progress, setProgress] = useState<TxProgress>(TxProgress.Begin);
   const [selectedTokenAndNetwork, setSelectedTokenAndNetwork] = useState(
     defaultTokenAndNetwork
   );
@@ -322,7 +322,7 @@ const Send: NextPage = () => {
     setShowModal(true);
   };
 
-  const [showScanner, setShowScanner] = useState(false)
+  const [showScanner, setShowScanner] = useState(false);
 
   const closeScanner = function () {
     setShowScanner(false);
@@ -335,7 +335,7 @@ const Send: NextPage = () => {
   const closeModalWrapper = function () {
     closeScanner();
     closeModal();
-  }
+  };
 
   const handleOnScan = function (uri: string) {
     console.log(uri);
@@ -531,11 +531,14 @@ const Send: NextPage = () => {
       <div className="text-center max-w-xl mx-auto content-center">
         {progress == TxProgress.SetParamaters && (
           <div>
-            
             <div>
-              <Modal isOpen={showModal} onRequestClose={closeModalWrapper} dark={isDark}>
+              <Modal
+                isOpen={showModal}
+                onRequestClose={closeModalWrapper}
+                dark={isDark}
+              >
                 <KryptikScanner show={showScanner} onScan={handleOnScan} />
-              </Modal> 
+              </Modal>
             </div>
             <div className="align-left m-7">
               <AiOutlineArrowLeft
@@ -638,7 +641,9 @@ const Send: NextPage = () => {
         {progress == TxProgress.SetParamaters && (
           <div className="items-center">
             {/* Top Text */}
-            <h1 className="text-2xl text-center fond-bold text-gray-500 mt-0 mb-6">You are about to send</h1>
+            <h1 className="text-2xl text-center fond-bold text-gray-500 mt-0 mb-6">
+              You are about to send
+            </h1>
             {/* amount indicator */}
             <div className="py-3 items-center">
               <img
@@ -663,49 +668,49 @@ const Send: NextPage = () => {
             </div>
             <div className="px-5 py-5 m-2 rounded mt-0 mb-0">
               {/* to label */}
-                <div className="text-left">
-                  <label className="block text-gray-500 font-bold mb-1 md:mb-0 pr-4 inline">
-                    To
-                  </label>
-                  {isResolverLoading && (
-                    <svg
-                      role="status"
-                      className="inline w-4 h-4 ml-3 mb-1 text-white animate-spin"
-                      viewBox="0 0 100 101"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-                        fill="#E5E7EB"
-                      />
-                      <path
-                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  )}
-                </div>
-                {/* to input */}
-              <div className="relative items-center pb-8">
-                  <button
-                      onClick={() => handleQrScanner()}
-                      className={`absolute bg-transparent text-gray-500 text-l  
-                                  top-3 right-0 inline-flex items-center`}
-                      >
-                    Scan in address
-                    <AiOutlineQrcode
-                      className="hover:cursor-pointer dark:text-white h-13 w-13 fill-current mr-2 ml-2 right-4 top-0"
-                      onClick={() => handleQrScanner()}
-                      size="30" 
+              <div className="text-left">
+                <label className="block text-gray-500 font-bold mb-1 md:mb-0 pr-4 inline">
+                  To
+                </label>
+                {isResolverLoading && (
+                  <svg
+                    role="status"
+                    className="inline w-4 h-4 ml-3 mb-1 text-white animate-spin"
+                    viewBox="0 0 100 101"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                      fill="#E5E7EB"
                     />
-                  </button>
-                  <input
-                    className="text-l bg-white appearance-none border-2 border-gray-400 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:dark:bg-[#141414] focus:border-blue-400 dark:bg-[#141414] dark:text-white"
-                    value={toAddress}
-                    onChange={(e) => handleToAddressChange(e.target.value)}
-                    id="inline-to"
+                    <path
+                      d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                )}
+              </div>
+              {/* to input */}
+              <div className="relative items-center pb-8">
+                <button
+                  onClick={() => handleQrScanner()}
+                  className={`absolute bg-transparent text-gray-500 text-l  
+                                  top-3 right-0 inline-flex items-center`}
+                >
+                  Scan in address
+                  <AiOutlineQrcode
+                    className="hover:cursor-pointer dark:text-white h-13 w-13 fill-current mr-2 ml-2 right-4 top-0"
+                    onClick={() => handleQrScanner()}
+                    size="30"
                   />
+                </button>
+                <input
+                  className="text-l bg-white appearance-none border-2 border-gray-400 rounded w-full py-4 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:dark:bg-[#141414] focus:border-blue-400 dark:bg-[#141414] dark:text-white"
+                  value={toAddress}
+                  onChange={(e) => handleToAddressChange(e.target.value)}
+                  id="inline-to"
+                />
               </div>
               {/* next button... to review */} */
               <button
