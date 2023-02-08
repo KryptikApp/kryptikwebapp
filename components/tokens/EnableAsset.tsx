@@ -190,7 +190,7 @@ const EnableAsset: NextPage<Props> = (props) => {
         </div>
       </div>
       <Modal isOpen={showModal} onRequestClose={closeModal} dark={isDark}>
-        <div className="dark:text-white max-w-[90%] w-[500px] flex flex-col space-y-4 border border-gray-400 dark:border-gray-500 pt-6 pb-10 mx-auto my-auto px-4 rounded rounded-lg bg-gradient-to-r from-white to-gray-50 dark:from-black dark:to-gray-900">
+        <div className="dark:text-white max-w-lg flex flex-col space-y-4 border border-gray-400 dark:border-gray-500 pt-6 pb-10 mx-auto my-auto px-4 rounded rounded-lg bg-gradient-to-r from-white to-gray-50 dark:from-black dark:to-gray-900">
           <div className="flex flex-row space-x-2">
             <img
               className="h-6 w-6 rounded-full my-auto"
