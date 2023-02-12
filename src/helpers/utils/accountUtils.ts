@@ -1,7 +1,13 @@
 import { PublicKey } from "@solana/web3.js";
 
-import { isValidEVMAddress, Network, NetworkFamily } from "hdseedloop";
+import {
+  isValidEVMAddress,
+  Network,
+  NetworkFamily,
+  NetworkFamilyFromFamilyName,
+} from "hdseedloop";
 import { IWallet } from "../../models/KryptikWallet";
+import { ActiveAddresses } from "../../services/models/KryptikBalanceHolder";
 import { NetworkDb } from "../../services/models/network";
 import { networkFromNetworkDb } from "./networkUtils";
 
@@ -74,3 +80,30 @@ export const getAddressForNetwork = (
   let firstAddy: string = allAddys[0];
   return firstAddy;
 };
+
+/** Returns address corresponding to network db. */
+export function getActiveNetworkAddress(
+  addresses: ActiveAddresses,
+  network: NetworkDb
+): string {
+  const networkFamily: NetworkFamily = NetworkFamilyFromFamilyName(
+    network.networkFamilyName
+  );
+  switch (networkFamily) {
+    case NetworkFamily.Algorand: {
+      return addresses.algo;
+    }
+    case NetworkFamily.EVM: {
+      return addresses.eth;
+    }
+    case NetworkFamily.Near: {
+      return addresses.near;
+    }
+    case NetworkFamily.Solana: {
+      return addresses.sol;
+    }
+    default: {
+      throw new Error(`Active address not available for ${network.fullName}`);
+    }
+  }
+}

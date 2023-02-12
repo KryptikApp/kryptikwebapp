@@ -33,4 +33,6 @@ export type GetNetworkDbByTicker = (ticker: string) => NetworkDb | null;
 
 export type OnFetch = (balance: TokenAndNetwork | null) => void;
 
+export type OnDoneBalances = (balances: TokenAndNetwork[]) => void;
+
 export { ServiceState, Status, TxProgress, WaitlistProgress };

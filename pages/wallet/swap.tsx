@@ -148,11 +148,7 @@ const Swap: NextPage = () => {
     // remove zero balances, if requested
     if (onlyWithValue) {
       // get balances
-      let balanceHolder: KryptikBalanceHolder =
-        await kryptikService.getAllBalances({
-          walletUser: kryptikWallet,
-          isAdvanced: isAdvanced,
-        });
+      let balanceHolder: KryptikBalanceHolder = kryptikService.kryptikBalances;
       newTokensAndNetworks = balanceHolder.getNonzeroBalances();
     }
     //TODO: FIX TO SHOW TOKENS AS WELL

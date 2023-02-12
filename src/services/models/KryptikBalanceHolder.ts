@@ -1,15 +1,25 @@
 // class that 'holds' and manages balances
 import { NetworkFamily, NetworkFamilyFromFamilyName } from "hdseedloop";
-import { sumFiatBalances } from "../../helpers/balances";
+import { getAllBalances } from "../../../balanceWorker";
+import {
+  IFetchAllBalancesParams,
+  sumFiatBalances,
+} from "../../helpers/balances";
 import { TokenAndNetwork } from "./token";
-
-// wrapper for common transaction data
+import { PubSub } from "pubsub-ts";
 
 export interface IKryptikBalanceParams {
-  tokenAndBalances: TokenAndNetwork[];
+  tokenAndBalances?: TokenAndNetwork[];
   // freshness window
   freshWindow?: number;
 }
+
+export type ActiveAddresses = {
+  eth: string;
+  sol: string;
+  near: string;
+  algo: string;
+};
 
 /**
  * Returns a  positive number if token b has a greater token value than token a
@@ -45,7 +55,7 @@ function sortTokenAndBalances(a: TokenAndNetwork, b: TokenAndNetwork) {
   }
 }
 
-export class KryptikBalanceHolder {
+export class KryptikBalanceHolder extends PubSub.Publisher {
   id: number;
   private lastUpdated: number;
   // number of seconds we consider these balances to be 'fresh'
@@ -54,15 +64,29 @@ export class KryptikBalanceHolder {
   // null if not calculated yet
   private totalBalanceFiat: number | null;
 
+  public isLoading: boolean;
+  public hasCache: boolean;
+  private totalFetched: number;
+
   constructor(params: IKryptikBalanceParams) {
-    const { tokenAndBalances, freshWindow } = { ...params };
-    tokenAndBalances.sort(sortTokenAndBalances);
-    this.tokenAndBalances = tokenAndBalances;
+    super();
+    const { tokenAndBalances, freshWindow } = {
+      ...params,
+    };
+    if (tokenAndBalances) {
+      tokenAndBalances.sort(sortTokenAndBalances);
+      this.tokenAndBalances = tokenAndBalances;
+    } else {
+      this.tokenAndBalances = [];
+    }
     this.lastUpdated = Date.now();
     // use provided number of seconds or default to five minutes
     this.freshWindow = freshWindow ? freshWindow : 300;
     this.id = Math.random();
     this.totalBalanceFiat = null;
+    this.isLoading = false;
+    this.hasCache = false;
+    this.totalFetched = 0;
   }
 
   isFresh(): boolean {
@@ -165,5 +189,33 @@ export class KryptikBalanceHolder {
   getLastUpdateTimestamp(): string {
     let date = new Date(this.lastUpdated);
     return date.toLocaleTimeString("en-US");
+  }
+
+  handleFetchIncrement(bal: TokenAndNetwork | null) {
+    this.totalFetched++;
+    this.notify("incrementBalance", {
+      balance: bal,
+      fetchCount: this.totalFetched,
+    });
+  }
+
+  handleFetchDone(bals: TokenAndNetwork[]) {
+    this.updateBalances(bals);
+    this.notify("loading", false);
+    this.isLoading = false;
+  }
+
+  async refresh(params: IFetchAllBalancesParams) {
+    this.isLoading = true;
+    this.totalFetched = 0;
+    this.notify("loading", true);
+    params.onDone = (b) => {
+      this.handleFetchDone(b);
+    };
+    params.onFetch = (b) => {
+      this.handleFetchIncrement(b);
+    };
+    // run asynchronous fetch of balances
+    getAllBalances(params);
   }
 }

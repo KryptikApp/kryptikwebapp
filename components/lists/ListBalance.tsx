@@ -10,73 +10,78 @@ import { useKryptikThemeContext } from "../ThemeProvider";
 import { useRouter } from "next/router";
 import { ServiceState } from "../../src/services/types";
 import { TokenAndNetwork } from "../../src/services/models/token";
-import { KryptikBalanceHolder } from "../../src/services/models/KryptikBalanceHolder";
 import { AiOutlineRedo } from "react-icons/ai";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 import AvailableNetworks from "../networks/AvailableNetworks";
 import BuyEth from "../BuyEth";
+import { PubSub } from "pubsub-ts";
 
 const ListBalance: NextPage = () => {
-  const { kryptikService, kryptikWallet } = useKryptikAuthContext();
+  const { kryptikService, kryptikWallet, refreshBalances } =
+    useKryptikAuthContext();
+  const [balanceHolder, setBalanceHolder] = useState(
+    kryptikService.kryptikBalances
+  );
   // ensure service is started
   const router = useRouter();
   const { isAdvanced, hideBalances } = useKryptikThemeContext();
-  const initTokenAndBalances: TokenAndNetwork[] = [];
-  const [isFetchedBalances, setIsFetchedBalances] = useState(false);
+  const [isFetchedBalances, setIsFetchedBalances] = useState(
+    !balanceHolder.isLoading
+  );
   const [isManualRefresh, setIsManualRefresh] = useState(false);
-  const [tokenAndBalances, setTokenAndBalances] =
-    useState<TokenAndNetwork[]>(initTokenAndBalances);
-  const [balanceHolder, setBalanceHolder] =
-    useState<KryptikBalanceHolder | null>(null);
+  const [tokenAndBalances, setTokenAndBalances] = useState<TokenAndNetwork[]>(
+    []
+  );
   const [totalBalance, setTotalBalance] = useState<number>(0);
   const [progressPercent, setProgressPercent] = useState(0);
+
   //TODO: ACCOUNT FOR TOKENS ON MULTIPLE NETWORKS
-  const totalToFetch =
-    kryptikService.NetworkDbs.length + kryptikService.tokenDbs.length * 2;
-  let progressCounter = 0;
-  const incrementLoadProgress = function (
-    tokenAndBalance: TokenAndNetwork | null
-  ) {
-    progressCounter++;
-    //TODO: SEE IF POSSIBLE TO ONLY GET ONCE
-    const progressBar = document.getElementById("progressBar");
-    if (progressBar) {
-      const currentProgress = (progressCounter / totalToFetch) * 100;
-      // update ui progress percent.. not to exceed 100%
-      if (currentProgress > 100) {
-        progressBar.style.width = `${100}%`;
-        setProgressPercent(100);
-      } else {
-        progressBar.style.width = `${currentProgress}%`;
-        setProgressPercent(currentProgress);
+
+  class BalanceManager extends PubSub.Subscriber {
+    public totalToFetch: number;
+    constructor(totalToFetch: number) {
+      super();
+      this.on("incrementBalance", this.onBalanceIncrement);
+      this.on("loading", this.onLoading);
+      this.totalToFetch = totalToFetch;
+    }
+    public onBalanceIncrement(notification: PubSub.Notification) {
+      const data = notification.body;
+      const fetchCount: number = data.fetchCount || 0;
+      //TODO: SEE IF POSSIBLE TO ONLY GET ONCE
+      const progressBar = document.getElementById("progressBar");
+      if (progressBar) {
+        const currentProgress = (fetchCount / this.totalToFetch) * 100;
+        // update ui progress percent.. not to exceed 100%
+        if (currentProgress > 100) {
+          progressBar.style.width = `${100}%`;
+          setProgressPercent(100);
+        } else {
+          progressBar.style.width = `${currentProgress}%`;
+          setProgressPercent(currentProgress);
+        }
       }
     }
-  };
+    public onLoading(notification: PubSub.Notification) {
+      const isLoading = notification.body;
+      setIsFetchedBalances(!isLoading);
+    }
+  }
 
   const handleManualRefresh = function () {
     if (!isManualRefresh) {
       setIsManualRefresh(true);
     }
+    setProgressPercent(0);
   };
 
   // retrieves wallet balances
   const fetchBalances = async (manualRefresh = false) => {
     if (kryptikWallet.status != WalletStatus.Connected) return;
-    setIsFetchedBalances(false);
-    const newBalanceHolder: KryptikBalanceHolder =
-      await kryptikService.getAllBalances({
-        walletUser: kryptikWallet,
-        isAdvanced: isAdvanced,
-        onFetch: incrementLoadProgress,
-        tryCached: !manualRefresh,
-      });
-    const newTokenAndBals: TokenAndNetwork[] =
-      newBalanceHolder.getNonzeroBalances(isAdvanced);
-    const newTotalBal: number = newBalanceHolder.getTotalBalance();
-    setTotalBalance(newTotalBal);
-    setTokenAndBalances(newTokenAndBals);
-    setBalanceHolder(newBalanceHolder);
-    setIsFetchedBalances(true);
+    if (!kryptikService.kryptikBalances) return;
+    // start async balance refresh
+    console.log("refreshing balances..");
+    refreshBalances();
     if (manualRefresh) setIsManualRefresh(false);
   };
 
@@ -84,9 +89,22 @@ const ListBalance: NextPage = () => {
     if (kryptikService.serviceState != ServiceState.started) {
       router.push("/");
     }
-    if (isFetchedBalances) return;
-    fetchBalances();
+    // instantiate balance manager
+    const newBalanceManager = new BalanceManager(
+      kryptikService.NetworkDbs.length + kryptikService.tokenDbs.length * 2
+    );
+    // enable notification processing
+    newBalanceManager.start();
+    balanceHolder.add(newBalanceManager);
   }, []);
+
+  useEffect(() => {
+    const newTokenAndBals: TokenAndNetwork[] =
+      balanceHolder.getNonzeroBalances(isAdvanced);
+    const newTotalBal: number = balanceHolder.getTotalBalance();
+    setTotalBalance(newTotalBal);
+    setTokenAndBalances(newTokenAndBals);
+  }, [isFetchedBalances]);
 
   useEffect(() => {
     if (!isManualRefresh) return;
@@ -102,7 +120,7 @@ const ListBalance: NextPage = () => {
         <div>
           <div className="flex flex-row px-3 py-2">
             <div className="">
-              {isFetchedBalances && balanceHolder ? (
+              {isFetchedBalances || balanceHolder.hasCache ? (
                 <div className="flex flex-col">
                   <h1 className="text-lg font-semibold text-slate-700 dark:text-slate-200">
                     Your Balance
@@ -126,7 +144,7 @@ const ListBalance: NextPage = () => {
             </div>
 
             <div className="flex-grow text-right min-y-full">
-              {isFetchedBalances && balanceHolder && (
+              {isFetchedBalances && (
                 <div className="text-slate-500 dark:text-slate-500 bottom-0 pt-8">
                   <h2 className="text-sm inline">
                     Last Updated: {balanceHolder?.getLastUpdateTimestamp()}

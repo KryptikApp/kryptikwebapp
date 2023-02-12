@@ -1,8 +1,18 @@
 import { SOL_COVALENT_CHAINID } from "../../constants/solConstants";
 import { CovalentBalance } from "../../requests/covalent";
 import { IBalance } from "../../services/models/IBalance";
+import { ActiveAddresses } from "../../services/models/KryptikBalanceHolder";
+import { KryptikPriceHolder } from "../../services/models/KryptikPriceHolder";
 import { NetworkDb } from "../../services/models/network";
-import { TokenAndNetwork } from "../../services/models/token";
+import { KryptikProvider } from "../../services/models/provider";
+import {
+  ERC20Params,
+  Nep141Params,
+  SplParams,
+  TokenAndNetwork,
+  TokenDb,
+} from "../../services/models/token";
+import { OnDoneBalances, OnFetch } from "../../services/types";
 import { formatTicker } from "../utils/networkUtils";
 import { divByDecimals, IBigNumber } from "../utils/numberUtils";
 
@@ -66,3 +76,40 @@ export const sumFiatBalances = function (
   }
   return totalBalance;
 };
+
+export interface IFetchAllBalancesParams {
+  addresses: ActiveAddresses;
+  isAdvanced: boolean;
+  prices: KryptikPriceHolder;
+  networks: NetworkDb[];
+  tokens: TokenDb[];
+  providers: { [ticker: string]: KryptikProvider };
+  onFetch?: OnFetch;
+  onDone?: OnDoneBalances;
+}
+
+export interface IFetchNetworkBalanceParams {
+  address: string;
+  prices: KryptikPriceHolder;
+  network: NetworkDb;
+  provider: KryptikProvider;
+}
+
+export interface IFetchTokenBalanceParams {
+  address: string;
+  prices: KryptikPriceHolder;
+  network: NetworkDb;
+  token: TokenDb;
+  provider: KryptikProvider;
+  onFetch?: OnFetch;
+  onDone?: OnDoneBalances;
+  // optional params for each  network
+  splParams?: SplParams;
+  nep141Params?: Nep141Params;
+  erc20Params?: ERC20Params;
+}
+
+export enum MessageEnum {
+  AllBalances = 1,
+  UpdateSingleBalance = 2,
+}

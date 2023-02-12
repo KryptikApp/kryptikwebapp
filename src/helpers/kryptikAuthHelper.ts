@@ -15,6 +15,11 @@ import { signingMethods } from "../handlers/connect/types";
 import { getActiveUser, updateProfile } from "./user";
 import { handleApprove, logout } from "./auth";
 import { updateVaultName, vaultExists } from "../handlers/wallet/vaultHandler";
+import { getAddressForNetworkDb } from "./utils/accountUtils";
+import { TokenAndNetwork } from "../services/models/token";
+import { IFetchAllBalancesParams, MessageEnum } from "./balances";
+import { getAllBalances } from "../../balanceWorker";
+import balances from "../../pages/api/balances";
 
 export function useKryptikAuth() {
   //create service
@@ -111,7 +116,36 @@ export function useKryptikAuth() {
     setAuthUser(formattedUser);
     setLoadingAuthUser(false);
     setLoadingWallet(false);
+    refreshBalances();
   };
+
+  function refreshBalances() {
+    console.log("Running refresh balances....");
+    // initialize balances
+    const algoNw: NetworkDb | null =
+      kryptikService.getNetworkDbByTicker("algo");
+    const ethNw: NetworkDb | null = kryptikService.getNetworkDbByTicker("eth");
+    const nearNw: NetworkDb | null =
+      kryptikService.getNetworkDbByTicker("near");
+    const solNw: NetworkDb | null = kryptikService.getNetworkDbByTicker("sol");
+    if (algoNw && ethNw && nearNw && solNw && kryptikService.kryptikPrices) {
+      // set balance fetch routine
+      const balParams: IFetchAllBalancesParams = {
+        addresses: {
+          eth: getAddressForNetworkDb(kryptikWallet, ethNw),
+          sol: getAddressForNetworkDb(kryptikWallet, solNw),
+          near: getAddressForNetworkDb(kryptikWallet, nearNw),
+          algo: getAddressForNetworkDb(kryptikWallet, algoNw),
+        },
+        isAdvanced: false,
+        prices: kryptikService.kryptikPrices,
+        networks: kryptikService.NetworkDbs,
+        tokens: kryptikService.tokenDbs,
+        providers: kryptikService.networkProviders,
+      };
+      kryptikService.kryptikBalances.refresh(balParams);
+    }
+  }
 
   function signOut() {
     logout().then(() => {
@@ -236,6 +270,8 @@ export function useKryptikAuth() {
         refreshUserAndWallet();
       }
     };
+    // run balance refresh every 5 minutes
+    setInterval(refreshBalances, 300000);
   }, []);
 
   return {
@@ -243,6 +279,7 @@ export function useKryptikAuth() {
     loadingAuthUser,
     loadingWallet,
     refreshUserAndWallet,
+    refreshBalances,
     signInWithToken,
     updateCurrentUserKryptik,
     signOut,
