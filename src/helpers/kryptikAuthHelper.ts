@@ -110,16 +110,17 @@ export function useKryptikAuth() {
       });
       newWalletKryptik = connectionObject.wallet;
     }
+    refreshBalances(newWalletKryptik);
     // set data
     setKryptikWallet(newWalletKryptik);
     setWalletStatus(newWalletKryptik.status);
     setAuthUser(formattedUser);
     setLoadingAuthUser(false);
     setLoadingWallet(false);
-    refreshBalances();
   };
 
-  function refreshBalances() {
+  function refreshBalances(wallet?: IWallet) {
+    const walletToCheck: IWallet = wallet ? wallet : kryptikWallet;
     console.log("Running refresh balances....");
     // initialize balances
     const algoNw: NetworkDb | null =
@@ -132,10 +133,10 @@ export function useKryptikAuth() {
       // set balance fetch routine
       const balParams: IFetchAllBalancesParams = {
         addresses: {
-          eth: getAddressForNetworkDb(kryptikWallet, ethNw),
-          sol: getAddressForNetworkDb(kryptikWallet, solNw),
-          near: getAddressForNetworkDb(kryptikWallet, nearNw),
-          algo: getAddressForNetworkDb(kryptikWallet, algoNw),
+          eth: getAddressForNetworkDb(walletToCheck, ethNw),
+          sol: getAddressForNetworkDb(walletToCheck, solNw),
+          near: getAddressForNetworkDb(walletToCheck, nearNw),
+          algo: getAddressForNetworkDb(walletToCheck, algoNw),
         },
         isAdvanced: false,
         prices: kryptikService.kryptikPrices,

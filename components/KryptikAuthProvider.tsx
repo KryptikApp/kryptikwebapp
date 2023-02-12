@@ -25,7 +25,7 @@ interface IAuthContext {
   walletStatus: WalletStatus;
   updateWalletStatus: (newStatus: WalletStatus) => void;
   refreshUserAndWallet: () => void;
-  refreshBalances: () => void;
+  refreshBalances: (wallet?: IWallet) => void;
   signOut: () => void;
   signClient: SignClient | null;
 }
@@ -48,7 +48,7 @@ const kryptikAuthContext = createContext<IAuthContext>({
   signClient: null,
   signOut: () => {},
   refreshUserAndWallet: () => {},
-  refreshBalances: () => {},
+  refreshBalances: (wallet?: IWallet) => {},
   walletStatus: defaultWallet.status,
   updateWalletStatus: (newStatus: WalletStatus) => {},
 });
