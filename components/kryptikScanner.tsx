@@ -16,31 +16,32 @@ interface IProps {
  * Component
  */
 export default function KryptikScanner(iprops: IProps) {
-  const {show, onScan} = {...iprops}
+  const { show, onScan } = { ...iprops };
   const handleScan = async function (data: any) {
     if (data && data.text && typeof data.text == "string") {
       await onScan(data.text);
     }
   };
-  
+
   const previewStyle = {
-      height: 300,
-      width: 1000,
-    }
+    height: 300,
+    width: 1000,
+  };
 
   return (
     <div>
       {show ? (
-      <div className="w-[400px] max-h-[300px] rounded overflow-hidden">
-        <ReactQrReader
-          videoStyle={previewStyle}
-          constraints={{facingMode: "user"}}
-          className={"scale-150"}
-          onResult={(data) => handleScan(data)}
-        />
-      </div> 
-      ) : (<div></div>)
-      }
+        <div className="w-[400px] max-w-[90vw] h-[400px] max-h-[80vh] rounded overflow-hidden">
+          <ReactQrReader
+            videoStyle={previewStyle}
+            constraints={{ facingMode: "user" }}
+            className={"scale-150"}
+            onResult={(data) => handleScan(data)}
+          />
+        </div>
+      ) : (
+        <div></div>
+      )}
     </div>
   );
 }
