@@ -14,12 +14,9 @@ import ModalStore from "../handlers/store/ModalStore";
 import { signingMethods } from "../handlers/connect/types";
 import { getActiveUser, updateProfile } from "./user";
 import { handleApprove, logout } from "./auth";
-import { updateVaultName, vaultExists } from "../handlers/wallet/vaultHandler";
+import { updateVaultName } from "../handlers/wallet/vaultHandler";
 import { getAddressForNetworkDb } from "./utils/accountUtils";
-import { TokenAndNetwork } from "../services/models/token";
-import { IFetchAllBalancesParams, MessageEnum } from "./balances";
-import { getAllBalances } from "../../balanceWorker";
-import balances from "../../pages/api/balances";
+import { IFetchAllBalancesParams } from "./balances";
 
 export function useKryptikAuth() {
   //create service
@@ -75,8 +72,9 @@ export function useKryptikAuth() {
     if (!user) {
       console.log("No user available.");
       return;
+    } else {
+      updateAuthContext(user);
     }
-    await updateAuthContext(user);
   }
 
   const updateAuthContext = async (user: UserDB, seed?: string) => {

@@ -24,8 +24,7 @@ handleRefreshTokens().then(() => {
 setInterval(() => {
   handleRefreshTokens().then(() => {
     getActiveUser().then((u) => {
-      console.log("User after auth refresh:");
-      console.log(u);
+      console.log("User refreshed!");
     });
   });
 }, 720000);
