@@ -169,6 +169,7 @@ export class KryptikBalanceHolder extends PubSub.Publisher {
     newTokenAndBalances.sort(sortTokenAndBalances);
     this.tokenAndBalances = newTokenAndBalances;
     this.lastUpdated = Date.now();
+    this.hasCache = true;
   }
 
   /** Returns the total value of current balances (in fiat). */

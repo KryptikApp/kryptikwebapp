@@ -195,7 +195,7 @@ const ListBalance: NextPage = () => {
           <Divider />
           {/* Network balances list display*/}
         </div>
-        {!isFetchedBalances && !isManualRefresh ? (
+        {!isFetchedBalances && !isManualRefresh && !balanceHolder.hasCache ? (
           <ul role="list">
             {
               <div>
