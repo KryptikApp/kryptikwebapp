@@ -115,15 +115,21 @@ const Recieve: NextPage = () => {
               <Canvas
                 text={toAddress}
                 options={{
-                  type: "image/jpeg",
-                  quality: 0.3,
-                  level: "M",
-                  margin: 3,
-                  scale: 4,
+                  level: "L",
+                  margin: 2,
+                  scale: 5,
                   width: 300,
                   color: {
-                    dark: "#20d0f7",
-                    light: "##fcfcfc",
+                    dark: "#000000",
+                    light: "#FFFFFF",
+                  },
+                }}
+                logo={{
+                  src: selectedTokenAndNetwork.tokenData
+                    ? selectedTokenAndNetwork.tokenData.tokenDb.logoURI
+                    : selectedTokenAndNetwork.baseNetworkDb.iconPath,
+                  options: {
+                    width: 35,
                   },
                 }}
               />
