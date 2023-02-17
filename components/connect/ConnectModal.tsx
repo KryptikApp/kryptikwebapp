@@ -1,5 +1,4 @@
 import { NextPage } from "next";
-import { useState } from "react";
 import { useSnapshot } from "valtio";
 import ModalStore from "../../src/handlers/store/ModalStore";
 import { useKryptikTheme } from "../../src/helpers/kryptikThemeHelper";

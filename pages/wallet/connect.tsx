@@ -1,6 +1,6 @@
 import type { NextPage } from "next";
 import { useState } from "react";
-import toast, { ToastBar, Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import Divider from "../../components/Divider";
 import QrReader from "../../components/QrReader";
 import { useKryptikAuth } from "../../src/helpers/kryptikAuthHelper";
