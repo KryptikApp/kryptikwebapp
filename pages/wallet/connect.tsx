@@ -32,7 +32,7 @@ const Connect: NextPage = () => {
     }
   };
   return (
-    <div className="max-w-md border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-lg bg-gradient-to-r from-white to-gray-50 dark:from-black dark:to-gray-900">
+    <div className="max-w-md border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-lg bg-gradient-to-r from-white to-gray-50 dark:from-[#0c0c0c] dark:to-gray-900">
       <div>
         <p className="text-xl font-semibold dark:text-white">Connect App</p>
         <Divider />

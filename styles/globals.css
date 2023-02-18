@@ -2,7 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
+html {
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  background-color: #00d9ff;
+}
+
 body {
   padding: 0;
   margin: 0;
@@ -198,73 +205,35 @@ a {
   background: -moz-radial-gradient(
     circle at 50% 41%,
     rgba(34, 255, 164, 0.54) 1%,
-    rgba(0, 0, 0, 1) 63%
+    #0c0c0c 63%
   );
 
   /* safari 5.1+,chrome 10+ */
   background: -webkit-radial-gradient(
     circle at 50% 41%,
     rgba(34, 255, 164, 0.54) 1%,
-    rgba(0, 0, 0, 1) 63%
+    #0c0c0c 63%
   );
 
   /* opera 11.10+ */
   background: -o-radial-gradient(
     circle at 50% 41%,
     rgba(34, 255, 164, 0.54) 1%,
-    rgba(0, 0, 0, 1) 63%
+    #0c0c0c 63%
   );
 
   /* ie 10+ */
   background: -ms-radial-gradient(
     circle at 50% 41%,
     rgba(34, 255, 164, 0.54) 1%,
-    rgba(0, 0, 0, 1) 63%
+    #0c0c0c 63%
   );
 
   /* global 92%+ browsers support */
   background: radial-gradient(
     circle at 50% 41%,
     rgba(34, 255, 164, 0.54) 1%,
-    rgba(0, 0, 0, 1) 63%
-  );
-}
-
-/* radial green to transparent white gradient */
-.colorFadeGreenBlack {
-  /* ff 3.6+ */
-  background: -moz-radial-gradient(
-    circle at 50% 41%,
-    rgba(34, 255, 164, 0.54) 1%,
-    rgb(255, 255, 255) 63%
-  );
-
-  /* safari 5.1+,chrome 10+ */
-  background: -webkit-radial-gradient(
-    circle at 50% 41%,
-    rgba(34, 255, 164, 0.54) 1%,
-    rgb(255, 255, 255) 63%
-  );
-
-  /* opera 11.10+ */
-  background: -o-radial-gradient(
-    circle at 50% 41%,
-    rgba(34, 255, 164, 0.54) 1%,
-    rgb(255, 255, 255) 63%
-  );
-
-  /* ie 10+ */
-  background: -ms-radial-gradient(
-    circle at 50% 41%,
-    rgba(34, 255, 164, 0.54) 1%,
-    rgb(255, 255, 255) 63%
-  );
-
-  /* global 92%+ browsers support */
-  background: radial-gradient(
-    circle at 50% 41%,
-    rgba(34, 255, 164, 0.54) 1%,
-    rgb(255, 255, 255) 63%
+    #0c0c0c 63%
   );
 }
 
@@ -312,35 +281,35 @@ a {
   background: -moz-radial-gradient(
     circle at 50% 50%,
     rgba(34, 255, 164, 0.54) 0%,
-    rgba(0, 0, 0, 1) 73%
+    #0c0c0c 73%
   );
 
   /* safari 5.1+,chrome 10+ */
   background: -webkit-radial-gradient(
     circle at 50% 50%,
     rgba(34, 255, 164, 0.54) 0%,
-    rgba(0, 0, 0, 1) 73%
+    #0c0c0c 73%
   );
 
   /* opera 11.10+ */
   background: -o-radial-gradient(
     circle at 50% 50%,
     rgba(34, 255, 164, 0.54) 0%,
-    rgba(0, 0, 0, 1) 73%
+    #0c0c0c 73%
   );
 
   /* ie 10+ */
   background: -ms-radial-gradient(
     circle at 50% 50%,
     rgba(34, 255, 164, 0.54) 0%,
-    rgba(0, 0, 0, 1) 73%
+    #0c0c0c 73%
   );
 
   /* global 92%+ browsers support */
   background: radial-gradient(
     circle at 50% 50%,
     rgba(34, 255, 164, 0.54) 0%,
-    rgba(0, 0, 0, 1) 73%
+    #0c0c0c 73%
   );
 }
 

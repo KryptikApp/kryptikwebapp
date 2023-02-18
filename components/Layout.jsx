@@ -9,7 +9,7 @@ export default function Layout({ children }) {
   return (
     <div
       className={`min-h-screen ${themeLoading || isDark ? "dark" : ""} ${
-        themeLoading || isDark ? "bg-black" : "bg-white"
+        themeLoading || isDark ? "bg-[#0c0c0c]" : "bg-white"
       }`}
     >
       <Head>

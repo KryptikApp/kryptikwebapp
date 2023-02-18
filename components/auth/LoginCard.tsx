@@ -101,7 +101,7 @@ const LoginCard: NextPage = () => {
 
   return (
     <div className="dark:text-white">
-      <div className="bg-[#FBFDFD] dark:bg-gradient-to-br dark:to-[#0d0d0d] dark:from-black max-w-md mx-auto rounded-lg border border-solid dark:border-gray-800 border-gray-100 hover:dark:border-green-400 drop-shadow dark:text-white pt-2 px-2 pb-10 min-h-[280px]">
+      <div className="bg-[#FBFDFD] dark:bg-gradient-to-br dark:to-[#0d0d0d] dark:from-[#0c0c0c] max-w-md mx-auto rounded-lg border border-solid dark:border-gray-800 border-gray-100 hover:dark:border-green-400 drop-shadow dark:text-white pt-2 px-2 pb-10 min-h-[280px]">
         <div className="flex flex-row mt-1">
           <div className="w-10 my-auto">
             <img src="/kryptikBrand/kryptikEyez.png" className="rounded-full" />
