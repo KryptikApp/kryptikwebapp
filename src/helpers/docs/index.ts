@@ -137,15 +137,19 @@ export function getDocsByCategory(props: {
   fields?: string[];
   docEnum: DocTypeEnum;
   slugToExclude?: string;
+  maxCount?: number;
 }): DocType[] {
-  const { category, slugToExclude, fields, docEnum } = { ...props };
+  const { category, slugToExclude, fields, docEnum, maxCount } = { ...props };
   // TODO: examine efficiency if we call getalldocs this for every page
   const allDocs = getAllDocs({ docEnum: docEnum, fields: fields });
-  const recommendedDocs = allDocs.filter(
+  let recommendedDocs = allDocs.filter(
     (d) =>
       d.category.toLowerCase().trim() == category.toLowerCase().trim() &&
       (!slugToExclude ||
         d.slug.toLowerCase().trim() != slugToExclude.toLowerCase().trim())
   );
+  if (maxCount && recommendedDocs.length > maxCount) {
+    recommendedDocs = recommendedDocs.slice(0, maxCount);
+  }
   return recommendedDocs;
 }

@@ -95,17 +95,27 @@ const Sync: NextPage = () => {
           />
         </h1>
 
-        <p className="text-lg px-2">
-          This feature is{" "}
-          <span className="font-semibold">not yet supported</span>. In the
-          future, you will be able to{" "}
-          <span className="text-green-400">sync your wallet</span> across
-          devices via a simple QR code. For now, please use your{" "}
-          <span className="text-sky-500 dark:text-sky-400">
-            original device
-          </span>{" "}
-          to check your balance and make transactions.
-        </p>
+        <p className="text-lg px-2">Add a trusted device.</p>
+        {/* QR CODE */}
+        <div className="flex">
+          <div className="flex-1" />
+          <div className="flex-2">
+            <Canvas
+              text={toAddress}
+              options={{
+                level: "L",
+                margin: 2,
+                scale: 5,
+                width: 300,
+                color: {
+                  dark: "#000000",
+                  light: "#FFFFFF",
+                },
+              }}
+            />
+          </div>
+          <div className="flex-1" />
+        </div>
       </div>
 
       <div className="h-[12rem]">

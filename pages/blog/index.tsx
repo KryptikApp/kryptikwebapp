@@ -1,14 +1,9 @@
-import Link from "next/link";
-import Divider from "../../components/Divider";
-import DocCategoryPreview from "../../components/docs/docCategoryPreview";
-import Image from "next/image";
-
 import { getAllDocs } from "../../src/helpers/docs";
 import { DocType, DocTypeEnum } from "../../src/helpers/docs/types";
 import BlogFeature from "../../components/docs/blogFeature";
 import RecentDocCard from "../../components/docs/recentDocCard";
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DocListItemPreview from "../../components/docs/docListItemPreview";
 import { AiOutlineSearch } from "react-icons/ai";
 
@@ -44,6 +39,19 @@ export default function BlogHome({ allDocs }: Props) {
     // get suggestions
     searchArticles(newQuery);
   }
+
+  const articleContainerId = "articleResultsContainer";
+
+  useEffect(() => {
+    const articleContainer = document.getElementById(articleContainerId);
+    if (!articleContainer) {
+      return;
+    }
+    const initHeight = articleContainer.scrollHeight;
+    console.log("HEIGHT");
+    console.log(initHeight);
+    articleContainer.style.minHeight = `${initHeight}px`;
+  }, []);
 
   return (
     <div className="">
@@ -103,17 +111,28 @@ export default function BlogHome({ allDocs }: Props) {
                 </p>
               )}
             </div>
-            {showAll && (
-              <div className="grid grid-cols-1 gap-y-2">
-                {filteredDocs.map((doc: DocType, index: number) => (
-                  <DocListItemPreview
-                    doc={doc}
-                    key={index}
-                    baseUrl={"/blog/"}
-                  />
-                ))}
-              </div>
-            )}
+            <div id={articleContainerId}>
+              {showAll && (
+                <div className="grid grid-cols-1 gap-y-2">
+                  {filteredDocs.length != 0 ? (
+                    filteredDocs.map((doc: DocType, index: number) => (
+                      <DocListItemPreview
+                        baseUrl={baseBlogUrl}
+                        doc={doc}
+                        key={index}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-black dark:text-white">
+                      No results for{" "}
+                      <span className="text-blue-400 truncate ...">
+                        "{query}"
+                      </span>
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

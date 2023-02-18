@@ -55,14 +55,19 @@ export default function Post({ doc, recommendedDocs }: Props) {
             <DocContent content={doc.content} />
             {readNext.length != 0 && (
               <div className="my-8">
-                <h1 className="font-bold text-3xl text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-600 text-left">
-                  Keep Learning
-                </h1>
-                <hr className="mt-2 mb-4" />
+                <hr className="mt-2" />
+                <div className="mt-6 mb-8">
+                  <h1 className="font-bold text-3xl text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-600 text-left">
+                    Keep Reading
+                  </h1>
+                  <p className="text-md text-gray-700 dark:text-gray-200">
+                    Explore more ideas from the frontier of online ownership.
+                  </p>
+                </div>
                 <div className="flex flex-col space-y-4">
                   {readNext.map((doc: DocType, index: number) => (
                     <DocKeepReadingPreview
-                      baseUrl="/docs/"
+                      baseUrl="/blog/"
                       key={`keep reading preview ${index}`}
                       title={doc.title}
                       image={doc.image || undefined}
