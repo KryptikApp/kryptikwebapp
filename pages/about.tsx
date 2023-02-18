@@ -40,6 +40,17 @@ const About: NextPage = () => {
             <h1 className="text-5xl text-left font-bold sans mb-5">
               The <span className="">Kryptik</span> Wallet
             </h1>
+            {/* demo video */}
+            {/* <div>
+              <iframe
+                src="https://player.vimeo.com/video/800170803?h=312c376fda&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+                allow="autoplay; fullscreen; picture-in-picture"
+                width="640"
+                height="360"
+                className="w-[100%]"
+                allowFullScreen
+              ></iframe>
+            </div> */}
             <p className="leading-loose mb-2 text-xl text-justify dark:text-gray-400">
               Kryptik is a simple wallet that lets you save, send, and collect
               value across the internet. With Kryptik you can access a world of
@@ -149,14 +160,15 @@ const About: NextPage = () => {
             data={{
               datasets: [
                 {
-                  data: [500, 45000, 20000],
-                  backgroundColor: ["#c41230", "#6B6EF9", "#00FFA3"],
+                  data: [500, 45000, 20000, 8000],
+                  backgroundColor: ["#c41230", "#6B6EF9", "#00FFA3", "#FFFFFF"],
                 },
               ],
               labels: [
-                "Carnegie Mellon Research",
+                "Carnegie Mellon",
                 "Near Foundation",
                 "Solana Foundation",
+                "Web 3 Foundation",
               ],
             }}
             type="doughnut"
