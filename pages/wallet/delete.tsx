@@ -9,7 +9,7 @@ import NavProfile from "../../components/navbars/NavProfile";
 import { removeUserAndWallet } from "../../src/helpers/auth";
 
 const DeleteWallet: NextPage = () => {
-  const { authUser, loadingAuthUser, signInWithToken, setKryptikWallet } =
+  const { authUser, loadingAuthUser, signInWithToken, signOut } =
     useKryptikAuthContext();
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
@@ -21,8 +21,9 @@ const DeleteWallet: NextPage = () => {
     try {
       // delete user and local wallet
       await removeUserAndWallet();
+      signOut();
       // set wallet to default
-      setKryptikWallet(defaultWallet);
+
       toast.success("Wallet deleted.");
       router.push("/");
     } catch (e) {
