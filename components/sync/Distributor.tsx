@@ -44,6 +44,8 @@ const Distributor: NextPage = () => {
   channel
     // subscribe to scan messages
     .on("broadcast", { event: "scan" }, (payload) => {
+      console.log("Scan channel payload:");
+      console.log(payload);
       if (payload.newScanIndex && typeof (payload.newScanIndex == "number")) {
         setSyncPieceIndex(payload.newScanIndex);
       }
@@ -67,7 +69,6 @@ const Distributor: NextPage = () => {
       progressEnum != EnumProgress.Done &&
       !syncPieces
     ) {
-      console.log("hereee");
       setErrorText("Unable to sync. Failed to generate sync pieces.");
       return false;
     }
