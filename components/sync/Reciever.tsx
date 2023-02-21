@@ -64,7 +64,7 @@ const Reciever: NextPage = () => {
 
   /** Ensure sync action is allowed. */
   function isSyncSafe(): boolean {
-    if (walletStatus != WalletStatus.OutOfSync) {
+    if (walletStatus == WalletStatus.OutOfSync) {
       return true;
     }
     return false;
