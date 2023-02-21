@@ -108,6 +108,9 @@ const Security: NextPage = () => {
               </p>
             )}
             <LockWalletModal />
+            <Link href="../sync" className="text-sky-400">
+              Add new device
+            </Link>
           </div>
         )}
 
