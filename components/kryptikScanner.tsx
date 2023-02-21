@@ -34,7 +34,7 @@ export default function KryptikScanner(iprops: IProps) {
         <div className="w-[400px] max-w-[90vw] h-[400px] max-h-[80vh] rounded overflow-hidden">
           <ReactQrReader
             videoStyle={previewStyle}
-            constraints={{ facingMode: "user" }}
+            constraints={{ facingMode: "environment" }}
             className={"scale-150"}
             onResult={(data) => handleScan(data)}
           />
