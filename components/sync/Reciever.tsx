@@ -185,7 +185,6 @@ const Reciever: NextPage = () => {
         {progressEnum == EnumProgress.Start && (
           <div className="flex flex-col">
             <p>Sync your wallet. This will take around 60 seconds.</p>
-            <p>Allow camera access and syncing will begin.</p>
           </div>
         )}
         {/* scan */}
