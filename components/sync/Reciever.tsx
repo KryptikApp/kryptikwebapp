@@ -239,15 +239,15 @@ const Reciever: NextPage = () => {
             </p>
           </div>
         )}
-        {progressEnum == EnumProgress.Start ||
-          (progressEnum == EnumProgress.Done && (
-            <ButtonSync
-              clickHandler={incrementProgress}
-              text={buttonText}
-              color={buttonColor}
-              isDisabled={isLoading}
-            />
-          ))}
+        {(progressEnum == EnumProgress.Start ||
+          progressEnum == EnumProgress.Done) && (
+          <ButtonSync
+            clickHandler={incrementProgress}
+            text={buttonText}
+            color={buttonColor}
+            isDisabled={isLoading}
+          />
+        )}
       </div>
     </SyncCard>
   );
