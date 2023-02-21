@@ -34,7 +34,8 @@ export default async function handler(
     try {
       await updateProfileByUserId(profileInfo, userId);
     } catch (e) {
-      throw new Error("Unable to create share.");
+      console.log(e);
+      throw new Error("Unable to update profile.");
     }
     return res.status(200).json({ msg: "Share has been updated." });
   } catch (e: any) {
