@@ -113,11 +113,13 @@ const Distributor: NextPage = () => {
           );
           setValidationCode(newValidationCode);
           setButtonText("Validate");
-          channel.send({
-            type: "broadcast",
-            event: "stopScanning",
-            payload: { stopScanning: true },
-          });
+          channel
+            .send({
+              type: "broadcast",
+              event: "stopScanning",
+              payload: { stopScanning: true },
+            })
+            .then((e) => console.log("Stop scanning message sent."));
         } else {
           setProgressEnum(EnumProgress.ShowCode);
           console.log("hereee");
@@ -133,11 +135,13 @@ const Distributor: NextPage = () => {
       }
       case EnumProgress.Validate: {
         // indicate done
-        channel.send({
-          type: "broadcast",
-          event: "validation",
-          payload: { isValidated: true },
-        });
+        channel
+          .send({
+            type: "broadcast",
+            event: "validation",
+            payload: { isValidated: true },
+          })
+          .then((e) => console.log("validation broadcast sent."));
         setProgressPercent(100);
         setProgressEnum(EnumProgress.Done);
         setButtonText("Back to Wallet");

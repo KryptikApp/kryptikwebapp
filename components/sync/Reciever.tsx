@@ -70,6 +70,14 @@ const Reciever: NextPage = () => {
     return false;
   }
 
+  async function broadcastScan(newIndex: number) {
+    await channel.send({
+      type: "broadcast",
+      event: "scan",
+      payload: { newScanIndex: newIndex },
+    });
+  }
+
   async function assembleWallet() {
     setIsLoading(true);
     if (!authUser) {
@@ -112,11 +120,7 @@ const Reciever: NextPage = () => {
       case EnumProgress.ShowCode: {
         const newIndex = syncPieceIndex + 1;
         // indicate we can show new code
-        channel.send({
-          type: "broadcast",
-          event: "scan",
-          payload: { newScanIndex: newIndex },
-        });
+        broadcastScan(newIndex);
         setSyncPieceIndex(newIndex);
         break;
       }
