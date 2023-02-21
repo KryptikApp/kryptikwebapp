@@ -48,7 +48,7 @@
     "firebase": "^9.8.2",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^3.19.0",
-    "framer-motion": "^9.0.7",
+    "framer-motion": "8",
     "from-exponential": "^1.1.1",
     "graphql": "^16.5.0",
     "graphql-tag": "^2.12.6",
