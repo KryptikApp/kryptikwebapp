@@ -71,11 +71,13 @@ const Reciever: NextPage = () => {
   }
 
   async function broadcastScan(newIndex: number) {
-    await channel.send({
+    const res = await channel.send({
       type: "broadcast",
       event: "scan",
       payload: { newScanIndex: newIndex },
     });
+    console.log("Scan Message Status:");
+    console.log(res);
   }
 
   async function assembleWallet() {
