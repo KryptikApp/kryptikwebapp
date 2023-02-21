@@ -6,11 +6,11 @@ import { UserDB } from "../src/models/user";
 import { useKryptikAuth } from "../src/helpers/kryptikAuthHelper";
 import Web3Service from "../src/services/Web3Service";
 import { IWallet, WalletStatus } from "../src/models/KryptikWallet";
+import HDSeedLoop from "hdseedloop";
 
 interface IAuthContext {
   kryptikService: Web3Service;
   kryptikWallet: IWallet;
-  setKryptikWallet: (newWallet: IWallet) => void;
   // auth db funcs and vals
   authUser: UserDB | null;
   loadingAuthUser: boolean;
@@ -24,6 +24,7 @@ interface IAuthContext {
   updateCurrentUserKryptik: (user: UserDB) => void;
   walletStatus: WalletStatus;
   updateWalletStatus: (newStatus: WalletStatus) => void;
+  updateWallet: (seedloop: HDSeedLoop) => void;
   refreshUserAndWallet: () => void;
   refreshBalances: (wallet?: IWallet) => void;
   signOut: () => void;
@@ -33,7 +34,6 @@ interface IAuthContext {
 const kryptikAuthContext = createContext<IAuthContext>({
   kryptikService: new Web3Service(),
   kryptikWallet: defaultWallet,
-  setKryptikWallet: (newWallet: IWallet) => {},
   // auth db funcs and vals
   authUser: null,
   loadingAuthUser: false,
@@ -51,6 +51,7 @@ const kryptikAuthContext = createContext<IAuthContext>({
   refreshBalances: (wallet?: IWallet) => {},
   walletStatus: defaultWallet.status,
   updateWalletStatus: (newStatus: WalletStatus) => {},
+  updateWallet: (seedloop: HDSeedLoop) => {},
 });
 
 export function KryptikAuthProvider(props: any) {
