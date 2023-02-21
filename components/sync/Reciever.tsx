@@ -110,12 +110,6 @@ const Reciever: NextPage = () => {
         break;
       }
       case EnumProgress.ShowCode: {
-        // ensure sync pieces are available
-        if (!syncPieces) {
-          setProgressEnum(EnumProgress.Error);
-
-          return;
-        }
         const newIndex = syncPieceIndex + 1;
         // indicate we can show new code
         channel.send({
