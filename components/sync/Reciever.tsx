@@ -1,3 +1,4 @@
+import { RealtimeChannel } from "@supabase/supabase-js";
 import HDSeedLoop from "hdseedloop";
 import { NextPage } from "next";
 import { useQRCode } from "next-qrcode";
@@ -33,36 +34,13 @@ const Reciever: NextPage = () => {
   const [buttonColor, setButtonColor] = useState(ColorEnum.blue);
   const [errorText, setErrorText] = useState("Unable to sync.");
   const [syncPieces, setSyncPieces] = useState<string[] | null>(null);
-  const [syncPieceIndex, setSyncPieceIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [totalSteps, setTotalSteps] = useState(0);
   const [validationCode, setValidationCode] = useState("");
   const [recoveredSeedloop, setRecoveredSeedloop] =
     useState<HDSeedLoop | null>();
-
-  // Create channels with the same name for both the broadcasting and receiving clients.
-  const channel = supabase.channel(`sync:${authUser?.uid}`);
-  // Subscribe registers your client with the server
-  channel
-    // Listen to validation messages.
-    .on("broadcast", { event: "validation" }, (payload) => {
-      if (payload.isValidated == true) {
-        incrementProgress();
-      }
-    })
-    // Listen to stop scanning messages.
-    .on("broadcast", { event: "stopScanning" }, (payload) => {
-      setProgressEnum(EnumProgress.Validate);
-      assembleWallet();
-      setButtonText("Validate");
-    })
-    .subscribe((status) => {
-      console.log("subscription status receiver:");
-      console.log(status);
-      if (status === "SUBSCRIBED") {
-        // console.log("Subscribed to sync channel.");
-      }
-    });
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+  let syncPieceIndex = 0;
 
   /** Ensure sync action is allowed. */
   function isSyncSafe(): boolean {
@@ -73,6 +51,7 @@ const Reciever: NextPage = () => {
   }
 
   async function broadcastScan(newIndex: number) {
+    if (!channel) return;
     const res = await channel.send({
       type: "broadcast",
       event: "scan",
@@ -136,10 +115,12 @@ const Reciever: NextPage = () => {
         const newIndex = syncPieceIndex + 1;
         // indicate we can show new code
         syncPieces.push(uri);
+        console.log("uri:");
+        console.log(uri);
         broadcastScan(newIndex).then(() => {
           console.log(`Scan message sent with index: ${newIndex}`);
         });
-        setSyncPieceIndex(newIndex);
+        syncPieceIndex = newIndex;
         break;
       }
       case EnumProgress.Validate: {
@@ -169,9 +150,10 @@ const Reciever: NextPage = () => {
   }
 
   function cancelSync() {
+    console.log("canceling sync. User initiated.");
     setSyncPieces([]);
     setButtonText("Start");
-    setSyncPieceIndex(0);
+    syncPieceIndex = 0;
     setProgressEnum(EnumProgress.Start);
     setRecoveredSeedloop(null);
     setTotalSteps(0);
@@ -186,7 +168,32 @@ const Reciever: NextPage = () => {
     setTotalSteps(syncPieces.length + 1 + 1);
   }, [syncPieces]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    // Create channels with the same name for both the broadcasting and receiving clients.
+    const newChannel = supabase.channel(`sync:${authUser?.uid}`);
+    // Subscribe registers your client with the server
+    newChannel
+      // Listen to validation messages.
+      .on("broadcast", { event: "validation" }, (payload) => {
+        if (payload.isValidated == true) {
+          incrementProgress();
+        }
+      })
+      // Listen to stop scanning messages.
+      .on("broadcast", { event: "stopScanning" }, (payload) => {
+        setProgressEnum(EnumProgress.Validate);
+        assembleWallet();
+        setButtonText("Validate");
+      })
+      .subscribe((status) => {
+        console.log("subscription status receiver:");
+        console.log(status);
+        if (status === "SUBSCRIBED") {
+          // console.log("Subscribed to sync channel.");
+        }
+      });
+    setChannel(newChannel);
+  }, []);
 
   return (
     <SyncCard

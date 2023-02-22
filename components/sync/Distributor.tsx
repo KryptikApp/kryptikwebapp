@@ -1,3 +1,4 @@
+import { RealtimeChannel } from "@supabase/supabase-js";
 import { NextPage } from "next";
 import { useQRCode } from "next-qrcode";
 import { useRouter } from "next/router";
@@ -30,33 +31,13 @@ const Distributor: NextPage = () => {
   const [buttonColor, setButtonColor] = useState(ColorEnum.blue);
   const [errorText, setErrorText] = useState("Unable to sync.");
   const [syncPieces, setSyncPieces] = useState<string[] | null>(null);
-  const [syncPieceIndex, setSyncPieceIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [totalSteps, setTotalSteps] = useState(0);
   const [validationCode, setValidationCode] = useState("");
   const [qrText, setQrText] = useState("");
   const { Canvas } = useQRCode();
-
-  // Create channels with the same name for both the broadcasting and receiving clients.
-  const channel = supabase.channel(`sync:${authUser?.uid}`);
-
-  // Register your client with the server
-  channel
-    // subscribe to scan messages
-    .on("broadcast", { event: "scan" }, (payload) => {
-      console.log("Scan channel payload:");
-      console.log(payload);
-      if (payload.newScanIndex && typeof (payload.newScanIndex == "number")) {
-        setSyncPieceIndex(payload.newScanIndex);
-      }
-    })
-    .subscribe((status) => {
-      console.log("subscription status distributor::");
-      console.log(status);
-      if (status === "SUBSCRIBED") {
-        // console.log("Subscribed to sync channel.");
-      }
-    });
+  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+  let syncPieceIndex = 0;
 
   /** Ensure sync action is allowed. */
   function isSyncSafe(): boolean {
@@ -106,6 +87,11 @@ const Distributor: NextPage = () => {
         }
         const newIndex = syncPieceIndex + 1;
         if (newIndex == syncPieces.length) {
+          if (!channel) {
+            setProgressEnum(EnumProgress.Error);
+            setErrorText("Unable to sync. Message channel not available.");
+            return;
+          }
           console.log("matched!!!");
           // move onto validation
           setProgressEnum(EnumProgress.Validate);
@@ -132,10 +118,15 @@ const Distributor: NextPage = () => {
         // update progress/step indicators
         const newProgressPercent = ((1 + newIndex) / totalSteps) * 100;
         setProgressPercent(newProgressPercent);
-        setSyncPieceIndex(newIndex);
+        syncPieceIndex = newIndex;
         break;
       }
       case EnumProgress.Validate: {
+        if (!channel) {
+          setProgressEnum(EnumProgress.Error);
+          setErrorText("Unable to sync. Message channel not available.");
+          return;
+        }
         // indicate done
         channel
           .send({
@@ -202,7 +193,27 @@ const Distributor: NextPage = () => {
   }, [syncPieces]);
 
   useEffect(() => {
-    // pass for now
+    // Create channels with the same name for both the broadcasting and receiving clients.
+    const newChannel = supabase.channel(`sync:${authUser?.uid}`);
+
+    // Register your client with the server
+    newChannel
+      // subscribe to scan messages
+      .on("broadcast", { event: "scan" }, (payload) => {
+        console.log("Scan channel payload:");
+        console.log(payload);
+        if (payload.newScanIndex && typeof (payload.newScanIndex == "number")) {
+          syncPieceIndex = payload.newScanIndex;
+        }
+      })
+      .subscribe((status) => {
+        console.log("subscription status distributor::");
+        console.log(status);
+        if (status === "SUBSCRIBED") {
+          // console.log("Subscribed to sync channel.");
+        }
+      });
+    setChannel(newChannel);
   }, []);
 
   return (
