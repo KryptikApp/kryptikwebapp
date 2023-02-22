@@ -1,14 +1,9 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
 import HDSeedLoop from "hdseedloop";
 import { NextPage } from "next";
-import { useQRCode } from "next-qrcode";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import {
-  assembleVault,
-  createValidationCode,
-  createVaultPieces,
-} from "../../src/handlers/sync";
+import { assembleVault, createValidationCode } from "../../src/handlers/sync";
 import { supabase } from "../../src/helpers/supabaseHelper";
 import { ColorEnum } from "../../src/helpers/utils";
 import { WalletStatus } from "../../src/models/KryptikWallet";
@@ -42,8 +37,9 @@ const Reciever: NextPage = () => {
   const [recoveredSeedloop, setRecoveredSeedloop] =
     useState<HDSeedLoop | null>();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
-  const [syncPieceIndex, setSyncPieceIndex] = useState(0);
   const [lastScanText, setLastScanText] = useState("");
+
+  let syncPieceIndex = 0;
 
   /** Ensure sync action is allowed. */
   function isSyncSafe(): boolean {
@@ -125,7 +121,7 @@ const Reciever: NextPage = () => {
           console.log(`Scan message sent with index: ${newIndex}`);
         });
         setLastScanText(uri);
-        setSyncPieceIndex(newIndex);
+        syncPieceIndex = newIndex;
         break;
       }
       case EnumProgress.Validate: {
@@ -158,7 +154,7 @@ const Reciever: NextPage = () => {
     console.log("canceling sync. User initiated.");
     setSyncPieces([]);
     setButtonText("Start");
-    setSyncPieceIndex(0);
+    syncPieceIndex = 0;
     setProgressEnum(EnumProgress.Start);
     setRecoveredSeedloop(null);
     setTotalSteps(0);

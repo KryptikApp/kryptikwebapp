@@ -200,7 +200,7 @@ const Distributor: NextPage = () => {
       return null;
     }
     // update progress state
-    const newProgressPercent = (1 / newPieces.length + 2) * 100;
+    const newProgressPercent = (1 / (newPieces.length + 2)) * 100;
     setProgressPercent(newProgressPercent);
     setProgressEnum(EnumProgress.ShowCode);
     // set initial qr code
