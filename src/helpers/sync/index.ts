@@ -20,17 +20,12 @@ export async function getTempSyncKey(): Promise<TempSyncKey | null> {
 }
 
 /** Create sync session. returns temp sync key. */
-export async function createTempSyncKey(
-  totalToPair: number
-): Promise<TempSyncKey | null> {
-  const params = {
-    totalToPair: totalToPair,
-  };
+export async function createTempSyncKey(): Promise<TempSyncKey | null> {
   // try to fetch share from server
   try {
     const res = await KryptikFetch("/api/sync/create", {
       method: "POST",
-      body: JSON.stringify(params),
+
       timeout: 8000,
       headers: { "Content-Type": "application/json" },
     });
