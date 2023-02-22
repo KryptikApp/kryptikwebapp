@@ -181,7 +181,9 @@ const Reciever: NextPage = () => {
         }
       })
       // Listen to stop scanning messages.
-      .on("broadcast", { event: "stopScanning" }, (payload) => {})
+      .on("broadcast", { event: "stopScanning" }, (data) => {
+        setStopScanrequested(true);
+      })
       .subscribe((status) => {
         console.log("subscription status receiver:");
         console.log(status);

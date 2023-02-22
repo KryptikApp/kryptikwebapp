@@ -152,7 +152,7 @@ const Distributor: NextPage = () => {
           setButtonText("Next");
         }
         setSyncPieceIndex(newIndex);
-        setProgressPercent((newIndex + 1 / totalSteps) * 100);
+        setProgressPercent(newIndex + 1 / totalSteps);
         break;
       }
       case EnumProgress.Validate: {
@@ -200,7 +200,7 @@ const Distributor: NextPage = () => {
       return null;
     }
     // update progress state
-    const newProgressPercent = (1 / (newPieces.length + 2)) * 100;
+    const newProgressPercent = 1 / (newPieces.length + 2);
     setProgressPercent(newProgressPercent);
     setProgressEnum(EnumProgress.ShowCode);
     // set initial qr code
