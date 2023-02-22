@@ -79,14 +79,11 @@ export async function createVaultPieces(
       order: index,
       type: "share",
     };
-    // encrypt share
-    const sharePieceEncrypted: string = encryptText(
-      tempKey,
-      stringifySyncPiece(sharePiece)
-    ).ciphertext;
+    // encrypt data
+    sharePiece.data = encryptText(tempKey, sharePiece.data).ciphertext;
     index += 1;
     // add to result
-    piecesToReturn.push(sharePieceEncrypted);
+    piecesToReturn.push(stringifySyncPiece(sharePiece));
   }
   // encrypt seedloop pieces
   for (const seedloopSubString of seedloopStrings) {
@@ -95,14 +92,11 @@ export async function createVaultPieces(
       order: index,
       type: "seedloopSerializedCipher",
     };
-    // encrypt share
-    const sharePieceEncrypted: string = encryptText(
-      tempKey,
-      stringifySyncPiece(seedloopPiece)
-    ).ciphertext;
+    // uncomment to encrypt data with temp sync key
+    // seedloopPiece.data = encryptText(tempKey, seedloopSubString).ciphertext;
     index += 1;
     // add to result
-    piecesToReturn.push(sharePieceEncrypted);
+    piecesToReturn.push(stringifySyncPiece(seedloopPiece));
   }
   // ensure return array length matches expected length
   if (piecesToReturn.length != totalToPair) {
@@ -178,11 +172,6 @@ export async function assembleVault(
   let seedloopPlainText = "";
   let sharePlainText = "";
   try {
-    // decrypt seedloop ciphertext piece
-    seedloopPlainText = decryptText(
-      decryptionKey,
-      seedloopCypherText
-    ).plaintext;
     // decrypt seedloop piece
     sharePlainText = decryptText(decryptionKey, shareCypherText).plaintext;
   } catch (e) {
@@ -197,7 +186,7 @@ export async function assembleVault(
   //create vault
   const vaultName = createVaultName(uid);
   const newVault: VaultContents = {
-    seedloopSerlializedCipher: seedloopPlainText,
+    seedloopSerlializedCipher: seedloopCypherText,
     vaultVersion: 0,
     localShare: sharePlainText,
     createdTime: Date.now(),

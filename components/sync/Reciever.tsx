@@ -33,11 +33,12 @@ const Reciever: NextPage = () => {
   const [totalSteps, setTotalSteps] = useState(0);
   const [validationCode, setValidationCode] = useState("");
   const [stopScanRequested, setStopScanRequested] = useState(false);
-  const [validationRequested, setValidationRequested] = useState(false);
+  const [validationDone, setValidationDone] = useState(false);
   const [recoveredSeedloop, setRecoveredSeedloop] =
     useState<HDSeedLoop | null>();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const [lastScanText, setLastScanText] = useState("");
+  const [indexToShow, setIndexToShow] = useState(0);
 
   let syncPieceIndex = 0;
 
@@ -62,6 +63,7 @@ const Reciever: NextPage = () => {
 
   async function assembleWallet() {
     setIsLoading(true);
+    setProgressEnum(EnumProgress.Validate);
     if (!authUser) {
       setIsLoading(false);
       setProgressEnum(EnumProgress.Error);
@@ -81,6 +83,7 @@ const Reciever: NextPage = () => {
       setValidationCode(newValidationCode);
       setIsLoading(false);
     } catch (e) {
+      console.error(e);
       setProgressEnum(EnumProgress.Error);
       setErrorText("Failed to assemble wallet vault. Unable to complete sync.");
       setIsLoading(false);
@@ -122,6 +125,7 @@ const Reciever: NextPage = () => {
         });
         setLastScanText(uri);
         syncPieceIndex = newIndex;
+        setIndexToShow(syncPieceIndex);
         break;
       }
       case EnumProgress.Validate: {
@@ -151,7 +155,7 @@ const Reciever: NextPage = () => {
   }
 
   function cancelSync() {
-    console.log("canceling sync. User initiated.");
+    console.log("Canceling sync. User initiated.");
     setSyncPieces([]);
     setButtonText("Start");
     syncPieceIndex = 0;
@@ -177,7 +181,7 @@ const Reciever: NextPage = () => {
       // Listen to validation messages.
       .on("broadcast", { event: "validation" }, (data) => {
         if (data.payload.isValidated == true) {
-          setValidationRequested(true);
+          setValidationDone(true);
         }
       })
       // Listen to stop scanning messages.
@@ -197,15 +201,14 @@ const Reciever: NextPage = () => {
   }, []);
 
   useEffect(() => {
-    if (validationRequested) {
-      setProgressEnum(EnumProgress.Validate);
-      assembleWallet();
-      setButtonText("Validate");
+    if (validationDone) {
+      incrementProgress();
     }
-  }, [validationRequested]);
+  }, [validationDone]);
   useEffect(() => {
     if (stopScanRequested) {
-      incrementProgress();
+      assembleWallet();
+      setButtonText("Validate");
     }
   }, [stopScanRequested]);
 
@@ -235,7 +238,7 @@ const Reciever: NextPage = () => {
                   onScan={incrementProgress}
                 />
                 <p className="text-sm text-sky-500 mt-4">
-                  Scanned {syncPieceIndex} codes.
+                  Scanned {indexToShow} codes.
                 </p>
               </div>
               <div className="flex-1" />
