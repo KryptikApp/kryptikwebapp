@@ -65,6 +65,11 @@ export async function createVaultPieces(
     tempKey,
     vaultContents.remoteShare2
   ).ciphertext;
+  if (
+    decryptText(tempKey, shareString).plaintext != vaultContents.remoteShare2
+  ) {
+    throw new Error("Decrypted share does not match plaintext.");
+  }
   // compute number of peces from each string
   const numSharePieces: number = Math.ceil(shareString.length / maxStringSize);
   const numSeedloopPieces: number = Math.ceil(
@@ -141,6 +146,8 @@ export async function assembleVault(
   });
   // match pieces
   for (const piece of syncPieces) {
+    console.log("processing");
+    console.log(piece);
     switch (piece.type) {
       case "share": {
         // ensure order safety
