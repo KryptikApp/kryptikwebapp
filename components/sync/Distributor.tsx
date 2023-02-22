@@ -2,7 +2,7 @@ import { RealtimeChannel } from "@supabase/supabase-js";
 import { NextPage } from "next";
 import { useQRCode } from "next-qrcode";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   createValidationCode,
   createVaultPieces,
@@ -22,6 +22,12 @@ enum EnumProgress {
   Error = 4,
 }
 
+type RealTimePayload = {
+  [key: string]: any;
+  type: "broadcast";
+  event: string;
+};
+
 const Distributor: NextPage = () => {
   const router = useRouter();
   const { walletStatus, authUser, kryptikWallet } = useKryptikAuthContext();
@@ -31,13 +37,15 @@ const Distributor: NextPage = () => {
   const [buttonColor, setButtonColor] = useState(ColorEnum.blue);
   const [errorText, setErrorText] = useState("Unable to sync.");
   const [syncPieces, setSyncPieces] = useState<string[] | null>(null);
+  const [syncPieceIndex, setSyncPieceIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [totalSteps, setTotalSteps] = useState(0);
   const [validationCode, setValidationCode] = useState("");
+  const [mostRecentPayload, setMostRecentPayload] =
+    useState<RealTimePayload | null>(null);
   const [qrText, setQrText] = useState("");
   const { Canvas } = useQRCode();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
-  let syncPieceIndex = 0;
 
   /** Ensure sync action is allowed. */
   function isSyncSafe(): boolean {
@@ -70,7 +78,7 @@ const Distributor: NextPage = () => {
     console.log("canceling sync. User initiated.");
     setSyncPieces([]);
     setButtonText("Start");
-    syncPieceIndex = 0;
+    setSyncPieceIndex(0);
     setProgressEnum(EnumProgress.Start);
     setTotalSteps(0);
   }
@@ -81,19 +89,29 @@ const Distributor: NextPage = () => {
       setProgressPercent(0);
       return;
     }
+    console.log("running switch statement with enum and text:");
+    console.log(progressEnum);
+    console.log(buttonText);
     switch (progressEnum) {
       case EnumProgress.Start: {
-        generateSyncPieces();
+        console.log("STAGE 0");
+        if (!syncPieces) {
+          // gnerate sync pieces
+          generateSyncPieces();
+        }
         break;
       }
       case EnumProgress.ShowCode: {
+        console.log("STAGE 1");
+        console.log("INDEX:");
+        console.log(syncPieceIndex);
+        const newIndex = syncPieceIndex;
         // ensure sync pieces are available
         if (!syncPieces) {
           setProgressEnum(EnumProgress.Error);
           setProgressPercent(0);
           return;
         }
-        const newIndex = syncPieceIndex + 1;
         if (newIndex == syncPieces.length) {
           if (!channel) {
             setProgressEnum(EnumProgress.Error);
@@ -119,14 +137,22 @@ const Distributor: NextPage = () => {
         } else {
           setProgressEnum(EnumProgress.ShowCode);
           console.log("hereee");
-          setQrText(syncPieces[newIndex]);
-          // show next code
+          console.log("new qr code:");
+          const newQrText = syncPieces[newIndex];
+          console.log(newQrText);
+          // ensure new code has text
+          if (newQrText == "") {
+            console.warn("empty qr text.");
+            setProgressEnum(EnumProgress.Error);
+            setErrorText("Unable to sync. Empty qr code text.");
+            return;
+          }
+          setQrText(newQrText);
+          // button should display 'next'
           setButtonText("Next");
         }
-        // update progress/step indicators
-        const newProgressPercent = ((1 + newIndex) / totalSteps) * 100;
-        setProgressPercent(newProgressPercent);
-        syncPieceIndex = newIndex;
+        setSyncPieceIndex(newIndex);
+        setProgressPercent((newIndex + 1 / totalSteps) * 100);
         break;
       }
       case EnumProgress.Validate: {
@@ -159,10 +185,6 @@ const Distributor: NextPage = () => {
         break;
       }
     }
-    // if error, progress should be zero
-    if (progressEnum == EnumProgress.Error) {
-      setProgressPercent(0);
-    }
   }
 
   async function generateSyncPieces(): Promise<string[] | null> {
@@ -173,15 +195,15 @@ const Distributor: NextPage = () => {
     const newPieces = await createVaultPieces(authUser);
     // ensure sync pieces are available
     if (!newPieces) {
-      console.log("hereeee");
       setProgressEnum(EnumProgress.Error);
       setProgressPercent(0);
       return null;
     }
     // update progress state
-    const newProgressPercent = (1 / newPieces.length) * 100;
+    const newProgressPercent = (1 / newPieces.length + 2) * 100;
     setProgressPercent(newProgressPercent);
     setProgressEnum(EnumProgress.ShowCode);
+    // set initial qr code
     setQrText(newPieces[0]);
     setButtonText("Next");
     setIsLoading(false);
@@ -196,28 +218,20 @@ const Distributor: NextPage = () => {
     }
     // total steps = number of sync pieces + 1 for start + 1 for validation
     setTotalSteps(syncPieces.length + 1 + 1);
-    console.log("TOTAL STEPS:");
-    console.log(syncPieces.length + 1 + 1);
   }, [syncPieces]);
 
   useEffect(() => {
     // Create channels with the same name for both the broadcasting and receiving clients.
     const newChannel = supabase.channel(`sync:${authUser?.uid}`);
-
     // Register your client with the server
     newChannel
       // subscribe to scan messages
-      .on("broadcast", { event: "scan" }, (payload) => {
+      .on("broadcast", { event: "scan" }, (data) => {
         console.log("Scan channel payload:");
-        console.log(payload);
-        if (
-          payload.newScanIndex &&
-          syncPieces &&
-          typeof (payload.newScanIndex == "number")
-        ) {
-          syncPieceIndex = payload.newScanIndex;
-          setQrText(syncPieces[payload.newScanIndex]);
-        }
+        console.log(data);
+        console.log("setting index....");
+        setMostRecentPayload(data);
+        setSyncPieceIndex(data.payload.newScanIndex);
       })
       .subscribe((status) => {
         console.log("subscription status distributor::");
@@ -228,6 +242,13 @@ const Distributor: NextPage = () => {
       });
     setChannel(newChannel);
   }, []);
+
+  useEffect(() => {
+    if (progressEnum == EnumProgress.ShowCode) {
+      console.log("RUNNING USE EFFECT BASED ON INDEX");
+      incrementProgress();
+    }
+  }, [syncPieceIndex]);
 
   return (
     <SyncCard
@@ -263,6 +284,9 @@ const Distributor: NextPage = () => {
                     },
                   }}
                 />
+                <p className="text-sm text-blue-500 mt-4">
+                  Scanned {syncPieceIndex} codes.
+                </p>
               </div>
               <div className="flex-1" />
             </div>

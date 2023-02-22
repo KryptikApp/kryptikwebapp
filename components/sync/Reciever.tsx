@@ -37,10 +37,13 @@ const Reciever: NextPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalSteps, setTotalSteps] = useState(0);
   const [validationCode, setValidationCode] = useState("");
+  const [stopScanRequested, setStopScanrequested] = useState(false);
+  const [validationRequested, setValidationRequested] = useState(false);
   const [recoveredSeedloop, setRecoveredSeedloop] =
     useState<HDSeedLoop | null>();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
-  let syncPieceIndex = 0;
+  const [syncPieceIndex, setSyncPieceIndex] = useState(0);
+  const [lastScanText, setLastScanText] = useState("");
 
   /** Ensure sync action is allowed. */
   function isSyncSafe(): boolean {
@@ -112,15 +115,17 @@ const Reciever: NextPage = () => {
           setErrorText("Unable to scan. Expected uri on callback.");
           return;
         }
+        if (uri == lastScanText) {
+          return;
+        }
         const newIndex = syncPieceIndex + 1;
         // indicate we can show new code
         syncPieces.push(uri);
-        console.log("uri:");
-        console.log(uri);
         broadcastScan(newIndex).then(() => {
           console.log(`Scan message sent with index: ${newIndex}`);
         });
-        syncPieceIndex = newIndex;
+        setLastScanText(uri);
+        setSyncPieceIndex(newIndex);
         break;
       }
       case EnumProgress.Validate: {
@@ -153,7 +158,7 @@ const Reciever: NextPage = () => {
     console.log("canceling sync. User initiated.");
     setSyncPieces([]);
     setButtonText("Start");
-    syncPieceIndex = 0;
+    setSyncPieceIndex(0);
     setProgressEnum(EnumProgress.Start);
     setRecoveredSeedloop(null);
     setTotalSteps(0);
@@ -174,17 +179,13 @@ const Reciever: NextPage = () => {
     // Subscribe registers your client with the server
     newChannel
       // Listen to validation messages.
-      .on("broadcast", { event: "validation" }, (payload) => {
-        if (payload.isValidated == true) {
-          incrementProgress();
+      .on("broadcast", { event: "validation" }, (data) => {
+        if (data.payload.isValidated == true) {
+          setValidationRequested(true);
         }
       })
       // Listen to stop scanning messages.
-      .on("broadcast", { event: "stopScanning" }, (payload) => {
-        setProgressEnum(EnumProgress.Validate);
-        assembleWallet();
-        setButtonText("Validate");
-      })
+      .on("broadcast", { event: "stopScanning" }, (payload) => {})
       .subscribe((status) => {
         console.log("subscription status receiver:");
         console.log(status);
@@ -194,6 +195,20 @@ const Reciever: NextPage = () => {
       });
     setChannel(newChannel);
   }, []);
+
+  useEffect(() => {
+    if (validationRequested) {
+      setProgressEnum(EnumProgress.Validate);
+      assembleWallet();
+      setButtonText("Validate");
+    }
+  }, [validationRequested]);
+  useEffect(() => {
+    if (stopScanRequested) {
+      incrementProgress();
+    }
+  }, []);
+  useEffect(() => {}, [stopScanRequested]);
 
   return (
     <SyncCard
@@ -220,12 +235,12 @@ const Reciever: NextPage = () => {
                   show={progressEnum == EnumProgress.ShowCode}
                   onScan={incrementProgress}
                 />
+                <p className="text-sm text-sky-500 mt-4">
+                  Scanned {syncPieceIndex} codes.
+                </p>
               </div>
               <div className="flex-1" />
             </div>
-            <p className="text-sm text-gray-500">
-              Scanned {syncPieceIndex} codes.
-            </p>
           </div>
         )}
         {/* validate */}
