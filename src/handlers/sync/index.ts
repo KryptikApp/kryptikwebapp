@@ -122,8 +122,6 @@ export async function assembleVault(
   if (vaultExists(uid)) {
     throw new Error("Vault already exists on device.");
   }
-  let sharePiece: ISyncPiece | null = null;
-  let seedloopPiece: ISyncPiece | null = null;
   const syncPieces: ISyncPiece[] = stringPieces.map((p) => JSON.parse(p));
   if (
     syncPieces.length == 0 ||
@@ -151,7 +149,7 @@ export async function assembleVault(
     switch (piece.type) {
       case "share": {
         // ensure order safety
-        if (piece.order < lastSeedloopPieceIndex) {
+        if (piece.order < lastSharePieceIndex) {
           throw new Error("Share sync pieces out of order.");
         }
         shareCypherText.concat(piece.data);
