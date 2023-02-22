@@ -66,6 +66,14 @@ const Distributor: NextPage = () => {
     return true;
   }
 
+  function cancelSync() {
+    console.log("canceling sync. User initiated.");
+    setSyncPieces([]);
+    setButtonText("Start");
+    syncPieceIndex = 0;
+    setProgressEnum(EnumProgress.Start);
+    setTotalSteps(0);
+  }
   function incrementProgress() {
     const isSafe: boolean = isSyncSafe();
     if (!isSafe) {
@@ -202,8 +210,13 @@ const Distributor: NextPage = () => {
       .on("broadcast", { event: "scan" }, (payload) => {
         console.log("Scan channel payload:");
         console.log(payload);
-        if (payload.newScanIndex && typeof (payload.newScanIndex == "number")) {
+        if (
+          payload.newScanIndex &&
+          syncPieces &&
+          typeof (payload.newScanIndex == "number")
+        ) {
           syncPieceIndex = payload.newScanIndex;
+          setQrText(syncPieces[payload.newScanIndex]);
         }
       })
       .subscribe((status) => {
@@ -280,15 +293,27 @@ const Distributor: NextPage = () => {
             <p>If the error persists, contact support.</p>
           </div>
         )}
-        <div className="mt-8">
-          <ButtonSync
-            clickHandler={incrementProgress}
-            text={buttonText}
-            color={buttonColor}
-            isDisabled={isLoading}
-            isLoading={isLoading}
-          />
-        </div>
+        {progressEnum == EnumProgress.ShowCode && (
+          <div>
+            <p
+              className="text-center text-md hover:cursor-pointer text-gray-400 dark:text-gray-500"
+              onClick={cancelSync}
+            >
+              Exit
+            </p>
+          </div>
+        )}
+        {progressEnum == EnumProgress.ShowCode && (
+          <div className="mt-8">
+            <ButtonSync
+              clickHandler={incrementProgress}
+              text={buttonText}
+              color={buttonColor}
+              isDisabled={isLoading}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
       </div>
     </SyncCard>
   );
