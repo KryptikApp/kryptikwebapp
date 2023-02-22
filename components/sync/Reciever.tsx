@@ -32,7 +32,7 @@ const Reciever: NextPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [totalSteps, setTotalSteps] = useState(0);
   const [validationCode, setValidationCode] = useState("");
-  const [stopScanRequested, setStopScanrequested] = useState(false);
+  const [stopScanRequested, setStopScanRequested] = useState(false);
   const [validationRequested, setValidationRequested] = useState(false);
   const [recoveredSeedloop, setRecoveredSeedloop] =
     useState<HDSeedLoop | null>();
@@ -182,7 +182,9 @@ const Reciever: NextPage = () => {
       })
       // Listen to stop scanning messages.
       .on("broadcast", { event: "stopScanning" }, (data) => {
-        setStopScanrequested(true);
+        console.log("Stop scanning message:");
+        console.log(data);
+        setStopScanRequested(true);
       })
       .subscribe((status) => {
         console.log("subscription status receiver:");
@@ -205,8 +207,7 @@ const Reciever: NextPage = () => {
     if (stopScanRequested) {
       incrementProgress();
     }
-  }, []);
-  useEffect(() => {}, [stopScanRequested]);
+  }, [stopScanRequested]);
 
   return (
     <SyncCard
