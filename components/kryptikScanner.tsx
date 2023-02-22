@@ -1,8 +1,4 @@
-import Image from "next/image";
-import { Fragment, useState } from "react";
 import { QrReader as ReactQrReader } from "react-qr-reader";
-import { ColorEnum } from "../src/helpers/utils";
-import Button from "./buttons/Button";
 
 /**
  * Types

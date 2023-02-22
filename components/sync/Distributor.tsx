@@ -2,7 +2,7 @@ import { RealtimeChannel } from "@supabase/supabase-js";
 import { NextPage } from "next";
 import { useQRCode } from "next-qrcode";
 import { useRouter } from "next/router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createValidationCode,
   createVaultPieces,
