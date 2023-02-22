@@ -80,6 +80,7 @@ const Distributor: NextPage = () => {
     setButtonText("Start");
     setSyncPieceIndex(0);
     setProgressEnum(EnumProgress.Start);
+    setProgressPercent(0);
     setTotalSteps(0);
   }
   function incrementProgress() {
