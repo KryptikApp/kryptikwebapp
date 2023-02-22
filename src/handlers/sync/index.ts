@@ -54,7 +54,17 @@ export async function createVaultPieces(
 
   const maxStringSize: number = 200;
   const seedloopString: string = vaultContents.vault.seedloopSerlializedCipher;
-  const shareString: string = vaultContents.remoteShare2;
+  //create temporary encryption key
+  const tempKey: TempSyncKey | null = await createTempSyncKey();
+  if (!tempKey) {
+    console.warn("Unable to create temp sync key with the given id.");
+    return null;
+  }
+  // encrypt new share
+  const shareString: string = encryptText(
+    tempKey,
+    vaultContents.remoteShare2
+  ).ciphertext;
   // compute number of peces from each string
   const numSharePieces: number = Math.ceil(shareString.length / maxStringSize);
   const numSeedloopPieces: number = Math.ceil(
@@ -62,15 +72,8 @@ export async function createVaultPieces(
   );
   // create encryption key
   const totalToPair: number = numSharePieces + numSeedloopPieces;
-  const tempKey: TempSyncKey | null = await createTempSyncKey(totalToPair);
-  if (!tempKey) {
-    console.warn("Unable to create temp sync key with the given id.");
-    return null;
-  }
-
   const shareStrings: string[] = splitString(shareString, maxStringSize);
   const seedloopStrings: string[] = splitString(seedloopString, maxStringSize);
-
   let index: number = 0;
   // encrypt share pieces
   for (const shareSubString of shareStrings) {
@@ -79,8 +82,6 @@ export async function createVaultPieces(
       order: index,
       type: "share",
     };
-    // encrypt data
-    sharePiece.data = encryptText(tempKey, sharePiece.data).ciphertext;
     index += 1;
     // add to result
     piecesToReturn.push(stringifySyncPiece(sharePiece));
@@ -146,7 +147,7 @@ export async function assembleVault(
         if (piece.order < lastSharePieceIndex) {
           throw new Error("Share sync pieces out of order.");
         }
-        shareCypherText.concat(piece.data);
+        shareCypherText = shareCypherText.concat(piece.data);
         lastSharePieceIndex += 1;
         break;
       }
@@ -155,7 +156,7 @@ export async function assembleVault(
         if (piece.order < lastSeedloopPieceIndex) {
           throw new Error("Seedloop sync pieces out of order.");
         }
-        seedloopCypherText.concat(piece.data);
+        seedloopCypherText = seedloopCypherText.concat(piece.data);
         lastSeedloopPieceIndex += 1;
         break;
       }
@@ -169,7 +170,6 @@ export async function assembleVault(
   if (!decryptionKey) {
     throw new Error("Unable to fetch decryption key.");
   }
-  let seedloopPlainText = "";
   let sharePlainText = "";
   try {
     // decrypt seedloop piece
@@ -185,6 +185,10 @@ export async function assembleVault(
   }
   //create vault
   const vaultName = createVaultName(uid);
+  console.log("__________");
+  console.log(seedloopCypherText);
+  console.log(sharePlainText);
+  console.log("__________");
   const newVault: VaultContents = {
     seedloopSerlializedCipher: seedloopCypherText,
     vaultVersion: 0,
@@ -201,6 +205,7 @@ export async function assembleVault(
     if (!seedloop) throw new Error();
     return seedloop;
   } catch (e) {
+    console.log(e);
     throw new Error("Unable to recover seedloop from vault.");
   }
 }
