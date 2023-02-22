@@ -303,7 +303,7 @@ const Distributor: NextPage = () => {
             </p>
           </div>
         )}
-        {progressEnum == EnumProgress.ShowCode && (
+        {progressEnum != EnumProgress.ShowCode && (
           <div className="mt-8">
             <ButtonSync
               clickHandler={incrementProgress}
