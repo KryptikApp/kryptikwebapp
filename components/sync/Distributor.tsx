@@ -51,6 +51,8 @@ const Distributor: NextPage = () => {
       }
     })
     .subscribe((status) => {
+      console.log("subscription status distributor::");
+      console.log(status);
       if (status === "SUBSCRIBED") {
         // console.log("Subscribed to sync channel.");
       }

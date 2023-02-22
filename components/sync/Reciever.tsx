@@ -57,6 +57,8 @@ const Reciever: NextPage = () => {
       setButtonText("Validate");
     })
     .subscribe((status) => {
+      console.log("subscription status receiver:");
+      console.log(status);
       if (status === "SUBSCRIBED") {
         // console.log("Subscribed to sync channel.");
       }
@@ -117,12 +119,26 @@ const Reciever: NextPage = () => {
     switch (progressEnum) {
       case EnumProgress.Start: {
         setProgressEnum(EnumProgress.ShowCode);
+        setSyncPieces([]);
         break;
       }
       case EnumProgress.ShowCode: {
+        if (syncPieces == null) {
+          setProgressEnum(EnumProgress.Error);
+          setErrorText("Unable to scan. Missing pieces array.");
+          return;
+        }
+        if (uri === undefined) {
+          setProgressEnum(EnumProgress.Error);
+          setErrorText("Unable to scan. Expected uri on callback.");
+          return;
+        }
         const newIndex = syncPieceIndex + 1;
         // indicate we can show new code
-        broadcastScan(newIndex);
+        syncPieces.push(uri);
+        broadcastScan(newIndex).then(() => {
+          console.log(`Scan message sent with index: ${newIndex}`);
+        });
         setSyncPieceIndex(newIndex);
         break;
       }
