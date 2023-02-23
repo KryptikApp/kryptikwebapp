@@ -54,6 +54,10 @@ export async function createVaultPieces(
 
   const maxStringSize: number = 200;
   const seedloopString: string = vaultContents.vault.seedloopSerlializedCipher;
+  console.log("SEEDLOP STRING:");
+  console.log(seedloopString);
+  console.log("Share string unencrypted");
+  console.log(vaultContents.remoteShare2);
   //create temporary encryption key
   const tempKey: TempSyncKey | null = await createTempSyncKey();
   if (!tempKey) {
@@ -75,7 +79,6 @@ export async function createVaultPieces(
   const numSeedloopPieces: number = Math.ceil(
     seedloopString.length / maxStringSize
   );
-  // create encryption key
   const totalToPair: number = numSharePieces + numSeedloopPieces;
   const shareStrings: string[] = splitString(shareString, maxStringSize);
   const seedloopStrings: string[] = splitString(seedloopString, maxStringSize);
@@ -132,8 +135,8 @@ export async function assembleVault(
   }
   let shareCypherText: string = "";
   let seedloopCypherText: string = "";
-  let lastSharePieceIndex: number = 0;
-  let lastSeedloopPieceIndex: number = 0;
+  let lastSharePieceIndex: number = -1;
+  let lastSeedloopPieceIndex: number = -1;
   // ensure pieces are sorted in ascending order
   syncPieces.sort((a, b) => {
     if (a.order < b.order) {
@@ -144,6 +147,8 @@ export async function assembleVault(
     }
     return 0;
   });
+  console.log("Sync pieces:");
+  console.log(syncPieces);
   // match pieces
   for (const piece of syncPieces) {
     console.log("processing");
@@ -151,18 +156,18 @@ export async function assembleVault(
     switch (piece.type) {
       case "share": {
         // ensure order safety
-        if (piece.order < lastSharePieceIndex) {
-          throw new Error("Share sync pieces out of order.");
-        }
+        // if (piece.order < lastSharePieceIndex) {
+        //   throw new Error("Share sync pieces out of order.");
+        // }
         shareCypherText = shareCypherText.concat(piece.data);
         lastSharePieceIndex += 1;
         break;
       }
       case "seedloopSerializedCipher": {
         // ensure order safety
-        if (piece.order < lastSeedloopPieceIndex) {
-          throw new Error("Seedloop sync pieces out of order.");
-        }
+        // if (piece.order < lastSeedloopPieceIndex) {
+        //   throw new Error("Seedloop sync pieces out of order.");
+        // }
         seedloopCypherText = seedloopCypherText.concat(piece.data);
         lastSeedloopPieceIndex += 1;
         break;
@@ -182,7 +187,7 @@ export async function assembleVault(
     // decrypt seedloop piece
     sharePlainText = decryptText(decryptionKey, shareCypherText).plaintext;
   } catch (e) {
-    throw new Error("Unable to decrypt sync strings");
+    throw new Error("Unable to decrypt sync strings.");
   }
   // create vault
   const remoteShare: string | null = await getRemoteShare();
@@ -193,7 +198,9 @@ export async function assembleVault(
   //create vault
   const vaultName = createVaultName(uid);
   console.log("__________");
+  console.log("seedloop string");
   console.log(seedloopCypherText);
+  console.log("Share string unencrypted");
   console.log(sharePlainText);
   console.log("__________");
   const newVault: VaultContents = {
