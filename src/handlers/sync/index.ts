@@ -52,7 +52,7 @@ export async function createVaultPieces(
   await createShareOnDb(vaultContents.remoteShare1);
   const piecesToReturn: string[] = [];
 
-  const maxStringSize: number = 200;
+  const maxStringSize: number = 50;
   const seedloopString: string = vaultContents.vault.seedloopSerlializedCipher;
   console.log("SEEDLOP STRING:");
   console.log(seedloopString);
