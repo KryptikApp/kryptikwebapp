@@ -1,6 +1,7 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
 import HDSeedLoop from "hdseedloop";
 import { NextPage } from "next";
+import { toast } from "react-hot-toast";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { assembleVault, createValidationCode } from "../../src/handlers/sync";
@@ -135,6 +136,8 @@ const Reciever: NextPage = () => {
           return;
         }
         updateWallet(recoveredSeedloop);
+        toast.success("Sync completed.");
+        router.push("../");
         setProgressEnum(EnumProgress.Done);
         setButtonText("Go to Wallet");
         // clean up state
@@ -282,6 +285,13 @@ const Reciever: NextPage = () => {
             >
               Exit
             </p>
+          </div>
+        )}
+        {/* done */}
+        {progressEnum == EnumProgress.Done && (
+          <div className="flex flex-col">
+            <p className="text-green-500">Sync completed!</p>
+            <p>You can now use your wallet from this device.</p>
           </div>
         )}
         {(progressEnum == EnumProgress.Start ||

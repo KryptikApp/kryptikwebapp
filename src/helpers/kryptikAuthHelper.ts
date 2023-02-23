@@ -171,6 +171,7 @@ export function useKryptikAuth() {
       uid: authUser.uid,
     });
     setKryptikWallet(newKryptikWallet);
+    setWalletStatus(WalletStatus.Connected);
     refreshBalances(newKryptikWallet);
   }
 
