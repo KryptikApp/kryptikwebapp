@@ -59,7 +59,7 @@ export const createVault = function (
   }
   // create string rep.'s of secret shares
   let remoteShare1 = shares[0].toString("hex");
-  let remoteShare2 = shares[0].toString("hex");
+  let remoteShare2 = shares[1].toString("hex");
   let localShare = shares[2].toString("hex");
   let newVault: VaultContents = {
     seedloopSerlializedCipher: seedloopEncrypted,
