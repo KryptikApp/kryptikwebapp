@@ -275,7 +275,7 @@ const Distributor: NextPage = () => {
                 <Canvas
                   text={qrText}
                   options={{
-                    level: "L",
+                    level: "H",
                     margin: 2,
                     scale: 5,
                     width: 300,
