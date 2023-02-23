@@ -75,6 +75,8 @@ export async function createVaultPieces(
   ).plaintext;
   console.log("Share string decrypted on sync generate:");
   console.log(shareStringDecrypted);
+  console.log("Share string encrypted on sync generate:");
+  console.log(shareString);
   if (shareStringDecrypted != vaultContents.remoteShare2) {
     throw new Error("Decrypted share does not match plaintext.");
   }
@@ -206,7 +208,10 @@ export async function assembleVault(
   console.log(seedloopCypherText);
   console.log("Share string unencrypted");
   console.log(sharePlainText);
+  console.log("Share string encrypted");
+  console.log(shareCypherText);
   console.log("__________");
+
   const newVault: VaultContents = {
     seedloopSerlializedCipher: seedloopCypherText,
     vaultVersion: 0,
