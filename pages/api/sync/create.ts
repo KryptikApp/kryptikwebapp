@@ -16,11 +16,6 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const body = req.body;
-  console.log("Body");
-  console.log(body);
-  // get totalToPair from request body
-  const totalToPair: number = body.totalToPair;
-  console.log(totalToPair);
   // Get data submitted in request's body.
   try {
     const userId: string | string[] | undefined = req.headers["user-id"];
@@ -28,11 +23,6 @@ export default async function handler(
       throw new Error(
         "No user id available or user id was of the wrong type (expected string)."
       );
-    }
-    // ensure we have required data
-    if (totalToPair === undefined) {
-      console.log("hereeee");
-      throw new Error("Total number to pair not provided. Expected a number.");
     }
     try {
       // create temp key
