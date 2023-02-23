@@ -31,7 +31,7 @@ export function decryptText(
   // decipher message
   const plaintextBuffer: Buffer = decipher.update(encryptedBuffer);
   // save as readable string
-  const plaintext: string = plaintextBuffer.toString();
+  const plaintext: string = plaintextBuffer.toString("utf-8");
   return { plaintext: plaintext };
 }
 
