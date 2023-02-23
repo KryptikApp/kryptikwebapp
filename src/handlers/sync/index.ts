@@ -69,9 +69,13 @@ export async function createVaultPieces(
     tempKey,
     vaultContents.remoteShare2
   ).ciphertext;
-  if (
-    decryptText(tempKey, shareString).plaintext != vaultContents.remoteShare2
-  ) {
+  const shareStringDecrypted: string = decryptText(
+    tempKey,
+    shareString
+  ).plaintext;
+  console.log("Share string decrypted on sync generate:");
+  console.log(shareStringDecrypted);
+  if (shareStringDecrypted != vaultContents.remoteShare2) {
     throw new Error("Decrypted share does not match plaintext.");
   }
   // compute number of peces from each string
