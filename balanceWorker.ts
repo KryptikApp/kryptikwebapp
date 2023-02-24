@@ -737,7 +737,7 @@ async function getBalanceAllSplTokens(
         network: networkDb,
         token: splDb,
         provider: provider,
-        nep141Params: splParams,
+        splParams: splParams,
         onFetch: onFetch,
         onDone: onDone,
       };
