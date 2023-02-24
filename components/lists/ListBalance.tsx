@@ -95,13 +95,19 @@ const ListBalance: NextPage = () => {
     );
     // enable notification processing
     newBalanceManager.start();
-    balanceHolder.add(newBalanceManager);
+    kryptikService.kryptikBalances.add(newBalanceManager);
+    if (kryptikService.kryptikBalances.isFresh()) {
+      const newBalances =
+        kryptikService.kryptikBalances.getNonzeroBalances(isAdvanced);
+      setTokenAndBalances(newBalances);
+    }
   }, []);
 
   useEffect(() => {
     const newTokenAndBals: TokenAndNetwork[] =
-      balanceHolder.getNonzeroBalances(isAdvanced);
-    const newTotalBal: number = balanceHolder.getTotalBalance();
+      kryptikService.kryptikBalances.getNonzeroBalances(isAdvanced);
+    const newTotalBal: number =
+      kryptikService.kryptikBalances.getTotalBalance();
     setTotalBalance(newTotalBal);
     setTokenAndBalances(newTokenAndBals);
   }, [isFetchedBalances]);
