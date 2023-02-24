@@ -136,7 +136,7 @@ export const getTokenSearchSuggestions = function (
     for (const chainData of token.contracts) {
       let newSuggestion: ISearchResult;
       // find base network for token by network ticker
-      let baseNetwork = networks.find((n) => n.id == chainData.id);
+      let baseNetwork = networks.find((n) => n.id == chainData.networkId);
       if (!baseNetwork) continue;
       let tokenAndNetwork: TokenAndNetwork = {
         baseNetworkDb: baseNetwork,
