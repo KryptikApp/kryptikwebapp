@@ -3,6 +3,7 @@ import { NextPage } from "next";
 import { useQRCode } from "next-qrcode";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { createHashCode } from "../../src/handlers/crypto";
 import {
   createValidationCode,
   createVaultPieces,
@@ -38,6 +39,7 @@ const Distributor: NextPage = () => {
   const [errorText, setErrorText] = useState("Unable to sync.");
   const [syncPieces, setSyncPieces] = useState<string[] | null>(null);
   const [syncPieceIndex, setSyncPieceIndex] = useState(0);
+  const [newCodeRequested, setNewCodeRequested] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [totalSteps, setTotalSteps] = useState(0);
   const [validationCode, setValidationCode] = useState("");
@@ -232,7 +234,11 @@ const Distributor: NextPage = () => {
         console.log(data);
         console.log("setting index....");
         setMostRecentPayload(data);
-        setSyncPieceIndex(data.payload.newScanIndex);
+        const receiverHashCode = data.payload.hashCode;
+        const currHashCode = createHashCode(qrText);
+        if (receiverHashCode == currHashCode) {
+          setSyncPieceIndex(data.payload.newScanIndex);
+        }
       })
       .subscribe((status) => {
         console.log("subscription status distributor::");
@@ -250,6 +256,15 @@ const Distributor: NextPage = () => {
       incrementProgress();
     }
   }, [syncPieceIndex]);
+
+  useEffect(() => {
+    if (!mostRecentPayload) return;
+    const receiverHashCode = mostRecentPayload.payload.hashCode;
+    const currHashCode = createHashCode(qrText);
+    if (receiverHashCode == currHashCode) {
+      setSyncPieceIndex(syncPieceIndex + 1);
+    }
+  }, [mostRecentPayload]);
 
   return (
     <SyncCard

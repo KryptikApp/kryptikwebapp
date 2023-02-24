@@ -12,6 +12,7 @@ import ButtonSync from "../buttons/ButtonSync";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import KryptikScanner from "../kryptikScanner";
 import SyncCard from "./SyncCard";
+import { createHashCode } from "../../src/handlers/crypto";
 
 enum EnumProgress {
   Start = 0,
@@ -39,9 +40,9 @@ const Reciever: NextPage = () => {
     useState<HDSeedLoop | null>();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const [lastScanText, setLastScanText] = useState("");
-  const [indexToShow, setIndexToShow] = useState(0);
+  // const [indexToShow, setIndexToShow] = useState(0);
 
-  let syncPieceIndex = 0;
+  // let syncPieceIndex = 0;
 
   /** Ensure sync action is allowed. */
   function isSyncSafe(): boolean {
@@ -51,15 +52,13 @@ const Reciever: NextPage = () => {
     return false;
   }
 
-  async function broadcastScan(newIndex: number) {
+  async function broadcastScan(hashCode: number) {
     if (!channel) return;
     const res = await channel.send({
       type: "broadcast",
       event: "scan",
-      payload: { newScanIndex: newIndex },
+      payload: { hashCode: hashCode },
     });
-    console.log("Scan Message Status:");
-    console.log(res);
   }
 
   async function assembleWallet() {
@@ -118,15 +117,16 @@ const Reciever: NextPage = () => {
         if (uri == lastScanText) {
           return;
         }
-        const newIndex = syncPieceIndex + 1;
+        // const newIndex = syncPieceIndex + 1;
+        const hashCode: number = createHashCode(uri);
         // indicate we can show new code
         syncPieces.push(uri);
-        broadcastScan(newIndex).then(() => {
-          console.log(`Scan message sent with index: ${newIndex}`);
+        broadcastScan(hashCode).then(() => {
+          console.log(`Scan message sent with hash code: ${hashCode}`);
         });
         setLastScanText(uri);
-        syncPieceIndex = newIndex;
-        setIndexToShow(syncPieceIndex);
+        // syncPieceIndex = newIndex;
+        // setIndexToShow(syncPieceIndex);
         break;
       }
       case EnumProgress.Validate: {
@@ -161,7 +161,7 @@ const Reciever: NextPage = () => {
     console.log("Canceling sync. User initiated.");
     setSyncPieces([]);
     setButtonText("Start");
-    syncPieceIndex = 0;
+    // syncPieceIndex = 0;
     setProgressEnum(EnumProgress.Start);
     setRecoveredSeedloop(null);
     setTotalSteps(0);
@@ -240,9 +240,9 @@ const Reciever: NextPage = () => {
                   show={progressEnum == EnumProgress.ShowCode}
                   onScan={incrementProgress}
                 />
-                <p className="text-sm text-sky-500 mt-4">
+                {/* <p className="text-sm text-sky-500 mt-4">
                   Scanned {indexToShow} codes.
-                </p>
+                </p> */}
               </div>
               <div className="flex-1" />
             </div>
