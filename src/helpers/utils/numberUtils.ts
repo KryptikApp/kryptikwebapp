@@ -56,7 +56,7 @@ export const lamportsToSol = function (amountIn: number): number {
 };
 
 export const solToLamports = function (amountIn: number): number {
-  return amountIn * 1000000000;
+  return Math.floor(amountIn * 1000000000);
 };
 
 export const formatAmountUi = function (

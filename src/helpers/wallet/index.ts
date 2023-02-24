@@ -122,7 +122,7 @@ export async function connectKryptikWallet(
     // create new vault for seedloop
     seedloopKryptik = createSeedloop(networksToAdd, seed);
     let newVaultandShare: VaultAndShares = createVault(seedloopKryptik, uid);
-    remoteShareReturn = newVaultandShare.remoteShare;
+    remoteShareReturn = newVaultandShare.remoteShare1;
   }
 
   // get primary ethereum addreses for kryptik wallet

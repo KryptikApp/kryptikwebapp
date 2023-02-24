@@ -5,7 +5,7 @@ export interface ShamirOptions {
   threshold: number;
 }
 
-// create shares from a given secret
+/** Split a given secret into shamir shares. */
 export const createShares = function (
   secret: string,
   optionsIn?: ShamirOptions
@@ -18,7 +18,7 @@ export const createShares = function (
   return shares;
 };
 
-// combines shares to recover secret
+/** Combines shares to recover secret */
 export const combineShares = function (shares: Buffer[] | string[]): Buffer {
   // combine original shares
   let combinedOutput: Buffer = shamir.combine(shares);

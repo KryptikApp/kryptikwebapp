@@ -122,3 +122,19 @@ export function createColorString(color: ColorEnum): string {
 }
 
 export const defaultColor = ColorEnum.blue;
+
+/**
+ * Split a string into chunks of the given size
+ * @param  {String} string is the String to split
+ * @param  {Number} size is the size you of the cuts
+ * @return {Array} an Array with the strings
+ */
+export function splitString(str: string, size: number): string[] {
+  const numChunks = Math.ceil(str.length / size);
+  const chunks = new Array(numChunks);
+
+  for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
+    chunks[i] = str.substr(o, size);
+  }
+  return chunks;
+}

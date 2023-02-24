@@ -3,16 +3,20 @@ import {
   OneTimeToken,
   Price,
   PrismaClient,
-  Profile,
+  SyncSession,
+  TempSyncKey,
   User,
 } from "@prisma/client";
-import { Console } from "console";
 import { add } from "date-fns";
+import { createAesKeyAndIv, IAesKey } from "../src/handlers/crypto";
 import { BlockchainAccountDb } from "../src/helpers/accounts";
 import hashToken from "../src/helpers/auth/hashtoken";
 import { generateCode } from "../src/helpers/auth/jwt";
 
 const prisma = new PrismaClient();
+
+const EmailTokenExpirationMinutes = 10;
+const SyncKeyExpirationMinutes = 10;
 
 export async function findUserByEmail(email: string): Promise<User | null> {
   return prisma.user.findUnique({
@@ -47,14 +51,10 @@ export async function validateUserOneTimeCode(id: string, code: string) {
   const tokens: OneTimeToken[] = await prisma.oneTimeToken.findMany({
     where: { userId: id },
   });
-  console.log(tokens);
-  console.log(id);
-  console.log(code);
   const currentDate: Date = new Date();
   // TODO: UPDATE SO WE DON'T CYCLE THROUGH ALL CODES
   for (const token of tokens) {
     if (token.expiration > currentDate && code == token.code) {
-      console.log("Heyyyy!");
       return true;
     }
   }
@@ -94,28 +94,34 @@ export function updateShareByUserId(newShare: string, userId: string) {
 }
 
 export function createShare(newShare: string, userId: string) {
-  return prisma.remoteShare.create({
-    data: { share: newShare, userId: userId },
+  return prisma.remoteShare.upsert({
+    where: { userId: userId },
+    create: { share: newShare, userId: userId },
+    update: { share: newShare, userId: userId },
   });
 }
 export type ProfileInfo = { name?: string; bio?: string; avatarPath?: string };
-export function updateProfileByUserId(
+export async function updateProfileByUserId(
   newProfileInfo: ProfileInfo,
   userId: string
 ) {
-  prisma.profile.update({
+  await prisma.profile.upsert({
     where: {
       userId: userId,
     },
-    data: {
+    create: {
+      name: newProfileInfo.name,
+      bio: newProfileInfo.bio,
+      avatarPath: newProfileInfo.avatarPath,
+      userId: userId,
+    },
+    update: {
       name: newProfileInfo.name,
       bio: newProfileInfo.bio,
       avatarPath: newProfileInfo.avatarPath,
     },
   });
 }
-
-const EmailTokenExpirationMinutes = 10;
 
 /**
  * Creates refresh token.
@@ -287,4 +293,75 @@ export async function updatePrices(prices: PriceToUpload[]) {
       continue;
     }
   }
+}
+
+/** Find the sync key for a given user id.*/
+export async function findSyncKeyByUserId(
+  id: string
+): Promise<TempSyncKey | null> {
+  const tempKey = prisma.tempSyncKey.findUnique({ where: { userId: id } });
+  return tempKey;
+}
+
+/** Updates or creates sync key via upsert */
+export async function createSyncKeyByUserId(id: string): Promise<TempSyncKey> {
+  const keyExpiration = add(new Date(), {
+    minutes: SyncKeyExpirationMinutes,
+  });
+  const aesKey: IAesKey = createAesKeyAndIv();
+  const keyToStore = {
+    userId: id,
+    key: aesKey.keyString,
+    iv: aesKey.ivString,
+    expiration: keyExpiration,
+  };
+  // update or create
+  const keyResult = await prisma.tempSyncKey.upsert({
+    where: { userId: id },
+    create: keyToStore,
+    update: keyToStore,
+  });
+  return keyResult;
+}
+
+/** Find the sync session for a given user id.*/
+export async function findSyncSessionByUserId(
+  id: string
+): Promise<SyncSession | null> {
+  const session = prisma.syncSession.findUnique({ where: { userId: id } });
+  return session;
+}
+
+/** Updates or creates sync session via upsert */
+export async function createSyncSessionByUserId(
+  id: string,
+  totalToPair: number
+): Promise<SyncSession> {
+  // default expiration to that of sync key
+  const keyExpiration = add(new Date(), {
+    minutes: SyncKeyExpirationMinutes,
+  });
+  const sessionToStore = {
+    userId: id,
+    expiration: keyExpiration,
+    pairIndex: 0,
+    totalToPair: totalToPair,
+  };
+  // update or create
+  const keyResult = await prisma.syncSession.upsert({
+    where: { userId: id },
+    create: sessionToStore,
+    update: sessionToStore,
+  });
+  return keyResult;
+}
+
+/** Validates temporary sync key. */
+export function validateSyncKey(key: TempSyncKey) {
+  const currentDate: Date = new Date();
+  // ensure key is still valid
+  if (key.expiration > currentDate) {
+    return true;
+  }
+  return false;
 }

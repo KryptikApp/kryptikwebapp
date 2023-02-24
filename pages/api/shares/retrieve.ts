@@ -23,10 +23,7 @@ export default async function handler(
     }
     const remoteShare: RemoteShare | null = await getShareByUserId(userId);
     if (!remoteShare) {
-      return res.status(200).json({
-        share: null,
-        msg: "Share has been updated.",
-      });
+      throw new Error("Unable to find remote share for given user.");
     }
     return res
       .status(200)

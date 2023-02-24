@@ -17,6 +17,8 @@ model User {
   refreshTokens RefreshToken[]
   remoteShare   RemoteShare?
   blockchainAccount BlockchainAccount?
+  tempSyncKey TempSyncKey?
+  syncSession SyncSession?
 }
 
 model RemoteShare {
@@ -52,6 +54,27 @@ model OneTimeToken {
   userId     String
   code       String
   expiration DateTime
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+// no server share, but share on local... sync w/ other device
+// be wary of new login and no share on server... don't want to overwrite
+// maybe only create wallet if user doesn't exist on server upon script fire?
+model TempSyncKey{
+  id         String   @id @unique @default(uuid())
+  userId     String   @unique
+  expiration DateTime
+  iv         String
+  key        String
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SyncSession{
+  id         String   @id @unique @default(uuid())
+  userId     String   @unique
+  expiration DateTime
+  pairIndex  Int  @default(0)
+  confirmed  Boolean @default(false)
+  totalToPair Int
   User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

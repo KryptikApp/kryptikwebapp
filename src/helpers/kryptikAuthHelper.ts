@@ -17,6 +17,7 @@ import { handleApprove, logout } from "./auth";
 import { updateVaultName } from "../handlers/wallet/vaultHandler";
 import { getAddressForNetworkDb } from "./utils/accountUtils";
 import { IFetchAllBalancesParams } from "./balances";
+import HDSeedLoop, { NetworkFromTicker } from "hdseedloop";
 
 export function useKryptikAuth() {
   //create service
@@ -35,9 +36,12 @@ export function useKryptikAuth() {
 
   // update standard firestore user's profile
   async function updateCurrentUserKryptik(user: UserDB) {
+    console.log("Updatiing user profile...");
     try {
       await updateProfile(user);
-    } catch (e) {}
+    } catch (e) {
+      console.warn("Unable to update profile");
+    }
   }
 
   const updateWalletStatus = function (newWalletStatus: WalletStatus) {
@@ -144,6 +148,31 @@ export function useKryptikAuth() {
       };
       kryptikService.kryptikBalances.refresh(balParams);
     }
+  }
+
+  function updateWallet(seedloop: HDSeedLoop) {
+    if (!authUser) return;
+    // get primary ethereum addreses for kryptik wallet
+    let ethNetwork = NetworkFromTicker("eth");
+    let etheAddysAll = seedloop.getAddresses(ethNetwork);
+    let ethAddyFirst = etheAddysAll[0];
+
+    let newWalletStatus: WalletStatus = seedloop.getIsLocked()
+      ? WalletStatus.Locked
+      : WalletStatus.Connected;
+
+    // set values for new wallet
+    let newKryptikWallet: IWallet = new IWallet({
+      ...defaultWallet,
+      walletProviderName: "kryptik",
+      status: newWalletStatus,
+      seedLoop: seedloop,
+      resolvedEthAccount: { address: ethAddyFirst, isResolved: false },
+      uid: authUser.uid,
+    });
+    setKryptikWallet(newKryptikWallet);
+    setWalletStatus(WalletStatus.Connected);
+    refreshBalances(newKryptikWallet);
   }
 
   function signOut() {
@@ -283,10 +312,10 @@ export function useKryptikAuth() {
     updateCurrentUserKryptik,
     signOut,
     kryptikService,
-    setKryptikWallet,
     kryptikWallet,
     walletStatus,
     updateWalletStatus,
+    updateWallet,
     signClient,
     clear,
   };

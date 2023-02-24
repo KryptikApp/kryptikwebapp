@@ -14,7 +14,7 @@ export async function updateProfile(user: UserDB) {
       headers: { "Content-Type": "application/json" },
     });
     if (res.status != 200) {
-      console.warn("Unable to create share on db.");
+      console.warn("Unable to update profile on db.");
       return false;
     }
     return true;

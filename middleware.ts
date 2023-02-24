@@ -52,5 +52,6 @@ export const config = {
     "/profile/:path*",
     "/wallet",
     "/sync/:path*",
+    "/api/sync/:path*",
   ],
 };

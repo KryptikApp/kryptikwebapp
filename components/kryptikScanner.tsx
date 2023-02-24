@@ -1,8 +1,5 @@
-import Image from "next/image";
-import { Fragment, useState } from "react";
 import { QrReader as ReactQrReader } from "react-qr-reader";
-import { ColorEnum } from "../src/helpers/utils";
-import Button from "./buttons/Button";
+import { ViewFinder } from "./viewfinder";
 
 /**
  * Types
@@ -24,19 +21,21 @@ export default function KryptikScanner(iprops: IProps) {
   };
 
   const previewStyle = {
-    height: 300,
+    height: 400,
     width: 1000,
   };
+  const containerStyle = {};
 
   return (
     <div>
       {show ? (
-        <div className="w-[400px] max-w-[90vw] h-[400px] max-h-[80vh] rounded overflow-hidden">
+        <div className="w-[400px] max-w-[90vw]  max-h-[80vh] rounded overflow-hidden">
           <ReactQrReader
             videoStyle={previewStyle}
-            constraints={{ facingMode: "user" }}
+            containerStyle={containerStyle}
+            constraints={{ facingMode: "environment" }}
             className={"scale-150"}
-            onResult={(data) => handleScan(data)}
+            onResult={(data: any) => handleScan(data)}
           />
         </div>
       ) : (

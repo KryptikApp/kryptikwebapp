@@ -1,7 +1,7 @@
 import { CoinMarketChartResponse } from "coingecko-api-v3";
 import { KryptikFetch } from "../../kryptikFetch";
 
-// gets historical prices from server for all possible networks (currently wrapper for coingecko request)
+/**  Gets historical prices. Bounces to server API to handle cors errors. */
 export const fetchServerHistoricalPrices = async function (
   id: string,
   days: number

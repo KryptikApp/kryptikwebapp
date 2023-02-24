@@ -31,6 +31,7 @@ export default function NavbarDevDocs() {
   function handleDocSelection(slug: string) {
     // update active slug
     setActiveSlug(slug);
+    // TODO: reset scroll height
   }
 
   useEffect(() => {

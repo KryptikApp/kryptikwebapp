@@ -291,14 +291,17 @@ const Send: NextPage = () => {
   const handleClickBack = function () {
     switch (progress) {
       case TxProgress.SetParamaters: {
+        setisLoading(false);
         setProgress(TxProgress.Begin);
         break;
       }
       case TxProgress.Rewiew: {
+        setisLoading(false);
         setProgress(TxProgress.SetParamaters);
         break;
       }
       case TxProgress.Complete: {
+        setisLoading(false);
         handleCancelTransaction();
         break;
       }

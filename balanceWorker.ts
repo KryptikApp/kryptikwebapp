@@ -232,11 +232,10 @@ async function getBalanceNetwork(
       let solPubKey: PublicKey = createEd25519PubKey(address);
       // ensures provider is set
       if (!kryptikProvider.solProvider)
-        throw new Error("No near provider is set up.");
+        throw new Error("No solana provider is set up.");
       const solNetworkProvider: Connection = kryptikProvider.solProvider;
-      balanceNetwork = lamportsToSol(
-        await solNetworkProvider.getBalance(solPubKey)
-      );
+      const balresponse = await solNetworkProvider.getBalance(solPubKey);
+      balanceNetwork = lamportsToSol(balresponse);
       break;
     }
     case NetworkFamily.Near: {
@@ -737,7 +736,7 @@ async function getBalanceAllSplTokens(
         network: networkDb,
         token: splDb,
         provider: provider,
-        nep141Params: splParams,
+        splParams: splParams,
         onFetch: onFetch,
         onDone: onDone,
       };

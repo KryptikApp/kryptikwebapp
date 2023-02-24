@@ -160,8 +160,9 @@ const Swap: NextPage = () => {
     }
     setNetworkAndTokens(newTokensAndNetworks);
     // update selected network to be first in possible options
-    if (newTokensAndNetworks.length != 0 && onlyWithValue)
+    if (newTokensAndNetworks.length != 0) {
       updateSellToken(newTokensAndNetworks[0]);
+    }
     setLoadingNetworks(false);
   };
 
@@ -336,7 +337,11 @@ const Swap: NextPage = () => {
       truncateAddress(kryptikWallet.resolvedEthAccount.address, nw)
     );
     setTxPubData(defaultTxPublishedData);
-    setSellTokenAndNetwork(defaultTokenAndNetwork);
+    if (networkAndTokens) {
+      setSellTokenAndNetwork(networkAndTokens[0]);
+    } else {
+      setSellTokenAndNetwork(defaultTokenAndNetwork);
+    }
     setBuyTokenAndNetwork(null);
     setSwapProgress(TxProgress.Begin);
     setIsLoading(false);

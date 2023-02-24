@@ -4,7 +4,7 @@ import HDSeedLoop, { SerializedSeedLoop } from "hdseedloop";
 import { IWallet } from "../../models/KryptikWallet";
 import { UserDB } from "../../models/user";
 
-import { combineShares, createShares } from "./shareHandler";
+import { combineShares, createShares, ShamirOptions } from "./shareHandler";
 
 export interface VaultContents {
   // ciphertext of encrypted seedloop
@@ -23,9 +23,15 @@ export interface VaultContents {
   check: string;
 }
 
+/** Type wrapper for vault and shamir shares
+ * @param vault Contents of the vault.
+ * @param remoteShare1 Reserved server.
+ * @param remoteShare2 Reserved for secondary device
+ */
 export interface VaultAndShares {
   vault: VaultContents;
-  remoteShare: string;
+  remoteShare1: string;
+  remoteShare2: string;
 }
 
 export const createVault = function (
@@ -40,11 +46,21 @@ export const createVault = function (
     seedloopString,
     newPassword
   ).toString();
+  const shamirOptions: ShamirOptions = {
+    shares: 3,
+    threshold: 2,
+  };
   // generate shares from encryption key
-  let shares: Buffer[] = createShares(newPassword);
+  let shares: Buffer[] = createShares(newPassword, shamirOptions);
+  // there should be precisely three shares created
+  if (shares.length != 3) {
+    console.log("Incorrect sharesssss");
+    throw new Error(`${shares.length} shares were created. Expected 3.`);
+  }
   // create string rep.'s of secret shares
-  let remoteShare = shares[0].toString("hex");
-  let localShare = shares[1].toString("hex");
+  let remoteShare1 = shares[0].toString("hex");
+  let remoteShare2 = shares[1].toString("hex");
+  let localShare = shares[2].toString("hex");
   let newVault: VaultContents = {
     seedloopSerlializedCipher: seedloopEncrypted,
     vaultVersion: 0,
@@ -59,10 +75,14 @@ export const createVault = function (
   // key to access vault in local storage
   let vaultName: string = createVaultName(uid);
   localStorage.setItem(vaultName, vaultString);
-  return { vault: newVault, remoteShare: remoteShare };
+  return {
+    vault: newVault,
+    remoteShare1: remoteShare1,
+    remoteShare2: remoteShare2,
+  };
 };
 
-// check if vault for a given uid exists in local storage
+/** Check if vault for a given uid exists in local storage */
 export const vaultExists = function (uid: string): boolean {
   let vaultName: string = createVaultName(uid);
   let vaultString: string | null = localStorage.getItem(vaultName);
@@ -72,13 +92,18 @@ export const vaultExists = function (uid: string): boolean {
   return true;
 };
 
+export function fetchVault(vaultName: string): string | null {
+  let vaultString: string | null = localStorage.getItem(vaultName);
+  return vaultString;
+}
+
 export const unlockVault = function (
   uid: string,
   remoteShare: string,
   seedloopUpdated?: HDSeedLoop
 ): HDSeedLoop | null {
   let vaultName: string = createVaultName(uid);
-  let vaultString: string | null = localStorage.getItem(vaultName);
+  let vaultString: string | null = fetchVault(vaultName);
   if (vaultString == null) {
     console.warn("There is no vault to unlock with the given id.");
     return null;
@@ -117,16 +142,17 @@ export const unlockVault = function (
   return seedloopRecovered;
 };
 
-// ensure vault was decoded correctly
+/** Ensure vault was decoded correctly */
 const isValidVaultDecode = function (vault: VaultContents): boolean {
   return vault.check == "valid";
 };
 
-// creates standard vault name given uid
-const createVaultName = function (uid: string) {
+/** Creates standard vault name given uid  */
+export function createVaultName(uid: string) {
   return "wallet|" + uid;
-};
+}
 
+/** Update local seedloop. */
 export const updateVaultSeedloop = function (
   uid: string,
   remoteShare: string,
@@ -147,7 +173,7 @@ export function updateVaultName(user: UserDB) {
   // only run if legacy vault name version with email
   if (vaultExists(user.email)) {
     const oldVaultName = createVaultName(user.email);
-    const vaultContents: string | null = localStorage.getItem(oldVaultName);
+    const vaultContents: string | null = fetchVault(oldVaultName);
     if (!vaultContents) return;
     const newVaultName = createVaultName(user.uid);
     localStorage.setItem(newVaultName, vaultContents);
