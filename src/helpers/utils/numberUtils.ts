@@ -52,7 +52,7 @@ export const divByDecimals = function (
 };
 
 export const lamportsToSol = function (amountIn: number): number {
-  return Math.floor(amountIn / 1000000000);
+  return amountIn / 1000000000;
 };
 
 export const solToLamports = function (amountIn: number): number {
