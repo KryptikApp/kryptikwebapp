@@ -262,7 +262,7 @@ const Reciever: NextPage = () => {
             ) : (
               <div className="flex flex-col space-y-2">
                 <p>Ensure code matches on both devices.</p>
-                <p className="text-sky-400 text-3xl fontbold">
+                <p className="text-sky-400 text-3xl fontbold text-center">
                   {validationCode}
                 </p>
               </div>
