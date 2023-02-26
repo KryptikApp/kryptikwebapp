@@ -70,10 +70,11 @@ export async function createVaultPieces(
   //   vaultContents.remoteShare2
   // ).ciphertext;
   const shareString: string = vaultContents.remoteShare2;
-  const shareStringDecrypted: string = decryptText(
-    tempKey,
-    shareString
-  ).plaintext;
+  // const shareStringDecrypted: string = decryptText(
+  //   tempKey,
+  //   shareString
+  // ).plaintext;
+  const shareStringDecrypted: string = shareString;
   console.log("Share string decrypted on sync generate:");
   console.log(shareStringDecrypted);
   console.log("Share string encrypted on sync generate:");
