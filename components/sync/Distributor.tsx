@@ -208,7 +208,7 @@ const Distributor: NextPage = () => {
     setProgressPercent(newProgressPercent);
     setProgressEnum(EnumProgress.ShowCode);
     // set initial qr code
-    setQrText(newPieces[0]);
+    setQrText(appendHashCode(newPieces[0]));
     setButtonText("Next");
     setIsLoading(false);
     setSyncPieces(newPieces);
@@ -235,11 +235,6 @@ const Distributor: NextPage = () => {
         console.log(data);
         console.log("setting index....");
         setMostRecentPayload(data);
-        const receiverHashCode = data.payload.hashCode;
-        const currHashCode = createHashCode(qrText);
-        if (receiverHashCode == currHashCode) {
-          setSyncPieceIndex(data.payload.newScanIndex);
-        }
       })
       .subscribe((status) => {
         console.log("subscription status distributor::");
