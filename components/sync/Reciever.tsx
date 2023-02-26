@@ -121,15 +121,23 @@ const Reciever: NextPage = () => {
         if (uri == lastScanText) {
           return;
         }
+        console.log("uri:");
+        console.log(uri);
         const scanRes = parseHashCode(uri);
         if (!scanRes) return;
         // const newIndex = syncPieceIndex + 1;
         const newHashCode: number = createHashCode(scanRes.data);
         if (newHashCode.toString() != scanRes.hashCode) {
+          console.log("Hash codes do not match. Rescanning...");
+          console.log(
+            `Expected: ${
+              scanRes.hashCode
+            }. Generated: ${newHashCode.toString()}`
+          );
           return;
         }
         // indicate we can show new code
-        syncPieces.push(uri);
+        syncPieces.push(scanRes.data);
         broadcastScan(newHashCode).then(() => {
           console.log(`Scan message sent with hash code: ${scanRes.hashCode}`);
         });
