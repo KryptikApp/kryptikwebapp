@@ -80,8 +80,9 @@ const Distributor: NextPage = () => {
   const useQRCodeStyling = (options: Options): QRCodeStyling | null => {
     //Only do this on the client
     if (typeof window !== "undefined") {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      /* eslint-disable */
       const QRCodeStylingLib = require("qr-code-styling");
+      /* eslint-disable */
       const qrCodeStyling: QRCodeStyling = new QRCodeStylingLib(options);
       return qrCodeStyling;
     }
