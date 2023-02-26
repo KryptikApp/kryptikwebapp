@@ -5,7 +5,7 @@ import { createTempSyncKey, getTempSyncKey } from "../../helpers/sync";
 import { splitString } from "../../helpers/utils";
 import { IWallet } from "../../models/KryptikWallet";
 import { UserDB } from "../../models/user";
-import { decryptText, encryptText } from "../crypto";
+import { createHashCode, decryptText, encryptText } from "../crypto";
 import {
   createVault,
   createVaultName,
@@ -236,4 +236,24 @@ export async function assembleVault(
 export function createValidationCode(seedLoop: HDSeedLoop): string {
   const ethNetwork = NetworkFromTicker("eth");
   return seedLoop.getAddresses(ethNetwork)[0].slice(-5);
+}
+
+const HASHCODE_DELIMITER: string = "|HC|";
+
+export function appendHashCode(str: string): string {
+  const hashCode = createHashCode(str);
+  return str + HASHCODE_DELIMITER + hashCode.toString();
+}
+
+interface IHahCodeParsed {
+  data: string;
+  hashCode: string;
+}
+export function parseHashCode(str: string): IHahCodeParsed | null {
+  try {
+    const splitString: string[] = str.split(HASHCODE_DELIMITER);
+    return { hashCode: splitString[1], data: splitString[0] };
+  } catch (e) {
+    return null;
+  }
 }

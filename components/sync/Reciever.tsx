@@ -4,7 +4,11 @@ import { NextPage } from "next";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { assembleVault, createValidationCode } from "../../src/handlers/sync";
+import {
+  assembleVault,
+  createValidationCode,
+  parseHashCode,
+} from "../../src/handlers/sync";
 import { supabase } from "../../src/helpers/supabaseHelper";
 import { ColorEnum } from "../../src/helpers/utils";
 import { WalletStatus } from "../../src/models/KryptikWallet";
@@ -117,12 +121,17 @@ const Reciever: NextPage = () => {
         if (uri == lastScanText) {
           return;
         }
+        const scanRes = parseHashCode(uri);
+        if (!scanRes) return;
         // const newIndex = syncPieceIndex + 1;
-        const hashCode: number = createHashCode(uri);
+        const newHashCode: number = createHashCode(scanRes.data);
+        if (newHashCode.toString() != scanRes.hashCode) {
+          return;
+        }
         // indicate we can show new code
         syncPieces.push(uri);
-        broadcastScan(hashCode).then(() => {
-          console.log(`Scan message sent with hash code: ${hashCode}`);
+        broadcastScan(newHashCode).then(() => {
+          console.log(`Scan message sent with hash code: ${scanRes.hashCode}`);
         });
         setLastScanText(uri);
         // syncPieceIndex = newIndex;

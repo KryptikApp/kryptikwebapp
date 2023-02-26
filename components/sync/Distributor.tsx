@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { createHashCode } from "../../src/handlers/crypto";
 import {
+  appendHashCode,
   createValidationCode,
   createVaultPieces,
 } from "../../src/handlers/sync";
@@ -141,7 +142,7 @@ const Distributor: NextPage = () => {
           setProgressEnum(EnumProgress.ShowCode);
           console.log("hereee");
           console.log("new qr code:");
-          const newQrText = syncPieces[newIndex];
+          const newQrText = appendHashCode(syncPieces[newIndex]);
           console.log(newQrText);
           // ensure new code has text
           if (newQrText == "") {
@@ -252,17 +253,19 @@ const Distributor: NextPage = () => {
 
   useEffect(() => {
     if (progressEnum == EnumProgress.ShowCode) {
-      console.log("RUNNING USE EFFECT BASED ON INDEX");
       incrementProgress();
     }
   }, [syncPieceIndex]);
 
   useEffect(() => {
-    if (!mostRecentPayload) return;
+    if (!mostRecentPayload || !syncPieces) return;
     const receiverHashCode = mostRecentPayload.payload.hashCode;
-    const currHashCode = createHashCode(qrText);
+    const currHashCode = createHashCode(syncPieces[syncPieceIndex]);
     if (receiverHashCode == currHashCode) {
+      console.log("Hash codes matched....");
       setSyncPieceIndex(syncPieceIndex + 1);
+    } else {
+      console.log("Hash codes did not match");
     }
   }, [mostRecentPayload]);
 
