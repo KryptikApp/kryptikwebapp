@@ -182,11 +182,6 @@ export class KryptikBalanceHolder extends PubSub.Publisher {
     return newTotalBalance;
   }
 
-  getLastUpdateDatestamp(): string {
-    let date = new Date(this.lastUpdated);
-    return date.toString();
-  }
-
   getLastUpdateTimestamp(): string {
     let date = new Date(this.lastUpdated);
     return date.toLocaleTimeString("en-US");

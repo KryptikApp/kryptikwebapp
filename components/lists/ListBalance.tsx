@@ -65,6 +65,12 @@ const ListBalance: NextPage = () => {
     public onLoading(notification: PubSub.Notification) {
       const isLoading = notification.body;
       setIsFetchedBalances(!isLoading);
+      const newTokenAndBals: TokenAndNetwork[] =
+        kryptikService.kryptikBalances.getNonzeroBalances(isAdvanced);
+      const newTotalBal: number =
+        kryptikService.kryptikBalances.getTotalBalance();
+      setTotalBalance(newTotalBal);
+      setTokenAndBalances(newTokenAndBals);
     }
   }
 
@@ -96,20 +102,16 @@ const ListBalance: NextPage = () => {
     // enable notification processing
     newBalanceManager.start();
     kryptikService.kryptikBalances.add(newBalanceManager);
-    if (kryptikService.kryptikBalances.isFresh()) {
-      const newBalances =
-        kryptikService.kryptikBalances.getNonzeroBalances(isAdvanced);
-      setTokenAndBalances(newBalances);
-    }
-  }, []);
-
-  useEffect(() => {
-    const newTokenAndBals: TokenAndNetwork[] =
+    const newBalances =
       kryptikService.kryptikBalances.getNonzeroBalances(isAdvanced);
     const newTotalBal: number =
       kryptikService.kryptikBalances.getTotalBalance();
     setTotalBalance(newTotalBal);
-    setTokenAndBalances(newTokenAndBals);
+    setTokenAndBalances(newBalances);
+  }, []);
+
+  useEffect(() => {
+    // pass for now
   }, [isFetchedBalances]);
 
   useEffect(() => {
@@ -122,7 +124,7 @@ const ListBalance: NextPage = () => {
 
   return (
     <div>
-      <div className="pt-4 border rounded">
+      <div className="pt-4 pb-4 border rounded rounded-lg dark:bg-[#030709]">
         <div>
           <div className="flex flex-row px-3 py-2">
             <div className="">
