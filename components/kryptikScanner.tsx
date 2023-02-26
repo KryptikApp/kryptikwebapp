@@ -20,21 +20,13 @@ export default function KryptikScanner(iprops: IProps) {
     }
   };
 
-  const previewStyle = {
-    height: 400,
-    width: 1000,
-  };
-  const containerStyle = {};
-
   return (
     <div>
       {show ? (
-        <div className="w-[400px] max-w-[90vw]  max-h-[80vh] rounded overflow-hidden">
+        <div className="w-full max-w-[80vh]">
           <ReactQrReader
-            videoStyle={previewStyle}
-            containerStyle={containerStyle}
             constraints={{ facingMode: "environment" }}
-            className={"scale-150"}
+            className={""}
             onResult={(data: any) => handleScan(data)}
           />
         </div>
