@@ -1,5 +1,6 @@
 import type { NextPage } from "next";
-import { useState } from "react";
+import QRCodeStyling, { Options } from "qr-code-styling";
+import { useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { AiFillCheckCircle, AiOutlineCopy } from "react-icons/ai";
 import { useQRCode } from "next-qrcode";
@@ -30,7 +31,36 @@ const Recieve: NextPage = () => {
   const [readableFromAddress, setReadableFromAddress] = useState("");
   const [toAddress, setToAddress] = useState(" ");
   const [isCopied, setIsCopied] = useState(false);
-  const { Canvas } = useQRCode();
+  const [qrOptions, setQrOptions] = useState<Options>({
+    width: 300,
+    height: 300,
+    margin: 2,
+    type: "svg",
+    data: readableFromAddress,
+    dotsOptions: {
+      gradient: {
+        type: "radial",
+        colorStops: [
+          { offset: 0, color: "#28C2F6" },
+          { offset: 1, color: "#000000" },
+        ],
+      },
+      type: "dots",
+    },
+    cornersSquareOptions: {
+      color: "black",
+      type: "extra-rounded",
+    },
+    backgroundOptions: {
+      color: "#e9ebee",
+    },
+    imageOptions: {
+      crossOrigin: "anonymous",
+    },
+  });
+
+  const [qrCode] = useState<QRCodeStyling>(new QRCodeStyling(qrOptions));
+  const qrRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
   // ROUTE PROTECTOR: Listen for changes on loading and authUser, redirect if needed
@@ -51,6 +81,12 @@ const Recieve: NextPage = () => {
     fetchFromAddress();
   }, []);
 
+  useEffect(() => {
+    if (qrRef.current) {
+      qrCode.append(qrRef.current);
+    }
+  }, [qrCode, qrRef]);
+
   const fetchFromAddress = async () => {
     let accountAddress = await getAddressForNetworkDb(
       kryptikWallet,
@@ -67,6 +103,7 @@ const Recieve: NextPage = () => {
       return;
     }
     setToAddress(accountAddress);
+    qrCode.update({ data: accountAddress });
     setReadableFromAddress(accountAddress);
   };
 
@@ -97,8 +134,8 @@ const Recieve: NextPage = () => {
         {/* padding div for space between top and main elements */}
       </div>
 
-      <div className="max-w-lg mx-auto content-center dark:text-white">
-        <div className="rounded-lg border border-solid border-gray-600 py-10 hover:border-gray-800 dark:border-gray-400 dark:hover:border-gray-200">
+      <div className="max-w-md mx-auto content-center dark:text-white">
+        <div className="rounded-lg border border-sky-300 hover:border-sky-400 py-10 ">
           <h1 className="text-center text-3xl font-bold lg:mb-2 dark:text-white">
             Recieve
             <img
@@ -109,30 +146,12 @@ const Recieve: NextPage = () => {
           </h1>
 
           {/* QR CODE */}
-          <div className="flex">
+          <div className="flex mb-2">
             <div className="flex-1" />
             <div className="flex-2">
-              <Canvas
-                text={toAddress}
-                options={{
-                  level: "L",
-                  margin: 2,
-                  scale: 5,
-                  width: 300,
-                  color: {
-                    dark: "#000000",
-                    light: "#FFFFFF",
-                  },
-                }}
-                logo={{
-                  src: selectedTokenAndNetwork.tokenData
-                    ? selectedTokenAndNetwork.tokenData.tokenDb.logoURI
-                    : selectedTokenAndNetwork.baseNetworkDb.iconPath,
-                  options: {
-                    width: 35,
-                  },
-                }}
-              />
+              <div className="rounded rounded-lg bg-sky-400 p-2">
+                <div ref={qrRef} />
+              </div>
             </div>
             <div className="flex-1" />
           </div>
