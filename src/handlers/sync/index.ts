@@ -5,7 +5,7 @@ import { createTempSyncKey, getTempSyncKey } from "../../helpers/sync";
 import { splitString } from "../../helpers/utils";
 import { IWallet } from "../../models/KryptikWallet";
 import { UserDB } from "../../models/user";
-import { decryptText, encryptText } from "../crypto";
+import { createHashCode, decryptText, encryptText } from "../crypto";
 import {
   createVault,
   createVaultName,
@@ -65,14 +65,16 @@ export async function createVaultPieces(
     return null;
   }
   // encrypt new share
-  const shareString: string = encryptText(
-    tempKey,
-    vaultContents.remoteShare2
-  ).ciphertext;
-  const shareStringDecrypted: string = decryptText(
-    tempKey,
-    shareString
-  ).plaintext;
+  // const shareString: string = encryptText(
+  //   tempKey,
+  //   vaultContents.remoteShare2
+  // ).ciphertext;
+  const shareString: string = vaultContents.remoteShare2;
+  // const shareStringDecrypted: string = decryptText(
+  //   tempKey,
+  //   shareString
+  // ).plaintext;
+  const shareStringDecrypted: string = shareString;
   console.log("Share string decrypted on sync generate:");
   console.log(shareStringDecrypted);
   console.log("Share string encrypted on sync generate:");
@@ -191,7 +193,8 @@ export async function assembleVault(
   let sharePlainText = "";
   try {
     // decrypt seedloop piece
-    sharePlainText = decryptText(decryptionKey, shareCypherText).plaintext;
+    // sharePlainText = decryptText(decryptionKey, shareCypherText).plaintext;
+    sharePlainText = shareCypherText;
   } catch (e) {
     throw new Error("Unable to decrypt sync strings.");
   }
@@ -236,4 +239,25 @@ export async function assembleVault(
 export function createValidationCode(seedLoop: HDSeedLoop): string {
   const ethNetwork = NetworkFromTicker("eth");
   return seedLoop.getAddresses(ethNetwork)[0].slice(-5);
+}
+
+const HASHCODE_DELIMITER: string = "|HC|";
+
+export function appendHashCode(str: string): string {
+  const hashCode = createHashCode(str);
+  return str.concat(HASHCODE_DELIMITER, hashCode.toString());
+}
+
+interface IHahCodeParsed {
+  data: string;
+  hashCode: string;
+}
+export function parseHashCode(str: string): IHahCodeParsed | null {
+  try {
+    const splitString: string[] = str.split(HASHCODE_DELIMITER);
+    console.log(splitString);
+    return { hashCode: splitString[1], data: splitString[0] };
+  } catch (e) {
+    return null;
+  }
 }

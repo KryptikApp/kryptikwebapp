@@ -25,9 +25,9 @@ const SyncCard: NextPage<Props> = (props) => {
     ...props,
   };
   return (
-    <div className="m-4 max-w-xl max-h-screen dark:text-white border border-gray-400 dark:border-gray-500 pt-10 pb-12 mx-auto my-auto px-4 rounded rounded-lg bg-gradient-to-r from-white to-gray-50 dark:from-black dark:to-gray-900">
+    <div className="m-4 max-w-lg max-h-screen dark:text-white border border-sky-300 pt-8 pb-10 mx-auto my-auto px-4 rounded rounded-lg bg-gray-50 dark:bg-gray-900 hover:border-sky-400 dark:hover:border-sky-400">
       <div className="flex flex-row">
-        <h1 className="text-2xl font-bold mb-2">
+        <h1 className="text-4xl font-bold mb-2">
           Sync
           <img
             src="/kryptikBrand/kryptikEyez.png"

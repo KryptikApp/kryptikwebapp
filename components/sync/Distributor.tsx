@@ -1,9 +1,12 @@
 import { RealtimeChannel } from "@supabase/supabase-js";
+import QRCodeStyling, { Options } from "qr-code-styling";
 import { NextPage } from "next";
 import { useQRCode } from "next-qrcode";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createHashCode } from "../../src/handlers/crypto";
 import {
+  appendHashCode,
   createValidationCode,
   createVaultPieces,
 } from "../../src/handlers/sync";
@@ -38,14 +41,56 @@ const Distributor: NextPage = () => {
   const [errorText, setErrorText] = useState("Unable to sync.");
   const [syncPieces, setSyncPieces] = useState<string[] | null>(null);
   const [syncPieceIndex, setSyncPieceIndex] = useState(0);
+  const [newCodeRequested, setNewCodeRequested] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [totalSteps, setTotalSteps] = useState(0);
   const [validationCode, setValidationCode] = useState("");
   const [mostRecentPayload, setMostRecentPayload] =
     useState<RealTimePayload | null>(null);
   const [qrText, setQrText] = useState("");
-  const { Canvas } = useQRCode();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+
+  const [qrOptions, setQrOptions] = useState<Options>({
+    width: 300,
+    height: 300,
+    type: "svg",
+    data: qrText,
+    dotsOptions: {
+      gradient: {
+        type: "radial",
+        colorStops: [
+          { offset: 0, color: "#28C2F6" },
+          { offset: 1, color: "#000000" },
+        ],
+      },
+      type: "dots",
+    },
+    cornersSquareOptions: {
+      color: "black",
+      type: "extra-rounded",
+    },
+    backgroundOptions: {
+      color: "#e9ebee",
+    },
+    imageOptions: {
+      crossOrigin: "anonymous",
+    },
+  });
+
+  const useQRCodeStyling = (options: Options): QRCodeStyling | null => {
+    //Only do this on the client
+    if (typeof window !== "undefined") {
+      /* eslint-disable */
+      const QRCodeStylingLib = require("qr-code-styling");
+      /* eslint-disable */
+      const qrCodeStyling: QRCodeStyling = new QRCodeStylingLib(options);
+      return qrCodeStyling;
+    }
+    return null;
+  };
+
+  const [qrCode] = useState<QRCodeStyling | null>(useQRCodeStyling(qrOptions));
+  const qrRef = useRef<HTMLDivElement>(null);
 
   /** Ensure sync action is allowed. */
   function isSyncSafe(): boolean {
@@ -76,13 +121,12 @@ const Distributor: NextPage = () => {
 
   function cancelSync() {
     console.log("canceling sync. User initiated.");
-    setSyncPieces([]);
     setButtonText("Start");
     setSyncPieceIndex(0);
     setProgressEnum(EnumProgress.Start);
     setProgressPercent(0);
-    setTotalSteps(0);
   }
+
   function incrementProgress() {
     const isSafe: boolean = isSyncSafe();
     if (!isSafe) {
@@ -96,10 +140,8 @@ const Distributor: NextPage = () => {
     switch (progressEnum) {
       case EnumProgress.Start: {
         console.log("STAGE 0");
-        if (!syncPieces) {
-          // gnerate sync pieces
-          generateSyncPieces();
-        }
+        // gnerate sync pieces
+        generateSyncPieces();
         break;
       }
       case EnumProgress.ShowCode: {
@@ -139,7 +181,7 @@ const Distributor: NextPage = () => {
           setProgressEnum(EnumProgress.ShowCode);
           console.log("hereee");
           console.log("new qr code:");
-          const newQrText = syncPieces[newIndex];
+          const newQrText = appendHashCode(syncPieces[newIndex]);
           console.log(newQrText);
           // ensure new code has text
           if (newQrText == "") {
@@ -148,6 +190,7 @@ const Distributor: NextPage = () => {
             setErrorText("Unable to sync. Empty qr code text.");
             return;
           }
+          qrCode?.update({ data: newQrText });
           setQrText(newQrText);
           // button should display 'next'
           setButtonText("Next");
@@ -188,12 +231,18 @@ const Distributor: NextPage = () => {
     }
   }
 
+  /** Generates sync pieces and updates state. Reuses saved pieces if available. */
   async function generateSyncPieces(): Promise<string[] | null> {
     console.log("Starting sync generator....");
     if (!authUser) return null;
     console.log("Generating sync pieces....");
     setIsLoading(true);
-    const newPieces = await createVaultPieces(authUser);
+    let newPieces;
+    if (syncPieces) {
+      newPieces = syncPieces;
+    } else {
+      newPieces = await createVaultPieces(authUser);
+    }
     // ensure sync pieces are available
     if (!newPieces) {
       setProgressEnum(EnumProgress.Error);
@@ -205,10 +254,14 @@ const Distributor: NextPage = () => {
     setProgressPercent(newProgressPercent);
     setProgressEnum(EnumProgress.ShowCode);
     // set initial qr code
-    setQrText(newPieces[0]);
+    const newQrText = appendHashCode(newPieces[0]);
+    qrCode?.update({ data: newQrText });
+    setQrText(newQrText);
     setButtonText("Next");
     setIsLoading(false);
-    setSyncPieces(newPieces);
+    if (!syncPieces) {
+      setSyncPieces(newPieces);
+    }
     return newPieces;
   }
 
@@ -232,7 +285,6 @@ const Distributor: NextPage = () => {
         console.log(data);
         console.log("setting index....");
         setMostRecentPayload(data);
-        setSyncPieceIndex(data.payload.newScanIndex);
       })
       .subscribe((status) => {
         console.log("subscription status distributor::");
@@ -245,11 +297,28 @@ const Distributor: NextPage = () => {
   }, []);
 
   useEffect(() => {
+    if (qrRef.current) {
+      qrCode?.append(qrRef.current);
+    }
+  }, [qrCode, qrRef]);
+
+  useEffect(() => {
     if (progressEnum == EnumProgress.ShowCode) {
-      console.log("RUNNING USE EFFECT BASED ON INDEX");
       incrementProgress();
     }
   }, [syncPieceIndex]);
+
+  useEffect(() => {
+    if (!mostRecentPayload || !syncPieces) return;
+    const receiverHashCode = mostRecentPayload.payload.hashCode;
+    const currHashCode = createHashCode(syncPieces[syncPieceIndex]);
+    if (receiverHashCode == currHashCode) {
+      console.log("Hash codes matched....");
+      setSyncPieceIndex(syncPieceIndex + 1);
+    } else {
+      console.log("Hash codes did not match");
+    }
+  }, [mostRecentPayload]);
 
   return (
     <SyncCard
@@ -267,33 +336,26 @@ const Distributor: NextPage = () => {
           </div>
         )}
         {/* qr code */}
-        {progressEnum == EnumProgress.ShowCode && (
-          <div className="flex flex-col space-y-2">
-            <div className="flex">
-              <div className="flex-1" />
-              <div className="flex-2 mx-auto">
-                <Canvas
-                  text={qrText}
-                  options={{
-                    level: "H",
-                    margin: 2,
-                    scale: 5,
-                    width: 300,
-                    color: {
-                      dark: "#000000",
-                      light: "#FFFFFF",
-                    },
-                  }}
-                />
-                <p className="text-sm text-blue-500 mt-4">
-                  Scanned {syncPieceIndex} codes.
-                </p>
+        <div
+          className={`flex flex-col space-y-2 ${
+            progressEnum == EnumProgress.ShowCode ? "" : "hidden"
+          }`}
+        >
+          <div className="flex">
+            <div className="flex-1" />
+            <div className="flex-2 mx-auto">
+              <div className="rounded rounded-lg bg-sky-400 p-2">
+                <div ref={qrRef} />
               </div>
-              <div className="flex-1" />
+
+              <p className="text-sm text-sky-500 mt-4">
+                Scanned {syncPieceIndex} codes.
+              </p>
+              <p className="text-lg">Scan with new device.</p>
             </div>
-            <p className="text-lg">Scan with new device.</p>
+            <div className="flex-1" />
           </div>
-        )}
+        </div>
         {/* validate */}
         {progressEnum == EnumProgress.Validate && (
           <div className="flex flex-col space-y-2">
@@ -321,7 +383,7 @@ const Distributor: NextPage = () => {
         {progressEnum == EnumProgress.ShowCode && (
           <div>
             <p
-              className="text-center text-md hover:cursor-pointer text-gray-400 dark:text-gray-500"
+              className="text-center text-md hover:cursor-pointer text-gray-400 dark:text-gray-500 mt-4 hover:text-red-500 dark:hover:text-red-500"
               onClick={cancelSync}
             >
               Exit
