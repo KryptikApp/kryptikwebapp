@@ -65,10 +65,11 @@ export async function createVaultPieces(
     return null;
   }
   // encrypt new share
-  const shareString: string = encryptText(
-    tempKey,
-    vaultContents.remoteShare2
-  ).ciphertext;
+  // const shareString: string = encryptText(
+  //   tempKey,
+  //   vaultContents.remoteShare2
+  // ).ciphertext;
+  const shareString: string = vaultContents.remoteShare2;
   const shareStringDecrypted: string = decryptText(
     tempKey,
     shareString
@@ -191,7 +192,8 @@ export async function assembleVault(
   let sharePlainText = "";
   try {
     // decrypt seedloop piece
-    sharePlainText = decryptText(decryptionKey, shareCypherText).plaintext;
+    // sharePlainText = decryptText(decryptionKey, shareCypherText).plaintext;
+    sharePlainText = shareCypherText;
   } catch (e) {
     throw new Error("Unable to decrypt sync strings.");
   }
