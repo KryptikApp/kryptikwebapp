@@ -18,10 +18,6 @@ import Link from "next/link";
 import Script from "next/script";
 
 const Recieve: NextPage = () => {
-  <Script
-    type="text/javascript"
-    src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"
-  ></Script>;
   const {
     kryptikWallet,
     kryptikService,
