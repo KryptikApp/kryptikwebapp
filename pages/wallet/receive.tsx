@@ -3,7 +3,6 @@ import QRCodeStyling, { Options } from "qr-code-styling";
 import { useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { AiFillCheckCircle, AiOutlineCopy } from "react-icons/ai";
-import { useQRCode } from "next-qrcode";
 import { useEffect } from "react";
 
 // kryptik imports
@@ -16,8 +15,13 @@ import { useRouter } from "next/router";
 import { ServiceState } from "../../src/services/types";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 import Link from "next/link";
+import Script from "next/script";
 
 const Recieve: NextPage = () => {
+  <Script
+    type="text/javascript"
+    src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"
+  ></Script>;
   const {
     kryptikWallet,
     kryptikService,
@@ -59,7 +63,18 @@ const Recieve: NextPage = () => {
     },
   });
 
-  const [qrCode] = useState<QRCodeStyling>(new QRCodeStyling(qrOptions));
+  const useQRCodeStyling = (options: Options): QRCodeStyling | null => {
+    //Only do this on the client
+    if (typeof window !== "undefined") {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const QRCodeStylingLib = require("qr-code-styling");
+      const qrCodeStyling: QRCodeStyling = new QRCodeStylingLib(options);
+      return qrCodeStyling;
+    }
+    return null;
+  };
+
+  const [qrCode] = useState<QRCodeStyling | null>(useQRCodeStyling(qrOptions));
   const qrRef = useRef<HTMLDivElement>(null);
 
   const router = useRouter();
@@ -83,7 +98,7 @@ const Recieve: NextPage = () => {
 
   useEffect(() => {
     if (qrRef.current) {
-      qrCode.append(qrRef.current);
+      qrCode?.append(qrRef.current);
     }
   }, [qrCode, qrRef]);
 
@@ -103,7 +118,7 @@ const Recieve: NextPage = () => {
       return;
     }
     setToAddress(accountAddress);
-    qrCode.update({ data: accountAddress });
+    qrCode?.update({ data: accountAddress });
     setReadableFromAddress(accountAddress);
   };
 

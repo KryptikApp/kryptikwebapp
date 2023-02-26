@@ -77,7 +77,18 @@ const Distributor: NextPage = () => {
     },
   });
 
-  const [qrCode] = useState<QRCodeStyling>(new QRCodeStyling(qrOptions));
+  const useQRCodeStyling = (options: Options): QRCodeStyling | null => {
+    //Only do this on the client
+    if (typeof window !== "undefined") {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const QRCodeStylingLib = require("qr-code-styling");
+      const qrCodeStyling: QRCodeStyling = new QRCodeStylingLib(options);
+      return qrCodeStyling;
+    }
+    return null;
+  };
+
+  const [qrCode] = useState<QRCodeStyling | null>(useQRCodeStyling(qrOptions));
   const qrRef = useRef<HTMLDivElement>(null);
 
   /** Ensure sync action is allowed. */
@@ -178,7 +189,7 @@ const Distributor: NextPage = () => {
             setErrorText("Unable to sync. Empty qr code text.");
             return;
           }
-          qrCode.update({ data: newQrText });
+          qrCode?.update({ data: newQrText });
           setQrText(newQrText);
           // button should display 'next'
           setButtonText("Next");
@@ -243,7 +254,7 @@ const Distributor: NextPage = () => {
     setProgressEnum(EnumProgress.ShowCode);
     // set initial qr code
     const newQrText = appendHashCode(newPieces[0]);
-    qrCode.update({ data: newQrText });
+    qrCode?.update({ data: newQrText });
     setQrText(newQrText);
     setButtonText("Next");
     setIsLoading(false);
@@ -282,14 +293,11 @@ const Distributor: NextPage = () => {
         }
       });
     setChannel(newChannel);
-    const qrElement = document.getElementById("qrCanvas");
-    console.log(qrElement);
-    qrCode.append(qrElement || undefined);
   }, []);
 
   useEffect(() => {
     if (qrRef.current) {
-      qrCode.append(qrRef.current);
+      qrCode?.append(qrRef.current);
     }
   }, [qrCode, qrRef]);
 
