@@ -242,7 +242,7 @@ const HASHCODE_DELIMITER: string = "|HC|";
 
 export function appendHashCode(str: string): string {
   const hashCode = createHashCode(str);
-  return str + HASHCODE_DELIMITER + hashCode.toString();
+  return str.concat(HASHCODE_DELIMITER, hashCode.toString());
 }
 
 interface IHahCodeParsed {
@@ -252,6 +252,7 @@ interface IHahCodeParsed {
 export function parseHashCode(str: string): IHahCodeParsed | null {
   try {
     const splitString: string[] = str.split(HASHCODE_DELIMITER);
+    console.log(splitString);
     return { hashCode: splitString[1], data: splitString[0] };
   } catch (e) {
     return null;
