@@ -27,4 +27,4 @@ setInterval(() => {
       console.log("User refreshed!");
     });
   });
-}, 720000);
+}, 32400000);

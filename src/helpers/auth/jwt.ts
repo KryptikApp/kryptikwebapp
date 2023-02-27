@@ -1,12 +1,11 @@
 import { User } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
-// Usually between 5 minutes - 15 minutes
 export function generateAccessToken(user: User) {
   const secret = process.env.JWT_ACCESS_SECRET;
   if (!secret) throw new Error("No secret available for JWT generation.");
   return jwt.sign({ userId: user.id }, secret, {
-    expiresIn: "15m",
+    expiresIn: "10h",
   });
 }
 
@@ -20,7 +19,7 @@ export function generateRefreshToken(user: User, jti: any) {
     },
     secret,
     {
-      expiresIn: "10h",
+      expiresIn: "2 days",
     }
   );
 }
@@ -36,8 +35,8 @@ export function generateTokens(user: User, jti: any) {
 }
 
 /**
- * Generate a random 8 digit number as the email token
+ * Generate a random 7 digit number as the email token
  */
 export function generateCode(): string {
-  return Math.floor(10000000 + Math.random() * 90000000).toString();
+  return Math.floor(1000000 + Math.random() * 8000000).toString();
 }

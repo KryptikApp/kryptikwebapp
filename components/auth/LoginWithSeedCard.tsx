@@ -87,7 +87,7 @@ const LoginWithSeedCard: NextPage = () => {
 
   async function handleCodeChage(newCode: string) {
     setCode(newCode);
-    if (newCode.length == 8) {
+    if (newCode.length == 7) {
       setLoadingApproval(true);
       handleStatusUpdate("Building wallet on device.");
       const approvedStatus: boolean = await signInWithToken(
@@ -181,10 +181,10 @@ const LoginWithSeedCard: NextPage = () => {
           )}
           {!loading && sentEmail && !loadingApproval && (
             <div>
-              <div className="mb-10 ml-[10%] md:ml-[10%]">
+              <div className="mb-10 ml-[5%] md:ml-[14%]">
                 <ReactCodeInput
                   name="Your Code"
-                  fields={8}
+                  fields={7}
                   inputMode={"numeric"}
                   onChange={handleCodeChage}
                   disabled={loadingApproval}
