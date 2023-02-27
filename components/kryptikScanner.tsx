@@ -16,10 +16,8 @@ export default function KryptikScanner(iprops: IProps) {
   const { show, onScan } = { ...iprops };
   const [qrScanner, setQrScanner] = useState<QrScanner | null>();
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const handleScan = async function (data: any) {
-    if (data && data.text && typeof data.text == "string") {
-      onScan(data.text);
-    }
+  const handleScan = async function (data: string) {
+    onScan(data);
   };
 
   useEffect(() => {
@@ -31,7 +29,7 @@ export default function KryptikScanner(iprops: IProps) {
     const newQrScanner = new QrScanner(
       videoRef.current,
       (result) => {
-        handleScan(result);
+        handleScan(result.data);
       },
       {
         preferredCamera: "environment",
