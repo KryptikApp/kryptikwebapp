@@ -120,7 +120,7 @@ const Distributor: NextPage = () => {
   }
 
   function cancelSync() {
-    console.log("canceling sync. User initiated.");
+    console.log("Canceling sync. User initiated.");
     setButtonText("Start");
     setSyncPieceIndex(0);
     setProgressEnum(EnumProgress.Start);
@@ -134,20 +134,13 @@ const Distributor: NextPage = () => {
       setProgressPercent(0);
       return;
     }
-    console.log("running switch statement with enum and text:");
-    console.log(progressEnum);
-    console.log(buttonText);
     switch (progressEnum) {
       case EnumProgress.Start: {
-        console.log("STAGE 0");
         // gnerate sync pieces
         generateSyncPieces();
         break;
       }
       case EnumProgress.ShowCode: {
-        console.log("STAGE 1");
-        console.log("INDEX:");
-        console.log(syncPieceIndex);
         const newIndex = syncPieceIndex;
         // ensure sync pieces are available
         if (!syncPieces) {
@@ -161,7 +154,6 @@ const Distributor: NextPage = () => {
             setErrorText("Unable to sync. Message channel not available.");
             return;
           }
-          console.log("matched!!!");
           // move onto validation
           setProgressEnum(EnumProgress.Validate);
           // generate validation code
@@ -179,13 +171,10 @@ const Distributor: NextPage = () => {
             .then((e) => console.log("Stop scanning message sent."));
         } else {
           setProgressEnum(EnumProgress.ShowCode);
-          console.log("hereee");
-          console.log("new qr code:");
           const newQrText = appendHashCode(syncPieces[newIndex]);
-          console.log(newQrText);
           // ensure new code has text
           if (newQrText == "") {
-            console.warn("empty qr text.");
+            console.warn("Empty qr text.");
             setProgressEnum(EnumProgress.Error);
             setErrorText("Unable to sync. Empty qr code text.");
             return;
@@ -212,7 +201,7 @@ const Distributor: NextPage = () => {
             event: "validation",
             payload: { isValidated: true },
           })
-          .then((e) => console.log("validation broadcast sent."));
+          .then((e) => console.log("Validation broadcast sent."));
         setProgressPercent(100);
         setProgressEnum(EnumProgress.Done);
         setButtonText("Back to Wallet");
@@ -233,7 +222,6 @@ const Distributor: NextPage = () => {
 
   /** Generates sync pieces and updates state. Reuses saved pieces if available. */
   async function generateSyncPieces(): Promise<string[] | null> {
-    console.log("Starting sync generator....");
     if (!authUser) return null;
     console.log("Generating sync pieces....");
     setIsLoading(true);
@@ -281,14 +269,9 @@ const Distributor: NextPage = () => {
     newChannel
       // subscribe to scan messages
       .on("broadcast", { event: "scan" }, (data) => {
-        console.log("Scan channel payload:");
-        console.log(data);
-        console.log("setting index....");
         setMostRecentPayload(data);
       })
       .subscribe((status) => {
-        console.log("subscription status distributor::");
-        console.log(status);
         if (status === "SUBSCRIBED") {
           // console.log("Subscribed to sync channel.");
         }
@@ -313,10 +296,9 @@ const Distributor: NextPage = () => {
     const receiverHashCode = mostRecentPayload.payload.hashCode;
     const currHashCode = createHashCode(syncPieces[syncPieceIndex]);
     if (receiverHashCode == currHashCode) {
-      console.log("Hash codes matched....");
       setSyncPieceIndex(syncPieceIndex + 1);
     } else {
-      console.log("Hash codes did not match");
+      // pass for now
     }
   }, [mostRecentPayload]);
 

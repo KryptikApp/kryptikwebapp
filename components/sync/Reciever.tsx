@@ -88,7 +88,6 @@ const Reciever: NextPage = () => {
       setValidationCode(newValidationCode);
       setIsLoading(false);
     } catch (e) {
-      console.error(e);
       setProgressEnum(EnumProgress.Error);
       setErrorText("Failed to assemble wallet vault. Unable to complete sync.");
       setIsLoading(false);
@@ -132,25 +131,17 @@ const Reciever: NextPage = () => {
         if (uri == lastScanText) {
           return;
         }
-        console.log("uri:");
-        console.log(uri);
         const scanRes = parseHashCode(uri);
         if (!scanRes) return;
         // const newIndex = syncPieceIndex + 1;
         const newHashCode: number = createHashCode(scanRes.data);
         if (newHashCode.toString() != scanRes.hashCode) {
-          console.log("Hash codes do not match. Rescanning...");
-          console.log(
-            `Expected: ${
-              scanRes.hashCode
-            }. Generated: ${newHashCode.toString()}`
-          );
           return;
         }
         // indicate we can show new code
         syncPieces.push(scanRes.data);
         broadcastScan(newHashCode).then(() => {
-          console.log(`Scan message sent with hash code: ${scanRes.hashCode}`);
+          // pass for now
         });
         setLastScanText(uri);
         // syncPieceIndex = newIndex;
@@ -217,13 +208,9 @@ const Reciever: NextPage = () => {
       })
       // Listen to stop scanning messages.
       .on("broadcast", { event: "stopScanning" }, (data) => {
-        console.log("Stop scanning message:");
-        console.log(data);
         setStopScanRequested(true);
       })
       .subscribe((status) => {
-        console.log("subscription status receiver:");
-        console.log(status);
         if (status === "SUBSCRIBED") {
           // console.log("Subscribed to sync channel.");
         }

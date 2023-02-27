@@ -44,8 +44,6 @@ export async function createVaultPieces(
       throw new Error("No object returned by create vault.");
     }
   } catch (e) {
-    console.warn(e);
-    console.warn("Unable to create new vault.");
     return null;
   }
   // update server share
@@ -54,10 +52,6 @@ export async function createVaultPieces(
 
   const maxStringSize: number = 50;
   const seedloopString: string = vaultContents.vault.seedloopSerlializedCipher;
-  console.log("SEEDLOP STRING:");
-  console.log(seedloopString);
-  console.log("Share string unencrypted");
-  console.log(vaultContents.remoteShare2);
   //create temporary encryption key
   const tempKey: TempSyncKey | null = await createTempSyncKey();
   if (!tempKey) {
@@ -75,10 +69,6 @@ export async function createVaultPieces(
   //   shareString
   // ).plaintext;
   const shareStringDecrypted: string = shareString;
-  console.log("Share string decrypted on sync generate:");
-  console.log(shareStringDecrypted);
-  console.log("Share string encrypted on sync generate:");
-  console.log(shareString);
   if (shareStringDecrypted != vaultContents.remoteShare2) {
     throw new Error("Decrypted share does not match plaintext.");
   }
@@ -155,12 +145,8 @@ export async function assembleVault(
     }
     return 0;
   });
-  console.log("Sync pieces:");
-  console.log(syncPieces);
   // match pieces
   for (const piece of syncPieces) {
-    console.log("processing");
-    console.log(piece);
     switch (piece.type) {
       case "share": {
         // ensure order safety
@@ -206,14 +192,6 @@ export async function assembleVault(
   }
   //create vault
   const vaultName = createVaultName(uid);
-  console.log("__________");
-  console.log("seedloop string");
-  console.log(seedloopCypherText);
-  console.log("Share string unencrypted");
-  console.log(sharePlainText);
-  console.log("Share string encrypted");
-  console.log(shareCypherText);
-  console.log("__________");
 
   const newVault: VaultContents = {
     seedloopSerlializedCipher: seedloopCypherText,
@@ -232,6 +210,7 @@ export async function assembleVault(
     return seedloop;
   } catch (e) {
     console.log(e);
+    localStorage.removeItem(vaultName);
     throw new Error("Unable to recover seedloop from vault.");
   }
 }
@@ -255,7 +234,6 @@ interface IHahCodeParsed {
 export function parseHashCode(str: string): IHahCodeParsed | null {
   try {
     const splitString: string[] = str.split(HASHCODE_DELIMITER);
-    console.log(splitString);
     return { hashCode: splitString[1], data: splitString[0] };
   } catch (e) {
     return null;
