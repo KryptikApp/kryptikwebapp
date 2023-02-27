@@ -44,6 +44,7 @@ const Reciever: NextPage = () => {
     useState<HDSeedLoop | null>();
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const [lastScanText, setLastScanText] = useState("");
+  const [newScanText, setNewScanText] = useState("");
   // const [indexToShow, setIndexToShow] = useState(0);
 
   // let syncPieceIndex = 0;
@@ -94,6 +95,16 @@ const Reciever: NextPage = () => {
       return;
     }
   }
+
+  function handleScan(uri: string) {
+    setNewScanText(uri);
+  }
+
+  useEffect(() => {
+    if (progressEnum == EnumProgress.ShowCode) {
+      incrementProgress(newScanText);
+    }
+  }, [newScanText]);
 
   function incrementProgress(uri?: string) {
     const isSafe: boolean = isSyncSafe();
@@ -251,7 +262,7 @@ const Reciever: NextPage = () => {
         <div>
           <KryptikScanner
             show={progressEnum == EnumProgress.ShowCode}
-            onScan={incrementProgress}
+            onScan={handleScan}
           />
         </div>
         {/* validate */}
