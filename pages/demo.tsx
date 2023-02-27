@@ -14,36 +14,38 @@ import { Chart } from "react-chartjs-2";
 import { useKryptikThemeContext } from "../components/ThemeProvider";
 import { AiOutlineLink } from "react-icons/ai";
 import Link from "next/link";
+import DemoCard from "../components/DemoCard";
 
 const Demo: NextPage = () => {
   const { isDark } = useKryptikThemeContext();
   return (
     <div>
       <div className="dark:text-white">
-        <div className="min-h-[100vh]">
-          <div className="min-h-[20vh]">
+        <div className="">
+          <div className="min-h-[10vh]">
             {/* padding div for space between top and main elements */}
           </div>
 
-          <div className="px-4 md:px-0  max-w-2xl mx-auto">
-            <h1 className="text-5xl text-left font-bold sans mb-5">
-              <span className="">Kryptik</span> Wallet Demo
-            </h1>
-            {/* demo video */}
-            <div>
-              <iframe
-                src="https://player.vimeo.com/video/800170803?h=312c376fda&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
-                allow="autoplay; fullscreen; picture-in-picture"
-                width="640"
-                height="360"
-                className="w-[100%]"
-                allowFullScreen
-              ></iframe>
-            </div>
-            <p className="leading-loose my-4 text-xl text-justify dark:text-gray-400">
-              Kryptik is a simple wallet that lets you save, send, and collect
-              value across the internet.
-            </p>
+          <div className="px-4 md:px-0  max-w-2xl mx-auto flex flex-col space-y-4">
+            <h1 className="text-5xl text-left font-bold sans mb-5">Demos</h1>
+            <DemoCard
+              title={"Kryptik Sync"}
+              src={
+                "https://player.vimeo.com/video/802871414?h=c2cd6980c1&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=5847"
+              }
+              description={
+                "Kryptik Sync is a new ability that allows anyone to share their wallet across devices in less than 60 seconds."
+              }
+            />
+            <DemoCard
+              title={"Kryptik V0"}
+              src={
+                "https://player.vimeo.com/video/800170803?h=312c376fda&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479"
+              }
+              description={
+                "Kryptik is a simple wallet that lets you save, send, and collect value across the internet."
+              }
+            />
             <p className="text-md mt-8 text-gray-700 dark:text-gray-200 text-right">
               Check out the Kryptik blog{" "}
               <span className="text-sky-400">
