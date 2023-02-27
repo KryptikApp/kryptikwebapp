@@ -298,8 +298,9 @@ export function useKryptikAuth() {
         refreshUserAndWallet();
       }
     };
-    // run balance refresh every 5 minutes
-    setInterval(refreshBalances, 300000);
+    // run balance refresh every 5 minutes... disabled for now
+    // TODO: FIX CALLBACK ERROR
+    // setInterval(refreshBalances, 300000);
   }, []);
 
   return {

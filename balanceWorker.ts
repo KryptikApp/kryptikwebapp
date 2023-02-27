@@ -38,7 +38,6 @@ import {
   IFetchNetworkBalanceParams,
   IFetchTokenBalanceParams,
 } from "./src/helpers/balances";
-import { OnDoneBalances, OnFetch } from "./src/services/types";
 
 /** Returns balances for all supported networks and tokens. */
 export async function getAllBalances(

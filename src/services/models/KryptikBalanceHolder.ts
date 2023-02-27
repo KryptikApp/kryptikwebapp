@@ -197,20 +197,20 @@ export class KryptikBalanceHolder extends PubSub.Publisher {
 
   handleFetchDone(bals: TokenAndNetwork[]) {
     this.updateBalances(bals);
-    this.notify("loading", false);
     this.isLoading = false;
+    this.notify("loading", false);
   }
 
   async refresh(params: IFetchAllBalancesParams) {
     this.isLoading = true;
     this.totalFetched = 0;
-    this.notify("loading", true);
     params.onDone = (b) => {
       this.handleFetchDone(b);
     };
     params.onFetch = (b) => {
       this.handleFetchIncrement(b);
     };
+    this.totalFetched = 0;
     // run asynchronous fetch of balances
     getAllBalances(params);
   }

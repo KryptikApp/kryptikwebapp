@@ -34,6 +34,7 @@ const ListBalance: NextPage = () => {
   );
   const [totalBalance, setTotalBalance] = useState<number>(0);
   const [progressPercent, setProgressPercent] = useState(0);
+  const [addedSubscriber, setAddedSubscriber] = useState(false);
 
   //TODO: ACCOUNT FOR TOKENS ON MULTIPLE NETWORKS
 
@@ -62,38 +63,48 @@ const ListBalance: NextPage = () => {
         }
       }
     }
+    // TODO: BEING CALLED MULTIPLE TIMES
     public onLoading(notification: PubSub.Notification) {
-      const isLoading = notification.body;
-      setIsFetchedBalances(!isLoading);
+      const newIsLoading = notification.body;
+      if (kryptikService.kryptikBalances.isLoading || newIsLoading) {
+        return;
+      }
       const newTokenAndBals: TokenAndNetwork[] =
         kryptikService.kryptikBalances.getNonzeroBalances(isAdvanced);
       const newTotalBal: number =
         kryptikService.kryptikBalances.getTotalBalance();
       setTotalBalance(newTotalBal);
       setTokenAndBalances(newTokenAndBals);
+      setIsManualRefresh(false);
+      setIsFetchedBalances(true);
     }
   }
 
   const handleManualRefresh = function () {
+    console.log("RUNNING MANUAL REFRESH");
     if (!isManualRefresh) {
       setIsManualRefresh(true);
     }
     setProgressPercent(0);
+    fetchBalances(true);
+    setIsFetchedBalances(false);
   };
 
-  // retrieves wallet balances
+  // retrieves wallet balances... done for manual refresh
   const fetchBalances = async (manualRefresh = false) => {
     if (kryptikWallet.status != WalletStatus.Connected) return;
     if (!kryptikService.kryptikBalances) return;
     // start async balance refresh
     console.log("refreshing balances..");
     refreshBalances();
-    if (manualRefresh) setIsManualRefresh(false);
   };
 
   useEffect(() => {
     if (kryptikService.serviceState != ServiceState.started) {
       router.push("/");
+    }
+    if (addedSubscriber) {
+      return;
     }
     // instantiate balance manager
     const newBalanceManager = new BalanceManager(
@@ -108,19 +119,12 @@ const ListBalance: NextPage = () => {
       kryptikService.kryptikBalances.getTotalBalance();
     setTotalBalance(newTotalBal);
     setTokenAndBalances(newBalances);
+    setAddedSubscriber(true);
   }, []);
 
   useEffect(() => {
     // pass for now
   }, [isFetchedBalances]);
-
-  useEffect(() => {
-    if (!isManualRefresh) return;
-    if (kryptikService.serviceState != ServiceState.started) {
-      router.push("/");
-    }
-    fetchBalances(true);
-  }, [isManualRefresh]);
 
   return (
     <div>
