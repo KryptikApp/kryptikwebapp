@@ -31,8 +31,7 @@ export default function KryptikScanner(iprops: IProps) {
     const newQrScanner = new QrScanner(
       videoRef.current,
       (result) => {
-        console.log("RESULT");
-        console.log(result);
+        handleScan(result);
       },
       {
         preferredCamera: "environment",
