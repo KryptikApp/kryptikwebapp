@@ -248,14 +248,12 @@ const Reciever: NextPage = () => {
           </div>
         )}
         {/* scan */}
-        {progressEnum == EnumProgress.ShowCode && (
-          <div>
-            <KryptikScanner
-              show={progressEnum == EnumProgress.ShowCode}
-              onScan={incrementProgress}
-            />
-          </div>
-        )}
+        <div>
+          <KryptikScanner
+            show={progressEnum == EnumProgress.ShowCode}
+            onScan={incrementProgress}
+          />
+        </div>
         {/* validate */}
         {progressEnum == EnumProgress.Validate && (
           <div>
