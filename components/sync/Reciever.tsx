@@ -259,7 +259,7 @@ const Reciever: NextPage = () => {
           </div>
         )}
         {/* scan */}
-        <div className="mx-auto">
+        <div className="w-full">
           <KryptikScanner
             show={progressEnum == EnumProgress.ShowCode}
             onScan={handleScan}
