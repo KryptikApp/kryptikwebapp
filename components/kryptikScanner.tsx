@@ -57,7 +57,7 @@ export default function KryptikScanner(iprops: IProps) {
     <div className={`${show ? "" : "hidden"}`}>
       <video
         ref={videoRef}
-        className={`rounded-xl object-cover mb-8 h-96`}
+        className={`rounded-xl object-cover w-full max-w-sm h-96 mb-8 mx-auto`}
         muted
         id="scanner"
       />
