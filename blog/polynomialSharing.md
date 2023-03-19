@@ -1,7 +1,7 @@
 ---
 title: "Secret Sharing: The Power of Polynomials"
 oneLiner: "Polynomials are a powerful tool for sharing secrets."
-image: "/blog/polynomialCover.png"
+image: "/blog/polynomial.png"
 lastUpdate: "2022-11-7"
 category: "Technology"
 contributorId: "jett"

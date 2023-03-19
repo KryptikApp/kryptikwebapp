@@ -1,7 +1,7 @@
 ---
 title: "Asymmetric Cryptography"
 oneLiner: "Public-private key pairs give everyone access to privacy and ownership."
-image: "/blog/publicKeyGradient.jpg"
+image: "/blog/key.png"
 lastUpdate: "2022-10-23"
 category: "Technology"
 contributorId: "jett"
