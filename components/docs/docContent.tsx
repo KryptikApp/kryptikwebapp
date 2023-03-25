@@ -32,7 +32,7 @@ const DocContent = ({ content }: Props) => {
   return (
     <div className="max-w-3xl mx-auto">
       <div
-        className="prose dark:prose-invert md:prose-xl prose-blockquote:border-sky-400 prose-code:rounded-md prose-code:hover:cursor-pointer prose-code:scrollbar-thin prose-code:scrollbar-thumb-sky-400 prose-code:scrollbar-track-gray-700 prose-blockquote:rounded-md prose-img:rounded-md prose-a:text-sky-400 prose-li:marker:text-sky-400 prose-quoteless prose-blockquote:not-italic"
+        className="overflow-hidden prose dark:prose-invert md:prose-xl prose-blockquote:border-sky-400 prose-code:rounded-md prose-code:hover:cursor-pointer prose-code:scrollbar-thin prose-code:scrollbar-thumb-sky-400 prose-code:scrollbar-track-gray-700 prose-blockquote:rounded-md prose-img:rounded-md prose-a:text-sky-400 prose-li:marker:text-sky-400 prose-quoteless prose-blockquote:not-italic"
         dangerouslySetInnerHTML={{ __html: cleanContent }}
       />
     </div>
