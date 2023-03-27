@@ -1,30 +1,19 @@
+import { isHexString, toUtf8String } from "ethers/lib/utils";
+import { Network, NetworkFamily } from "hdseedloop";
 import { isValidAddress } from "../../helpers/utils/accountUtils";
+import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
 import { NetworkDb } from "../../services/models/network";
-import { caipNamespaces, defaultNamespace, INamespace } from "./namespaces";
-import { JsonRpcResult } from "./types";
+import { JsonRpcResult, signingMethods, WcRequestType } from "./types";
 
 /**
- * Formats CAIP2 chainId to blockchain name
+ * Converts hex to utf8 string if it is valid bytes
  */
-export function namespaceIdToName(chainId: string) {
-  const namespaceObj: INamespace | undefined = caipNamespaces[chainId];
-  if (!namespaceObj) {
-    return "Unknown Network";
-  } else {
-    return namespaceObj.name;
+export function convertHexToUtf8(value: string) {
+  if (isHexString(value)) {
+    return toUtf8String(value);
   }
-}
 
-/**
- * Formats CAIP2 chainId to namespace
- */
-export function idToNamespace(chainId: string): INamespace {
-  const namespaceObj: INamespace | undefined = caipNamespaces[chainId];
-  if (!namespaceObj) {
-    return defaultNamespace;
-  } else {
-    return namespaceObj;
-  }
+  return value;
 }
 
 /**
@@ -47,4 +36,34 @@ export function formatJsonRpcResult<T = any>(
     jsonrpc: "2.0",
     result,
   };
+}
+
+/** True if network is supported. False otherwise. */
+export function isWalletConnectNetworkValid(networkDb: NetworkDb | null) {
+  if (!networkDb) return false;
+  const network: Network = networkFromNetworkDb(networkDb);
+  if (network.networkFamily == NetworkFamily.EVM) return true;
+  return false;
+}
+
+export function getRequestEnum(requestMethod: string | null) {
+  if (!requestMethod) return WcRequestType.unknown;
+  switch (requestMethod) {
+    case signingMethods.ETH_SIGN:
+    case signingMethods.PERSONAL_SIGN: {
+      return WcRequestType.signMessage;
+    }
+    case signingMethods.ETH_SIGN_TRANSACTION:
+    case signingMethods.SOLANA_SIGN_TRANSACTION:
+    case signingMethods.NEAR_SIGN_TRANSACTION:
+    case signingMethods.NEAR_SIGN_TRANSACTIONS: {
+      return WcRequestType.signTx;
+    }
+    case signingMethods.ETH_SEND_TRANSACTION: {
+      return WcRequestType.sendTx;
+    }
+    default: {
+      return WcRequestType.unknown;
+    }
+  }
 }

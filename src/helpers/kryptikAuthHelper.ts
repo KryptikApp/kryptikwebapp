@@ -1,23 +1,23 @@
 // helps with integrating web3service into app. context
-import { useCallback, useEffect, useRef, useState } from "react";
 import SignClient from "@walletconnect/sign-client";
 import { SignClientTypes } from "@walletconnect/types/dist/types/sign-client";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { defaultWallet } from "../models/defaultWallet";
-import { UserDB } from "../models/user";
-import Web3Service from "../services/Web3Service";
-import { IWallet, WalletStatus } from "../models/KryptikWallet";
-import { ConnectWalletLocalandRemote } from "./wallet";
-import { NetworkDb } from "../services/models/network";
+import HDSeedLoop, { NetworkFromTicker } from "hdseedloop";
+import { toast } from "react-hot-toast";
 import { createSignClient } from "../handlers/connect/walletConnect";
 import ModalStore from "../handlers/store/ModalStore";
-import { signingMethods } from "../handlers/connect/types";
-import { getActiveUser, updateProfile } from "./user";
-import { handleApprove, logout } from "./auth";
 import { updateVaultName } from "../handlers/wallet/vaultHandler";
-import { getAddressForNetworkDb } from "./utils/accountUtils";
+import { defaultWallet } from "../models/defaultWallet";
+import { IWallet, WalletStatus } from "../models/KryptikWallet";
+import { UserDB } from "../models/user";
+import { NetworkDb } from "../services/models/network";
+import Web3Service from "../services/Web3Service";
+import { handleApprove, logout } from "./auth";
 import { IFetchAllBalancesParams } from "./balances";
-import HDSeedLoop, { NetworkFromTicker } from "hdseedloop";
+import { getActiveUser, updateProfile } from "./user";
+import { getAddressForNetworkDb } from "./utils/accountUtils";
+import { ConnectWalletLocalandRemote } from "./wallet";
 
 export function useKryptikAuth() {
   //create service
@@ -200,65 +200,9 @@ export function useKryptikAuth() {
       console.log("session request event:");
       console.log(requestEvent);
       const { topic, params } = requestEvent;
-      const { request } = params;
-      // ensure sign client is defined
-      if (!signClient) {
-        console.log("Undefined sign client");
-        return;
-      }
-      const requestSession = signClient.session.get(topic);
-      switch (request.method) {
-        case signingMethods.ETH_SIGN:
-        case signingMethods.ETH_SIGN_TRANSACTION:
-        case signingMethods.PERSONAL_SIGN: {
-          console.log("session sign modal");
-          return ModalStore.open("SessionSignModal", {
-            requestEvent,
-            requestSession,
-          });
-        }
-
-        case signingMethods.ETH_SIGN_TYPED_DATA:
-        case signingMethods.ETH_SIGN_TYPED_DATA_V3:
-        case signingMethods.ETH_SIGN_TYPED_DATA_V4:
-          return ModalStore.open("SessionSignTypedDataModal", {
-            requestEvent,
-            requestSession,
-          });
-
-        case signingMethods.ETH_SEND_TRANSACTION:
-          return ModalStore.open("SessionSendTransactionModal", {
-            requestEvent,
-            requestSession,
-          });
-
-        case signingMethods.SOLANA_SIGN_MESSAGE:
-        case signingMethods.SOLANA_SIGN_TRANSACTION:
-          return ModalStore.open("SessionSignModal", {
-            requestEvent,
-            requestSession,
-          });
-
-        case signingMethods.NEAR_SIGN_IN:
-        case signingMethods.NEAR_SIGN_OUT:
-        case signingMethods.NEAR_SIGN_TRANSACTION:
-        case signingMethods.NEAR_SIGN_AND_SEND_TRANSACTION:
-        case signingMethods.NEAR_SIGN_TRANSACTIONS:
-        case signingMethods.NEAR_SIGN_AND_SEND_TRANSACTIONS:
-        case signingMethods.NEAR_VERIFY_OWNER:
-          return ModalStore.open("SessionSignModal", {
-            requestEvent,
-            requestSession,
-          });
-
-        default: {
-          console.log("Unsupported wc method.");
-          return ModalStore.open("SessionUnsuportedMethodModal", {
-            requestEvent,
-            requestSession,
-          });
-        }
-      }
+      return ModalStore.open("SessionSignModal", {
+        requestEvent,
+      });
     },
     []
   );
@@ -281,9 +225,7 @@ export function useKryptikAuth() {
       newSignClient.on("session_proposal", onSessionProposal);
       newSignClient.on("session_request", onSessionRequest);
       // TODOs
-      newSignClient.on("session_ping", (data: any) =>
-        console.log("ping", data)
-      );
+      newSignClient.on("session_ping", (data: any) => toast("Pinged!"));
       newSignClient.on("session_event", (data: any) =>
         console.log("event", data)
       );

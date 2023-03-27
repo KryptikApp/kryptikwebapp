@@ -1,13 +1,26 @@
 import { Transaction as SolTransaction } from "@solana/web3.js";
-import { NetworkFamily } from "hdseedloop";
+import { Transaction as AlgoTransaction } from "algosdk";
+import {
+  Network,
+  NetworkFamily,
+  SignedTransaction,
+  TransactionParameters,
+} from "hdseedloop";
 import { Transaction as NearTransaction } from "near-api-js/lib/transaction";
+import { getAddressForNetwork } from "../../../helpers/utils/accountUtils";
 import { networkFromNetworkDb } from "../../../helpers/utils/networkUtils";
+import { IWallet } from "../../../models/KryptikWallet";
+import { NetworkDb } from "../../../services/models/network";
 import { TokenAndNetwork } from "../../../services/models/token";
 import {
   IErrorHandler,
   TransactionPublishedData,
   TransactionRequest,
 } from "../../../services/models/transaction";
+import {
+  ISignAndSendAlgoParameters,
+  signAndSendAlgoTransaction,
+} from "./AlgorandTransaction";
 import {
   ISignAndSendEVMParameters,
   signAndSendEVMTransaction,
@@ -20,11 +33,6 @@ import {
   ISignAndSendSolParameters,
   signAndSendSOLTransaction,
 } from "./SolTransactions";
-import { Transaction as AlgoTransaction } from "algosdk";
-import {
-  ISignAndSendAlgoParameters,
-  signAndSendAlgoTransaction,
-} from "./AlgorandTransaction";
 
 export interface ISignAndSendWrapperParams {
   solParams?: ISignAndSendSolParameters;
@@ -135,3 +143,41 @@ export const handleSignAndSendTransaction = async function (
     }
   }
 };
+
+/** Signs a given transaction. Note that if multiple transactions are provided (example: multiple solana transactions) only the first tx will be signed.*/
+export async function signTransaction(
+  wallet: IWallet,
+  tx: TxFamilyWrapper,
+  networkDb: NetworkDb
+): Promise<SignedTransaction | null> {
+  const network: Network = networkFromNetworkDb(networkDb);
+  const address = getAddressForNetwork(wallet, network);
+  const txParams: TransactionParameters = {};
+  switch (network.networkFamily) {
+    case NetworkFamily.EVM: {
+      txParams.evmTransaction = tx.evmTx;
+      break;
+    }
+    case NetworkFamily.Solana: {
+      if (!tx.solTx) return null;
+      const txBuffer = tx.solTx[0].serialize();
+      txParams.transactionBuffer = txBuffer;
+      break;
+    }
+    case NetworkFamily.Algorand: {
+      if (!tx.algoTx) return null;
+      const txBuffer = tx.algoTx[0].bytesToSign();
+      txParams.transactionBuffer = txBuffer;
+      break;
+    }
+    default: {
+      // pass for now
+      break;
+    }
+  }
+  console.log("Signing tx with params:");
+  console.log(txParams);
+  console.log(tx);
+  const sigResult = wallet.seedLoop.signTransaction(address, txParams, network);
+  return sigResult;
+}

@@ -68,7 +68,7 @@ export default function Modal(props: Props) {
           {/* close button shown on small screens */}
           <button
             type="button"
-            className="md:hidden mb-2 mt-4 mr-4 text-black bg-white rounded-full font-bold text-sm p-1.5 ml-auto items-center dark:bg-white dark:text-black transition ease-in-out hover:scale-110"
+            className="md:hidden mb-2 mt-12 mr-4 text-black bg-white rounded-full font-bold text-sm p-1.5 ml-auto items-center dark:bg-white dark:text-black transition ease-in-out hover:scale-110"
             onClick={() => onRequestClose()}
           >
             <svg

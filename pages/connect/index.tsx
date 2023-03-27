@@ -32,8 +32,9 @@ const Connect: NextPage = () => {
       return;
     }
     try {
+      console.log("HEREEEE!");
       // initiate pair request
-      signClient.pair({ uri: uriToConnect });
+      await signClient.pair({ uri: uriToConnect });
       setUri("");
     } catch (e) {
       console.warn(e);
@@ -45,7 +46,7 @@ const Connect: NextPage = () => {
   }
   return (
     <div>
-      <div className="max-w-md border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-lg mt-20">
+      <div className="max-w-md border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-lg mt-20 hover:border-sky-400 dark:hover:border-sky-400">
         <div>
           <p className="text-xl font-semibold dark:text-white">Connect App</p>
           <Divider />
@@ -54,7 +55,7 @@ const Connect: NextPage = () => {
         <KryptikScanner show={showScanner} onScan={handleConnect} />
 
         {!showScanner && (
-          <div className="flex flex-col space-y-2 py-14 mx-auto border border-gray-400 dark:border-gray-500 w-[340px] h-[280px] rounded rounded-lg hover:border-sky-400">
+          <div className="flex flex-col space-y-2 py-14 mx-auto border border-gray-400 dark:border-gray-500 w-[340px] h-[280px] rounded rounded-lg">
             <RiQrCodeFill
               size={100}
               className="text-gray-500 dark:text-gray-400 mx-auto"
@@ -79,7 +80,7 @@ const Connect: NextPage = () => {
               placeholder="e.g. wc:a281567bb3e4..."
               onChange={(e) => setUri(e.target.value)}
               value={uri}
-              className="p-1 text-gray-900 text-lg bg-gray-50 border rounded-lg border-gray-300 dark:bg-gray-700 dark:border-l-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-bold focus:outline-[1px] focus:outline-gray-200 dark:focus:outline-gray-700 w-full"
+              className="p-2 text-gray-900 text-lg bg-gray-50 border rounded-lg border-gray-300 dark:bg-gray-700 dark:border-l-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white font-bold focus:outline-[1px] focus:outline-gray-200 dark:focus:outline-gray-700 w-full"
             />
             <div
               className={`opacity-95 hover:cursor-pointer absolute inset-y-0 right-2 px-2 rounded rounded-md my-1 bg-gray-300 dark:bg-gray-600 ${

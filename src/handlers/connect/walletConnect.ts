@@ -1,65 +1,59 @@
-import { Network, SignedTransaction, TransactionParameters } from "hdseedloop";
-import { useCallback } from "react";
-import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
+import SignClient from "@walletconnect/sign-client";
+import { Network, SignedTransaction } from "hdseedloop";
 import { IWallet } from "../../models/KryptikWallet";
 import { NetworkDb } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
-import Web3Service from "../../services/Web3Service";
-import { signingMethods } from "./types";
-import { formatJsonRpcResult, getSignParamsMessage } from "./utils";
-import { SignClientTypes } from "@walletconnect/types/dist/types/sign-client";
-import ModalStore from "../store/ModalStore";
-import { SignClient } from "@walletconnect/sign-client";
-import { SignClientTypes as SignClientType } from "@walletconnect/types/dist/types/sign-client/client";
+import { signTransaction } from "../wallet/transactions";
+import { IParsedWcRequest, JsonRpcResult, WcRequestType } from "./types";
+import { formatJsonRpcResult } from "./utils";
 
 type Params = {
-  requestEvent: SignClientTypes.EventArguments["session_request"];
+  parsedRequest: IParsedWcRequest;
   wallet: IWallet;
   fromAddy: string;
   // network related to request
-  //TODO:is it possible to have null or multiple networks?
+  // TODO:is it possible to have null or multiple networks?
   provider: KryptikProvider;
 };
 
-export async function approveRequest(requestParams: Params): Promise<any> {
-  const { requestEvent, wallet, provider, fromAddy } = requestParams;
+export async function approveWcRequest(
+  requestParams: Params
+): Promise<null | JsonRpcResult<string>> {
+  const { parsedRequest, wallet, provider, fromAddy } = requestParams;
   const networkDb: NetworkDb = provider.networkDb;
   const network: Network = provider.network;
-  const { params, id } = requestEvent;
-  const { chainId, request } = params;
+
   const { seedLoop } = wallet;
-  switch (request.method) {
-    case signingMethods.PERSONAL_SIGN || signingMethods.ETH_SIGN: {
-      const msg = getSignParamsMessage(request.params, networkDb);
+
+  switch (parsedRequest.requestType) {
+    case WcRequestType.signMessage: {
+      if (!parsedRequest.message)
+        throw new Error("No message available to sign.");
+      const msg = parsedRequest.message;
       const signedMsg: string = seedLoop.signMessage(fromAddy, msg, network);
-      return formatJsonRpcResult(id, signedMsg);
+      return formatJsonRpcResult(parsedRequest.id, signedMsg);
     }
-    case signingMethods.ETH_SIGN_TRANSACTION: {
-      //TODO: ensure correct evm tx format
-      const evmTx = request.params[0];
-      const tx: TransactionParameters = { evmTransaction: evmTx };
-      const signedTx: SignedTransaction = await seedLoop.signTransaction(
-        fromAddy,
-        tx,
-        network
+    case WcRequestType.signTx: {
+      if (!parsedRequest.tx)
+        throw new Error("No transaction available to sign.");
+      const signedTx: SignedTransaction | null = await signTransaction(
+        wallet,
+        parsedRequest.tx,
+        networkDb
       );
+      if (!signedTx) {
+        throw new Error("Unable to sign transaction");
+      }
+      // TODO: update to support non-evm tx signatures
       const signedEvmTx: string | undefined = signedTx.evmFamilyTx;
       if (!signedEvmTx) {
         throw new Error("Unable to sign EVM transaction.");
       }
-      return formatJsonRpcResult(id, signedEvmTx);
-    }
-    case signingMethods.ETH_SEND_TRANSACTION: {
-      const txToSend: any = request.params[0];
-      if (!provider.ethProvider) {
-        throw new Error(`Must include ${networkDb.fullName} network provider.`);
-      }
-      const res = await provider.ethProvider.sendTransaction(txToSend);
-      return formatJsonRpcResult(id, res.blockHash);
+      return formatJsonRpcResult(parsedRequest.id, signedEvmTx);
     }
     default: {
       throw new Error(
-        `Unable to approve request event woith method ${request.method}.`
+        `Unable to approve request event of method type: ${parsedRequest.method}.`
       );
     }
   }

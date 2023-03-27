@@ -1,3 +1,5 @@
+import { TxFamilyWrapper } from "../wallet/transactions";
+
 /**
  * Sign Methods
  */
@@ -30,4 +32,23 @@ export interface JsonRpcResult<T = any> {
 
 export interface IConnectCardProps {
   onRequestClose: () => any;
+}
+
+export interface IParsedWcRequest {
+  tx?: TxFamilyWrapper;
+  message?: string;
+  humanReadableString: string;
+  requestType: WcRequestType;
+  method: string;
+  id: number;
+  topic: string;
+}
+
+export enum WcRequestType {
+  signMessage = 0,
+  signTx = 1,
+  signAndSendTx = 2,
+  signTypedData = 3,
+  sendTx = 4,
+  unknown = 5,
 }
