@@ -112,6 +112,7 @@ export function useKryptikAuth() {
       });
       newWalletKryptik = connectionObject.wallet;
     }
+    await initializeSignClient();
     refreshBalances(newWalletKryptik);
     // set data
     setKryptikWallet(newWalletKryptik);
@@ -196,19 +197,26 @@ export function useKryptikAuth() {
    *****************************************************************************/
   const onSessionRequest = useCallback(
     async (requestEvent: SignClientTypes.EventArguments["session_request"]) => {
-      console.log("session_request", requestEvent);
+      console.log("session request event:");
+      console.log(requestEvent);
       const { topic, params } = requestEvent;
       const { request } = params;
       // ensure sign client is defined
-      if (!signClient) return;
+      if (!signClient) {
+        console.log("Undefined sign client");
+        return;
+      }
       const requestSession = signClient.session.get(topic);
       switch (request.method) {
         case signingMethods.ETH_SIGN:
-        case signingMethods.PERSONAL_SIGN:
+        case signingMethods.ETH_SIGN_TRANSACTION:
+        case signingMethods.PERSONAL_SIGN: {
+          console.log("session sign modal");
           return ModalStore.open("SessionSignModal", {
             requestEvent,
             requestSession,
           });
+        }
 
         case signingMethods.ETH_SIGN_TYPED_DATA:
         case signingMethods.ETH_SIGN_TYPED_DATA_V3:
@@ -219,7 +227,6 @@ export function useKryptikAuth() {
           });
 
         case signingMethods.ETH_SEND_TRANSACTION:
-        case signingMethods.ETH_SIGN_TRANSACTION:
           return ModalStore.open("SessionSendTransactionModal", {
             requestEvent,
             requestSession,
@@ -244,11 +251,13 @@ export function useKryptikAuth() {
             requestSession,
           });
 
-        default:
+        default: {
+          console.log("Unsupported wc method.");
           return ModalStore.open("SessionUnsuportedMethodModal", {
             requestEvent,
             requestSession,
           });
+        }
       }
     },
     []
@@ -286,6 +295,8 @@ export function useKryptikAuth() {
       );
     }
     setSignClient(newSignClient);
+    console.log("new sign client:");
+    console.log(newSignClient);
   }
 
   useEffect(() => {

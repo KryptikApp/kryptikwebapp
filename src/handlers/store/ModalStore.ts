@@ -35,7 +35,6 @@ const ModalStore = {
     state.view = view;
     state.data = data;
     state.open = true;
-    console.log("Modal open ran!");
   },
 
   close() {

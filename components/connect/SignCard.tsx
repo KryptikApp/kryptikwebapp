@@ -1,97 +1,85 @@
 import { SessionTypes } from "@walletconnect/types";
 import { NextPage } from "next";
-import { Fragment } from "react";
 import toast from "react-hot-toast";
 
-import ModalStore from "../../src/handlers/store/ModalStore";
-import { useKryptikAuth } from "../../src/helpers/kryptikAuthHelper";
-import { getAddressForNetworkDb } from "../../src/helpers/utils/accountUtils";
-import ConnectionCard from "./ConnectionCard";
-import PermissionsCard from "./Permissionscard";
-import { NetworkDb } from "../../src/services/models/network";
-import AppDetails from "./AppDetails";
 import { IConnectCardProps } from "../../src/handlers/connect/types";
+import ModalStore from "../../src/handlers/store/ModalStore";
+import { getAddressForNetworkDb } from "../../src/helpers/utils/accountUtils";
+import { NetworkDb } from "../../src/services/models/network";
+import { useKryptikAuthContext } from "../KryptikAuthProvider";
+import AppDetails from "./AppDetails";
+import ConnectionCard from "./ConnectionCard";
 
 const SignCard: NextPage<IConnectCardProps> = (props) => {
-  const { signClient, kryptikWallet, kryptikService } = useKryptikAuth();
+  const { signClient, kryptikWallet, kryptikService } = useKryptikAuthContext();
   const { onRequestClose } = { ...props };
   // Get proposal data and wallet address from store
-  const proposal = ModalStore.state.data?.proposal;
-  // Ensure proposal is defined
-  if (!proposal) {
-    return <p>Missing proposal data</p>;
-  }
+  const proposer = ModalStore.state.data?.requestSession?.peer;
+  const { request, chainId } =
+    ModalStore.state.data?.requestEvent?.params || {};
+  const newTxData = request?.params[0];
+  const network: NetworkDb | null = chainId
+    ? kryptikService.getNetworkDbByBlockchainId(chainId)
+    : null;
+
   const handleAccept = async function () {
     if (!signClient) {
       toast.error("Unable to establish connection. Please try again later.");
       return;
     }
-    if (proposal) {
-      const namespaces: SessionTypes.Namespaces = {};
-      //TODO
-
-      // format response
-      Object.keys(requiredNamespaces).forEach((key) => {
-        const accounts: string[] = [];
-        requiredNamespaces[key].chains.map((chainId) => {
-          const network: NetworkDb | null =
-            kryptikService.getNetworkDbByBlockchainId(chainId);
-          if (!network) {
-            // TODO: update error message/handler
-            toast.error("Unable to find network.");
-            return;
-          }
-          // default to first address
-          const addy: string = getAddressForNetworkDb(kryptikWallet, network);
-          accounts.push(`${chainId}:${addy}`);
-        });
-        namespaces[key] = {
-          accounts,
-          methods: requiredNamespaces[key].methods,
-          events: requiredNamespaces[key].events,
-        };
-      });
-      const { acknowledged } = await signClient.approve({
-        id,
-        relayProtocol: relays[0].protocol,
-        namespaces,
-      });
-      await acknowledged();
-    } else {
-      toast.error("No proposal to approve.");
+    if (!proposer || !request) {
+      return;
     }
-    toast.success("Approved");
-    // close modal
-    onRequestClose();
+    try {
+      toast.success("Approved");
+      // close modal
+      onRequestClose();
+    } catch (e) {
+      toast.error("Unable to approve request.");
+    }
   };
 
-  // Get required proposal data
-  const { id, params } = proposal;
-  const { proposer, requiredNamespaces, relays } = params;
-  console.log("Namespaces:");
-  console.log(requiredNamespaces);
-  console.log("------");
+  function handleRejection() {
+    onRequestClose();
+    toast("Connection rejected.");
+  }
+
+  console.log("HEREEEEEEEEE!");
+
   return (
-    <ConnectionCard title={"Review Proposal"} onAccept={handleAccept}>
-      <AppDetails
-        name={proposal.params.proposer.metadata.name}
-        icon={proposal.params.proposer.metadata.icons[0]}
-        description={proposal.params.proposer.metadata.description}
-      />
-      <div className="flex flex-col space-y-2">
-        <div className="flex flex-col space-y-2">
-          {Object.keys(requiredNamespaces).map((chain) => {
-            return (
-              <Fragment key={chain}>
-                <p className="dark:text-white font-bold">{`Review ${chain} permissions`}</p>
-                <PermissionsCard
-                  requiredNamespace={requiredNamespaces[chain]}
-                />
-              </Fragment>
-            );
-          })}
+    <ConnectionCard
+      title={"Review Transaction"}
+      onAccept={handleAccept}
+      onReject={handleRejection}
+      acceptText="Approve"
+    >
+      {proposer && request && (
+        <AppDetails
+          name={proposer.metadata.name}
+          icon={proposer.metadata.icons[0]}
+          description={proposer.metadata.description}
+          url={proposer.metadata.url}
+        />
+      )}
+      <div className="mt-6">
+        <p className="mb-2 font-semibold text-slate-900 dark:text-slate-100 text-lg">
+          Tx Data
+        </p>
+        <div className="h-[30vh] p-2 max-h-[30vh] w-full overflow-y-hidden no-scrollbar bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-slate-600 text-xl dark:text-slate-300">
+          {newTxData && (
+            <p className="text-md">{JSON.stringify(newTxData, null, 6)}</p>
+          )}
+          {!newTxData && (
+            <p className="font-semibold mt-20 text-center">
+              No request data to display.
+            </p>
+          )}
         </div>
       </div>
+
+      <p className="mt-4 mb-2 text-md text-slate-400 dark:text-slate-500">
+        If approved, this transaction will be signed by your wallet.
+      </p>
       <div></div>
     </ConnectionCard>
   );

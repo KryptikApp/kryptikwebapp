@@ -1,22 +1,19 @@
 import { SessionTypes } from "@walletconnect/types";
 import { NextPage } from "next";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
-import ModalStore from "../../src/handlers/store/ModalStore";
-import { useKryptikAuth } from "../../src/helpers/kryptikAuthHelper";
-import { getAddressForNetworkDb } from "../../src/helpers/utils/accountUtils";
-import ConnectionCard from "./ConnectionCard";
-import PermissionsCard from "./Permissionscard";
-import { NetworkDb } from "../../src/services/models/network";
-import AppDetails from "./AppDetails";
-import Expandable from "../Expandable";
 import { IConnectCardProps } from "../../src/handlers/connect/types";
+import ModalStore from "../../src/handlers/store/ModalStore";
+import { getAddressForNetworkDb } from "../../src/helpers/utils/accountUtils";
+import { NetworkDb } from "../../src/services/models/network";
+import { useKryptikAuthContext } from "../KryptikAuthProvider";
+import AppDetails from "./AppDetails";
+import ConnectionCard from "./ConnectionCard";
 
 const SessionProposalCard: NextPage<IConnectCardProps> = (props) => {
-  const { signClient, kryptikWallet, kryptikService } = useKryptikAuth();
+  const { signClient, kryptikWallet, kryptikService } = useKryptikAuthContext();
   const { onRequestClose } = { ...props };
-  const [showPermissions, setShowPermissions] = useState(false);
   // Get proposal data and wallet address from store
   const proposal = ModalStore.state.data?.proposal;
   // Ensure proposal is defined
@@ -24,90 +21,76 @@ const SessionProposalCard: NextPage<IConnectCardProps> = (props) => {
     return <p>Missing proposal data</p>;
   }
   const handleAccept = async function () {
-    if (!signClient) {
-      toast.error("Unable to establish connection. Please try again later.");
-      return;
-    }
-    if (proposal) {
-      const namespaces: SessionTypes.Namespaces = {};
-      //TODO
+    try {
+      if (!signClient) {
+        toast.error("Unable to establish connection. Please try again later.");
+        return;
+      }
+      if (proposal) {
+        const namespaces: SessionTypes.Namespaces = {};
+        //TODO
 
-      // format response
-      Object.keys(requiredNamespaces).forEach((key) => {
-        const accounts: string[] = [];
-        requiredNamespaces[key].chains.map((chainId) => {
-          const network: NetworkDb | null =
-            kryptikService.getNetworkDbByBlockchainId(chainId);
-          if (!network) {
-            // TODO: update error message/handler
-            toast.error("Unable to find network.");
-            return;
-          }
-          // default to first address
-          const addy: string = getAddressForNetworkDb(kryptikWallet, network);
-          accounts.push(`${chainId}:${addy}`);
+        // format response
+        Object.keys(requiredNamespaces).forEach((key) => {
+          const accounts: string[] = [];
+          requiredNamespaces[key].chains.map((chainId) => {
+            const network: NetworkDb | null =
+              kryptikService.getNetworkDbByBlockchainId(chainId);
+            if (!network) {
+              // TODO: update error message/handler
+              toast.error("Unable to find network.");
+              return;
+            }
+            // default to first address
+            const addy: string = getAddressForNetworkDb(kryptikWallet, network);
+            accounts.push(`${chainId}:${addy}`);
+          });
+          namespaces[key] = {
+            accounts,
+            methods: requiredNamespaces[key].methods,
+            events: requiredNamespaces[key].events,
+          };
         });
-        namespaces[key] = {
-          accounts,
-          methods: requiredNamespaces[key].methods,
-          events: requiredNamespaces[key].events,
-        };
-      });
-      const { acknowledged } = await signClient.approve({
-        id,
-        relayProtocol: relays[0].protocol,
-        namespaces,
-      });
-      await acknowledged();
-    } else {
-      toast.error("No proposal to approve.");
+        const { acknowledged } = await signClient.approve({
+          id,
+          relayProtocol: relays[0].protocol,
+          namespaces,
+        });
+        await acknowledged();
+      } else {
+        toast.error("No proposal to approve.");
+      }
+      toast.success("App connected.");
+    } catch (e) {
+      toast.error("Unable to approve connection.");
     }
-    toast.success("App connected.");
     // close modal
     onRequestClose();
   };
 
+  function handleRejection() {
+    onRequestClose();
+    toast("Connection rejected.");
+  }
+
   // Get required proposal data
   const { id, params } = proposal;
   const { proposer, requiredNamespaces, relays } = params;
-  console.log("Namespaces:");
-  console.log(requiredNamespaces);
-  console.log("------");
   return (
-    <ConnectionCard title={"Review Connection"} onAccept={handleAccept}>
+    <ConnectionCard
+      title={"Review Connection"}
+      onAccept={handleAccept}
+      onReject={handleRejection}
+    >
       <AppDetails
         name={proposal.params.proposer.metadata.name}
         icon={proposal.params.proposer.metadata.icons[0]}
         description={proposal.params.proposer.metadata.description}
+        url={proposal.params.proposer.metadata.url}
       />
-      <p>
-        This action will create a connection between your wallet and "
-        {proposal.params.proposer.metadata.name}" . No funds will leave your
-        wallet without your permission.
+      <p className="mt-6 text-xl font-semibold">
+        No funds will leave your wallet without your permission.
       </p>
-      <p
-        onClick={() => setShowPermissions(!showPermissions)}
-        className="text-md text-sky-400 hover:cursor-pointer"
-      >
-        {showPermissions ? "Hide Permissions" : "Show Permissions"}
-      </p>
-      <Expandable isOpen={showPermissions}>
-        <div className="flex flex-col space-y-2">
-          <div className="flex flex-col space-y-2">
-            {Object.keys(requiredNamespaces).map((chain) => {
-              return (
-                <Fragment key={chain}>
-                  <p className="dark:text-white font-bold">{`Review ${chain} permissions`}</p>
-                  <PermissionsCard
-                    requiredNamespace={requiredNamespaces[chain]}
-                  />
-                </Fragment>
-              );
-            })}
-          </div>
-        </div>
-      </Expandable>
-
       <div></div>
     </ConnectionCard>
   );

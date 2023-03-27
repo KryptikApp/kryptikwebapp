@@ -1,5 +1,6 @@
 import { NetworkFromTicker, truncateAddress } from "hdseedloop";
 import type { NextPage } from "next";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -114,13 +115,13 @@ const UserLandingPage: NextPage = () => {
             <div className="flex flex-col text-xl">
               <div className="flex flex-col">
                 {/* connect to app */}
-                {/* <div className="flex flex-row">
-                  <Link href="/wallet/connect">
+                <div className="flex flex-row">
+                  <Link href="/connect">
                     <p className="text-blue-400 hover:cursor-pointer">
                       Connect
                     </p>
                   </Link>
-                </div> */}
+                </div>
                 {/* wallet status */}
                 <div className="flex flex-row">
                   <div className="flex-1">
