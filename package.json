@@ -27,6 +27,8 @@
     "@types/crypto-js": "^4.1.1",
     "@types/lodash": "^4.14.191",
     "@types/uuid": "^9.0.0",
+    "@walletconnect/client": "^1.8.0",
+    "@walletconnect/legacy-types": "^2.0.0",
     "@walletconnect/sign-client": "^2.1.4",
     "@walletconnect/types": "^2.3.0",
     "@walletconnect/utils": "^2.1.4",
