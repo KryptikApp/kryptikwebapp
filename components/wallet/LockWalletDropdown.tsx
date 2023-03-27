@@ -64,7 +64,7 @@ const LockWalletDropdown: NextPage = () => {
   };
 
   return (
-    <div className="mt-8 bg-white dark:bg-black flex-col border rounded hover:cursor-pointer py-2 px-2">
+    <div className="mt-8 bg-white dark:bg-[#0c0c0c] flex-col border rounded hover:cursor-pointer py-2 px-2">
       <div
         className="flex flex-row py-2"
         onClick={() => handleLockDetailsClick()}

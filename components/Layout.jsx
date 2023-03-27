@@ -7,11 +7,7 @@ import { Toaster } from "react-hot-toast";
 export default function Layout({ children }) {
   const { isDark, themeLoading } = useKryptikThemeContext();
   return (
-    <div
-      className={`min-h-screen ${themeLoading || isDark ? "dark" : ""} ${
-        themeLoading || isDark ? "bg-[#0c0c0c]" : "bg-white"
-      }`}
-    >
+    <>
       <Head>
         <title>Kryptik Wallet</title>
         <meta name="description" content="Crypto made simple." />
@@ -19,10 +15,15 @@ export default function Layout({ children }) {
       </Head>
       <Toaster />
 
-      <main className={`px-4 mx-auto`}>
-        <Navbar></Navbar>
+      <main
+        className={`min-h-screen ${themeLoading || isDark ? "dark" : ""} ${
+          themeLoading || isDark ? "bg-[#0c0c0c]" : "bg-white"
+        } px-2`}
+      >
+        <Navbar />
         {children}
+        <div className="min-h-[10vh] md:min-h-0"></div>
       </main>
-    </div>
+    </>
   );
 }

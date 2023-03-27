@@ -1,12 +1,9 @@
 import type { NextPage } from "next";
 
-import LaunchPage from "../components/LaunchPage";
 import LandingPage from "../components/LandingPage";
 
 const Home: NextPage = () => {
-  const appMode = process.env.NEXT_PUBLIC_APP_MODE;
-
-  return <div>{appMode == "prelaunch" ? <LaunchPage /> : <LandingPage />}</div>;
+  return <LandingPage />;
 };
 
 export default Home;

@@ -104,7 +104,7 @@ const DropdownNetworks: NextPage<Props> = (props) => {
           <div className="relative" onClick={() => toggleShowOptions()}>
             <button
               type="button"
-              className="relative w-full bg-white dark:bg-black border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
+              className="relative w-full bg-white dark:bg-[#0c0c0c] border border-gray-300 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 sm:text-sm"
               aria-haspopup="listbox"
               aria-expanded="true"
               aria-labelledby="listbox-label"
@@ -160,7 +160,7 @@ const DropdownNetworks: NextPage<Props> = (props) => {
             </button>
 
             <ul
-              className="no-scrollbar absolute z-10 mt-1 w-full bg-white dark:bg-black opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:border dark:border-slate-500"
+              className="no-scrollbar absolute z-10 mt-1 w-full bg-white dark:bg-[#0c0c0c] opacity-95 shadow-lg max-h-56 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dark:border dark:border-slate-500"
               tabIndex={-1}
               role="listbox"
               aria-labelledby="listbox-label"

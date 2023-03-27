@@ -598,7 +598,7 @@ const Swap: NextPage = () => {
       </div>
       <div className="max-w-2xl mx-auto px-4 md:px-0 min-h-[100vh]">
         <div className="">
-          <div className="max-w-[450px] bg-white dark:bg-black mx-auto md:mt-0 rounded-lg h-fit border border-slate-400 dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
+          <div className="max-w-[450px] bg-white dark:bg-[#0c0c0c] mx-auto md:mt-0 rounded-lg h-fit border border-slate-400 dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
             {swapProgress == TxProgress.Begin && (
               <div className="flex flex-col mt-8 pb-8">
                 <div className="mb-8">
@@ -1288,7 +1288,7 @@ const Swap: NextPage = () => {
             {/* padding div for space between bottom and main elements */}
           </div>
 
-          <div className="dark:text-white bg-white dark:bg-black pt-4 rounded-lg w-[450px] max-w-[450px] min-h-[30rem] min-h-[30rem] h-fit max-h-[38rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
+          <div className="dark:text-white bg-white dark:bg-[#0c0c0c] pt-4 rounded-lg w-[450px] max-w-[450px] min-h-[30rem] min-h-[30rem] h-fit max-h-[38rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
             <div className="flex px-2">
               <div className="flex-1">
                 <RiArrowLeftLine
@@ -1311,7 +1311,7 @@ const Swap: NextPage = () => {
                   autoComplete="off"
                   type="search"
                   id="search-dropdown"
-                  className="ml-2 flex-grow dark:bg-black min-w-[80%] z-20 text-gray-900 text-xl dark:placeholder-gray-400 dark:text-white font-semibold outline-none"
+                  className="ml-2 flex-grow dark:bg-[#0c0c0c] min-w-[80%] z-20 text-gray-900 text-xl dark:placeholder-gray-400 dark:text-white font-semibold outline-none"
                   placeholder={`Search tokens`}
                   value={query}
                   onChange={(e) => handleQueryChange(e.target.value)}

@@ -1,14 +1,11 @@
 import type { NextPage } from "next";
-import toast, { Toaster } from "react-hot-toast";
 
-import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import { useRouter } from "next/router";
 import { useKryptikThemeContext } from "../ThemeProvider";
 
 // main landing page for those who don't yet have a wallet or are logged out
 const BrandLandingPage: NextPage = () => {
   const router = useRouter();
-  const { kryptikWallet, authUser, loadingAuthUser } = useKryptikAuthContext();
   const { isDark, themeLoading } = useKryptikThemeContext();
 
   const handleGetStarted = async () => {
@@ -38,9 +35,9 @@ const BrandLandingPage: NextPage = () => {
           </div>
         </div>
         {/* kryptik display */}
-        <div className="flex-grow graphPaper -mx-4 md:mx-0">
+        <div className="flex-grow graphPaper md:mx-0">
           <div
-            className={`${
+            className={`overflow-hidden ${
               isDark || themeLoading
                 ? "colorFadeGreenBlackCenter"
                 : "colorFadeGreenWhiteCenter"

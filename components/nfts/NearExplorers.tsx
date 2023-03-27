@@ -20,7 +20,7 @@ const NearExplorers: NextPage<Props> = (props) => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <div className="drop-shadow-lg bg-gray-50 hover:bg-gray-100 dark:hover-gray-800 border border-gray-100 dark:border-gray-800 dark:bg-black hover:cursor-pointer transition ease-in-out hover:scale-110 rounded-full py-1 px-1 w-fit">
+              <div className="drop-shadow-lg bg-gray-50 hover:bg-gray-100 dark:hover-gray-800 border border-gray-100 dark:border-gray-800 dark:bg-[#0c0c0c] hover:cursor-pointer transition ease-in-out hover:scale-110 rounded-full py-1 px-1 w-fit">
                 <img
                   className="w-5 h-5 inline mr-2"
                   src="/nftPlatforms/logos/paras.png"
@@ -38,7 +38,7 @@ const NearExplorers: NextPage<Props> = (props) => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <div className="drop-shadow-lg bg-gray-50  hover:bg-gray-100 dark:hover-gray-800 border border-gray-100 dark:border-gray-800 dark:bg-black hover:cursor-pointer transition ease-in-out hover:scale-110 rounded-full py-1 px-1 w-fit">
+              <div className="drop-shadow-lg bg-gray-50  hover:bg-gray-100 dark:hover-gray-800 border border-gray-100 dark:border-gray-800 dark:bg-[#0c0c0c] hover:cursor-pointer transition ease-in-out hover:scale-110 rounded-full py-1 px-1 w-fit">
                 <img
                   className="w-5 h-5 inline mr-2"
                   src="/scanners/logos/near.png"

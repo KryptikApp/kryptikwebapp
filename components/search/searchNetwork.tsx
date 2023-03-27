@@ -127,7 +127,7 @@ const SearchNetwork: NextPage = () => {
         onRequestClose={handleModalClose}
       >
         <div className="flex md:flex-row flex-col">
-          <div className="flex-1 text-left py-4 px-3 dark:text-white bg-white dark:bg-black md:ml-6 mt-8 md:mt-0 rounded-lg min-h-[30rem] md:min-h-[25rem] h-fit md:max-h-[40rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
+          <div className="flex-1 text-left py-4 px-3 dark:text-white bg-white dark:bg-[#0c0c0c] md:ml-6 mt-8 md:mt-0 rounded-lg min-h-[30rem] md:min-h-[25rem] h-fit md:max-h-[40rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
             <h1 className="text-3xl font-bold mb-2">What is this?</h1>
             <p>
               You are now choosing a blockchain to interact with. Blockchains
@@ -151,7 +151,7 @@ const SearchNetwork: NextPage = () => {
             </p>
           </div>
 
-          <div className="flex-1 pt-4 px-3 dark:text-white bg-white dark:bg-black md:ml-6 mt-8 md:mt-0 rounded-lg min-h-[30rem] md:min-h-[25rem] h-fit md:max-h-[40rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
+          <div className="flex-1 pt-4 px-3 dark:text-white bg-white dark:bg-[#0c0c0c] md:ml-6 mt-8 md:mt-0 rounded-lg min-h-[30rem] md:min-h-[25rem] h-fit md:max-h-[40rem] dark:border dark:border-gray-100 md:overflow-x-hidden overflow-y-auto no-scrollbar">
             <div className="flex">
               <div className="flex-1"></div>
               <h1 className="text-2xl font-bold">Change Network</h1>

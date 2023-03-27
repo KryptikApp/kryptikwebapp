@@ -51,7 +51,7 @@ const About: NextPage = () => {
                 allowFullScreen
               ></iframe>
             </div> */}
-            <p className="leading-loose mb-2 text-xl text-justify dark:text-gray-400">
+            <p className="leading-loose mb-2 text-xl md:text-justify dark:text-gray-400">
               Kryptik is a simple wallet that lets you save, send, and collect
               value across the internet. With Kryptik you can access a world of
               possibilities across 10+ blockchains from a single app. One{" "}
@@ -79,7 +79,7 @@ const About: NextPage = () => {
             {/* padding div for space between about and more info */}
           </div>
 
-          <div className="-mx-4">
+          <div className="">
             {/* <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl text-center md:text-left font-semibold sans pt-4 md:pt-20 mb-5 dark:text-slate-100">Unlock the 🌎 of Crypto</h2>
             </div> */}

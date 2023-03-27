@@ -55,7 +55,7 @@ const LockWalletCard: NextPage = () => {
   return (
     <div
       id="lockWalletCard"
-      className="mx-2 border bg-white dark:bg-black rounded px-2 py-2 max-w-xl border-gray-400 dark:border-gray-500 hover:border-gray-600 hover:dark:border-gray-300"
+      className="mx-2 border bg-white dark:bg-[#0c0c0c] rounded px-2 py-2 max-w-xl border-gray-400 dark:border-gray-500 hover:border-gray-600 hover:dark:border-gray-300"
     >
       <div className="flex-col">
         <h2 className="text-2xl font-bold sans text-gray-900 dark:text-gray-100">
