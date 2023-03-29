@@ -5788,10 +5788,10 @@ hdkey@^2.0.1:
     safe-buffer "^5.1.1"
     secp256k1 "^4.0.0"
 
-hdseedloop@^0.7.8:
-  version "0.7.8"
-  resolved "https://registry.yarnpkg.com/hdseedloop/-/hdseedloop-0.7.8.tgz#ffa80ceb276704b49a7df58ba715863c18701a57"
-  integrity sha512-TVIiLohjLS5d/g1ktfyePo7aamAwU/OKXhzoR9moToEOjIGOg0BZNFUt3YGSIOVyvd8x2PpRJL6t60jglfJrow==
+hdseedloop@^0.7.9:
+  version "0.7.9"
+  resolved "https://registry.yarnpkg.com/hdseedloop/-/hdseedloop-0.7.9.tgz#e8cccd7db4e472b164437b130cdeaa21999af5af"
+  integrity sha512-/trBpbZg+EqbWc5iYAMyNh37Bs7tRliOYhZxYz6GLVsU+PCk/QejVZZSXiQ4TcBVtXl7ihbjk7WUuqI6byBzAA==
   dependencies:
     "@ethersproject/abstract-signer" "^5.6.2"
     "@ethersproject/address" "^5.6.1"
