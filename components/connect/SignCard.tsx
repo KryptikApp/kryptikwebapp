@@ -1,4 +1,4 @@
-import { CoreTypes } from "@walletconnect/types";
+import { CoreTypes, SignClientTypes } from "@walletconnect/types";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import {
   IConnectCardProps,
   IParsedWcRequest,
+  WcRequestType,
 } from "../../src/handlers/connect/types";
 import { isWalletConnectNetworkValid } from "../../src/handlers/connect/utils";
 import { approveWcRequest } from "../../src/handlers/connect/walletConnect";
@@ -20,7 +21,8 @@ import AppDetails from "./AppDetails";
 import ConnectionCard from "./ConnectionCard";
 
 const SignCard: NextPage<IConnectCardProps> = (props) => {
-  const { signClient, kryptikWallet, kryptikService } = useKryptikAuthContext();
+  const { signClient, legacySignClient, kryptikWallet, kryptikService } =
+    useKryptikAuthContext();
   const { onRequestClose } = { ...props };
   const [isValid, setIsValid] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -28,6 +30,7 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
   const [parsedRequest, setParsedRequest] = useState<IParsedWcRequest | null>(
     null
   );
+  const [isLegacy, setIsLegacy] = useState(false);
   const [networkDb, setNetworkDb] = useState<NetworkDb | null>(null);
   const [proposer, setProposer] = useState<{
     publicKey: string;
@@ -36,30 +39,83 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
 
   useEffect(() => {
     try {
-      // Get proposal data from store
-      const topic = ModalStore.state.data?.requestEvent?.topic || "";
-      const newRequestSession = signClient
-        ? signClient.session.get(topic)
-        : null;
-      const newProposer = newRequestSession?.peer || null;
-      const { request, chainId } =
-        ModalStore.state.data?.requestEvent?.params || {};
-      if (!ModalStore.state.data?.requestEvent) {
-        throw new Error("Request event not available.");
+      let newProposer: {
+        publicKey: string;
+        metadata: CoreTypes.Metadata;
+      } | null = null;
+      let newNetworkDb: NetworkDb | null = null;
+      let newParsedRequest: IParsedWcRequest | null = null;
+      if (ModalStore.state.data?.isLegacy) {
+        setIsLegacy(true);
+        const legacyEvent = ModalStore.state.data?.legacyCallRequestEvent;
+        console.log("Legacy event:");
+        console.log(legacyEvent);
+        const newRequestSession = legacySignClient?.session;
+        const newChainId = `eip155:${newRequestSession?.chainId || 1}`;
+        console.log(newChainId);
+        newNetworkDb = kryptikService.getNetworkDbByBlockchainId(newChainId);
+        newProposer = {
+          publicKey: newRequestSession?.key || "",
+          metadata: newRequestSession?.peerMeta || {
+            name: "Unknown",
+            description: "",
+            url: "",
+            icons: [""],
+          },
+        };
+        if (!legacyEvent?.id) {
+          throw new Error("Undefined request id.");
+        }
+        console.log("params");
+        console.log(legacyEvent?.params[0]);
+        const tempRequest: SignClientTypes.EventArguments["session_request"] = {
+          id: legacyEvent.id,
+          topic: "Unknown",
+          params: {
+            request: {
+              method: legacyEvent?.method || "",
+              params: legacyEvent?.params || [""],
+            },
+            chainId:
+              `eip1559:${newRequestSession?.chainId.toString()}` || `eip1559:0`,
+          },
+        };
+        newParsedRequest = parseWcRequest(
+          tempRequest,
+          legacyEvent?.method || "",
+          newNetworkDb
+        );
+        console.log("New parsed request legacy:");
+        console.log(newParsedRequest);
+      } else {
+        // Get proposal data from store
+        const topic = ModalStore.state.data?.requestEvent?.topic || "";
+        const newRequestSession = signClient
+          ? signClient.session.get(topic)
+          : null;
+        newProposer = newRequestSession?.peer || null;
+        const { request, chainId } =
+          ModalStore.state.data?.requestEvent?.params || {};
+        if (!ModalStore.state.data?.requestEvent) {
+          throw new Error("Request event not available.");
+        }
+        // extract network
+        newNetworkDb = chainId
+          ? kryptikService.getNetworkDbByBlockchainId(chainId)
+          : null;
+        // parse walet connect request
+        newParsedRequest = parseWcRequest(
+          ModalStore.state.data.requestEvent,
+          request?.method || null,
+          newNetworkDb
+        );
       }
-      // extract network
-      const newNetworkDb: NetworkDb | null = chainId
-        ? kryptikService.getNetworkDbByBlockchainId(chainId)
-        : null;
-      // parse walet connect request
-      const newParsedRequest = parseWcRequest(
-        ModalStore.state.data.requestEvent,
-        request?.method || null,
-        newNetworkDb
-      );
+
       // determine if data is valid
       const isValidNetwork: boolean = isWalletConnectNetworkValid(newNetworkDb);
-      if (!newRequestSession || !newParsedRequest || !newNetworkDb) {
+      console.log("New network:");
+      console.log(networkDb);
+      if (!newParsedRequest || !newNetworkDb) {
         setIsValid(false);
         setErrorMessage("Requested session unavailable.");
       }
@@ -113,7 +169,35 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
       if (!response) {
         throw new Error("Approval method returned null.");
       }
-      signClient.respond({ topic: parsedRequest.topic, response: response });
+      // send signed tx
+      // TODO: push inside of helper?
+      // TODO: update to support non evm requests
+      if (
+        parsedRequest.requestType == WcRequestType.sendTx ||
+        parsedRequest.requestType == WcRequestType.signAndSendTx
+      ) {
+        const provider: KryptikProvider =
+          await kryptikService.getKryptikProviderForNetworkDb(networkDb);
+        if (!provider.ethProvider)
+          throw new Error("No provider available to publish tx.");
+        const res = await provider.ethProvider.sendTransaction(response.result);
+        // set response to transaction hash
+        response.result = res.hash;
+      }
+      if (isLegacy) {
+        if (!legacySignClient) {
+          toast.error(
+            "Legacy client not specified. Unable to approve request."
+          );
+          throw new Error(
+            "Legacy client not specified. Unable to approve request."
+          );
+        }
+        legacySignClient.approveRequest(response);
+        console.log("Approved legacy request");
+      } else {
+        signClient.respond({ topic: parsedRequest.topic, response: response });
+      }
       toast.success("Approved");
       // close modal
       onRequestClose();
@@ -126,21 +210,28 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
   async function handleRejection() {
     try {
       // TODO: add better handler if id not available
-      const requestId = ModalStore.state.data?.requestEvent?.id || 0;
+      const requestId = parsedRequest?.id;
       const requestTopic =
         ModalStore.state.data?.requestEvent?.topic || "Unknown";
       const response = {
-        id: requestId,
+        id: requestId || 0,
         jsonrpc: "2.0",
         error: {
           code: 5000,
           message: "User rejected.",
         },
       };
-      await signClient?.respond({
-        topic: requestTopic,
-        response: response,
-      });
+      if (isLegacy) {
+        if (!legacySignClient) {
+          toast.error("Rejected. No client specified.");
+        }
+        legacySignClient?.rejectRequest(response);
+      } else {
+        await signClient?.respond({
+          topic: requestTopic,
+          response: response,
+        });
+      }
     } catch (e) {
       // pass for now
       console.warn(

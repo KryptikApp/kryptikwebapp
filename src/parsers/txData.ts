@@ -39,7 +39,7 @@ export function parseTxData(
   txData: TxFamilyWrapper | null,
   networkDb: NetworkDb | null
 ): string {
-  console.log("parsing with data:");
+  console.log("parsinggggg with data:");
   console.log(txData);
   // TODO: add bettter default string
   const defaultResponse: string = "No request data to display.";
@@ -139,8 +139,11 @@ export function parseWcRequest(
   method: string | null,
   networkDb: NetworkDb | null
 ): IParsedWcRequest | null {
+  console.log("AHHHHHHHH");
   if (!networkDb) return null;
   const params = request.params.request.params;
+  console.log("tx params");
+  console.log(params);
   const { id, topic } = { ...request };
   const requestType: WcRequestType = getRequestEnum(method);
   const network: Network = networkFromNetworkDb(networkDb);
@@ -150,45 +153,55 @@ export function parseWcRequest(
     method: method || "Unknown",
     id: id,
     topic: topic,
+    chainId: request.params.chainId,
   };
-  if (requestType == WcRequestType.signTx) {
-    switch (network.networkFamily) {
-      case NetworkFamily.EVM: {
-        const newTxRequest: TransactionRequest = params[0];
-        if (newTxRequest.gasPrice) {
-          newTxRequest.type = 1;
-        } else {
-          newTxRequest.type = 2;
+  console.log(method);
+  console.log(requestType);
+  switch (requestType) {
+    case WcRequestType.signTx:
+    case WcRequestType.sendTx: {
+      switch (network.networkFamily) {
+        case NetworkFamily.EVM: {
+          const newTxRequest: TransactionRequest = params[0];
+          if (newTxRequest.gasPrice) {
+            newTxRequest.type = 1;
+          } else {
+            newTxRequest.type = 2;
+          }
+          const tx: TxFamilyWrapper = { evmTx: newTxRequest };
+          result.tx = tx;
+          break;
         }
-        const tx: TxFamilyWrapper = { evmTx: newTxRequest };
-        result.tx = tx;
-        break;
+        case NetworkFamily.Solana: {
+          const tx: TxFamilyWrapper = { solTx: [params] };
+          result.tx = tx;
+          break;
+        }
+        case NetworkFamily.Algorand: {
+          const tx: TxFamilyWrapper = { algoTx: [params] };
+          result.tx = tx;
+          break;
+        }
+        case NetworkFamily.Near: {
+          const tx: TxFamilyWrapper = { nearTx: params };
+          result.tx = tx;
+          break;
+        }
+        case WcRequestType.signMessage: {
+        }
+        default: {
+          return null;
+        }
       }
-      case NetworkFamily.Solana: {
-        const tx: TxFamilyWrapper = { solTx: [params] };
-        result.tx = tx;
-        break;
-      }
-      case NetworkFamily.Algorand: {
-        const tx: TxFamilyWrapper = { algoTx: [params] };
-        result.tx = tx;
-        break;
-      }
-      case NetworkFamily.Near: {
-        const tx: TxFamilyWrapper = { nearTx: params };
-        result.tx = tx;
-        break;
-      }
-      default: {
-        return null;
-      }
+      console.log("setting human readable string...");
+      result.humanReadableString = parseTxData(result.tx || null, networkDb);
+      break;
     }
-    result.humanReadableString = parseTxData(result.tx || null, networkDb);
-  }
-  // parse message signer
-  else {
-    const message = getSignParamsMessage(params, networkDb);
-    result.message = message;
+    default: {
+      const message = getSignParamsMessage(params, networkDb);
+      result.message = message;
+      result.humanReadableString = message;
+    }
   }
   return result;
 }

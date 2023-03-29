@@ -2,6 +2,7 @@
 import SignClient from "@walletconnect/sign-client";
 import { SignClientTypes } from "@walletconnect/types/dist/types/sign-client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import LegacySignClient from "@walletconnect/client";
 
 import HDSeedLoop, { NetworkFromTicker } from "hdseedloop";
 import { toast } from "react-hot-toast";
@@ -18,6 +19,7 @@ import { IFetchAllBalancesParams } from "./balances";
 import { getActiveUser, updateProfile } from "./user";
 import { getAddressForNetworkDb } from "./utils/accountUtils";
 import { ConnectWalletLocalandRemote } from "./wallet";
+import { createLegacySignClient } from "../handlers/connect/utils";
 
 export function useKryptikAuth() {
   //create service
@@ -30,6 +32,8 @@ export function useKryptikAuth() {
   const [loadingAuthUser, setLoadingAuthUser] = useState<boolean>(false);
   const [loadingWallet, setLoadingWallet] = useState<boolean>(false);
   const [signClient, setSignClient] = useState<SignClient | null>(null);
+  const [legacySignClient, setLegacySignClient] =
+    useState<LegacySignClient | null>(null);
   const [walletConnectInitialized, setWalletConnectInitialized] =
     useState(false);
   const authWorker = useRef<Worker>();
@@ -219,6 +223,7 @@ export function useKryptikAuth() {
 
   async function initializeSignClient() {
     const newSignClient: SignClient = await createSignClient();
+
     // set up event listners
     if (newSignClient) {
       console.log("Attaching wc event listners.");
@@ -237,8 +242,10 @@ export function useKryptikAuth() {
       );
     }
     setSignClient(newSignClient);
-    console.log("new sign client:");
-    console.log(newSignClient);
+  }
+
+  function updateLegacySignClient(newClient: LegacySignClient | null) {
+    setLegacySignClient(newClient);
   }
 
   useEffect(() => {
@@ -271,6 +278,8 @@ export function useKryptikAuth() {
     updateWalletStatus,
     updateWallet,
     signClient,
+    legacySignClient,
+    updateLegacySignClient,
     clear,
   };
 }

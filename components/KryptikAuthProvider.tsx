@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 import SignClient from "@walletconnect/sign-client";
+import LegacySignClient from "@walletconnect/client";
 
 import { defaultWallet } from "../src/models/defaultWallet";
 import { UserDB } from "../src/models/user";
@@ -29,6 +30,8 @@ interface IAuthContext {
   refreshBalances: (wallet?: IWallet) => void;
   signOut: () => void;
   signClient: SignClient | null;
+  legacySignClient: LegacySignClient | null;
+  updateLegacySignClient: (newClient: LegacySignClient | null) => any;
 }
 
 const kryptikAuthContext = createContext<IAuthContext>({
@@ -46,6 +49,9 @@ const kryptikAuthContext = createContext<IAuthContext>({
   ) => true,
   updateCurrentUserKryptik: async (user: UserDB) => {},
   signClient: null,
+  legacySignClient: null,
+  updateLegacySignClient: (newClient: LegacySignClient | null) => {},
+
   signOut: () => {},
   refreshUserAndWallet: () => {},
   refreshBalances: (wallet?: IWallet) => {},

@@ -2,12 +2,14 @@ import { isHexString, toUtf8String } from "ethers/lib/utils";
 import { IWalletConnectSession } from "@walletconnect/legacy-types";
 import LegacySignClient from "@walletconnect/client";
 import { Network, NetworkFamily } from "hdseedloop";
+import * as qs from "querystring";
 
 import { isValidAddress } from "../../helpers/utils/accountUtils";
 import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
 import { NetworkDb } from "../../services/models/network";
 import { JsonRpcResult, signingMethods, WcRequestType } from "./types";
 import ModalStore from "../store/ModalStore";
+import { EngineTypes, RelayerTypes } from "@walletconnect/types";
 
 /**
  * Converts hex to utf8 string if it is valid bytes
@@ -73,11 +75,13 @@ export function getRequestEnum(requestMethod: string | null) {
 }
 
 // pulled from https://github.com/WalletConnect/web-examples/blob/main/wallets/react-wallet-v2/src/utils/LegacyWalletConnectUtil.ts
-export let legacySignClient: LegacySignClient;
 
-export function createLegacySignClient({ uri }: { uri?: string } = {}) {
+export function createLegacySignClient({
+  uri,
+}: { uri?: string } = {}): LegacySignClient | null {
   // If URI is passed always create a new session,
   // otherwise fall back to cached session if client isn't already instantiated.
+  let legacySignClient: LegacySignClient | null = null;
   if (uri) {
     deleteCachedLegacySession();
     legacySignClient = new LegacySignClient({ uri });
@@ -85,7 +89,7 @@ export function createLegacySignClient({ uri }: { uri?: string } = {}) {
     const session = getCachedLegacySession();
     legacySignClient = new LegacySignClient({ session });
   } else {
-    return;
+    return null;
   }
 
   // TODO: ensure we can parse payload
@@ -93,7 +97,10 @@ export function createLegacySignClient({ uri }: { uri?: string } = {}) {
     if (error) {
       throw new Error(`legacySignClient > session_request failed: ${error}`);
     }
-    ModalStore.open("SessionProposalModal", { legacyProposal: payload });
+    ModalStore.open("SessionProposalModal", {
+      legacyProposal: payload,
+      isLegacy: true,
+    });
   });
 
   legacySignClient.on("connect", () => {
@@ -114,6 +121,7 @@ export function createLegacySignClient({ uri }: { uri?: string } = {}) {
   legacySignClient.on("disconnect", async () => {
     deleteCachedLegacySession();
   });
+  return legacySignClient;
 }
 
 const onCallRequest = async (payload: {
@@ -126,18 +134,18 @@ const onCallRequest = async (payload: {
     case signingMethods.PERSONAL_SIGN:
       return ModalStore.open("SessionSignModal", {
         legacyCallRequestEvent: payload,
-        legacyRequestSession: legacySignClient.session,
+        isLegacy: true,
       });
     // TODO: note signing implies sending. Maybe add a legacy variable that triggers a send after signing in the approve method?
     case signingMethods.ETH_SEND_TRANSACTION:
     case signingMethods.ETH_SIGN_TRANSACTION:
       return ModalStore.open("SessionSignModal", {
         legacyCallRequestEvent: payload,
-        legacyRequestSession: legacySignClient.session,
+        isLegacy: true,
       });
 
     default:
-      alert(`${payload.method} is not supported for WalletConnect v1`);
+      console.warn(`${payload.method} is not supported for WalletConnect v1`);
   }
 };
 
@@ -162,4 +170,41 @@ function getCachedLegacySession(): IWalletConnectSession | undefined {
 function deleteCachedLegacySession(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem("walletconnect");
+}
+
+export function parseRelayParams(
+  params: any,
+  delimiter = "-"
+): RelayerTypes.ProtocolOptions {
+  const relay: any = {};
+  const prefix = "relay" + delimiter;
+  Object.keys(params).forEach((key) => {
+    if (key.startsWith(prefix)) {
+      const name = key.replace(prefix, "");
+      const value = params[key];
+      relay[name] = value;
+    }
+  });
+  return relay;
+}
+
+/** Extracts data from walletconnect uri. */
+export function parseUri(str: string): EngineTypes.UriParameters {
+  const pathStart: number = str.indexOf(":");
+  const pathEnd: number | undefined =
+    str.indexOf("?") !== -1 ? str.indexOf("?") : undefined;
+  const protocol: string = str.substring(0, pathStart);
+  const path: string = str.substring(pathStart + 1, pathEnd);
+  const requiredValues = path.split("@");
+  const queryString: string =
+    typeof pathEnd !== "undefined" ? str.substring(pathEnd) : "";
+  const queryParams = qs.parse(queryString);
+  const result = {
+    protocol,
+    topic: requiredValues[0],
+    version: parseInt(requiredValues[1], 10),
+    symKey: queryParams.symKey as string,
+    relay: parseRelayParams(queryParams),
+  };
+  return result;
 }

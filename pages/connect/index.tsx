@@ -8,12 +8,16 @@ import Divider from "../../components/Divider";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import KryptikScanner from "../../components/kryptikScanner";
 import { useKryptikThemeContext } from "../../components/ThemeProvider";
+import {
+  createLegacySignClient,
+  parseUri,
+} from "../../src/handlers/connect/utils";
 import { ColorEnum } from "../../src/helpers/utils";
 
 // connect wallet to external application
 const Connect: NextPage = () => {
   const [uri, setUri] = useState<string>("");
-  const { signClient } = useKryptikAuthContext();
+  const { signClient, updateLegacySignClient } = useKryptikAuthContext();
   const [loading, setLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const { isDark } = useKryptikThemeContext();
@@ -34,7 +38,14 @@ const Connect: NextPage = () => {
     try {
       console.log("HEREEEE!");
       // initiate pair request
-      await signClient.pair({ uri: uriToConnect });
+      const { version } = parseUri(uri);
+      // Route the provided URI to the v1 SignClient if URI version indicates it, else use v2.
+      if (version == 1) {
+        const newLegacySignClient = createLegacySignClient({ uri });
+        updateLegacySignClient(newLegacySignClient);
+      } else {
+        await signClient.pair({ uri: uriToConnect });
+      }
       setUri("");
     } catch (e) {
       console.warn(e);

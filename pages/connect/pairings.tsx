@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { Fragment, useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import PairingCard from "../../components/connect/PairingCard";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
-import { useKryptikAuth } from "../../src/helpers/kryptikAuthHelper";
 
 export default function PairingsPage() {
   const { signClient } = useKryptikAuthContext();
@@ -35,14 +34,17 @@ export default function PairingsPage() {
             const { peerMetadata } = pairing;
 
             return (
-              <PairingCard
-                key={pairing.topic}
-                icon={peerMetadata?.icons[0]}
-                url={peerMetadata?.url}
-                name={peerMetadata?.name}
-                description={peerMetadata?.description}
-                onDelete={() => onDelete(pairing.topic)}
-              />
+              // only show parinings with defined name
+              peerMetadata?.name && (
+                <PairingCard
+                  key={pairing.topic}
+                  icon={peerMetadata?.icons[0]}
+                  url={peerMetadata?.url}
+                  name={peerMetadata?.name}
+                  description={peerMetadata?.description}
+                  onDelete={() => onDelete(pairing.topic)}
+                />
+              )
             );
           })}
         </div>

@@ -33,7 +33,9 @@ export async function approveWcRequest(
       const signedMsg: string = seedLoop.signMessage(fromAddy, msg, network);
       return formatJsonRpcResult(parsedRequest.id, signedMsg);
     }
-    case WcRequestType.signTx: {
+    case WcRequestType.signTx:
+    case WcRequestType.sendTx:
+    case WcRequestType.signAndSendTx: {
       if (!parsedRequest.tx)
         throw new Error("No transaction available to sign.");
       const signedTx: SignedTransaction | null = await signTransaction(

@@ -7,10 +7,13 @@ import {
   SignClientTypes,
 } from "@walletconnect/types/dist/types/sign-client";
 import { proxy } from "valtio";
+import { IParsedWcRequest } from "../connect/types";
 
 // model data types
 interface ModalData {
   proposal?: SignClientTypes.EventArguments["session_proposal"];
+  isLegacy?:boolean;
+  parsedRequest?: IParsedWcRequest;
   requestEvent?: SignClientTypes.EventArguments["session_request"];
   requestSession?: SessionTypes.Struct;
   legacyProposal?: {

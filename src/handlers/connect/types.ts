@@ -40,6 +40,8 @@ export interface IParsedWcRequest {
   humanReadableString: string;
   requestType: WcRequestType;
   method: string;
+  // blockchain id
+  chainId: string;
   id: number;
   topic: string;
 }
