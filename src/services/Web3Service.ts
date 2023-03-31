@@ -391,6 +391,14 @@ class Web3Service extends BaseService implements IWeb3Service {
     let priceUSD = cachedPrice || getPriceOfTicker(tokenId);
     return priceUSD;
   }
+  /** Returns true if network is supported by Kryptik. False otherwise.*/
+  isChainIdSupported(blockchainId: string): boolean {
+    const networkDb = this.getAllNetworkDbs(true).find(
+      (n) => n.blockchainId == blockchainId
+    );
+    if (!networkDb) return false;
+    return true;
+  }
 }
 
 export default Web3Service;
