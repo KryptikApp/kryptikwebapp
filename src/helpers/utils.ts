@@ -44,10 +44,8 @@ export function removeHttp(url: string) {
     url = url.slice(www.length);
   }
 
-  // remove extra route at end
-  let endOfPath = url.indexOf("/");
-  if (endOfPath) {
-    url = url.slice(0, endOfPath);
+  if (url.endsWith("/")) {
+    url = url.substring(0, -1);
   }
 
   return url;
