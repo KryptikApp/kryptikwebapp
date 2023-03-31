@@ -12,6 +12,7 @@ export const signingMethods = {
   ETH_SIGN_TYPED_DATA_V4: "eth_signTypedData_v4",
   ETH_SEND_RAW_TRANSACTION: "eth_sendRawTransaction",
   ETH_SEND_TRANSACTION: "eth_sendTransaction",
+  ETH_SWITCH_NETWORK: "wallet_switchEthereumChain",
   SOLANA_SIGN_TRANSACTION: "solana_signTransaction",
   SOLANA_SIGN_MESSAGE: "solana_signMessage",
   NEAR_SIGN_IN: "near_signIn",

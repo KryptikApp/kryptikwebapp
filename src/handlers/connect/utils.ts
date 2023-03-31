@@ -144,6 +144,13 @@ const onCallRequest = async (payload: {
         isLegacy: true,
       });
 
+    case "wallet_switchEthereumChain": {
+      return ModalStore.open("SwitchNetworkModal", {
+        legacyCallRequestEvent: payload,
+        isLegacy: true,
+      });
+    }
+
     default:
       console.warn(`${payload.method} is not supported for WalletConnect v1`);
   }
