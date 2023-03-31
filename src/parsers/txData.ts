@@ -1,18 +1,24 @@
 import { Transaction as SolTransaction } from "@solana/web3.js";
-import { Transaction as NearTransaction } from "near-api-js/lib/transaction";
 import { encodeAddress, Transaction as AlgoTransaction } from "algosdk";
+import { Transaction as NearTransaction } from "near-api-js/lib/transaction";
 
-import { TxFamilyWrapper } from "../handlers/wallet/transactions";
-import { networkFromNetworkDb } from "../helpers/utils/networkUtils";
-import { NetworkDb } from "../services/models/network";
-import { TransactionRequest } from "../services/models/transaction";
+import { SignClientTypes } from "@walletconnect/types";
+import { BigNumber } from "ethers";
+import { formatEther } from "ethers/lib/utils";
 import { Network, NetworkFamily, truncateAddress } from "hdseedloop";
 import { IParsedWcRequest, WcRequestType } from "../handlers/connect/types";
 import {
+  convertHexToUtf8,
   getRequestEnum,
   getSignParamsMessage,
 } from "../handlers/connect/utils";
-import { SignClientTypes } from "@walletconnect/types";
+import { TxFamilyWrapper } from "../handlers/wallet/transactions";
+import {
+  isEVMTxTypeTwo,
+  networkFromNetworkDb,
+} from "../helpers/utils/networkUtils";
+import { NetworkDb } from "../services/models/network";
+import { TransactionRequest } from "../services/models/transaction";
 
 interface IParseTxData {
   network: Network;
@@ -93,8 +99,22 @@ function parseEvmData(params: IParseEvmData) {
   const { tx, network, networkDb } = { ...params };
   const to: string = tx.to ? truncateAddress(tx.to, network) : "Unknown";
   const from: string = tx.from ? truncateAddress(tx.from, network) : "Unknown";
-  const value: string = tx.value ? tx.value.toString() : "Unknown";
-  const dataString: string = `To: ${to}\nFrom: ${from}\nvalue:${value}`;
+  const txDataField: string | null = tx.data ? tx.data.toString() : null;
+  let value: string = "Unknown";
+  if (tx.value) {
+    try {
+      const roundedAmount = formatEther(tx.value.toString());
+      value = `${roundedAmount} ${networkDb.ticker.toUpperCase()}`;
+    } catch (e) {
+      // pass for now
+      console.warn("Unable to convert EVM tx value to human readable string.");
+    }
+  }
+  // uncomment for string w/ data field
+  // const dataString: string = `To: ${to}\nFrom: ${from}${
+  //   txDataField && `\nData: ${txDataField}`
+  // }\nValue: ${value}`;
+  const dataString: string = `To: ${to}\nFrom: ${from}\nValue: ${value}`;
   return dataString;
 }
 
@@ -155,17 +175,31 @@ export function parseWcRequest(
     topic: topic,
     chainId: request.params.chainId,
   };
-  console.log(method);
-  console.log(requestType);
   switch (requestType) {
     case WcRequestType.signTx:
     case WcRequestType.sendTx: {
       switch (network.networkFamily) {
         case NetworkFamily.EVM: {
-          const newTxRequest: TransactionRequest = params[0];
-          if (newTxRequest.gasPrice) {
-            newTxRequest.type = 1;
-          } else {
+          // evm chain id
+          const chainId: number = Number(networkDb.blockchainId.split(":")[1]);
+
+          const inputRequest: any = params[0];
+
+          const newTxRequest: TransactionRequest = {
+            to: inputRequest.to,
+            from: inputRequest.from,
+            data: inputRequest.data,
+            gasLimit: inputRequest.gasLimit,
+            maxFeePerGas: inputRequest.maxFeePerGas,
+            maxPriorityFeePerGas: inputRequest.maxPriorityFeePerGas,
+            accessList: inputRequest.accessList,
+            ccipReadEnabled: inputRequest.ccipReadEnabled,
+            gasPrice: inputRequest.gasPrice,
+            type: inputRequest.type,
+            value: BigNumber.from(inputRequest.value),
+            chainId: chainId,
+          };
+          if (isEVMTxTypeTwo(networkDb)) {
             newTxRequest.type = 2;
           }
           const tx: TxFamilyWrapper = { evmTx: newTxRequest };
@@ -199,7 +233,10 @@ export function parseWcRequest(
     }
     default: {
       const message = getSignParamsMessage(params, networkDb);
-      result.message = message;
+      result.message =
+        network.networkFamily == NetworkFamily.EVM
+          ? convertHexToUtf8(message)
+          : message;
       result.humanReadableString = message;
     }
   }
