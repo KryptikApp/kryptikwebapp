@@ -12,7 +12,7 @@ import { IParsedWcRequest } from "../connect/types";
 // model data types
 interface ModalData {
   proposal?: SignClientTypes.EventArguments["session_proposal"];
-  isLegacy?:boolean;
+  isLegacy?: boolean;
   parsedRequest?: IParsedWcRequest;
   requestEvent?: SignClientTypes.EventArguments["session_request"];
   requestSession?: SessionTypes.Struct;
@@ -31,7 +31,8 @@ interface State {
     | "SessionSignModal"
     | "SessionSignTypedDataModal"
     | "SessionSendTransactionModal"
-    | "SessionUnsuportedMethodModal";
+    | "SessionUnsuportedMethodModal"
+    | "SwitchNetworkModal";
   data?: ModalData;
 }
 
@@ -45,6 +46,7 @@ const ModalStore = {
   state,
 
   open(view: State["view"], data: State["data"]) {
+    console.log("AQUIIII");
     state.view = view;
     state.data = data;
     state.open = true;
