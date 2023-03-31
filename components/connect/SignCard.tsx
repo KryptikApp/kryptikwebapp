@@ -10,13 +10,16 @@ import {
 } from "../../src/handlers/connect/types";
 import { isWalletConnectNetworkValid } from "../../src/handlers/connect/utils";
 import { approveWcRequest } from "../../src/handlers/connect/walletConnect";
+import { getTransactionFeeDataEVM } from "../../src/handlers/fees/EVMFees";
 import ModalStore from "../../src/handlers/store/ModalStore";
 import { getAddressForNetworkDb } from "../../src/helpers/utils/accountUtils";
 
 import { parseWcRequest } from "../../src/parsers/txData";
 import { NetworkDb } from "../../src/services/models/network";
 import { KryptikProvider } from "../../src/services/models/provider";
+import TransactionFeeData from "../../src/services/models/transaction";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
+import TxFee from "../transactions/TxFee";
 import AppDetails from "./AppDetails";
 import ConnectionCard from "./ConnectionCard";
 
@@ -26,7 +29,9 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
   const { onRequestClose } = { ...props };
   const [isValid, setIsValid] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  const [txData, setTxData] = useState<any>(null);
+  const [tokenPrice, setTokenPrice] = useState<number>(0);
+  const [feeData, setFeeData] = useState<TransactionFeeData | null>(null);
+  const [isFeeLoaded, setIsFeeLoaded] = useState(false);
   const [parsedRequest, setParsedRequest] = useState<IParsedWcRequest | null>(
     null
   );
@@ -36,7 +41,31 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
     publicKey: string;
     metadata: CoreTypes.Metadata;
   } | null>(null);
-
+  async function initializeNetworkMeta(
+    newNetworkDb: NetworkDb,
+    newParsedRequest: IParsedWcRequest
+  ) {
+    const newTokenPrice: number = await kryptikService.getTokenPrice(
+      newNetworkDb?.coingeckoId
+    );
+    if (
+      (newParsedRequest.requestType == WcRequestType.signAndSendTx ||
+        newParsedRequest.requestType == WcRequestType.sendTx) &&
+      newParsedRequest.tx?.evmTx
+    ) {
+      const provider: KryptikProvider =
+        kryptikService.getProviderForNetwork(newNetworkDb);
+      const newFeeData = await getTransactionFeeDataEVM({
+        tx: newParsedRequest.tx.evmTx,
+        tokenPriceUsd: newTokenPrice,
+        networkDb: newNetworkDb,
+        kryptikProvider: provider,
+      });
+      setFeeData(newFeeData);
+      setIsFeeLoaded(true);
+    }
+    setTokenPrice(newTokenPrice);
+  }
   useEffect(() => {
     try {
       let newProposer: {
@@ -48,11 +77,8 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
       if (ModalStore.state.data?.isLegacy) {
         setIsLegacy(true);
         const legacyEvent = ModalStore.state.data?.legacyCallRequestEvent;
-        console.log("Legacy event:");
-        console.log(legacyEvent);
         const newRequestSession = legacySignClient?.session;
         const newChainId = `eip155:${newRequestSession?.chainId || 1}`;
-        console.log(newChainId);
         newNetworkDb = kryptikService.getNetworkDbByBlockchainId(newChainId);
         newProposer = {
           publicKey: newRequestSession?.key || "",
@@ -66,8 +92,6 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
         if (!legacyEvent?.id) {
           throw new Error("Undefined request id.");
         }
-        console.log("params");
-        console.log(legacyEvent?.params[0]);
         const tempRequest: SignClientTypes.EventArguments["session_request"] = {
           id: legacyEvent.id,
           topic: "Unknown",
@@ -87,6 +111,9 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
         );
         console.log("New parsed request legacy:");
         console.log(newParsedRequest);
+        if (newNetworkDb && newParsedRequest) {
+          initializeNetworkMeta(newNetworkDb, newParsedRequest);
+        }
       } else {
         // Get proposal data from store
         const topic = ModalStore.state.data?.requestEvent?.topic || "";
@@ -113,8 +140,6 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
 
       // determine if data is valid
       const isValidNetwork: boolean = isWalletConnectNetworkValid(newNetworkDb);
-      console.log("New network:");
-      console.log(networkDb);
       if (!newParsedRequest || !newNetworkDb) {
         setIsValid(false);
         setErrorMessage("Requested session unavailable.");
@@ -165,6 +190,7 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
         wallet: kryptikWallet,
         fromAddy: addy,
         provider: provider,
+        tokenPrice: tokenPrice,
       });
       if (!response) {
         throw new Error("Approval method returned null.");
@@ -180,9 +206,23 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
           await kryptikService.getKryptikProviderForNetworkDb(networkDb);
         if (!provider.ethProvider)
           throw new Error("No provider available to publish tx.");
-        const res = await provider.ethProvider.sendTransaction(response.result);
-        // set response to transaction hash
-        response.result = res.hash;
+        try {
+          const res = await provider.ethProvider.sendTransaction(
+            response.result
+          );
+          // set response to transaction hash
+          response.result = res.hash;
+        } catch (e: any) {
+          if (e.message) {
+            const failureMessage: string = e.message;
+            if (failureMessage.includes("insufficient funds")) {
+              setErrorMessage(
+                `You need more ${networkDb.ticker.toUpperCase()} to approve this transaction.`
+              );
+            }
+          }
+          throw new Error(e);
+        }
       }
       if (isLegacy) {
         if (!legacySignClient) {
@@ -203,7 +243,9 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
       onRequestClose();
     } catch (e) {
       console.log(e);
-      toast.error("Unable to approve request.");
+      toast.error(
+        errorMessage != "" ? errorMessage : "Unable to approve request."
+      );
     }
   };
 
@@ -263,16 +305,29 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
             <p className="mb-2 font-semibold text-slate-900 dark:text-slate-100 text-lg">
               Tx Info
             </p>
-            <div className="h-[30vh] p-2 max-h-[30vh] overflow-y-hidden no-scrollbar bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-slate-600 text-xl dark:text-slate-300">
+            <div className="h-fit p-2 max-h-[20vh] overflow-y-hidden no-scrollbar bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl text-slate-600 text-xl dark:text-slate-300">
               <p className="text-md" style={{ whiteSpace: "pre-wrap" }}>
                 {parsedRequest && parsedRequest.humanReadableString}
               </p>
             </div>
           </div>
-
           <p className="mt-4 mb-2 text-md text-slate-400 dark:text-slate-500">
             If approved, this transaction will be signed by your wallet.
           </p>
+          {feeData && networkDb && (
+            <div>
+              <div className="flex flex-row space-x-2">
+                <p className="text-md text-slate-400 dark:text-slate-500">
+                  Cost:{" "}
+                </p>
+                <TxFee
+                  tokenAndNetwork={{ baseNetworkDb: networkDb }}
+                  txFeeData={feeData}
+                  feesLoaded={isFeeLoaded}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
       {!isValid && (
