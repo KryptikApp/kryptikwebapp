@@ -56,7 +56,7 @@ const ListItemBalance: NextPage<Props> = (props) => {
     if (addInfoLink) {
       if (tokenAndNetwork.tokenData) {
         router.push({
-          pathname: "../coins/coinInfo",
+          pathname: "../tokens",
           query: {
             networkTicker: tokenAndNetwork.baseNetworkDb.ticker,
             tokenTicker: tokenAndNetwork.tokenData.tokenDb.ticker,
@@ -64,7 +64,7 @@ const ListItemBalance: NextPage<Props> = (props) => {
         });
       } else {
         router.push({
-          pathname: "../coins/coinInfo",
+          pathname: "../tokens",
           query: { networkTicker: tokenAndNetwork.baseNetworkDb.ticker },
         });
       }
