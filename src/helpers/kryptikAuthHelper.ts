@@ -131,7 +131,7 @@ export function useKryptikAuth() {
       ) {
         deleteCachedLegacySession();
       } else {
-        const newLegacySignClient = new LegacySignClient({ session });
+        const newLegacySignClient = createLegacySignClient();
         setLegacySignClient(newLegacySignClient);
       }
     }
