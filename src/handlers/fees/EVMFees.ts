@@ -1,4 +1,4 @@
-// import { asL2Provider } from "@eth-optimism/sdk";
+import { asL2Provider } from "@eth-optimism/sdk";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish } from "ethers";
 import { parseEther } from "ethers/lib/utils";
@@ -110,20 +110,20 @@ export async function getTransactionFeeDataEVM(params: FeeDataEvmParameters) {
   let transactionFeeData: TransactionFeeData =
     evmFeeDataFromLimits(EVMGasLimitsParams);
   // optimism layer two solution has unique gas cost calculation
-  // if (networkDb.ticker == "eth(optimism)") {
-  //   let optismismProvider = asL2Provider(ethNetworkProvider);
-  //   let optimismTotalGasCost: number = (
-  //     await optismismProvider.estimateTotalGasCost(tx)
-  //   ).toNumber();
-  //   // format in crypto amount
-  //   optimismTotalGasCost = divByDecimals(
-  //     optimismTotalGasCost,
-  //     networkDb.decimals
-  //   ).asNumber;
-  //   let optimismFeeFiat = optimismTotalGasCost * params.tokenPriceUsd;
-  //   transactionFeeData.upperBoundUSD = optimismFeeFiat;
-  //   transactionFeeData.lowerBoundUSD = optimismFeeFiat;
-  // }
+  if (networkDb.ticker == "eth(optimism)") {
+    let optismismProvider = asL2Provider(ethNetworkProvider);
+    let optimismTotalGasCost: number = (
+      await optismismProvider.estimateTotalGasCost(tx)
+    ).toNumber();
+    // format in crypto amount
+    optimismTotalGasCost = divByDecimals(
+      optimismTotalGasCost,
+      networkDb.decimals
+    ).asNumber;
+    let optimismFeeFiat = optimismTotalGasCost * params.tokenPriceUsd;
+    transactionFeeData.upperBoundUSD = optimismFeeFiat;
+    transactionFeeData.lowerBoundUSD = optimismFeeFiat;
+  }
   console.log(`${params.networkDb.fullName} fee data:`);
   console.log(transactionFeeData);
   return transactionFeeData;
