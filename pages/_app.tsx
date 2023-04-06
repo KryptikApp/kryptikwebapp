@@ -3,12 +3,11 @@ import type { AppProps } from "next/app";
 import "highlight.js/styles/github-dark-dimmed.css";
 import { Router } from "next/router";
 import { useEffect } from "react";
-
 import { load, trackPageview } from "fathom-client";
+
 import Layout from "../components/Layout";
 import { KryptikAuthProvider } from "../components/KryptikAuthProvider";
 import { KryptikThemeProvider } from "../components/ThemeProvider";
-
 import LayoutDevDocs from "../components/LayoutDevDocs";
 import ConnectModal from "../components/connect/ConnectModal";
 
