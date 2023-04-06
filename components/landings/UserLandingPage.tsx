@@ -114,14 +114,6 @@ const UserLandingPage: NextPage = () => {
             </div>
             <div className="flex flex-col text-xl">
               <div className="flex flex-col">
-                {/* connect to app */}
-                <div className="flex flex-row">
-                  <Link href="/connect">
-                    <p className="text-blue-400 hover:cursor-pointer">
-                      Connect
-                    </p>
-                  </Link>
-                </div>
                 {/* wallet status */}
                 <div className="flex flex-row">
                   <div className="flex-1">
@@ -182,7 +174,7 @@ const UserLandingPage: NextPage = () => {
                   <div className="flex-1 px-1">
                     <div
                       onClick={() => handleClickAddy()}
-                      className="text-right float-right"
+                      className="text-right float-right hover:text-sky-400"
                     >
                       {loadingAuthUser || loadingWallet ? (
                         <div className="text-sm font-medium text-gray-900 truncate w-20 mx-auto mb-2 h-4 bg-gray-400 animate-pulse rounded" />
@@ -282,6 +274,17 @@ const UserLandingPage: NextPage = () => {
             </div>
           </div>
         </div>
+        {/* connect to app */}
+        <Link href="/connect">
+          <div className="mx-auto max-w-xl rounded-xl p-4 border border-gray-400 bg-gradient-to-r from-[#FBFDFD] dark:from-[#0d0d0d] to-gray-50 dark:to-gray-900 mt-12 border-sky-400 hover:brightness-125 hover:cursor-pointer">
+            <div className="flex flex-col">
+              <p className="text-xl font-semibold">Connect</p>
+              <p className="text-slate-400 dark:text-slate-500">
+                Connect to your favorite applications.
+              </p>
+            </div>
+          </div>
+        </Link>
       </div>
     </div>
   );
