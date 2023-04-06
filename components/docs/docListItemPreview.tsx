@@ -13,7 +13,7 @@ const DocListItemPreview = ({ doc, baseUrl }: Props) => {
   const { slug, title, lastUpdate } = { ...doc };
   const urlBase = `${baseUrl}[slug]`;
   const urlAs = `${baseUrl}${slug}`;
-  const formattedDate = new Date(lastUpdate).toDateString();
+  const formattedDate = new Date(lastUpdate.replace(/-/g, "/")).toDateString();
   const listItemId = `${title}ListPreview`;
   const listItemTitleId = `${title}Title`;
   // useEffect(()=>{

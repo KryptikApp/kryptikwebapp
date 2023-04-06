@@ -21,7 +21,6 @@ export default function KryptikScanner(iprops: IProps) {
   };
 
   useEffect(() => {
-    console.log("HERE!");
     if (!videoRef.current) {
       console.log("No video ref available.");
       return;

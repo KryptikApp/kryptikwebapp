@@ -58,7 +58,7 @@ export default function Layout(props: Props) {
                 </div>
               </Link>
               <div
-                className="invisible md:visible my-auto float-right w-fit h-fit p-1 hover:outline hover:outline-1 hover:outline-black hover:dark:outline-white rounded-full text-slate-400 dark:text-white"
+                className="invisible md:visible my-auto float-right w-fit h-fit p-1 hover:border hover:border-1 hover:border-black hover:dark:border-white rounded-full text-slate-400 dark:text-white"
                 onClick={() => handleDarkToggle()}
               >
                 {isDark ? <RiMoonFill size={20} /> : <RiSunFill size={20} />}

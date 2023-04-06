@@ -170,25 +170,6 @@ const CoinInfo: NextPage = () => {
     updateHistoricalData(numDays);
   }, [activeLookback]);
 
-  const createGradient = function (
-    tokenAndNetworkForLine: TokenAndNetwork
-  ): CanvasGradient | undefined {
-    const chart = chartRef.current;
-    if (!chart) {
-      return undefined;
-    }
-    const gradient = chart.ctx.createLinearGradient(0, 0, 0, 400);
-    // UPDATE FOR DARK SCHEME
-    gradient.addColorStop(
-      0,
-      tokenAndNetworkForLine.tokenData
-        ? tokenAndNetworkForLine.tokenData.tokenDb.hexColor
-        : tokenAndNetworkForLine.baseNetworkDb.hexColor
-    );
-    gradient.addColorStop(1, `${isDark ? "#b5b5b5" : "#11161a"}`);
-    return gradient;
-  };
-
   return (
     <div>
       <div className="h-[1rem]">
@@ -432,6 +413,7 @@ const CoinInfo: NextPage = () => {
           </div>
         )}
 
+        {/* token info at bottom of page */}
         {loaded && tokenAndNetwork && (
           <div>
             <div className="text-left mt-4 mb-20 text-lg dark:text-white">

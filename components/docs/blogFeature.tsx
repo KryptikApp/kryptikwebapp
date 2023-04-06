@@ -12,7 +12,7 @@ const BlogFeature = ({ doc }: Props) => {
   const urlAs = `/blog/${doc.slug}`;
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="max-w-3xl rounded-lg bg-white dark:bg-gray-900 text-black dark:text-white py-6 px-4 outline outline-1 outline-slate-400 dark:outline-slate-700 hover:outline-2 hover:outline-green-400 hover:dark:outline-green-400">
+      <div className="max-w-3xl rounded-lg bg-white dark:bg-gray-900 text-black dark:text-white py-6 px-4 border border-1 border-slate-400 dark:border-slate-700 hover:border-2 hover:border-green-400 hover:dark:border-green-400">
         <div className="flex flex-col md:flex-row">
           <div className="flex flex-col space-y-4">
             <div className="">

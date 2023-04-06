@@ -1,3 +1,5 @@
+import { TxFamilyWrapper } from "../wallet/transactions";
+
 /**
  * Sign Methods
  */
@@ -10,6 +12,7 @@ export const signingMethods = {
   ETH_SIGN_TYPED_DATA_V4: "eth_signTypedData_v4",
   ETH_SEND_RAW_TRANSACTION: "eth_sendRawTransaction",
   ETH_SEND_TRANSACTION: "eth_sendTransaction",
+  ETH_SWITCH_NETWORK: "wallet_switchEthereumChain",
   SOLANA_SIGN_TRANSACTION: "solana_signTransaction",
   SOLANA_SIGN_MESSAGE: "solana_signMessage",
   NEAR_SIGN_IN: "near_signIn",
@@ -30,4 +33,25 @@ export interface JsonRpcResult<T = any> {
 
 export interface IConnectCardProps {
   onRequestClose: () => any;
+}
+
+export interface IParsedWcRequest {
+  tx?: TxFamilyWrapper;
+  message?: string;
+  humanReadableString: string;
+  requestType: WcRequestType;
+  method: string;
+  // blockchain id
+  chainId: string;
+  id: number;
+  topic: string;
+}
+
+export enum WcRequestType {
+  signMessage = 0,
+  signTx = 1,
+  signAndSendTx = 2,
+  signTypedData = 3,
+  sendTx = 4,
+  unknown = 5,
 }

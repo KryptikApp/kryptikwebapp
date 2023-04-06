@@ -31,6 +31,7 @@ export interface EVMGas {
   gasLimit: BigNumberish;
   maxFeePerGas: BigNumberish;
   maxPriorityFeePerGas: BigNumberish;
+  lastBaseFee: BigNumberish;
 }
 
 export const defaultEVMGas: EVMGas = {
@@ -38,6 +39,7 @@ export const defaultEVMGas: EVMGas = {
   gasLimit: 0,
   maxFeePerGas: 0,
   maxPriorityFeePerGas: 0,
+  lastBaseFee: 0,
 };
 
 export const defaultTransactionFeeData: TransactionFeeData = {

@@ -16,7 +16,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
-  console.log("running get networks");
   // Get data submitted in request's body.
   try {
     const prices = await allPrices();

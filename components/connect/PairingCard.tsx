@@ -1,33 +1,40 @@
 import { NextPage } from "next";
+import { removeHttp } from "../../src/helpers/utils";
 
 type Props = {
-  icon?: string;
-  name?: string;
-  url?: string;
-  description?: string;
-  onDelete?: () => any;
+  icon: string | undefined;
+  name: string | undefined;
+  description: string | undefined;
+  url: string | undefined;
+  onDelete: () => any;
 };
 
 const PairingCard: NextPage<Props> = (props) => {
-  const { icon, name, url, description } = { ...props };
+  const { icon, name, description, url } = { ...props };
+  const urlToDisplay: string = url ? removeHttp(url) : "";
   return (
-    <div className="w-max dark:text-white border border-gray-400 dark:border-gray-500 px-2 py-2 rounded-md flex flex-row space-x-2">
-      <a
-        href={`${url ? url : "#"}`}
-        className="hover:cursor-pointer hover:text-sky-500 text-sky-400"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+    <a
+      className="hover:cursor-pointer"
+      href={url ? url : "#"}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <div className="w-max dark:text-white rounded-md flex flex-row space-x-2">
         <div>
           {icon && icon.length > 4 ? (
-            <img className="h-10 w-10 rounded-full" src={icon}></img>
+            <img className="h-14 w-14 rounded-full" src={icon}></img>
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-400 dark:bg-gray-500"></div>
+            <div className="w-14 h-14 rounded-full bg-gray-400 dark:bg-gray-500"></div>
           )}
         </div>
-        <p className="my-auto text-lg">{name || "Unknown"}</p>
-      </a>
-    </div>
+        <div className="flex flex-col space-y-1">
+          <p className="text-xl">{name || "Unknown"}</p>
+          <p className="text-md text-slate-500 dark:text-slate-400">
+            {urlToDisplay}
+          </p>
+        </div>
+      </div>
+    </a>
   );
 };
 

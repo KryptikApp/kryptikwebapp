@@ -1,6 +1,7 @@
-// import { asL2Provider } from "@eth-optimism/sdk";
+import { asL2Provider } from "@eth-optimism/sdk";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
+import { parseEther } from "ethers/lib/utils";
 import { INetworkFeeDataParams } from ".";
 import {
   isEVMTxTypeTwo,
@@ -15,6 +16,7 @@ import TransactionFeeData, {
 
 export interface FeeDataEvmParameters extends INetworkFeeDataParams {
   tx: TransactionRequest;
+  suggestedGasLimit?: BigNumberish;
 }
 
 // gets gas limit for basic transfer
@@ -39,7 +41,7 @@ export interface IEVMGasLimitsParams extends EVMGas {
 
 // calculates the fee data for a given transaction
 export async function getTransactionFeeDataEVM(params: FeeDataEvmParameters) {
-  const { kryptikProvider, tx, networkDb } = { ...params };
+  const { kryptikProvider, tx, networkDb, suggestedGasLimit } = { ...params };
   // validate provider
   if (!kryptikProvider.ethProvider) {
     throw new Error(
@@ -50,26 +52,39 @@ export async function getTransactionFeeDataEVM(params: FeeDataEvmParameters) {
 
   const feeData = await ethNetworkProvider.getFeeData();
   let gasLimit: BigNumber;
-  try {
-    gasLimit = await ethNetworkProvider.estimateGas(tx);
-  } catch (e) {
-    // if the node is unable to estimate the gas limit, do so manually
-    // TODO: switch manual transaction estimate based on tx type
-    gasLimit = BigNumber.from(330000);
+  if (suggestedGasLimit) {
+    console.log("Using suggested gas limit");
+    gasLimit = BigNumber.from(suggestedGasLimit);
+    console.log(suggestedGasLimit);
+    console.log(gasLimit);
+  } else {
+    try {
+      gasLimit = await ethNetworkProvider.estimateGas(tx);
+      console.log("Estimated gas limit:");
+      console.log(gasLimit.toString());
+    } catch (e) {
+      // if the node is unable to estimate the gas limit, do so manually
+      // TODO: switch manual transaction estimate based on tx type
+      gasLimit = BigNumber.from(330000);
+    }
   }
-  let gasLimitAsNum = gasLimit.toNumber();
+
   // validate fee data response
   if (
     !feeData.maxFeePerGas ||
     !feeData.maxPriorityFeePerGas ||
-    !feeData.gasPrice
+    !feeData.gasPrice ||
+    !feeData.lastBaseFeePerGas
   ) {
+    console.log("No fee data available. Filling in with default.");
+
     // some networks like arbitrum uses pre EIP-1559 fee structure
     if (!isEVMTxTypeTwo(networkDb)) {
       let baseGas = await ethNetworkProvider.getGasPrice();
       feeData.gasPrice = baseGas;
       feeData.maxFeePerGas = baseGas;
       feeData.maxPriorityFeePerGas = BigNumber.from(0);
+      feeData.lastBaseFeePerGas = baseGas;
     } else {
       throw new Error(
         `No fee data returned for ${kryptikProvider.network.fullName}`
@@ -88,26 +103,27 @@ export async function getTransactionFeeDataEVM(params: FeeDataEvmParameters) {
     networkDb: kryptikProvider.networkDb,
     // current price of base network coin
     tokenPriceUsd: params.tokenPriceUsd,
+    lastBaseFee: feeData.lastBaseFeePerGas,
   };
 
   // create new fee data object
   let transactionFeeData: TransactionFeeData =
     evmFeeDataFromLimits(EVMGasLimitsParams);
   // optimism layer two solution has unique gas cost calculation
-  // if (networkDb.ticker == "eth(optimism)") {
-  //   let optismismProvider = asL2Provider(ethNetworkProvider);
-  //   let optimismTotalGasCost: number = (
-  //     await optismismProvider.estimateTotalGasCost(tx)
-  //   ).toNumber();
-  //   // format in crypto amount
-  //   optimismTotalGasCost = divByDecimals(
-  //     optimismTotalGasCost,
-  //     networkDb.decimals
-  //   ).asNumber;
-  //   let optimismFeeFiat = optimismTotalGasCost * params.tokenPriceUsd;
-  //   transactionFeeData.upperBoundUSD = optimismFeeFiat;
-  //   transactionFeeData.lowerBoundUSD = optimismFeeFiat;
-  // }
+  if (networkDb.ticker == "eth(optimism)") {
+    let optismismProvider = asL2Provider(ethNetworkProvider);
+    let optimismTotalGasCost: number = (
+      await optismismProvider.estimateTotalGasCost(tx)
+    ).toNumber();
+    // format in crypto amount
+    optimismTotalGasCost = divByDecimals(
+      optimismTotalGasCost,
+      networkDb.decimals
+    ).asNumber;
+    let optimismFeeFiat = optimismTotalGasCost * params.tokenPriceUsd;
+    transactionFeeData.upperBoundUSD = optimismFeeFiat;
+    transactionFeeData.lowerBoundUSD = optimismFeeFiat;
+  }
   console.log(`${params.networkDb.fullName} fee data:`);
   console.log(transactionFeeData);
   return transactionFeeData;
@@ -122,24 +138,25 @@ export function evmFeeDataFromLimits(
     gasPrice,
     maxFeePerGas,
     maxPriorityFeePerGas,
+    lastBaseFee,
     tokenPriceUsd,
     networkDb,
   } = { ...params };
+  // calculate our own max fee per gas
+  maxFeePerGas = Number(lastBaseFee) * 1.27 + Number(maxPriorityFeePerGas);
   // calculate u.i. fees in token amount
-  let gasPriceConverted: number = divByDecimals(
-    Number(params.gasPrice),
+  let maxFeePerGasConverted: number = divByDecimals(
+    Number(params.maxFeePerGas),
     networkDb.decimals
   ).asNumber;
-  console.log(gasPriceConverted);
-  let maxPriorityFeePerGasConverted: number = divByDecimals(
-    Number(maxPriorityFeePerGas),
+  let baseFeeConverted: number = divByDecimals(
+    Number(lastBaseFee),
     networkDb.decimals
   ).asNumber;
 
-  let lowerBoundCrypto: number = Number(gasLimit) * gasPriceConverted;
+  let lowerBoundCrypto: number = Number(gasLimit) * baseFeeConverted;
   let lowerBoundUSD: number = lowerBoundCrypto * tokenPriceUsd;
-  let upperBoundCrypto: number =
-    Number(gasLimit) * (gasPriceConverted + maxPriorityFeePerGasConverted);
+  let upperBoundCrypto: number = Number(gasLimit) * maxFeePerGasConverted;
   let upperBoundUsd: number = upperBoundCrypto * tokenPriceUsd;
 
   let network = networkFromNetworkDb(networkDb);
@@ -157,6 +174,7 @@ export function evmFeeDataFromLimits(
       gasPrice: gasPrice,
       maxFeePerGas: maxFeePerGas,
       maxPriorityFeePerGas: maxPriorityFeePerGas,
+      lastBaseFee: lastBaseFee,
     },
   };
   return transactionFeeData;

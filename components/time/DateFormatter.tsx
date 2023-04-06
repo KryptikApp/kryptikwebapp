@@ -10,7 +10,7 @@ const DateFormatter = ({ dateString, isPast }: Props) => {
   if (isPast == undefined) {
     isPast = true;
   }
-  const startDate: Date = new Date(dateString);
+  const startDate: Date = new Date(dateString.replace(/-/g, "/"));
   const today: Date = new Date();
   const elapsedString = timeElapsedString(startDate, today);
   return (
