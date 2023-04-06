@@ -28,30 +28,6 @@ const NavProfile: NextPage = () => {
         </span>
       </Link>
       <Link
-        href="../profile/"
-        className="flex-grow py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800"
-      >
-        <AiOutlineUser className="w-6 h-6 mb-2 mx-auto" size="20" />
-        <span className={`${router.pathname == "/profile" ? "font-bold" : ""}`}>
-          Profile
-        </span>
-      </Link>
-
-      <Link
-        href="../profile/avatar"
-        className="flex-grow py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800"
-      >
-        <AiOutlineCamera className="w-6 h-6 mb-2 mx-auto" size="20" />
-        <span
-          className={`${
-            router.pathname == "/profile/avatar" ? "font-bold" : ""
-          }`}
-        >
-          Avatar
-        </span>
-      </Link>
-
-      <Link
         href="../profile/settings"
         className="flex-grow py-5 px-3 text-center hover:bg-slate-200 hover:text-sky-800 dark:hover:bg-[#171717] dark:hover:text-green-400 transition-colors duration-800"
       >
