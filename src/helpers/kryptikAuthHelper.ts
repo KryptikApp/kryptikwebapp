@@ -19,7 +19,11 @@ import { IFetchAllBalancesParams } from "./balances";
 import { getActiveUser, updateProfile } from "./user";
 import { getAddressForNetworkDb } from "./utils/accountUtils";
 import { ConnectWalletLocalandRemote } from "./wallet";
-import { createLegacySignClient } from "../handlers/connect/utils";
+import {
+  createLegacySignClient,
+  deleteCachedLegacySession,
+  getCachedLegacySession,
+} from "../handlers/connect/utils";
 
 export function useKryptikAuth() {
   //create service
@@ -117,6 +121,20 @@ export function useKryptikAuth() {
       newWalletKryptik = connectionObject.wallet;
     }
     await initializeSignClient();
+    const session = getCachedLegacySession();
+    // get cached legacy sign client
+    if (session) {
+      // if session is cached, but the account is different, delete the session
+      if (
+        session.accounts[0].toLowerCase() !==
+        newWalletKryptik.resolvedEthAccount.address.toLowerCase()
+      ) {
+        deleteCachedLegacySession();
+      } else {
+        const newLegacySignClient = new LegacySignClient({ session });
+        setLegacySignClient(newLegacySignClient);
+      }
+    }
     refreshBalances(newWalletKryptik);
     // set data
     setKryptikWallet(newWalletKryptik);

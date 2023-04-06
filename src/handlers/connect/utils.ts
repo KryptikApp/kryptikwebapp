@@ -156,7 +156,7 @@ const onCallRequest = async (payload: {
   }
 };
 
-function getCachedLegacySession(): IWalletConnectSession | undefined {
+export function getCachedLegacySession(): IWalletConnectSession | undefined {
   if (typeof window === "undefined") return;
 
   const local = window.localStorage
@@ -174,7 +174,7 @@ function getCachedLegacySession(): IWalletConnectSession | undefined {
   return session;
 }
 
-function deleteCachedLegacySession(): void {
+export function deleteCachedLegacySession(): void {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem("walletconnect");
 }
