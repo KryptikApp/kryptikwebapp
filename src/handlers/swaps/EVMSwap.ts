@@ -95,7 +95,6 @@ export async function BuildEVMTokenApproval(
     allowanceTarget,
     approvalAmount
   );
-  tx.from = sendAccount;
   tx.chainId = chainIdEVM;
   tx.nonce = accountNonce;
   let tokenPriceUsd: number;

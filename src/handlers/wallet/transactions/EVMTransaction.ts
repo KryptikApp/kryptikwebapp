@@ -1,4 +1,4 @@
-import { Contract } from "ethers";
+import { Contract, Wallet } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { SignedTransaction, TransactionParameters } from "hdseedloop";
 import { erc20Abi } from "../../../abis/erc20Abi";
@@ -53,6 +53,7 @@ export const signAndSendEVMTransaction = async function (
     );
     if (!signedTx.evmFamilyTx)
       throw new Error("Error: Unable to sign EVM transaction");
+    console.log("Publishing tx...");
     let txResponse = await evmProvider.sendTransaction(signedTx.evmFamilyTx);
     txDoneData.hash = txResponse.hash;
     // set tx. explorer path
@@ -107,7 +108,6 @@ export const createEVMTransferTransaction = async function (
   let txType: TxType;
   if (!tokenAndNetwork.tokenData) {
     tx = {
-      from: sendAccount,
       to: toAddress,
       value: value,
       nonce: accountNonce,
@@ -115,6 +115,7 @@ export const createEVMTransferTransaction = async function (
     };
     txType = TxType.TransferNative;
   }
+
   // creates evm transfer tx for ERC20 token
   else {
     txType = TxType.TransferToken;
@@ -129,7 +130,6 @@ export const createEVMTransferTransaction = async function (
       txIn.toAddress,
       value
     );
-    tx.from = sendAccount;
     tx.chainId = chainIdEVM;
   }
   tx.nonce = accountNonce;
@@ -149,7 +149,10 @@ export const createEVMTransferTransaction = async function (
   } else {
     tx.gasLimit = kryptikFeeData.EVMGas.gasLimit;
     tx.gasPrice = kryptikFeeData.EVMGas.gasPrice;
-    tx.type = 1;
+    // optimism tx fail if tx type is included
+    if (kryptikProvider.networkDb.fullName.toLowerCase() != "optimism") {
+      tx.type = 1;
+    }
   }
 
   // create krptik tx. object
