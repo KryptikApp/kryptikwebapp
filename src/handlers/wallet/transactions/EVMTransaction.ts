@@ -1,4 +1,4 @@
-import { Contract, Wallet } from "ethers";
+import { Contract } from "ethers";
 import { parseUnits } from "ethers/lib/utils";
 import { SignedTransaction, TransactionParameters } from "hdseedloop";
 import { erc20Abi } from "../../../abis/erc20Abi";
