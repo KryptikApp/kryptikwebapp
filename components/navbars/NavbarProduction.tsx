@@ -13,15 +13,9 @@ import { getUserPhotoPath } from "../../src/helpers/auth";
 import Menu, { MenuItem } from "../menu/menu";
 
 const NavbarProduction: NextPage = () => {
-  const [isMenuMobile, setMenuMobile] = useState(false);
   const { authUser, walletStatus } = useKryptikAuthContext();
   const { hideBalances, updateHideBalances } = useKryptikThemeContext();
   const router = useRouter();
-
-  // change style based on boolean
-  const menuWrapperClassName = isMenuMobile
-    ? "flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0 min-h-[100vh] bg-white dark:bg-[#0c0c0c] md:min-h-0 text-2xl space-y-2"
-    : "hidden text-xl md:flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0";
 
   const handleHideBalances = function (isHideBalances: boolean) {
     if (!authUser) {
@@ -148,7 +142,7 @@ const NavbarProduction: NextPage = () => {
                 <img
                   src={getUserPhotoPath(authUser)}
                   alt="Profile Image"
-                  className="inline object-cover w-5 h-5 rounded-full ml-2"
+                  className="inline object-cover w-5 h-5 rounded-full ml-2 md:mb-1"
                 />
               </span>
             </Link>
