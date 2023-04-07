@@ -48,12 +48,13 @@ export async function approveWcRequest(
       kryptikProvider: provider,
       suggestedGasLimit: suggestedLimit,
     });
-
-    evmTx.type = 2;
     if (evmTx.type == 2) {
       evmTx.gasLimit = newFeeData.EVMGas.gasLimit;
       evmTx.maxFeePerGas = newFeeData.EVMGas.maxFeePerGas;
       evmTx.maxPriorityFeePerGas = newFeeData.EVMGas.maxPriorityFeePerGas;
+    } else {
+      evmTx.gasLimit = newFeeData.EVMGas.gasLimit;
+      evmTx.gasPrice = newFeeData.EVMGas.gasPrice;
     }
     if (provider.ethProvider) {
       let accountNonce = await provider.ethProvider.getTransactionCount(

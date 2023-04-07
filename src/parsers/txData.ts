@@ -175,6 +175,7 @@ export function parseWcRequest(
     topic: topic,
     chainId: request.params.chainId,
   };
+  const isTxTypeTwo: boolean = isEVMTxTypeTwo(networkDb);
   switch (requestType) {
     case WcRequestType.signTx:
     case WcRequestType.sendTx: {
@@ -187,20 +188,22 @@ export function parseWcRequest(
 
           const newTxRequest: TransactionRequest = {
             to: inputRequest.to,
-            from: inputRequest.from,
             data: inputRequest.data,
-            gasLimit: inputRequest.gasLimit,
-            maxFeePerGas: inputRequest.maxFeePerGas,
-            maxPriorityFeePerGas: inputRequest.maxPriorityFeePerGas,
-            accessList: inputRequest.accessList,
-            ccipReadEnabled: inputRequest.ccipReadEnabled,
-            gasPrice: inputRequest.gasPrice,
-            type: inputRequest.type,
+            gasLimit: inputRequest.gasLimit || inputRequest.gas,
             value: BigNumber.from(inputRequest.value),
             chainId: chainId,
           };
-          if (isEVMTxTypeTwo(networkDb)) {
+          if (isTxTypeTwo) {
             newTxRequest.type = 2;
+            newTxRequest.maxFeePerGas = inputRequest.maxFeePerGas;
+            newTxRequest.maxPriorityFeePerGas =
+              inputRequest.maxPriorityFeePerGas;
+          } else {
+            // if type 1 and not optimism tx
+            if (networkDb.fullName.toLowerCase() != "optimism") {
+              newTxRequest.type = 1;
+              newTxRequest.gasPrice = inputRequest.gasPrice;
+            }
           }
           const tx: TxFamilyWrapper = { evmTx: newTxRequest };
           result.tx = tx;

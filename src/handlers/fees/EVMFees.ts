@@ -111,18 +111,23 @@ export async function getTransactionFeeDataEVM(params: FeeDataEvmParameters) {
     evmFeeDataFromLimits(EVMGasLimitsParams);
   // optimism layer two solution has unique gas cost calculation
   if (networkDb.ticker == "eth(optimism)") {
-    let optismismProvider = asL2Provider(ethNetworkProvider);
-    let optimismTotalGasCost: number = (
-      await optismismProvider.estimateTotalGasCost(tx)
-    ).toNumber();
-    // format in crypto amount
-    optimismTotalGasCost = divByDecimals(
-      optimismTotalGasCost,
-      networkDb.decimals
-    ).asNumber;
-    let optimismFeeFiat = optimismTotalGasCost * params.tokenPriceUsd;
-    transactionFeeData.upperBoundUSD = optimismFeeFiat;
-    transactionFeeData.lowerBoundUSD = optimismFeeFiat;
+    try {
+      let optismismProvider = asL2Provider(ethNetworkProvider);
+      let optimismTotalGasCost: number = (
+        await optismismProvider.estimateTotalGasCost(tx)
+      ).toNumber();
+      // format in crypto amount
+      optimismTotalGasCost = divByDecimals(
+        optimismTotalGasCost,
+        networkDb.decimals
+      ).asNumber;
+      let optimismFeeFiat = optimismTotalGasCost * params.tokenPriceUsd;
+      transactionFeeData.upperBoundUSD = optimismFeeFiat;
+      transactionFeeData.lowerBoundUSD = optimismFeeFiat;
+    } catch (e) {
+      transactionFeeData.upperBoundUSD = 0.5;
+      transactionFeeData.lowerBoundUSD = 0.5;
+    }
   }
   console.log(`${params.networkDb.fullName} fee data:`);
   console.log(transactionFeeData);
