@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
 import { findUserById } from "../../../prisma/script";
-import { UserDB, UserTemp } from "../../../src/models/user";
+import { UserDB } from "../../../src/models/user";
 
 type Data = {
   user?: UserDB;

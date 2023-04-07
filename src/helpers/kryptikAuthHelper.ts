@@ -14,7 +14,7 @@ import { IWallet, WalletStatus } from "../models/KryptikWallet";
 import { UserDB } from "../models/user";
 import { NetworkDb } from "../services/models/network";
 import Web3Service from "../services/Web3Service";
-import { handleApprove, logout } from "./auth";
+import { handleApprove, handleRefreshTokens, logout } from "./auth";
 import { IFetchAllBalancesParams } from "./balances";
 import { getActiveUser, updateProfile } from "./user";
 import { getAddressForNetworkDb } from "./utils/accountUtils";
@@ -266,19 +266,21 @@ export function useKryptikAuth() {
     setLegacySignClient(newClient);
   }
 
+  async function initializeUser() {
+    await handleRefreshTokens();
+    await refreshUserAndWallet();
+  }
+
   useEffect(() => {
     // add auth web worker
     authWorker.current = new Worker(new URL("/authWorker.ts", import.meta.url));
-
-    // should fire once upon refresh
-    authWorker.current.onmessage = (event: MessageEvent<boolean>) => {
-      if (event.data) {
-        refreshUserAndWallet();
-      }
-    };
-    // run balance refresh every 5 minutes... disabled for now
-    // TODO: FIX CALLBACK ERROR
-    // setInterval(refreshBalances, 300000);
+    // authWorker.current.onmessage = (event: MessageEvent<boolean>) => {
+    //   if (event.data) {
+    //     refreshUserAndWallet();
+    //   }
+    // };
+    // set initial user values
+    initializeUser();
   }, []);
 
   return {

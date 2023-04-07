@@ -111,3 +111,18 @@ export const getRandomAvatarPhoto = function (): string {
   let photoUrl: string = avatarPathList[randomIndex];
   return photoUrl;
 };
+
+export async function handleRefreshTokens() {
+  try {
+    const res = await KryptikFetch("/api/auth/refresh", {
+      method: "POST",
+      timeout: 8000,
+      headers: { "Content-Type": "application/json" },
+    });
+    if (res.status != 200) {
+      throw new Error("Bad request");
+    }
+  } catch (e) {
+    // console.warn("Unable to refresh auth token. May need to log in again.");
+  }
+}
