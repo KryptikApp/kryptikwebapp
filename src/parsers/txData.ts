@@ -240,7 +240,7 @@ export function parseWcRequest(
         network.networkFamily == NetworkFamily.EVM
           ? convertHexToUtf8(message)
           : message;
-      result.humanReadableString = message;
+      result.humanReadableString = result.message;
     }
   }
   return result;
