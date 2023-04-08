@@ -120,7 +120,6 @@ export function useKryptikAuth() {
       });
       newWalletKryptik = connectionObject.wallet;
     }
-    await initializeSignClient();
     const session = getCachedLegacySession();
     // get cached legacy sign client
     if (session) {
@@ -281,6 +280,7 @@ export function useKryptikAuth() {
     // };
     // set initial user values
     initializeUser();
+    initializeSignClient();
   }, []);
 
   return {

@@ -44,6 +44,7 @@ const Connect: NextPage = () => {
         const newLegacySignClient = createLegacySignClient({ uri });
         updateLegacySignClient(newLegacySignClient);
       } else {
+        console.log("Initiating wc v2 pair request...");
         await signClient.pair({ uri: uriToConnect });
       }
       setUri("");

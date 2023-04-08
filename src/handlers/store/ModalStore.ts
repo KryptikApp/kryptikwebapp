@@ -46,7 +46,6 @@ const ModalStore = {
   state,
 
   open(view: State["view"], data: State["data"]) {
-    console.log("AQUIIII");
     state.view = view;
     state.data = data;
     state.open = true;
