@@ -1,6 +1,4 @@
-import { NextPage } from "next";
-
-const LoadingSpinner: NextPage = () => {
+export default function LoadingSpinner() {
   return (
     <div className="">
       <svg
@@ -21,6 +19,4 @@ const LoadingSpinner: NextPage = () => {
       </svg>
     </div>
   );
-};
-
-export default LoadingSpinner;
+}

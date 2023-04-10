@@ -5,12 +5,12 @@ import toast from "react-hot-toast";
 import ReactCodeInput from "react-code-input";
 
 import { useRouter } from "next/router";
-import LoadingSpinner from "../LoadingSpinner";
 import { useKryptikThemeContext } from "../ThemeProvider";
 import { KryptikFetch } from "../../src/kryptikFetch";
 import Link from "next/link";
 import { isValidEmailAddress } from "../../src/helpers/resolvers/kryptikResolver";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
+import LoadingSpinner from "../LoadingSpinner";
 
 const LoginCard: NextPage = () => {
   const { signInWithToken } = useKryptikAuthContext();
