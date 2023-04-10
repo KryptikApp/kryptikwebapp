@@ -139,7 +139,9 @@ const ListBalance: NextPage = () => {
                   </h1>
                   <h1
                     className={`text-left text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-sky-500 to-green-400 hover:text-sky-400 ${
-                      hideBalances ? "blur-md" : ""
+                      hideBalances
+                        ? "blur-md text-2xl text-sky-400 dark:text-white"
+                        : ""
                     }`}
                   >
                     ${roundToDecimals(totalBalance, 2)}
