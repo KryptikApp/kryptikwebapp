@@ -12,6 +12,7 @@ import { networkFromNetworkDb } from "../src/helpers/utils/networkUtils";
 import { defaultNetworkDb, NetworkDb } from "../src/services/models/network";
 import { KryptikProvider } from "../src/services/models/provider";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
+import toast from "react-hot-toast";
 interface Props {
   account?: string;
   networkDb?: NetworkDb;
@@ -28,6 +29,23 @@ const GalleryProfile: NextPage<Props> = (props) => {
   const [nameToDisplay, setNameToDisplay] = useState("");
   const [addytoDisplay, setAddyToDisplay] = useState<string | null>(null);
   const [avatarToDisplay, setAvatarToDisplay] = useState("");
+
+  function handleClickAddy() {
+    if (!resolveAccount) return;
+    navigator.clipboard.writeText(resolvedAccount.address);
+    toast.success("Address Copied");
+  }
+
+  function handleClickName() {
+    if (!resolveAccount) return;
+    if (resolvedAccount.names) {
+      navigator.clipboard.writeText(resolvedAccount.names[0]);
+      toast.success("Name Copied");
+    } else {
+      navigator.clipboard.writeText(resolvedAccount.address);
+      toast.success("Address Copied");
+    }
+  }
 
   const fetchAccountName = async function () {
     setLoadingResolvedAccount(true);
@@ -106,11 +124,17 @@ const GalleryProfile: NextPage<Props> = (props) => {
 
       <div>
         <div>
-          <h1 className="mt-3 font-bold text-3xl dark:text-white inline">
+          <h1
+            className="mt-3 font-bold text-3xl dark:text-white inline hover:text-sky-500 dark:hover:text-sky-500 hover:cursor-pointer"
+            onClick={handleClickName}
+          >
             {nameToDisplay}
           </h1>
           {addytoDisplay && (
-            <h1 className="mt-3 font-bold text-xl dark:text-slate-600">
+            <h1
+              className="mt-3 font-bold text-xl dark:text-slate-600 hover:text-sky-500 dark:hover:text-sky-500 hover:cursor-pointer"
+              onClick={handleClickAddy}
+            >
               {addytoDisplay}
             </h1>
           )}

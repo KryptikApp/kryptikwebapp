@@ -13,6 +13,9 @@ import { defaultNetworkDb } from "../src/services/models/network";
 import { KryptikProvider } from "../src/services/models/provider";
 
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
+import { WalletStatus } from "../src/models/KryptikWallet";
+import toast from "react-hot-toast";
+import { ServiceState } from "../src/services/types";
 
 interface Props {
   account?: string;
@@ -20,8 +23,14 @@ interface Props {
 
 const ProfileName: NextPage<Props> = (props) => {
   const accountPassedIn = props.account;
-  const { authUser, kryptikWallet, kryptikService } = useKryptikAuthContext();
-  const [loadingResolvedAccount, setLoadingResolvedAccount] = useState(false);
+  const {
+    kryptikWallet,
+    kryptikService,
+    loadingWallet,
+    loadingAuthUser,
+    walletStatus,
+  } = useKryptikAuthContext();
+  const [loadingResolvedAccount, setLoadingResolvedAccount] = useState(true);
   const [resolvedAccount, setResolvedAccount] = useState(
     defaultResolvedAccount
   );
@@ -50,36 +59,76 @@ const ProfileName: NextPage<Props> = (props) => {
     if (!newResolvedAccount) {
       newResolvedAccount = defaultResolvedAccount;
     }
-    if (
-      authUser &&
-      authUser.name &&
-      !newResolvedAccount.names &&
-      !accountPassedIn
-    ) {
-      setNameToDisplay(authUser.name);
-    } else {
-      setNameToDisplay(
-        newResolvedAccount.names
-          ? newResolvedAccount.names[0]
-          : truncateAddress(
-              newResolvedAccount.address,
-              networkFromNetworkDb(defaultNetworkDb)
-            )
-      );
-    }
+    // if (
+    //   authUser &&
+    //   authUser.name &&
+    //   !newResolvedAccount.names &&
+    //   !accountPassedIn
+    // ) {
+    //   setNameToDisplay(authUser.name);
+    // } else {
+    //   setNameToDisplay(
+    //     newResolvedAccount.names
+    //       ? newResolvedAccount.names[0]
+    //       : truncateAddress(
+    //           newResolvedAccount.address,
+    //           networkFromNetworkDb(defaultNetworkDb)
+    //         )
+    //   );
+    // }
+    setNameToDisplay(
+      newResolvedAccount.names
+        ? newResolvedAccount.names[0]
+        : truncateAddress(
+            newResolvedAccount.address,
+            networkFromNetworkDb(defaultNetworkDb)
+          )
+    );
     setResolvedAccount(newResolvedAccount);
     setLoadingResolvedAccount(false);
   };
 
+  function handleClickAddy() {
+    if (
+      loadingWallet ||
+      loadingAuthUser ||
+      walletStatus != WalletStatus.Connected
+    )
+      return;
+    navigator.clipboard.writeText(kryptikWallet.resolvedEthAccount.address);
+    toast.success("Ethereum Address Copied");
+  }
+
   useEffect(() => {
+    console.log("name hit");
+    if (kryptikService.serviceState != ServiceState.started) return;
+    if (kryptikService.NetworkDbs.length == 0) return;
+    console.log("namessss");
     fetchAccountName();
-  }, []);
+  }, [kryptikService.serviceState, kryptikService.NetworkDbs]);
   return (
     <div>
       <div>
-        <h1 className="mt-3 font-bold text-2xl dark:text-white inline">
-          {nameToDisplay}
-        </h1>
+        {/* uncomment below for skeleton loader in name position */}
+        {/* {loadingResolvedAccount ? (
+          <div className="w-28 h-8 bg-gray-400 animate-pulse rounded mx-auto"></div>
+        ) : (
+          <h1
+            className="mt-3 font-bold text-2xl dark:text-white inline hover:cursor-pointer hover:text-sky-500 dark:hover:text-sky-500"
+            onClick={handleClickAddy}
+          >
+            {nameToDisplay}
+          </h1>
+        )} */}
+        {!loadingResolvedAccount && (
+          <h1
+            className="mt-3 font-bold text-2xl dark:text-white inline hover:cursor-pointer hover:text-sky-500 dark:hover:text-sky-500"
+            onClick={handleClickAddy}
+          >
+            {nameToDisplay}
+          </h1>
+        )}
+
         {loadingResolvedAccount && (
           <svg
             role="status"
