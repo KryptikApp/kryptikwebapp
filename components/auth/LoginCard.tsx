@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import ReactCodeInput from "react-code-input";
 
 import { useRouter } from "next/router";
-import LoadingSpinner from "../loadingSpinner";
+import LoadingSpinner from "../LoadingSpinner";
 import { useKryptikThemeContext } from "../ThemeProvider";
 import { KryptikFetch } from "../../src/kryptikFetch";
 import Link from "next/link";

@@ -3,7 +3,7 @@ import {
   createColorString,
   defaultColor,
 } from "../../src/helpers/utils";
-import LoadingSpinner from "../loadingSpinner";
+import LoadingSpinner from "../LoadingSpinner";
 
 type Props = {
   clickHandler: () => any;
@@ -27,7 +27,7 @@ export default function Button(props: Props) {
     <button
       onClick={() => clickHandler()}
       className={`bg-transparent my-2 ${
-        expand && "w-full"
+        expand ? "w-full" : "w-fit"
       } hover:bg-${colorString} text-${colorString} text-xl font-semibold hover:cursor-pointer hover:text-white py-2 px-8 border border-${colorString} hover:border-transparent rounded`}
       disabled={isDisabled}
     >
