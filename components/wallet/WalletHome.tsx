@@ -8,7 +8,7 @@ import ListBalance from "../../components/lists/ListBalance";
 import { ColorEnum } from "../../src/helpers/utils";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 import { ServiceState } from "../../src/services/types";
-import LoadingSpinner from "../LoadingSpinner";
+import LoadingSpinner from "../loadingSpinner";
 import Button from "../buttons/Button";
 import ActionBar from "./ActionBar";
 import UnlockWalletCard from "./UnlockWalletCard";

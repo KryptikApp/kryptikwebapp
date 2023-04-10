@@ -3,7 +3,7 @@ import {
   createColorString,
   defaultColor,
 } from "../../src/helpers/utils";
-import LoadingSpinner from "../LoadingSpinner";
+import LoadingSpinner from "../loadingSpinner";
 
 type Props = {
   clickHandler: () => any;

@@ -18,7 +18,7 @@ import {
 import { TxProgress } from "../../src/services/types";
 import Button from "../buttons/Button";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
-import LoadingSpinner from "../LoadingSpinner";
+import LoadingSpinner from "../loadingSpinner";
 import Modal from "../modals/modal";
 import { useKryptikThemeContext } from "../ThemeProvider";
 
