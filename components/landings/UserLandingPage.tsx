@@ -20,7 +20,6 @@ const UserLandingPage: NextPage = () => {
     loadingAuthUser,
     loadingWallet,
     walletStatus,
-    signClient,
     updateWalletStatus,
   } = useKryptikAuthContext();
   const [password, setPassword] = useState("");

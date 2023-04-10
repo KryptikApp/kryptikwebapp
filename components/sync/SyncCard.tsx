@@ -1,8 +1,5 @@
 import { NextPage } from "next";
-import { ColorEnum } from "../../src/helpers/utils";
 import { roundToDecimals } from "../../src/helpers/utils/numberUtils";
-import Button from "../buttons/Button";
-import LoadingSpinner from "../loadingSpinner";
 
 type Props = {
   children: any;
