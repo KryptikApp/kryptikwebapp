@@ -44,13 +44,13 @@ const HeaderProfile: NextPage<Props> = (props) => {
               <div>
                 <ProfileName />
               </div>
-              <div>
+              {/* <div>
                 {showBio && (
                   <p className="text-slate-500 text-sm dark:text-white">
                     {authUser ? authUser.bio : ""}
                   </p>
                 )}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
