@@ -1,12 +1,10 @@
 import type { NextPage } from "next";
-import { Toaster } from "react-hot-toast";
 
-import { useKryptikAuthContext } from "../components/KryptikAuthProvider";
-import UserLandingPage from "./landings/UserLandingPage";
-import BrandLandingPage from "./landings/BrandLandingPage";
-import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { useKryptikAuthContext } from "../components/KryptikAuthProvider";
 import { defaultUser } from "../src/models/user";
+import BrandLandingPage from "./landings/BrandLandingPage";
+import WalletHome from "./wallet/WalletHome";
 
 const LandingPage: NextPage = () => {
   const router = useRouter();
@@ -20,17 +18,18 @@ const LandingPage: NextPage = () => {
 
   return (
     <div>
-      <div className="h-[10vh]">
-        {/* padding div for space between top and main elements */}
-      </div>
-
       <div className="dark:text-white">
         {loadingAuthUser ||
         loadingWallet ||
         (authUser && authUser != defaultUser) ? (
-          <UserLandingPage />
+          <WalletHome />
         ) : (
-          <BrandLandingPage />
+          <div>
+            <div className="h-[10vh]">
+              {/* padding div for space between top and main elements */}
+            </div>
+            <BrandLandingPage />
+          </div>
         )}
       </div>
       <div className="h-[10rem]">
