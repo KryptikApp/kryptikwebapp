@@ -100,9 +100,9 @@ const ListBalance: NextPage = () => {
   };
 
   useEffect(() => {
-    if (kryptikService.serviceState != ServiceState.started) {
-      router.push("/");
-    }
+    // if (kryptikService.serviceState != ServiceState.started) {
+    //   router.push("/");
+    // }
     if (addedSubscriber) {
       return;
     }
@@ -128,7 +128,7 @@ const ListBalance: NextPage = () => {
 
   return (
     <div>
-      <div className="pt-4 pb-4 border rounded rounded-lg dark:bg-[#030709]">
+      <div className="pt-4 pb-4 border rounded rounded-xl border-gray-500 dark:border-gray-300 dark:bg-[#030709]">
         <div>
           <div className="flex flex-row px-3 py-2">
             <div className="">
