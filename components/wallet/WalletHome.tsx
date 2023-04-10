@@ -14,7 +14,8 @@ import ActionBar from "./ActionBar";
 import UnlockWalletCard from "./UnlockWalletCard";
 
 const WalletHome: NextPage = () => {
-  const { walletStatus, kryptikService } = useKryptikAuthContext();
+  const { walletStatus, kryptikService, loadingWallet } =
+    useKryptikAuthContext();
   const [progressionValid, setProgressionValid] = useState(false);
   // ROUTE PROTECTOR: Listen for changes on loadingAuthUser and authUser, redirect if needed
   const router = useRouter();
@@ -49,18 +50,16 @@ const WalletHome: NextPage = () => {
 
       <div className="max-w-2xl mx-auto">
         {progressionValid && <ListBalance />}
-        {!progressionValid && (
+        {loadingWallet && (
           <div className="flex flex-row space-x-2 text-slate-900 dark:text-slate-100 font-semibold text-xl">
             <p>Unlocking Wallet</p>
             <LoadingSpinner />
           </div>
         )}
-        {progressionValid && walletStatus == WalletStatus.Locked && (
-          <UnlockWalletCard />
-        )}
-        {progressionValid && walletStatus == WalletStatus.OutOfSync && (
+        {walletStatus == WalletStatus.Locked && <UnlockWalletCard />}
+        {walletStatus == WalletStatus.OutOfSync && (
           <div className="flex flex-col space-y-1 text-black dark:text-white">
-            <h1 className="font-semibold text-xl text-slate-900 dark:text-slate-100">
+            <h1 className="font-semibold text-left text-xl text-slate-900 dark:text-slate-100">
               Sync Your Wallet
             </h1>
             <p className="text-lg">
@@ -78,7 +77,7 @@ const WalletHome: NextPage = () => {
         )}
         {progressionValid && walletStatus == WalletStatus.Disconected && (
           <div>
-            <h1 className="font-semibold text-xl text-red-500">
+            <h1 className="font-semibold text-left text-xl text-red-500">
               Connection Failure
             </h1>
             <p className="text-lg">
