@@ -12,12 +12,12 @@ const Privacy: NextPage = () => {
 
       <div className="dark:text-white">
         <div className="max-w-3xl mx-auto px-4 md:px-0">
-          <div className="mb-12">
+          <div className="mb-12 flex flex-col space-y-2">
             <h1 className="text-3xl font-bold sans mb-5">
               Kryptik Privacy Policy
             </h1>
             <h1 className="font-semibold text-xl text-slate-800 dark:text-slate-200">
-              Updated: August 1st, 2022
+              Updated: April 9th, 2023
             </h1>
             <p>
               Kryptik is a Free app. This SERVICE is provided by Kryptik at no
@@ -48,20 +48,14 @@ const Privacy: NextPage = () => {
             <p>
               Your email is only used for authentication and account management.
               Your email will not be shared with others except for basic
-              authentication requests which may be performed by third parties.
+              authentication requests which may be facilitated by third parties.
             </p>
             <h1 className="font-semibold text-xl">Cookies</h1>
             <p>
               Cookies are files with a small amount of data that are commonly
               used as anonymous unique identifiers. These are sent to your
               browser from the websites that you visit and are stored on your
-              device. This Service does not use these “cookies” explicitly.
-              However, the app may use third party code and libraries that use
-              “cookies” to collect information and improve their services. You
-              have the option to either accept or refuse these cookies and know
-              when a cookie is being sent to your device. If you choose to
-              refuse our cookies, you may not be able to use some portions of
-              this Service.
+              device. This Service only uses cookies for session authentication.
             </p>
             <h1 className="font-semibold text-xl">Links to Other Sites</h1>
             <p>
@@ -96,7 +90,7 @@ const Privacy: NextPage = () => {
             <h1 className="font-semibold text-xl">Contact Us</h1>
             <p>
               If you have any questions or suggestions about our Privacy Policy,
-              do not hesitate to contact us at kryptikApp@gmail.com.
+              do not hesitate to contact us at support@kryptik.app.
             </p>
           </div>
         </div>
