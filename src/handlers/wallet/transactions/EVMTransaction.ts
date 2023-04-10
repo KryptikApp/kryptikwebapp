@@ -8,7 +8,10 @@ import {
   getTransactionExplorerPath,
   isEVMTxTypeTwo,
 } from "../../../helpers/utils/networkUtils";
-import { roundToDecimals } from "../../../helpers/utils/numberUtils";
+import {
+  multByDecimals,
+  roundToDecimals,
+} from "../../../helpers/utils/numberUtils";
 import {
   IKryptikTxParams,
   KryptikTransaction,
@@ -104,7 +107,12 @@ export const createEVMTransferTransaction = async function (
     ? tokenAndNetwork.tokenData.tokenDb.decimals
     : tokenAndNetwork.baseNetworkDb.decimals;
   let roundedAmountCrypto = roundToDecimals(valueCrypto, tokenDecimals);
-  let value = parseUnits(roundedAmountCrypto.toString(), tokenDecimals);
+  let value: number | string = multByDecimals(
+    roundedAmountCrypto,
+    tokenDecimals
+  ).asNumber;
+  // remove any excess decimals
+  value = value.toFixed(0);
   let txType: TxType;
   if (!tokenAndNetwork.tokenData) {
     tx = {
