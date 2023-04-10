@@ -37,6 +37,14 @@ export const resolveAccount = async function (
     params
   );
   if (kryptikResolved) return kryptikResolved;
+  // parse network prefix
+  if (params.account.includes(":")) {
+    let split = params.account.split(":");
+    let prefix = split[0];
+    let address = split[1];
+    // TODO: case on network prefix
+    params.account = address;
+  }
   switch (network.networkFamily) {
     case NetworkFamily.Algorand: {
       let resolvedAccount: IResolvedAccount | null = await resolveAlgoAccount(
