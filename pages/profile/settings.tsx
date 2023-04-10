@@ -93,7 +93,7 @@ const Settings: NextPage = () => {
 
         {/* visibility toggle */}
 
-        <div className="hover:bg-gray-100 hover:dark:bg-[#141414] py-4 rounded px-1">
+        {/* <div className="hover:bg-gray-100 hover:dark:bg-[#141414] py-4 rounded px-1">
           <div>
             <h2 className="font-bold text-gray-500 dark:text-gray-400 mb-1 inline">
               Wallet Visiblity
@@ -135,7 +135,7 @@ const Settings: NextPage = () => {
             When your wallet is &apos;visible&apos;, others can discover your
             account via email. This setting can be changed at any time.
           </p>
-        </div>
+        </div> */}
 
         {/* dark mode stereo */}
 
