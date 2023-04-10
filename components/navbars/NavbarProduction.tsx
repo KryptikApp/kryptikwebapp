@@ -1,6 +1,5 @@
 import { NextPage } from "next";
 import Link from "next/link";
-import { useState } from "react";
 import { useRouter } from "next/router";
 import { RiEyeCloseLine, RiEyeLine } from "react-icons/ri";
 
@@ -78,32 +77,19 @@ const NavbarProduction: NextPage = () => {
           </Link>
         </MenuItem>
       )}
-      {!authUser && (
-        <MenuItem>
-          <Link href="../docs">
-            <span
-              className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${
-                router.pathname.startsWith("/docs") ? "font-bold" : ""
-              } `}
-            >
-              Learn
-            </span>
-          </Link>
-        </MenuItem>
-      )}
-      {authUser && (
-        <MenuItem>
-          <Link href="../explore">
-            <span
-              className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${
-                router.pathname == "/explore" ? "font-bold" : ""
-              } `}
-            >
-              Explore
-            </span>
-          </Link>
-        </MenuItem>
-      )}
+
+      <MenuItem>
+        <Link href="../docs">
+          <span
+            className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${
+              router.pathname.startsWith("/docs") ? "font-bold" : ""
+            } `}
+          >
+            Learn
+          </span>
+        </Link>
+      </MenuItem>
+
       {authUser ? (
         <MenuItem>
           <Link href="../gallery">
@@ -134,11 +120,11 @@ const NavbarProduction: NextPage = () => {
       {authUser ? (
         walletStatus == WalletStatus.Connected ? (
           <MenuItem>
-            <Link href="../wallet/">
+            <Link href="../explore">
               <span
                 className={`p-2 lg:px-4 md:mx-2 text-green-400 md:text-center md:border md:border-solid border-gray-300 dark:border-gray-600 dark:hover:border-sky-200 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}
               >
-                Wallet{" "}
+                Explore{" "}
                 <img
                   src={getUserPhotoPath(authUser)}
                   alt="Profile Image"
