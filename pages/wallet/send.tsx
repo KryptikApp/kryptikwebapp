@@ -58,6 +58,7 @@ import { WalletStatus } from "../../src/models/KryptikWallet";
 import KryptikScanner from "../../components/kryptikScanner";
 import { useKryptikTheme } from "../../src/helpers/kryptikThemeHelper";
 import Modal from "../../components/modals/modal";
+import { useKryptikThemeContext } from "../../components/ThemeProvider";
 
 const Send: NextPage = () => {
   const {
@@ -67,6 +68,8 @@ const Send: NextPage = () => {
     kryptikService,
     walletStatus,
   } = useKryptikAuthContext();
+
+  const { hideBalances } = useKryptikThemeContext();
 
   const [amountCrypto, setAmountCrypto] = useState("0");
   const [isInputCrypto, setIsInputCrypto] = useState(false);
@@ -1170,7 +1173,7 @@ const Send: NextPage = () => {
             <div className="mx-auto text-center text-gray-500 text-sm dark:text-gray-400">
               {selectedTokenAndNetwork.networkBalance &&
                 !selectedTokenAndNetwork.tokenData && (
-                  <p>
+                  <p className={`${hideBalances ? "blur-md" : ""}`}>
                     {isInputCrypto
                       ? roundCryptoAmount(
                           Number(
@@ -1197,7 +1200,7 @@ const Send: NextPage = () => {
                 )}
               {selectedTokenAndNetwork.tokenData &&
                 selectedTokenAndNetwork.tokenData.tokenBalance && (
-                  <p>
+                  <p className={`${hideBalances ? "blur-md" : ""}`}>
                     {isInputCrypto
                       ? roundCryptoAmount(
                           Number(
