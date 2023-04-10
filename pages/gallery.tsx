@@ -14,7 +14,10 @@ import { defaultUser } from "../src/models/user";
 import { INFTMetadata } from "../src/parsers/nftEthereum";
 import { listNearNftsByAddress } from "../src/requests/nearIndexApi";
 import { listNftsByAddress } from "../src/requests/nfts/ethereumApi";
-import { listPoapsByAddress } from "../src/requests/nfts/poapApi";
+import {
+  fetchServerPoaps,
+  listPoapsByAddress,
+} from "../src/requests/nfts/poapApi";
 import { fetchServerSolNfts } from "../src/requests/nfts/solanaApi";
 import { defaultNetworkDb, NetworkDb } from "../src/services/models/network";
 import { ServiceState } from "../src/services/types";
@@ -171,7 +174,7 @@ const Gallery: NextPage = () => {
           newNftMetadataList.push(...ethNfts);
         }
         // fetch poaps
-        let poapsList = await listPoapsByAddress(account);
+        let poapsList = await fetchServerPoaps(account);
         if (poapsList) {
           newNftMetadataList.push(...poapsList);
         }
