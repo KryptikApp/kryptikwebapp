@@ -60,7 +60,7 @@ const ActionBar: NextPage<Props> = (props) => {
         <div
           className={`text-center  ${
             active
-              ? "hover:font-semibold hover:animate-pulse hover:cursor-pointer hover:text-sky-800 text-sky-500"
+              ? "hover:font-semibold hover:animate-pulse hover:cursor-pointer hover:text-sky-800 text-sky-500 transition duration-300 ease-in-out"
               : "text-slate-500"
           } `}
         >
@@ -79,7 +79,7 @@ const ActionBar: NextPage<Props> = (props) => {
         <div
           className={`text-center  ${
             active
-              ? "hover:font-semibold hover:animate-pulse hover:cursor-pointer hover:text-sky-800 text-sky-500"
+              ? "hover:font-semibold hover:animate-pulse hover:cursor-pointer hover:text-sky-800 text-sky-500 transition duration-300 ease-in-out"
               : "text-slate-500"
           } `}
         >
@@ -97,7 +97,7 @@ const ActionBar: NextPage<Props> = (props) => {
         <div
           className={`text-center  ${
             active
-              ? "hover:font-semibold hover:animate-pulse hover:cursor-pointer hover:text-sky-800 text-sky-500"
+              ? "hover:font-semibold hover:animate-pulse hover:cursor-pointer hover:text-sky-800 text-sky-500 transition duration-300 ease-in-out"
               : "text-slate-500"
           } `}
           onClick={() => actionHandler(ActionEnum.Receive)}
@@ -117,7 +117,7 @@ const ActionBar: NextPage<Props> = (props) => {
         <div
           className={`text-center  ${
             active
-              ? "hover:font-semibold hover:animate-pulse hover:cursor-pointer hover:text-sky-800 text-sky-500"
+              ? "hover:font-semibold hover:animate-pulse hover:cursor-pointer hover:text-sky-800 text-sky-500 transition duration-300 ease-in-out"
               : "text-slate-500"
           } `}
         >
