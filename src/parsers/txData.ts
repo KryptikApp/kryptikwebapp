@@ -51,8 +51,6 @@ export function parseTxData(
   txData: TxFamilyWrapper | null,
   networkDb: NetworkDb | null
 ): string {
-  console.log("parsinggggg with data:");
-  console.log(txData);
   // TODO: add bettter default string
   const defaultResponse: string = "No request data to display.";
   if (!networkDb || !txData) return defaultResponse;
@@ -104,7 +102,7 @@ export function parseTxData(
 function parseEvmData(params: IParseEvmData) {
   const { tx, network, networkDb } = { ...params };
   const to: string = tx.to ? truncateAddress(tx.to, network) : "Unknown";
-  const from: string = tx.from ? truncateAddress(tx.from, network) : "Unknown";
+  // const from: string = tx.from ? truncateAddress(tx.from, network) : "Unknown";
   const txDataField: string | null = tx.data ? tx.data.toString() : null;
   let value: string = "Unknown";
   if (tx.value) {
@@ -120,7 +118,7 @@ function parseEvmData(params: IParseEvmData) {
   // const dataString: string = `To: ${to}\nFrom: ${from}${
   //   txDataField && `\nData: ${txDataField}`
   // }\nValue: ${value}`;
-  const dataString: string = `To: ${to}\nFrom: ${from}\nValue: ${value}`;
+  const dataString: string = `To: ${to}\nValue: ${value}`;
   return dataString;
 }
 
