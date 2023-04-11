@@ -23,7 +23,7 @@ const ConnectionCard: NextPage<Props> = (props) => {
         transition={{ duration: 0.18 }}
       >
         {" "}
-        <div className="max-w-sm md:max-w-md max-h-screen dark:text-white border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-xl bg-white bg-[#0c0c0c]">
+        <div className="max-w-sm md:max-w-md max-h-screen dark:text-white border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-xl bg-white dark:bg-[#0c0c0c]">
           <div>
             <p className="text-2xl font-semibold text-center">{title}</p>
             <Divider />
