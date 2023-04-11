@@ -297,6 +297,7 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
           icon={proposer.metadata.icons[0]}
           description={proposer.metadata.description}
           url={proposer.metadata.url}
+          network={networkDb || undefined}
         />
       )}
       {isValid && (
