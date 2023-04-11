@@ -66,6 +66,7 @@ export async function approveWcRequest(
   }
 
   switch (parsedRequest.requestType) {
+    // sign message
     case WcRequestType.signMessage: {
       if (!parsedRequest.message)
         throw new Error("No message available to sign.");
@@ -73,6 +74,7 @@ export async function approveWcRequest(
       const signedMsg: string = seedLoop.signMessage(fromAddy, msg, network);
       return formatJsonRpcResult(parsedRequest.id, signedMsg);
     }
+    // sign tx
     case WcRequestType.signTx:
     case WcRequestType.sendTx:
     case WcRequestType.signAndSendTx: {
@@ -92,6 +94,22 @@ export async function approveWcRequest(
         throw new Error("Unable to sign EVM transaction.");
       }
       return formatJsonRpcResult(parsedRequest.id, signedEvmTx);
+    }
+    // sign typed data
+    case WcRequestType.signTypedData: {
+      if (!parsedRequest.typedData)
+        throw new Error("No typed data available to sign.");
+      const typedData = parsedRequest.typedData;
+      const signedTypedData: string = await seedLoop.signTypedData(
+        fromAddy,
+        typedData,
+        network
+      );
+      if (!signedTypedData) {
+        throw new Error("Unable to sign typed data.");
+      }
+      console.log("Signed typed data!", typedData);
+      return formatJsonRpcResult(parsedRequest.id, signedTypedData);
     }
     default: {
       throw new Error(

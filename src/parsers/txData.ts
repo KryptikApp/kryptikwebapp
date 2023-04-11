@@ -1,16 +1,22 @@
 import { Transaction as SolTransaction } from "@solana/web3.js";
-import { encodeAddress, Transaction as AlgoTransaction } from "algosdk";
+import { Transaction as AlgoTransaction, encodeAddress } from "algosdk";
 import { Transaction as NearTransaction } from "near-api-js/lib/transaction";
 
 import { SignClientTypes } from "@walletconnect/types";
 import { BigNumber } from "ethers";
 import { formatEther } from "ethers/lib/utils";
-import { Network, NetworkFamily, truncateAddress } from "hdseedloop";
+import {
+  Network,
+  NetworkFamily,
+  TypedDataParameters,
+  truncateAddress,
+} from "hdseedloop";
 import { IParsedWcRequest, WcRequestType } from "../handlers/connect/types";
 import {
   convertHexToUtf8,
   getRequestEnum,
   getSignParamsMessage,
+  getSignParamsTypedData,
 } from "../handlers/connect/utils";
 import { TxFamilyWrapper } from "../handlers/wallet/transactions";
 import {
@@ -159,12 +165,12 @@ export function parseWcRequest(
   method: string | null,
   networkDb: NetworkDb | null
 ): IParsedWcRequest | null {
-  console.log("AHHHHHHHH");
   if (!networkDb) return null;
   const params = request.params.request.params;
   console.log("tx params");
   console.log(params);
   const { id, topic } = { ...request };
+  // get request type
   const requestType: WcRequestType = getRequestEnum(method);
   const network: Network = networkFromNetworkDb(networkDb);
   const result: IParsedWcRequest = {
@@ -224,14 +230,29 @@ export function parseWcRequest(
           result.tx = tx;
           break;
         }
-        case WcRequestType.signMessage: {
-        }
         default: {
           return null;
         }
       }
       console.log("setting human readable string...");
       result.humanReadableString = parseTxData(result.tx || null, networkDb);
+      break;
+    }
+    case WcRequestType.signTypedData: {
+      const typedData: TypedDataParameters = getSignParamsTypedData(
+        params,
+        networkDb
+      );
+      result.typedData = typedData;
+      // set human readable string
+      if (
+        network.networkFamily == NetworkFamily.EVM &&
+        typedData.evmTypedData
+      ) {
+        result.humanReadableString = JSON.stringify(
+          typedData.evmTypedData.value
+        );
+      }
       break;
     }
     default: {

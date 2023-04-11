@@ -1,7 +1,7 @@
 import { isHexString, toUtf8String } from "ethers/lib/utils";
 import { IWalletConnectSession } from "@walletconnect/legacy-types";
 import LegacySignClient from "@walletconnect/client";
-import { Network, NetworkFamily } from "hdseedloop";
+import { Network, NetworkFamily, TypedDataParameters } from "hdseedloop";
 import * as qs from "querystring";
 
 import { isValidAddress } from "../../helpers/utils/accountUtils";
@@ -33,6 +33,37 @@ export function getSignParamsMessage(params: string[], networkDB: NetworkDb) {
   return message;
 }
 
+/**
+ * Gets data from various signTypedData request methods by filtering out
+ * a value that is not an address (thus is data).
+ * If data is a string convert it to object
+ */
+
+export function getSignParamsTypedData(
+  params: string[],
+  networkDB: NetworkDb
+): TypedDataParameters {
+  const typedData = params.filter((p) => !isValidAddress(p, networkDB))[0];
+  const network: Network = networkFromNetworkDb(networkDB);
+  try {
+    let typedDataObj: any = typedData;
+    if (typeof typedData === "string") {
+      typedDataObj = JSON.parse(typedData);
+    }
+    if (typedDataObj.message) {
+      typedDataObj.value = typedDataObj.message;
+      delete typedDataObj.message;
+    }
+    if (network.networkFamily == NetworkFamily.EVM) {
+      return { evmTypedData: typedDataObj };
+    } else {
+      throw new Error("Unsupported network family.");
+    }
+  } catch (e) {
+    return {};
+  }
+}
+
 export function formatJsonRpcResult<T = any>(
   id: number,
   result: T
@@ -49,6 +80,7 @@ export function isWalletConnectNetworkValid(networkDb: NetworkDb | null) {
   if (!networkDb) return false;
   const network: Network = networkFromNetworkDb(networkDb);
   if (network.networkFamily == NetworkFamily.EVM) return true;
+  // TODO: filter on specific networks
   return false;
 }
 
@@ -67,6 +99,9 @@ export function getRequestEnum(requestMethod: string | null) {
     }
     case signingMethods.ETH_SEND_TRANSACTION: {
       return WcRequestType.sendTx;
+    }
+    case signingMethods.ETH_SIGN_TYPED_DATA: {
+      return WcRequestType.signTypedData;
     }
     default: {
       return WcRequestType.unknown;
@@ -143,7 +178,11 @@ const onCallRequest = async (payload: {
         legacyCallRequestEvent: payload,
         isLegacy: true,
       });
-
+    case signingMethods.ETH_SIGN_TYPED_DATA:
+      return ModalStore.open("SessionSignModal", {
+        legacyCallRequestEvent: payload,
+        isLegacy: true,
+      });
     case "wallet_switchEthereumChain": {
       return ModalStore.open("SwitchNetworkModal", {
         legacyCallRequestEvent: payload,
@@ -152,6 +191,7 @@ const onCallRequest = async (payload: {
     }
 
     default:
+      console.log(payload);
       console.warn(`${payload.method} is not supported for WalletConnect v1`);
   }
 };

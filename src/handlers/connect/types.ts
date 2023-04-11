@@ -1,3 +1,4 @@
+import { TypedDataParameters } from "hdseedloop";
 import { TxFamilyWrapper } from "../wallet/transactions";
 
 /**
@@ -38,6 +39,7 @@ export interface IConnectCardProps {
 export interface IParsedWcRequest {
   tx?: TxFamilyWrapper;
   message?: string;
+  typedData?: TypedDataParameters;
   humanReadableString: string;
   requestType: WcRequestType;
   method: string;
