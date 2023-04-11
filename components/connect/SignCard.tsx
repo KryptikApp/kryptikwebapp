@@ -66,7 +66,26 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
     }
     setTokenPrice(newTokenPrice);
   }
+
+  function clear() {
+    setTokenPrice(0);
+    setProposer(null);
+    setParsedRequest(null);
+    setIsFeeLoaded(false);
+    setFeeData(null);
+    setIsLegacy(false);
+    setNetworkDb(null);
+    setErrorMessage("");
+    setIsValid(true);
+  }
+
   useEffect(() => {
+    if (
+      !ModalStore.state.data?.requestEvent &&
+      !ModalStore.state.data?.legacyCallRequestEvent
+    ) {
+      return;
+    }
     try {
       let newProposer: {
         publicKey: string;
@@ -156,13 +175,14 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
       setParsedRequest(newParsedRequest);
       setProposer(newProposer);
       setNetworkDb(newNetworkDb);
+      setIsValid(true);
     } catch (e) {
       console.log("Sign card load error:");
       console.log(e);
       setIsValid(false);
       setErrorMessage("Unable to initiate request handler.");
     }
-  }, []);
+  }, [ModalStore.state.data]);
 
   const handleAccept = async function () {
     if (!signClient) {
@@ -195,35 +215,6 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
       if (!response) {
         throw new Error("Approval method returned null.");
       }
-      // send signed tx
-      // TODO: push inside of helper?
-      // TODO: update to support non evm requests
-      if (
-        parsedRequest.requestType == WcRequestType.sendTx ||
-        parsedRequest.requestType == WcRequestType.signAndSendTx
-      ) {
-        const provider: KryptikProvider =
-          await kryptikService.getKryptikProviderForNetworkDb(networkDb);
-        if (!provider.ethProvider)
-          throw new Error("No provider available to publish tx.");
-        try {
-          const res = await provider.ethProvider.sendTransaction(
-            response.result
-          );
-          // set response to transaction hash
-          response.result = res.hash;
-        } catch (e: any) {
-          if (e.message) {
-            const failureMessage: string = e.message;
-            if (failureMessage.includes("insufficient funds")) {
-              setErrorMessage(
-                `You need more ${networkDb.ticker.toUpperCase()} to approve this transaction.`
-              );
-            }
-          }
-          throw new Error(e);
-        }
-      }
       if (isLegacy) {
         if (!legacySignClient) {
           toast.error(
@@ -241,6 +232,7 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
       toast.success("Approved");
       // close modal
       onRequestClose();
+      clear();
     } catch (e) {
       console.log(e);
       toast.error(
@@ -281,6 +273,7 @@ const SignCard: NextPage<IConnectCardProps> = (props) => {
       );
     }
     onRequestClose();
+    clear();
     toast("Connection rejected.");
   }
 
