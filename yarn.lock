@@ -6413,10 +6413,10 @@ hdkey@^2.0.1:
     safe-buffer "^5.1.1"
     secp256k1 "^4.0.0"
 
-hdseedloop@^0.8.3:
-  version "0.8.3"
-  resolved "https://registry.yarnpkg.com/hdseedloop/-/hdseedloop-0.8.3.tgz#1452369cac388dfda5edc9dfaafd67617d42c157"
-  integrity sha512-lbyXJhEJZ92dg2pxB7fbC64KgcnOng0elxb7z0O19BtpjOH9+aiJ1FDlpT/8omHwg67u+5LVs663v6f480eFFQ==
+hdseedloop@^0.8.5:
+  version "0.8.5"
+  resolved "https://registry.yarnpkg.com/hdseedloop/-/hdseedloop-0.8.5.tgz#3698ae3c1739de20285be8d10650abb1c87efb7f"
+  integrity sha512-+T0THaGNDUpGgTuDU0H90CzIMSkfljY/KezctATdA8aUFA5Qt3VR63DZMluKAghIlzTHA+Px9Unk6S5I/DsiMQ==
   dependencies:
     "@ethersproject/abstract-signer" "^5.6.2"
     "@ethersproject/address" "^5.6.1"
