@@ -98,6 +98,9 @@ export function getRequestEnum(requestMethod: string | null) {
       return WcRequestType.signTx;
     }
     case signingMethods.ETH_SEND_TRANSACTION: {
+      return WcRequestType.signAndSendTx;
+    }
+    case signingMethods.ETH_SEND_RAW_TRANSACTION: {
       return WcRequestType.sendTx;
     }
     case signingMethods.ETH_SIGN_TYPED_DATA: {
@@ -164,6 +167,7 @@ const onCallRequest = async (payload: {
   method: string;
   params: any[];
 }) => {
+  console.log("New call request w/ params: ", payload.params);
   switch (payload.method) {
     case signingMethods.ETH_SIGN:
     case signingMethods.PERSONAL_SIGN:

@@ -38,6 +38,7 @@ export interface IConnectCardProps {
 
 export interface IParsedWcRequest {
   tx?: TxFamilyWrapper;
+  signedTx?: string;
   message?: string;
   typedData?: TypedDataParameters;
   humanReadableString: string;

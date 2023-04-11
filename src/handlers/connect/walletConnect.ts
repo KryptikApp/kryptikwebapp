@@ -1,6 +1,6 @@
 import SignClient from "@walletconnect/sign-client";
 import { BigNumberish } from "ethers";
-import { Network, SignedTransaction } from "hdseedloop";
+import { Network, NetworkFamily, SignedTransaction } from "hdseedloop";
 import { IWallet } from "../../models/KryptikWallet";
 import { NetworkDb } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
@@ -27,12 +27,15 @@ export async function approveWcRequest(
     requestParams;
   const networkDb: NetworkDb = provider.networkDb;
   const network: Network = provider.network;
-
+  if (network.networkFamily != NetworkFamily.EVM) {
+    throw new Error(
+      "WalletConnect approval process only supports EVM networks at this time."
+    );
+  }
   const { seedLoop } = wallet;
   // populate tx if required
   if (
     parsedRequest.requestType == WcRequestType.signAndSendTx ||
-    parsedRequest.requestType == WcRequestType.sendTx ||
     parsedRequest.requestType == WcRequestType.signTx
   ) {
     const evmTx: TransactionRequest | undefined = parsedRequest.tx?.evmTx;
@@ -64,7 +67,7 @@ export async function approveWcRequest(
       evmTx.nonce = accountNonce;
     }
   }
-
+  let response: JsonRpcResult<string> | null = null;
   switch (parsedRequest.requestType) {
     // sign message
     case WcRequestType.signMessage: {
@@ -72,12 +75,18 @@ export async function approveWcRequest(
         throw new Error("No message available to sign.");
       const msg = parsedRequest.message;
       const signedMsg: string = seedLoop.signMessage(fromAddy, msg, network);
-      return formatJsonRpcResult(parsedRequest.id, signedMsg);
+      response = formatJsonRpcResult(parsedRequest.id, signedMsg);
+      break;
+    }
+    case WcRequestType.sendTx: {
+      if (!parsedRequest.signedTx)
+        throw new Error("No signed transaction available to send.");
+      response = formatJsonRpcResult(parsedRequest.id, parsedRequest.signedTx);
+      break;
     }
     // sign tx
-    case WcRequestType.signTx:
-    case WcRequestType.sendTx:
-    case WcRequestType.signAndSendTx: {
+    case WcRequestType.signAndSendTx:
+    case WcRequestType.signTx: {
       if (!parsedRequest.tx)
         throw new Error("No transaction available to sign.");
       const signedTx: SignedTransaction | null = await signTransaction(
@@ -93,7 +102,8 @@ export async function approveWcRequest(
       if (!signedEvmTx) {
         throw new Error("Unable to sign EVM transaction.");
       }
-      return formatJsonRpcResult(parsedRequest.id, signedEvmTx);
+      response = formatJsonRpcResult(parsedRequest.id, signedEvmTx);
+      break;
     }
     // sign typed data
     case WcRequestType.signTypedData: {
@@ -108,8 +118,8 @@ export async function approveWcRequest(
       if (!signedTypedData) {
         throw new Error("Unable to sign typed data.");
       }
-      console.log("Signed typed data!", typedData);
-      return formatJsonRpcResult(parsedRequest.id, signedTypedData);
+      response = formatJsonRpcResult(parsedRequest.id, signedTypedData);
+      break;
     }
     default: {
       throw new Error(
@@ -117,6 +127,35 @@ export async function approveWcRequest(
       );
     }
   }
+  // send signed tx
+  // TODO: push inside of helper?
+  // TODO: update to support non evm requests
+  if (
+    parsedRequest.requestType == WcRequestType.sendTx ||
+    parsedRequest.requestType == WcRequestType.signAndSendTx
+  ) {
+    if (!provider.ethProvider)
+      throw new Error("No provider available to publish tx.");
+    try {
+      const res = await provider.ethProvider.sendTransaction(response.result);
+      // set response to transaction hash
+      response.result = res.hash;
+    } catch (e: any) {
+      if (e.message) {
+        const failureMessage: string = e.message;
+        if (failureMessage.includes("insufficient funds")) {
+          throw new Error(
+            `You need more ${networkDb.ticker.toUpperCase()} to approve this transaction.`
+          );
+        }
+      }
+      throw new Error(
+        `Unable to publish transaction to ${networkDb.fullName} .`
+      );
+    }
+  }
+  // if not sending tx, return response
+  return response;
 }
 
 export function createSignClient() {

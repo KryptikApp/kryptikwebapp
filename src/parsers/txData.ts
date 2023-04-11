@@ -183,8 +183,8 @@ export function parseWcRequest(
   };
   const isTxTypeTwo: boolean = isEVMTxTypeTwo(networkDb);
   switch (requestType) {
-    case WcRequestType.signTx:
-    case WcRequestType.sendTx: {
+    case WcRequestType.signAndSendTx:
+    case WcRequestType.signTx: {
       switch (network.networkFamily) {
         case NetworkFamily.EVM: {
           // evm chain id
@@ -254,6 +254,12 @@ export function parseWcRequest(
         );
       }
       break;
+    }
+    case WcRequestType.sendTx: {
+      const signedTx: string = params[0];
+      result.signedTx = signedTx;
+      // TODO: add better human readable string for signed tx
+      result.humanReadableString = "Preview Unavailable";
     }
     default: {
       const message = getSignParamsMessage(params, networkDb);
