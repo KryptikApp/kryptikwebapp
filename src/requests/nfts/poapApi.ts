@@ -1,3 +1,4 @@
+import { env } from "process";
 import { KryptikFetch } from "../../kryptikFetch";
 import { INFTMetadata } from "../../parsers/nftEthereum";
 import { parsePoaps } from "../../parsers/poap";
@@ -11,7 +12,7 @@ export const listPoapsByAddress = async function (
     const url = `https://api.poap.tech/actions/scan/${address}`;
     const data = await KryptikFetch(url, {
       headers: {
-        "x-api-key": "FILL ME IN",
+        "x-api-key": env.POAP_API_KEY || "",
       },
       timeout: 10000, // 10 secs
     });
