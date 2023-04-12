@@ -149,6 +149,8 @@ export function evmFeeDataFromLimits(
   } = { ...params };
   // calculate our own max fee per gas
   maxFeePerGas = Number(lastBaseFee) * 1.27 + Number(maxPriorityFeePerGas);
+  // remove decimals
+  maxFeePerGas = maxFeePerGas.toFixed(0);
   // calculate u.i. fees in token amount
   let maxFeePerGasConverted: number = divByDecimals(
     Number(params.maxFeePerGas),
