@@ -194,7 +194,6 @@ export function parseWcRequest(
             to: inputRequest.to,
             data: inputRequest.data,
             gasLimit: inputRequest.gasLimit || inputRequest.gas,
-            value: BigNumber.from(inputRequest.value),
             chainId: chainId,
           };
           if (isTxTypeTwo) {
@@ -208,6 +207,9 @@ export function parseWcRequest(
               newTxRequest.type = 1;
               newTxRequest.gasPrice = inputRequest.gasPrice;
             }
+          }
+          if (inputRequest.value) {
+            newTxRequest.value = BigNumber.from(inputRequest.value);
           }
           const tx: TxFamilyWrapper = { evmTx: newTxRequest };
           result.tx = tx;
