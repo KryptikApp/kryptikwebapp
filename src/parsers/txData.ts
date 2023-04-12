@@ -210,6 +210,8 @@ export function parseWcRequest(
           }
           if (inputRequest.value) {
             newTxRequest.value = BigNumber.from(inputRequest.value);
+          } else {
+            newTxRequest.value = BigNumber.from(0);
           }
           const tx: TxFamilyWrapper = { evmTx: newTxRequest };
           result.tx = tx;
