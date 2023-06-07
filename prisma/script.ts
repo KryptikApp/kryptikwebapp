@@ -9,7 +9,6 @@ import {
 } from "@prisma/client";
 import { add } from "date-fns";
 import { createAesKeyAndIv, IAesKey } from "../src/handlers/crypto";
-import { BlockchainAccountDb } from "../src/helpers/accounts";
 import hashToken from "../src/helpers/auth/hashtoken";
 import { generateCode } from "../src/helpers/auth/jwt";
 
@@ -210,55 +209,6 @@ export async function deleteUserById(id: string): Promise<boolean> {
     return true;
   } catch (e) {
     return false;
-  }
-}
-
-export async function deleteBlockChainAccountByUserId(
-  userId: string
-): Promise<boolean> {
-  try {
-    await prisma.blockchainAccount.delete({ where: { userId: userId } });
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-export async function addBlockChainAccountByUserId(
-  blockchainAccount: BlockchainAccountDb,
-  userId: string
-): Promise<boolean> {
-  try {
-    const newAcccount: BlockchainAccount =
-      await prisma.blockchainAccount.create({
-        data: {
-          evmAddress: blockchainAccount.evmAddress,
-          nearAddress: blockchainAccount.nearAddress,
-          solAddress: blockchainAccount.solAddress,
-          userId: userId,
-        },
-      });
-    return true;
-  } catch (e) {
-    console.log(e);
-    return false;
-  }
-}
-
-export async function getBlockchainAccountByEmail(
-  email: string
-): Promise<BlockchainAccount | null> {
-  try {
-    const res = await prisma.user.findFirst({
-      where: { email: email },
-      include: { blockchainAccount: true },
-    });
-    if (!res || !res.blockchainAccount) {
-      throw new Error("unable to find blockchain account.");
-    }
-    return res.blockchainAccount;
-  } catch (e) {
-    return null;
   }
 }
 
