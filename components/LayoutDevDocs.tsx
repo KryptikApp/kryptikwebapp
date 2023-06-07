@@ -19,7 +19,7 @@ export default function Layout(props: Props) {
   function handleDarkToggle() {
     // uid to update theme for if persisting
     const uid: string = authUser ? authUser.uid : "default";
-    updateIsDark(!isDark, uid, false);
+    updateIsDark(!isDark);
   }
   return (
     <div

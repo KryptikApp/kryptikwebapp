@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 export function useKryptikTheme() {
   // init state
   const [isDark, setIsDark] = useState(false);
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [isAdvanced, setIsAdvanced] = useState(false);
   const [hideBalances, setHideBalances] = useState(false);
   const [themeLoading, setThemeLoading] = useState(true);
@@ -47,23 +47,9 @@ export function useKryptikTheme() {
     }
   };
 
-  const updateIsDark = function (
-    newIsDark: boolean,
-    uid: string,
-    persist: boolean = true
-  ) {
+  const updateIsDark = function (newIsDark: boolean) {
     console.log("updating is dark...");
-    // update app state
-    setIsDark(newIsDark);
-    if (persist) {
-      let newTheme: ITheme = {
-        isAdvanced: isAdvanced,
-        hideBalances: hideBalances,
-        lastUpdated: Date.now(),
-      };
-      // update stored theme
-      updateTheme(newTheme, uid);
-    }
+    setTheme(newIsDark ? "dark" : "light");
   };
 
   const updateIsAdvanced = function (newIsAdvanced: boolean, uid: string) {

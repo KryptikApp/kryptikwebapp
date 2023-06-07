@@ -8,18 +8,11 @@ import { useKryptikThemeContext } from "../../components/ThemeProvider";
 import Link from "next/link";
 import NavProfile from "../../components/navbars/NavProfile";
 import { defaultUser } from "../../src/models/user";
-import { WalletStatus } from "../../src/models/KryptikWallet";
 
 const Settings: NextPage = () => {
   const { authUser, signOut, kryptikWallet } = useKryptikAuthContext();
-  const {
-    updateIsDark,
-    isDark,
-    updateIsAdvanced,
-    isAdvanced,
-    isVisible,
-    updateIsVisible,
-  } = useKryptikThemeContext();
+  const { updateIsDark, isDark, updateIsAdvanced, isAdvanced } =
+    useKryptikThemeContext();
   const [updateVisibleLoading, setUpdateVisibleLoading] = useState(false);
   const router = useRouter();
 
@@ -30,37 +23,6 @@ const Settings: NextPage = () => {
     } catch (e) {
       toast.error("Unable to sign out. Please contact support.");
     }
-  };
-
-  const handleUpdateWalletVisibility = async function () {
-    if (!authUser) {
-      toast.error("Please login before updating your preferences");
-      return;
-    }
-    if (
-      kryptikWallet.status == WalletStatus.OutOfSync ||
-      kryptikWallet.status == WalletStatus.Disconected
-    ) {
-      toast.error("Please sync wallet before updating your preferences");
-      return;
-    }
-    if (kryptikWallet.status == WalletStatus.Locked) {
-      toast.error("Please unlock wallet before updating your preferences");
-      return;
-    }
-    setUpdateVisibleLoading(true);
-    try {
-      await updateIsVisible(!isVisible, authUser.uid, kryptikWallet);
-      if (!isVisible) {
-        toast.success("Your wallet is now visible");
-      } else {
-        toast.success("Your wallet is now private");
-      }
-    } catch (e) {
-      console.log(e);
-      toast.error("Unable to update wallet visiblity");
-    }
-    setUpdateVisibleLoading(false);
   };
 
   const handleUpdateIsAdvanced = function (newIsAdvanced: boolean) {
@@ -147,9 +109,7 @@ const Settings: NextPage = () => {
           <div className="flex mb-2">
             <div
               className="form-check form-check-inline"
-              onClick={() =>
-                updateIsDark(false, authUser ? authUser.uid : defaultUser.uid)
-              }
+              onClick={() => updateIsDark(false)}
             >
               <input
                 className="form-check-input form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-sky-500 checked:border-sky-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
@@ -170,9 +130,7 @@ const Settings: NextPage = () => {
 
             <div
               className="form-check form-check-inline ml-4"
-              onClick={() =>
-                updateIsDark(true, authUser ? authUser.uid : defaultUser.uid)
-              }
+              onClick={() => updateIsDark(true)}
             >
               <input
                 className="form-check-input form-check-input appearance-none rounded-full h-4 w-4 border border-gray-300 bg-white checked:bg-sky-500 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
