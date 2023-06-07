@@ -16,9 +16,8 @@ export default function Layout({ children }) {
       <Toaster />
 
       <main
-        className={`min-h-screen ${themeLoading || isDark ? "dark" : ""} ${
-          themeLoading || isDark ? "bg-[#0c0c0c]" : "bg-white"
-        } px-2`}
+        className={`min-h-screen dark:bg-[#0c0c0c] bg-white
+        px-2`}
       >
         <Navbar />
         {children}
