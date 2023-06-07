@@ -10,6 +10,7 @@ import { KryptikAuthProvider } from "../components/KryptikAuthProvider";
 import { KryptikThemeProvider } from "../components/ThemeProvider";
 import LayoutDevDocs from "../components/LayoutDevDocs";
 import ConnectModal from "../components/connect/ConnectModal";
+import { ThemeProvider } from "next-themes";
 
 // Record a pageview when route changes
 Router.events.on("routeChangeComplete", (as, routeProps) => {
@@ -43,22 +44,26 @@ function MyApp({ Component, pageProps, router }: AppProps) {
   if (router.pathname.startsWith("/developer")) {
     return (
       <KryptikAuthProvider>
-        <KryptikThemeProvider>
-          <LayoutDevDocs>
-            <Component {...pageProps} />
-          </LayoutDevDocs>
-        </KryptikThemeProvider>
+        <ThemeProvider attribute="class">
+          <KryptikThemeProvider>
+            <LayoutDevDocs>
+              <Component {...pageProps} />
+            </LayoutDevDocs>
+          </KryptikThemeProvider>
+        </ThemeProvider>
       </KryptikAuthProvider>
     );
   } else {
     return (
       <KryptikAuthProvider>
-        <KryptikThemeProvider>
-          <Layout>
-            <Component {...pageProps} />
-            <ConnectModal />
-          </Layout>
-        </KryptikThemeProvider>
+        <ThemeProvider attribute="class">
+          <KryptikThemeProvider>
+            <Layout>
+              <Component {...pageProps} />
+              <ConnectModal />
+            </Layout>
+          </KryptikThemeProvider>
+        </ThemeProvider>
       </KryptikAuthProvider>
     );
   }
