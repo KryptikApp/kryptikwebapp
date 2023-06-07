@@ -1,33 +1,24 @@
-import { defaultNetworks } from "hdseedloop";
 import { useEffect, useState } from "react";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
-import { IWallet } from "../models/KryptikWallet";
-import {
-  addUserBlockchainAccountDB,
-  BlockchainAccountDb,
-  deleteUserBlockchainAccountDB,
-} from "./accounts";
-import { getAddressForNetwork } from "./utils/accountUtils";
+import { useTheme } from "next-themes";
 
 export function useKryptikTheme() {
   // init state
   const [isDark, setIsDark] = useState(false);
+  const { resolvedTheme } = useTheme();
   const [isAdvanced, setIsAdvanced] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
   const [hideBalances, setHideBalances] = useState(false);
   const [themeLoading, setThemeLoading] = useState(true);
+
   const { authUser } = useKryptikAuthContext();
   const defaultTheme: ITheme = {
     isAdvanced: false,
-    isDark: true,
-    isVisible: false,
     hideBalances: false,
     lastUpdated: Date.now(),
   };
+
   interface ITheme {
     isAdvanced: boolean;
-    isDark: boolean;
-    isVisible: boolean;
     hideBalances: boolean;
     lastUpdated: number;
   }
@@ -50,14 +41,9 @@ export function useKryptikTheme() {
     } else {
       theme = { ...JSON.parse(themeString) };
     }
-    // update state
-    setIsDark(theme.isDark);
     setHideBalances(theme.hideBalances);
     if (theme.isAdvanced) {
       setIsAdvanced(theme.isAdvanced);
-    }
-    if (theme.isVisible) {
-      setIsVisible(theme.isVisible);
     }
   };
 
@@ -72,8 +58,6 @@ export function useKryptikTheme() {
     if (persist) {
       let newTheme: ITheme = {
         isAdvanced: isAdvanced,
-        isDark: newIsDark,
-        isVisible: isVisible,
         hideBalances: hideBalances,
         lastUpdated: Date.now(),
       };
@@ -82,58 +66,10 @@ export function useKryptikTheme() {
     }
   };
 
-  const updateIsVisible = async function (
-    newIsVisible: boolean,
-    uid: string,
-    wallet: IWallet
-  ) {
-    let newTheme: ITheme = {
-      isAdvanced: isAdvanced,
-      isDark: isDark,
-      isVisible: newIsVisible,
-      hideBalances: hideBalances,
-      lastUpdated: Date.now(),
-    };
-    let success: boolean = false;
-    if (newIsVisible) {
-      let blockchainAccounts: BlockchainAccountDb = {
-        evmAddress: "",
-        nearAddress: "",
-        solAddress: "",
-      };
-      // PERPETUAL TODO: UPDATE WHEN NETWORK WITH DIFFERENT NETWORK FAMILY IS ADDED
-      const solNetwork = defaultNetworks["sol"];
-      const ethNetwork = defaultNetworks["eth"];
-      const nearNetwork = defaultNetworks["near"];
-      const solAddy = getAddressForNetwork(wallet, solNetwork);
-      const ethAddy = getAddressForNetwork(wallet, ethNetwork);
-      const nearAddy = getAddressForNetwork(wallet, nearNetwork);
-      // add data to ticker-addy dictionary
-      blockchainAccounts.solAddress = solAddy;
-      blockchainAccounts.evmAddress = ethAddy;
-      blockchainAccounts.nearAddress = nearAddy;
-      console.log("adding addys to remote...");
-      success = await addUserBlockchainAccountDB(blockchainAccounts);
-      console.log("----");
-    } else {
-      success = await deleteUserBlockchainAccountDB();
-    }
-    if (success) {
-      // update app state
-      setIsVisible(newIsVisible);
-      // update stored theme
-      updateTheme(newTheme, uid);
-    } else {
-      throw new Error("Unable to add blockchain accounts");
-    }
-  };
-
   const updateIsAdvanced = function (newIsAdvanced: boolean, uid: string) {
     console.log("updating is advanced...");
     let newTheme: ITheme = {
       isAdvanced: newIsAdvanced,
-      isDark: isDark,
-      isVisible: isVisible,
       hideBalances: hideBalances,
       lastUpdated: Date.now(),
     };
@@ -147,8 +83,6 @@ export function useKryptikTheme() {
     console.log("updating hide balances...");
     let newTheme: ITheme = {
       isAdvanced: isAdvanced,
-      isDark: isDark,
-      isVisible: isVisible,
       hideBalances: newHideBalances,
       lastUpdated: Date.now(),
     };
@@ -181,13 +115,19 @@ export function useKryptikTheme() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
 
+  useEffect(() => {
+    if (resolvedTheme === "dark") {
+      setIsDark(true);
+    } else {
+      setIsDark(false);
+    }
+  }, [resolvedTheme]);
+
   return {
     isDark,
     updateIsDark,
     isAdvanced,
     updateIsAdvanced,
-    isVisible,
-    updateIsVisible,
     hideBalances,
     updateHideBalances,
     themeLoading,

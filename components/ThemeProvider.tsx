@@ -9,12 +9,6 @@ const kryptikThemeContext = createContext({
   updateIsDark: (newIsDark: boolean, uid: string, persist?: boolean) => {},
   isAdvanced: false,
   updateIsAdvanced: (newIsAdvanced: boolean, uid: string) => {},
-  isVisible: false,
-  updateIsVisible: async (
-    newIsVisible: boolean,
-    uid: string,
-    wallet: IWallet
-  ) => {},
   hideBalances: false,
   updateHideBalances: (newHideBalances: boolean, uid: string) => {},
 });
