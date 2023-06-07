@@ -11,7 +11,7 @@ export default function Layout({ children }) {
       <Head>
         <title>Kryptik Wallet</title>
         <meta name="description" content="Crypto made simple." />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/icon.ico" />
       </Head>
       <Toaster />
 
