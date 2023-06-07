@@ -5,7 +5,6 @@ import { KryptikProvider } from "../../services/models/provider";
 import { networkFromNetworkDb } from "../utils/networkUtils";
 import { resolveAlgoAccount } from "./algorandResolver";
 import { resolveEVMAccount } from "./evmResolver";
-import { resolveKryptikAccount } from "./kryptikResolver";
 import { resolveNEARAccount } from "./nearResolver";
 import { resolveSOLAccount } from "./solResolver";
 
@@ -33,10 +32,6 @@ export const resolveAccount = async function (
   console.log("Resolving account....");
   const { networkDB } = params;
   let network = networkFromNetworkDb(networkDB);
-  const kryptikResolved: IResolvedAccount | null = await resolveKryptikAccount(
-    params
-  );
-  if (kryptikResolved) return kryptikResolved;
   // parse network prefix
   if (params.account.includes(":")) {
     let split = params.account.split(":");
