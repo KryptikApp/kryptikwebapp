@@ -69,6 +69,7 @@
     "next": "^13.1.6",
     "next-connect": "^0.12.2",
     "next-qrcode": "^2.1.0",
+    "next-themes": "^0.2.1",
     "npm": "^9.5.1",
     "prisma": "^4.9.0",
     "pubsub-ts": "^0.2.0",
