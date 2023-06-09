@@ -53,5 +53,9 @@ export const config = {
     "/wallet",
     "/sync/:path*",
     "/api/sync/:path*",
+    "/api/auth/passkey/createRegistrationOptions",
+    "/api/auth/passkey/verifyRegistration",
+    "/api/auth/passkey/createAuthOptions",
+    "/api/auth/passkey/verifyAuth",
   ],
 };
