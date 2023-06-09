@@ -10,6 +10,7 @@ import {
 } from "../../../../prisma/script";
 import { Authenticator, User } from "@prisma/client";
 import { rpID } from "../../../../src/helpers/auth/passkey";
+import { UAParser } from "ua-parser-js";
 
 // The URL at which registrations and authentications should occur
 const origin = `https://${rpID}`;
@@ -51,14 +52,19 @@ export default async function handler(
     if (!registrationInfo) {
       throw new Error("Unable to verify registration response.");
     }
+    // parse user agent
+    const uaParser = new UAParser(req.headers["user-agent"]);
+    const ua = uaParser.getResult();
+    // create authenticator name from user agent
+    const authenticatorName = ua.browser.name + "on " + ua.os.name;
     const {
       counter,
-      credentialID,
       credentialDeviceType,
       credentialBackedUp,
       credentialPublicKey,
     } = registrationInfo;
-    const newAuthenticator: any = {
+    // populate new authenticator object
+    const newAuthenticator: Authenticator = {
       credentialID: body.id,
       counter: counter,
       userId: user.id,
@@ -67,6 +73,7 @@ export default async function handler(
       credentialBackedUp: credentialBackedUp,
       credentialPublicKey: Buffer.from(credentialPublicKey),
       transports: "",
+      name: authenticatorName,
     };
     // save authenticator to db
     const authenticator: Authenticator = await saveAuthenticator(

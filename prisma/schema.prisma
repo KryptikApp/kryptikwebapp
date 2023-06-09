@@ -33,6 +33,7 @@ model Authenticator {
   // SQL: `VARCHAR(32)` or similar, longest possible value is currently 12 characters
   // Ex: 'singleDevice' | 'multiDevice'
   credentialDeviceType String
+  name String
   // SQL: `BOOL` or whatever similar type is supported
   credentialBackedUp Boolean
   // SQL: `VARCHAR(255)` and store string array as a CSV string
