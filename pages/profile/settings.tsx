@@ -8,6 +8,8 @@ import { useKryptikThemeContext } from "../../components/ThemeProvider";
 import Link from "next/link";
 import NavProfile from "../../components/navbars/NavProfile";
 import { defaultUser } from "../../src/models/user";
+import PassKeyRegistration from "../../components/auth/PasskeyRegistration";
+import PassKeyAuth from "../../components/auth/PasskeyAuth";
 
 const Settings: NextPage = () => {
   const { authUser, signOut, kryptikWallet } = useKryptikAuthContext();
@@ -179,6 +181,8 @@ const Settings: NextPage = () => {
             custom transaction fees.
           </p>
         </div>
+        <PassKeyRegistration />
+        <PassKeyAuth />
         <Divider />
         <button
           onClick={() => handleLogout()}
