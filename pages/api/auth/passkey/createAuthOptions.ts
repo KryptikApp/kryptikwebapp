@@ -10,7 +10,6 @@ import {
   saveCurrentChallenge,
   findUserById,
 } from "../../../../prisma/script";
-import { rpID, rpName } from "../../../../src/helpers/auth/passkey";
 
 type Data = any;
 

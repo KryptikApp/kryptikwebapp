@@ -9,7 +9,7 @@ import {
   findUserById,
 } from "../../../../prisma/script";
 import { User } from "@prisma/client";
-import { rpID } from "../../../../src/helpers/auth/passkey";
+import { rpID } from "../../../../src/constants/passkeyConstants";
 
 // The URL at which registrations and authentications should occur
 const origin = `https://${rpID}`;

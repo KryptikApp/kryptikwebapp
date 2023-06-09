@@ -9,8 +9,9 @@ import {
   saveAuthenticator,
 } from "../../../../prisma/script";
 import { Authenticator, User } from "@prisma/client";
-import { rpID } from "../../../../src/helpers/auth/passkey";
+
 import { UAParser } from "ua-parser-js";
+import { rpID } from "../../../../src/constants/passkeyConstants";
 
 // The URL at which registrations and authentications should occur
 const origin = `https://${rpID}`;
