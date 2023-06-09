@@ -46,6 +46,16 @@ export async function findAuthenticatorsByUserId(
   });
 }
 
+export async function findAuthenticatorsByUserEmail(
+  userId: string
+): Promise<Authenticator[] | null> {
+  return prisma.authenticator.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
+
 export async function saveCurrentChallenge(
   challenge: string,
   userId: string
