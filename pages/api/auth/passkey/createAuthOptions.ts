@@ -9,6 +9,7 @@ import {
   findAuthenticatorsByUserId,
   saveCurrentChallenge,
   findUserById,
+  findUserByEmail,
 } from "../../../../prisma/script";
 
 type Data = any;
@@ -19,16 +20,16 @@ export default async function handler(
 ) {
   try {
     const body = req.body;
-    const userId: string | string[] | undefined = req.headers["user-id"];
-    if (!userId || typeof userId != "string") {
+    const email = body.email;
+    if (!email || typeof email != "string") {
       throw new Error(
-        "No user id available or user id was of the wrong type (expected string)."
+        "No email available or email was of the wrong type (expected string)."
       );
     }
     // find user
-    const user: User | null = await findUserById(userId);
+    const user: User | null = await findUserByEmail(email);
     if (!user) {
-      throw new Error("Unable to find or create new user.");
+      throw new Error("Unable to find user with email.");
     }
 
     const userAuthenticators = await findAuthenticatorsByUserId(user.id);
