@@ -1,59 +1,34 @@
 import { NextPage } from "next";
 import Button from "../buttons/Button";
 import { useState } from "react";
-import { KryptikFetch } from "../../src/kryptikFetch";
-import { startAuthentication } from "@simplewebauthn/browser";
-import toast from "react-hot-toast";
 import { useRouter } from "next/router";
+import { authenticatePasskey } from "../../src/helpers/auth/passkey";
+import { useKryptikAuthContext } from "../KryptikAuthProvider";
 
-const PassKeyAuth: NextPage = () => {
+// params for component are passed in as props
+type Props = {
+  onSuccess: () => any;
+  onFailure: () => any;
+};
+
+export default function PassKeyAuth(props: Props) {
+  const { onSuccess, onFailure } = { ...props };
   const [loadingRegistration, setLoadingRegistration] = useState(false);
+  const { authUser } = useKryptikAuthContext();
   const router = useRouter();
 
   async function addPasskey() {
+    if (!authUser) {
+      onFailure();
+      return;
+    }
     setLoadingRegistration(true);
-
-    // try to add new friend on server
-    try {
-      const res = await KryptikFetch("/api/auth/passkey/createAuthOptions", {
-        method: "POST",
-        timeout: 8000,
-        headers: { "Content-Type": "application/json" },
-      });
-
-      let attResp;
-      // custom error handling for option generation
-      try {
-        attResp = await startAuthentication(res.data);
-      } catch (e: any) {
-        if (e.name && e.name === "InvalidStateError") {
-          throw new Error("Passkey already registered.");
-        }
-        throw new Error(e.message);
-      }
-      // send the registration credentials to the server
-      const resRegistration = await KryptikFetch(
-        "/api/auth/passkey/verifyAuth",
-        {
-          method: "POST",
-          body: JSON.stringify(attResp),
-          timeout: 8000,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      const verification = resRegistration.data;
-      // ensure that the passkey was registered
-      if (verification.verified) {
-        toast.success("Logged in.");
-        setLoadingRegistration(false);
-        router.push("/");
-        return;
-      } else {
-        throw new Error();
-      }
-    } catch (e: any) {
-      toast.error("Unable to add passkey.");
-      setLoadingRegistration(false);
+    const approved = await authenticatePasskey(authUser.email);
+    setLoadingRegistration(false);
+    if (approved) {
+      onSuccess();
+    } else {
+      onFailure();
     }
   }
 
@@ -68,6 +43,4 @@ const PassKeyAuth: NextPage = () => {
       />
     </div>
   );
-};
-
-export default PassKeyAuth;
+}
