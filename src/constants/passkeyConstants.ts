@@ -2,7 +2,7 @@
 let rpID: string;
 if (process.env.IS_PRODUCTION?.toLowerCase() == "true") {
   // prod
-  rpID = "kryptik.app";
+  rpID = "www.kryptik.app";
 } else {
   // dev
   rpID = "localhost";
