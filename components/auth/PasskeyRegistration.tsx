@@ -1,72 +1,42 @@
-import { NextPage } from "next";
+import { registerPasskey } from "../../src/helpers/auth/passkey";
+import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import Button from "../buttons/Button";
 import { useState } from "react";
-import { KryptikFetch } from "../../src/kryptikFetch";
-import { startRegistration } from "@simplewebauthn/browser";
-import toast from "react-hot-toast";
 
-const PassKeyRegistration: NextPage = () => {
+// params for component are passed in as props
+type Props = {
+  onSuccess: () => any;
+  onFailure: () => any;
+};
+
+export default function PassKeyRegistration(props: Props) {
+  const { onSuccess, onFailure } = { ...props };
+  const { authUser } = useKryptikAuthContext();
   const [loadingRegistration, setLoadingRegistration] = useState(false);
 
   async function addPasskey() {
+    if (!authUser) {
+      onFailure();
+      return;
+    }
     setLoadingRegistration(true);
-
-    // try to add new friend on server
-    try {
-      const res = await KryptikFetch(
-        "/api/auth/passkey/createRegistrationOptions",
-        {
-          method: "POST",
-          timeout: 8000,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      let attResp;
-      // custom error handling for option generation
-      try {
-        attResp = await startRegistration(res.data);
-      } catch (e: any) {
-        if (e.name && e.name === "InvalidStateError") {
-          throw new Error("Passkey already registered.");
-        }
-        throw new Error(e.message);
-      }
-      // send the registration credentials to the server
-      const resRegistration = await KryptikFetch(
-        "/api/auth/passkey/verifyRegistration",
-        {
-          method: "POST",
-          body: JSON.stringify(attResp),
-          timeout: 8000,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      const verification = resRegistration.data;
-      // ensure that the passkey was registered
-      if (verification.verified) {
-        toast.success("Passkey added.");
-        setLoadingRegistration(false);
-        return;
-      } else {
-        throw new Error();
-      }
-    } catch (e: any) {
-      toast.error("Unable to add passkey.");
-      setLoadingRegistration(false);
+    const success = await registerPasskey(authUser.email);
+    setLoadingRegistration(false);
+    if (success) {
+      onSuccess();
+    } else {
+      onFailure();
     }
   }
 
   return (
-    <div className="hover:border-sky-400 transition-colors duration-300 border rounded-xl px-2 py-2 my-2">
-      <h1 className="text-3xl font-bold">Passkey Registration</h1>
-      <p className="text-xl">Register your passkey for easy login.</p>
-      <Button
-        clickHandler={addPasskey}
-        text={"Add Passkey"}
-        isLoading={loadingRegistration}
-      />
+    <div className="">
+      <p
+        className="text-xl text-sky-400 hover:text-sky-500 hover:font-bold transition-colors duration-300 hover:cursor-pointer"
+        onClick={addPasskey}
+      >
+        Add New Key
+      </p>
     </div>
   );
-};
-
-export default PassKeyRegistration;
+}
