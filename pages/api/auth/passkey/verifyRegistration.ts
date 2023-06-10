@@ -72,7 +72,11 @@ export default async function handler(
     const verification = await verifyRegistrationResponse({
       response: body,
       expectedChallenge: expectedChallenge.challenge,
-      expectedOrigin: [origin, "http://localhost:3000", "https://kryptik.app"],
+      expectedOrigin: [
+        origin,
+        "http://localhost:3000",
+        "https://www.kryptik.app",
+      ],
       expectedRPID: rpID,
     });
     const { registrationInfo, verified } = verification;
