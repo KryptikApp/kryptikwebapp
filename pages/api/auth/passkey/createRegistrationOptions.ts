@@ -13,6 +13,7 @@ import {
   createUserByEmail,
 } from "../../../../prisma/script";
 import { rpID, rpName } from "../../../../src/constants/passkeyConstants";
+import { authenticateApiRequest } from "../../../../middleware";
 
 type Data = any;
 
@@ -22,7 +23,6 @@ export default async function handler(
 ) {
   try {
     const body = req.body;
-    const userId: string | string[] | undefined = req.headers["user-id"];
     const email = body.email;
     let user: User | null = null;
     if (email && typeof email == "string") {
@@ -33,13 +33,14 @@ export default async function handler(
         user = await createUserByEmail(email);
       }
     }
-    if ((!user && !userId) || typeof userId != "string") {
-      throw new Error(
-        "No user id available or user id was of the wrong type (expected string)."
-      );
-    }
     // find user by userId, if not already found
     if (!user) {
+      const verifiedResult = await authenticateApiRequest(req);
+      if (!verifiedResult.verified || !verifiedResult.payload) {
+        throw new Error("Unable to verify request.");
+      }
+      // get user id from header
+      const userId: any = verifiedResult.payload.userId;
       user = await findUserById(userId);
     }
     if (!user) {

@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
 import {
-  createUserByEmail,
+  addRefreshTokenToWhitelist,
   findCurrentChallenge,
   findUserByEmail,
   findUserById,
@@ -14,6 +14,10 @@ import { Authenticator, User } from "@prisma/client";
 
 import { UAParser } from "ua-parser-js";
 import { rpID } from "../../../../src/constants/passkeyConstants";
+import { setCookie } from "cookies-next";
+import { v4 } from "uuid";
+import { generateTokens } from "../../../../src/helpers/auth/jwt";
+import { authenticateApiRequest } from "../../../../middleware";
 
 // The URL at which registrations and authentications should occur
 const origin = `https://${rpID}`;
@@ -27,30 +31,38 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
 ) {
+  console.log("Verify registration request body", req.body);
   try {
     const body = req.body;
-    const userId: string | string[] | undefined = req.headers["user-id"];
     const email = body.email;
     let user: User | null = null;
-    if (email && typeof email == "string") {
-      // find user by email
-      user = await findUserByEmail(email);
-      // if no user found, create new user
-      if (!user) {
-        user = await createUserByEmail(email);
+
+    user = await findUserByEmail(email);
+    if (user) {
+      const createdTime = new Date(user.createdAt);
+      const currentTime = new Date();
+      const timeDiff = currentTime.getTime() - createdTime.getTime();
+      // allowed if younger than one minute or if user is verified
+      if (timeDiff > 60000) {
+        console.log("user is older than one minute");
+        user = null;
+        const verifiedResult = await authenticateApiRequest(req);
+        if (!verifiedResult.verified || !verifiedResult.payload) {
+          throw new Error("Unable to verify request.");
+        }
+        // get user id from header
+        const userId: any = verifiedResult.payload.userId;
+        if (!userId || typeof userId != "string") {
+          throw new Error(
+            "No user id available or user id was of the wrong type (expected string)."
+          );
+        }
+        // find user
+        user = await findUserById(userId);
       }
     }
-    if ((!user && !userId) || typeof userId != "string") {
-      throw new Error(
-        "No user id available or user id was of the wrong type (expected string)."
-      );
-    }
-    // find user by userId, if not already found
     if (!user) {
-      user = await findUserById(userId);
-    }
-    if (!user) {
-      throw new Error("Unable to find or create new user.");
+      throw new Error("Unable to find user with email.");
     }
 
     const expectedChallenge = await findCurrentChallenge(user.id);
@@ -71,7 +83,7 @@ export default async function handler(
     const uaParser = new UAParser(req.headers["user-agent"]);
     const ua = uaParser.getResult();
     // create authenticator name from user agent
-    const authenticatorName = ua.browser.name + "on " + ua.os.name;
+    const authenticatorName = ua.browser.name + " on " + ua.os.name;
     const {
       counter,
       credentialDeviceType,
@@ -97,6 +109,23 @@ export default async function handler(
     if (!verified) {
       throw new Error("Unable to verify registration response.");
     }
+    // add auth cookies
+    const jti = v4();
+    const { accessToken, refreshToken } = generateTokens(user, jti);
+    await addRefreshTokenToWhitelist(jti, refreshToken, user.id);
+    setCookie("accessToken", accessToken, {
+      req,
+      res,
+      secure: process.env.APP_STAGE == "production",
+      httpOnly: true,
+    });
+    setCookie("refreshToken", refreshToken, {
+      req,
+      res,
+      secure: process.env.APP_STAGE == "production",
+      httpOnly: true,
+    });
+    // return success
     return res.status(200).send({
       msg: "Successfully verified registration response.",
       verified: verified,
