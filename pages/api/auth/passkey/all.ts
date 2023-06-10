@@ -4,9 +4,14 @@ import { Authenticator, User } from "@prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import {
   findAuthenticatorsByUserEmail,
+  findAuthenticatorsByUserId,
   findUserByEmail,
   findUserById,
 } from "../../../../prisma/script";
+import {
+  authenticateApiRequest,
+  authenticateRequest,
+} from "../../../../middleware";
 
 type Data = {
   msg?: string;
@@ -21,24 +26,29 @@ export default async function handler(
     // check if head request
     if (req.method === "HEAD") {
       // get email from body
-      const email = req.body.email;
+      const email = req.headers["email"];
       if (!email || typeof email != "string") {
         return res.status(400).json({ msg: "No email provided." });
       }
       // find user
       const user: User | null = await findUserByEmail(email);
       if (!user) {
-        throw new Error("Unable to find user.");
+        return res.status(200).setHeader("Passkeys-Count", 0).end();
       }
       // find all authenticators associated with user
-      const passkeys: Authenticator[] | null =
-        await findAuthenticatorsByUserEmail(user.email);
+      const passkeys: Authenticator[] | null = await findAuthenticatorsByUserId(
+        user.id
+      );
       const passkeysCount = passkeys?.length.toString() || "0";
       // return metadata about authenticators for given user
       return res.status(200).setHeader("Passkeys-Count", passkeysCount).end();
     }
+    const verifiedResult = await authenticateApiRequest(req);
+    if (!verifiedResult.verified || !verifiedResult.payload) {
+      throw new Error("Unable to verify request.");
+    }
     // get user id from header
-    const userId: string | string[] | undefined = req.headers["user-id"];
+    const userId: any = verifiedResult.payload.userId;
     if (!userId || typeof userId != "string") {
       throw new Error(
         "No user id available or user id was of the wrong type (expected string)."
@@ -50,8 +60,9 @@ export default async function handler(
       return res.status(200).json({ passkeys: [] });
     }
     // find all authenticators associated with user
-    const passkeys: Authenticator[] | null =
-      await findAuthenticatorsByUserEmail(user.email);
+    const passkeys: Authenticator[] | null = await findAuthenticatorsByUserId(
+      user.id
+    );
     if (!passkeys) {
       throw new Error("Unable to find passkeys for user.");
     }
