@@ -41,12 +41,9 @@ export function timeElapsedString(startDate: Date, endDate: Date) {
     }
   }
 }
-
+// get rounded days elapsed between two dates
 export function getDaysElapsed(startDate: Date, endDate: Date): number {
-  const msInDay = 24 * 60 * 60 * 1000;
-
-  // 👇️ explicitly calling getTime()
-  return Math.round(
-    Math.abs(endDate.getTime() - startDate.getTime()) / msInDay
-  );
+  const timeDiff = endDate.getTime() - startDate.getTime();
+  const daysElapsed = Math.round(timeDiff / (1000 * 3600 * 24));
+  return daysElapsed;
 }

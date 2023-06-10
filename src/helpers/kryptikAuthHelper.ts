@@ -24,6 +24,7 @@ import {
   deleteCachedLegacySession,
   getCachedLegacySession,
 } from "../handlers/connect/utils";
+import { authenticatePasskey, registerPasskey } from "./auth/passkey";
 
 export function useKryptikAuth() {
   //create service
@@ -66,6 +67,30 @@ export function useKryptikAuth() {
   ): Promise<boolean> {
     const approved = await handleApprove(email, token);
     if (!approved) return false;
+    setLoadingAuthUser(true);
+    const user: UserDB | null = await getActiveUser();
+    setAuthUser(user);
+    if (!user) {
+      console.log("No user available. Running clear...");
+      clear();
+      return false;
+    }
+    // begin update, but don't wait...
+    updateAuthContext(user, seed);
+    return true;
+  }
+
+  async function signInWithPasskey(
+    email: string,
+    hasPasskey: boolean,
+    seed?: string
+  ) {
+    let success: boolean = false;
+    if (hasPasskey) {
+      success = await authenticatePasskey(email);
+    } else {
+      success = await registerPasskey(email);
+    }
     setLoadingAuthUser(true);
     const user: UserDB | null = await getActiveUser();
     setAuthUser(user);
@@ -290,6 +315,7 @@ export function useKryptikAuth() {
     refreshUserAndWallet,
     refreshBalances,
     signInWithToken,
+    signInWithPasskey,
     updateCurrentUserKryptik,
     signOut,
     kryptikService,

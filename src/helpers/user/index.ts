@@ -41,3 +41,21 @@ export async function getActiveUser(): Promise<UserDB | null> {
     return null;
   }
 }
+
+export async function isEmailTaken(email: string): Promise<boolean> {
+  try {
+    const params = { email: email };
+    console.log();
+    const res = await KryptikFetch("/api/user/nameTaken", {
+      method: "POST",
+      timeout: 8000,
+      body: JSON.stringify(params),
+      headers: { "Content-Type": "application/json" },
+    });
+    console.log(res);
+    const taken = res.data.taken;
+    return taken == true;
+  } catch (e: any) {
+    return false;
+  }
+}

@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 
 import ReactCodeInput from "react-code-input";
 
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useKryptikThemeContext } from "../ThemeProvider";
 import { KryptikFetch } from "../../src/kryptikFetch";
@@ -11,18 +12,30 @@ import Link from "next/link";
 import { isValidEmailAddress } from "../../src/helpers/resolvers/kryptikResolver";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import LoadingSpinner from "../loadingSpinner";
+import { hasPasskeys } from "../../src/helpers/auth/passkey";
+import {
+  browserSupportsWebAuthn,
+  platformAuthenticatorIsAvailable,
+} from "@simplewebauthn/browser";
+import { isEmailTaken } from "../../src/helpers/user";
 
+enum LoginType {
+  email = 0,
+  passkey = 1,
+}
 const LoginCard: NextPage = () => {
-  const { signInWithToken } = useKryptikAuthContext();
+  const { signInWithToken, signInWithPasskey } = useKryptikAuthContext();
   const [email, setEmail] = useState("");
   const [sentEmail, setSentEmail] = useState(false);
   const [loadingApproval, setLoadingApproval] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [initPasskeyFlow, setInitPasskeyFlow] = useState(false);
   const [redirectToPath, setRedirectToPath] = useState<null | string>(null);
   const sendLink: boolean = false;
   const { isDark } = useKryptikThemeContext();
   const [code, setCode] = useState("");
   const router = useRouter();
+  const [loginType, setLoginType] = useState<LoginType>(LoginType.email);
   const [loadingMessage, setLoadingMessage] = useState("");
   function handleStatusUpdate(msg: string, progress?: number) {
     setLoadingMessage(msg);
@@ -36,18 +49,11 @@ const LoginCard: NextPage = () => {
     }
   }, [router.isReady]);
 
-  async function handleLogin() {
+  async function sendEmailCode() {
     const params = {
       email: email,
       sendLink: sendLink,
     };
-    if (!isValidEmailAddress(email)) {
-      toast.error("Please enter a valid email");
-      return;
-    }
-    setLoading(true);
-    // try to login
-    // TODO: CREATE SEPERATE LOGIN REQUEST FUNCTION
     try {
       const res = await KryptikFetch("/api/auth/login", {
         method: "POST",
@@ -61,12 +67,68 @@ const LoginCard: NextPage = () => {
       }
       setSentEmail(true);
       setLoading(false);
+      setInitPasskeyFlow(false);
       toast.success("Email sent!");
       return;
     } catch (e) {
       setLoading(false);
       // adding events failed. notfy user.
       toast("Unable to send varification email.");
+      return;
+    }
+  }
+
+  async function loginWithPasskey(email: string, hasPasskey: boolean) {
+    console.log("Logging in with passkey");
+    setInitPasskeyFlow(true);
+    setLoadingApproval(true);
+    handleStatusUpdate("Building wallet on device.");
+    setLoading(false);
+    const approvedStatus: boolean = await signInWithPasskey(email, hasPasskey);
+    if (approvedStatus) {
+      toast.success("You are now logged in!");
+      setLoadingApproval(false);
+      setInitPasskeyFlow(false);
+      // redirect to main page or previous (if set)
+      if (redirectToPath) {
+        router.push(redirectToPath);
+      } else {
+        router.push("/");
+      }
+      return;
+    } else {
+      toast("Trying email instead.");
+      setLoadingApproval(false);
+      setLoginType(LoginType.email);
+      await sendEmailCode();
+      return;
+    }
+  }
+
+  async function handleLogin() {
+    if (!isValidEmailAddress(email)) {
+      toast.error("Please enter a valid email");
+      return;
+    }
+    const hasPasskey = await hasPasskeys(email);
+    const supportsPasskeys = await platformAuthenticatorIsAvailable();
+    const browserSupportsPasskeys = browserSupportsWebAuthn();
+    const emailTaken: boolean = await isEmailTaken(email);
+    try {
+      setLoading(true);
+      if (
+        (hasPasskey || !emailTaken) &&
+        supportsPasskeys &&
+        browserSupportsPasskeys
+      ) {
+        setLoginType(LoginType.passkey);
+        loginWithPasskey(email, hasPasskey);
+      } else {
+        setLoginType(LoginType.email);
+        sendEmailCode();
+      }
+    } catch (e) {
+      toast.error("Unable to initiate login.");
       return;
     }
   }
@@ -114,14 +176,14 @@ const LoginCard: NextPage = () => {
           <h1 className="text-3xl font-bold text-center mb-4">Welcome</h1>
         </div>
         <div className="">
-          {!sentEmail && loading && (
+          {!sentEmail && loading && !initPasskeyFlow && (
             <div>
               <p className="text-xl font-semibold text-gray-700 dark:text-gray-200 text-center">
                 Sending email...
               </p>
             </div>
           )}
-          {!loading && !sentEmail && (
+          {!loading && !sentEmail && !initPasskeyFlow && (
             <div className="px-6">
               <div className="flex flex-col mb-4">
                 <p className="text-gray-700 dark:text-gray-400 text-lg font-semibold mb-4">
@@ -157,7 +219,7 @@ const LoginCard: NextPage = () => {
               </div>
             </div>
           )}
-          {!loading && sentEmail && !loadingApproval && (
+          {!loading && sentEmail && !loadingApproval && !initPasskeyFlow && (
             <div>
               <div className="mb-10 ml-[5%] md:ml-[14%]">
                 <ReactCodeInput
@@ -174,6 +236,17 @@ const LoginCard: NextPage = () => {
                 </p>
                 {loadingApproval && <LoadingSpinner />}
               </div>
+            </div>
+          )}
+          {initPasskeyFlow && (
+            <div className="">
+              <Image
+                src="/icons/orb.gif"
+                alt="Orb"
+                width={200}
+                height={200}
+                className="mx-auto rounded-xl"
+              />
             </div>
           )}
           {loadingApproval && (

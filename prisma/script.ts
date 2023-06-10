@@ -1,4 +1,6 @@
 import {
+  Authenticator,
+  AuthenticatorChallenge,
   BlockchainAccount,
   OneTimeToken,
   Price,
@@ -25,6 +27,64 @@ export async function findUserByEmail(email: string): Promise<User | null> {
   });
 }
 
+// save authentictor to db
+export async function saveAuthenticator(
+  authenticator: Authenticator
+): Promise<Authenticator> {
+  return prisma.authenticator.create({
+    data: authenticator,
+  });
+}
+
+export async function findAuthenticatorsByUserId(
+  userId: string
+): Promise<Authenticator[] | null> {
+  return prisma.authenticator.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
+
+export async function findAuthenticatorsByUserEmail(
+  userId: string
+): Promise<Authenticator[] | null> {
+  return prisma.authenticator.findMany({
+    where: {
+      userId: userId,
+    },
+  });
+}
+
+export async function saveCurrentChallenge(
+  challenge: string,
+  userId: string
+): Promise<AuthenticatorChallenge> {
+  // upsert new challenege
+  return prisma.authenticatorChallenge.upsert({
+    where: {
+      userId: userId,
+    },
+    update: {
+      challenge: challenge,
+    },
+    create: {
+      challenge: challenge,
+      userId: userId,
+    },
+  });
+}
+
+export async function findCurrentChallenge(
+  userId: string
+): Promise<AuthenticatorChallenge | null> {
+  return prisma.authenticatorChallenge.findUnique({
+    where: {
+      userId: userId,
+    },
+  });
+}
+
 export function findUserById(id: string) {
   return prisma.user.findUnique({
     where: {
@@ -42,6 +102,17 @@ export function findCodeByUserId(id: string) {
   return prisma.oneTimeToken.findFirst({
     where: {
       userId: id,
+    },
+  });
+}
+
+export async function findAuthenticatorById(authId: string) {
+  return prisma.authenticator.findUnique({
+    where: {
+      credentialID: authId,
+    },
+    include: {
+      User: true,
     },
   });
 }
