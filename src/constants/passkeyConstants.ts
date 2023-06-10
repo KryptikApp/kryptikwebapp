@@ -1,6 +1,6 @@
 // file should only be referenced on the server
 let rpID: string;
-if (process.env.IS_PRODUCTION == "true") {
+if (process.env.IS_PRODUCTION?.toLowerCase() == "true") {
   // prod
   rpID = "kryptik.app";
 } else {
