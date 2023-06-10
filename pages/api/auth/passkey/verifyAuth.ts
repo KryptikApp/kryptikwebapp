@@ -55,7 +55,11 @@ export default async function handler(
     const verification = await verifyAuthenticationResponse({
       response: body,
       expectedChallenge: expectedChallenge.challenge,
-      expectedOrigin: [origin, "http://localhost:3000"],
+      expectedOrigin: [
+        origin,
+        "http://localhost:3000",
+        "https://www.kryptik.app",
+      ],
       expectedRPID: rpID,
       authenticator: {
         credentialPublicKey: authenticator.credentialPublicKey,
