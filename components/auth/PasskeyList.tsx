@@ -55,7 +55,10 @@ export default function PassKeyList(props: Props) {
           passkeys.length != 0 &&
           passkeys.map((passkey) => {
             return (
-              <div className="flex flex-row rounded-xl py-1 transition-transform duration-300 bg-gray-50/20 dark:bg-gray-900/20 hover:brightness-80 dark:hover:brightness-150">
+              <div
+                key={passkey.credentialID}
+                className="flex flex-row rounded-xl py-1 transition-transform duration-300 bg-gray-50/20 dark:bg-gray-900/20 hover:brightness-80 dark:hover:brightness-150"
+              >
                 <p className="text-xl dark:text-gray-200 text-gray-700">
                   {passkey.name}
                 </p>
