@@ -135,6 +135,6 @@ export default async function handler(
       verified: verified,
     });
   } catch (e: any) {
-    return res.status(400).send({ msg: e.message });
+    return res.status(400).send({ msg: "Unable to verify passkey." });
   }
 }
