@@ -72,7 +72,7 @@ export default async function handler(
     const verification = await verifyRegistrationResponse({
       response: body,
       expectedChallenge: expectedChallenge.challenge,
-      expectedOrigin: [origin, "http://localhost:3000"],
+      expectedOrigin: [origin, "http://localhost:3000", "https://kryptik.app"],
       expectedRPID: rpID,
     });
     const { registrationInfo, verified } = verification;
@@ -131,6 +131,6 @@ export default async function handler(
       verified: verified,
     });
   } catch (e: any) {
-    return res.status(400).send({ msg: "Unable to approve passkey." });
+    return res.status(400).send({ msg: e.message });
   }
 }
