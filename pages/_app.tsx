@@ -56,7 +56,12 @@ function MyApp({ Component, pageProps, router }: AppProps) {
   } else {
     return (
       <KryptikAuthProvider>
-        <ThemeProvider attribute="class">
+        <ThemeProvider
+          attribute="class"
+          enableSystem={true}
+          enableColorScheme={true}
+          themes={["light", "dark"]}
+        >
           <KryptikThemeProvider>
             <Layout>
               <Component {...pageProps} />
