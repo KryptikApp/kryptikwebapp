@@ -25,7 +25,7 @@ export default function DocsHome({ allDocs }: Props) {
     <div>
       <div className="dark:text-white">
         <div className="max-w-2xl mx-auto mb-8">
-          <div className="mb-4 rounded-lg bg-gray-100 dark:bg-gray-900 border border-sky-400 hover:shadow-md hover:shadow-sky-400 px-2 py-4 ">
+          <div className="mb-4 rounded-lg bg-gray-100 dark:bg-gray-900 border border-sky-400 hover:shadow-md hover:shadow-sky-400 px-2 py-4 mt-10">
             <div className="flex flex-row space-x-1">
               <p className="text-6xl pt-2">📜</p>
               <div className="flex flex-col space-y-2">
