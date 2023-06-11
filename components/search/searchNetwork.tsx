@@ -66,7 +66,7 @@ const SearchNetwork: NextPage = () => {
       <div className="md:max-w-lg max-h-40 max-w-[95%] mx-auto">
         <div
           onFocus={() => setShowDarkener(true)}
-          className="flex relative z-20 w-full h-full transition ease-in-out focus-within:scale-105 focus-within:border focus-within:ring-2 focus-within:ring-sky-500 focus-within:border-slate-400 rounded-xl"
+          className="flex relative z-10 w-full h-full transition ease-in-out focus-within:scale-105 focus-within:border focus-within:ring-2 focus-within:ring-sky-500 focus-within:border-slate-400 rounded-xl"
         >
           <div
             onClick={() => setShowNetworkModal(true)}
