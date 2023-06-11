@@ -45,7 +45,7 @@ const BrandLandingPage: NextPage = () => {
             </div>
 
             <div className="flex flex-row min-h-[100px] py-4 space-x-2 overflow-x-auto snap-x px-2">
-              <div className="flex flex-col  min-w-[400px] h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-green-400 rounded-xl snap-center px-2 py-4">
+              <div className="flex flex-col  min-w-[380px] max-w-xl h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-green-400 rounded-xl snap-center px-2 py-4">
                 <h4 className="text-3xl font-semibold mb-2">
                   Multichain Magic
                 </h4>
@@ -78,7 +78,7 @@ const BrandLandingPage: NextPage = () => {
                 width={300}
                 height={300}
               />
-              <div className="flex flex-col  min-w-[400px] h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-sky-400 rounded-xl snap-center px-2 py-4">
+              <div className="flex flex-col  min-w-[380px] h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-sky-400 rounded-xl snap-center px-2 py-4">
                 <h4 className="text-3xl font-semibold mb-2">
                   Lockdown Security
                 </h4>
@@ -102,7 +102,7 @@ const BrandLandingPage: NextPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col  min-w-[400px] h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-green-400 rounded-xl snap-center px-2 py-4">
+              <div className="flex flex-col  min-w-[380px] h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-green-400 rounded-xl snap-center px-2 py-4">
                 <h4 className="text-3xl font-semibold mb-2">Open Source</h4>
                 <p className="text-xl text-gray-700 dark:text-gray-200">
                   All of Kryptik's code is public and open source. We believe in
@@ -117,7 +117,7 @@ const BrandLandingPage: NextPage = () => {
                   View Code
                 </a>
               </div>
-              <div className="flex flex-col  min-w-[400px] h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-sky-400 rounded-xl snap-center px-2 py-4">
+              <div className="flex flex-col  min-w-[380px] h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-sky-400 rounded-xl snap-center px-2 py-4">
                 <h4 className="text-3xl font-semibold mb-2">
                   Delightful Design
                 </h4>
@@ -151,11 +151,11 @@ const BrandLandingPage: NextPage = () => {
           <h1 className="text-3xl text-left font-bold sans mb-4">
             Kryptik Supporters
           </h1>
-          <p className="leading-loose text-xl text-justify dark:text-gray-400">
+          <p className="ltext-xl text-justify dark:text-gray-400">
             Kryptik has been made possible by the generous support of the
             following organizations.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 bg-gray-300/20 rounded-xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 bg-gray-300/20 rounded-xl my-4">
             <Image
               src="/supporters/cmu.webp"
               alt="ECMU"
