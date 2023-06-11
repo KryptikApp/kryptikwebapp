@@ -23,8 +23,8 @@ const Menu: NextPage<Props> = (props) => {
 
   // change style based on boolean
   const menuWrapperClassName = isMenuMobile
-    ? "flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0 min-h-[80vh] rounded-lg bg-[#F2FBFE] z-10 border-sky-500 border bg-gray-50 py-4 pl-4 dark:bg-[#0c0c0c] md:min-h-0 text-2xl space-y-2"
-    : "hidden text-xl md:flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0";
+    ? "flex flex-col md:flex-row md:ml-auto mt-3 md:mt-0 min-h-[80vh] rounded-lg bg-[#F2FBFE] z-20 border-sky-500 border bg-gray-50 py-4 pl-4 dark:bg-[#0c0c0c] md:min-h-0 text-4xl space-y-4"
+    : "hidden text-2xl md:flex flex-col md:flex-row md:ml-auto mt-3 md:mt-2";
 
   useEffect(() => {
     // Handler to call on window resize
