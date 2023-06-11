@@ -52,7 +52,7 @@ const NavbarProduction: NextPage = () => {
       )}
 
       <a href="#"></a>
-      {authUser ? (
+      {authUser && (
         <MenuItem>
           <Link href="../profile/settings">
             <span
@@ -61,18 +61,6 @@ const NavbarProduction: NextPage = () => {
               } `}
             >
               Profile
-            </span>
-          </Link>
-        </MenuItem>
-      ) : (
-        <MenuItem>
-          <Link href="../about">
-            <span
-              className={`p-2 lg:px-4 md:mx-2 text-gray-400 rounded hover:bg-gray-200 hover:cursor-pointer hover:text-gray-700 dark:hover:bg-gray-100 dark:hover:text-black transition-colors duration-300 ${
-                router.pathname == "/about" ? "font-bold" : ""
-              } `}
-            >
-              About
             </span>
           </Link>
         </MenuItem>

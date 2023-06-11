@@ -25,9 +25,6 @@ const LandingPage: NextPage = () => {
           <WalletHome />
         ) : (
           <div>
-            <div className="h-[10vh]">
-              {/* padding div for space between top and main elements */}
-            </div>
             <BrandLandingPage />
           </div>
         )}
