@@ -39,7 +39,7 @@ const WalletHome: NextPage = () => {
   }, [walletStatus]);
 
   return (
-    <div>
+    <div className="my-8">
       <div className="flex flex-col lg:flex-row">
         <div></div>
       </div>
