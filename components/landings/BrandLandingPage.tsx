@@ -3,6 +3,7 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useKryptikThemeContext } from "../ThemeProvider";
 import Image from "next/image";
+import { AiOutlineLeftCircle, AiOutlineRightCircle } from "react-icons/ai";
 
 // main landing page for those who don't yet have a wallet or are logged out
 const BrandLandingPage: NextPage = () => {
@@ -12,6 +13,17 @@ const BrandLandingPage: NextPage = () => {
   const handleGetStarted = async () => {
     router.push("/wallet/create");
   };
+  
+
+  function handleScroll(direction:"left"|"right"){
+    const container = document.getElementById("featureContainer")
+    if(!container) return;
+    // scroll horizontal with smooth behavior
+    container.scrollBy({
+      left: direction === "left" ? -container.offsetWidth/2 : container.offsetWidth/2,
+      behavior: "smooth"
+    })
+  }
 
   return (
     <div className="w-full">
@@ -38,13 +50,14 @@ const BrandLandingPage: NextPage = () => {
       <div className="graphPaper rounded-xl max-w-5xl mx-auto ">
         <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-300/50 to-white dark:from-green-900/50 dark:to-[#0c0c0c] background-animate rounded-xl">
           <div>
-            <div className="w-full bg-sky-400/10 rounded-t-xl px-2">
+            <div className="w-full bg-sky-400/10 rounded-t-xl px-2 relative">
               <h1 className="text-4xl font-bold pt-2 pb-4">
                 Powerful and easy to use.
               </h1>
+              <AiOutlineLeftCircle size={35} className="invisible md:visible absolute top-80 -left-8 text-green-400/50 hover:cursor-pointer hover:text-green-400" onClick={()=>handleScroll("left")}/>
+              <AiOutlineRightCircle size={35} className="invisible md:visible absolute top-80 -right-8 text-green-400/50  hover:cursor-pointer hover:text-green-400" onClick={()=>handleScroll("right")}/>
             </div>
-
-            <div className="flex flex-row min-h-[100px] py-4 space-x-2 overflow-x-auto snap-x px-2">
+            <div id="featureContainer" className="relative flex flex-row min-h-[100px] py-4 space-x-2 overflow-x-auto snap-x px-2 no-scrollbar">
               <div className="flex flex-col  min-w-[380px] max-w-xl h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-green-400 rounded-xl snap-center px-2 py-4">
                 <h4 className="text-3xl font-semibold mb-2">
                   Multichain Magic
