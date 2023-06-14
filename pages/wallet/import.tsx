@@ -1,18 +1,4 @@
 import type { NextPage } from "next";
-import { useState } from "react";
-import { Magic } from "magic-sdk";
-import toast, { Toaster } from "react-hot-toast";
-
-//kryptic imports
-import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
-import { validateAndFormatMnemonic } from "hdseedloop";
-import { isValidEmailAddress } from "../../src/helpers/resolvers/kryptikResolver";
-import {
-  addEmailToWaitlist,
-  isOnAlphaTestList,
-} from "../../src/helpers/waitlist";
-import { useRouter } from "next/router";
-import LoginCard from "../../components/auth/LoginCard";
 import LoginWithSeedCard from "../../components/auth/LoginWithSeedCard";
 
 const ImportSeed: NextPage = () => {
