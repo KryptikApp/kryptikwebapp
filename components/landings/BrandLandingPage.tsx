@@ -122,7 +122,7 @@ const BrandLandingPage: NextPage = () => {
                   100% transparency.
                 </p>
                 <a
-                  className="text-green-400 font-semibold mt-40 text-2xl text-center rounded-xl px-6 py-1 bg-green-400/10 w-fit mx-auto hover:cursor-pointer hover:border border-green-400"
+                  className="text-green-400 font-semibold mt-32 text-2xl text-center rounded-xl px-6 py-1 bg-green-400/10 w-fit mx-auto hover:cursor-pointer hover:border border-green-400"
                   href={`https://github.com/KryptikApp/kryptikwebapp`}
                   target="_blank"
                   rel="noopener noreferrer"
