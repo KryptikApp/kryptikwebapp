@@ -30,8 +30,8 @@ const BrandLandingPage: NextPage = () => {
       <div className="min-h-[10vh]" />
       <div className="flex flex-col place-items-center">
         <div className="mx-auto text-center content-center pt-10 max-w-2xl">
-          <h1 className="text-5xl font-bold sans dark:text-white hover:text-sky-400 dark:hover:text-gray-100 transition-colors transition duration-300 ease-in-out hover:scale-105">
-            Kryptik is a magical wallet for the future.
+          <h1 className="p-2 text-5xl font-bold sans text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-700 dark:from-white dark:to-gray-100 hover:text-gray-800 dark:hover:text-gray-100 transition-colors transition duration-300 ease-in-out hover:scale-105">
+            Kryptik is a powerful digital wallet.
           </h1>
           <h1 className="text-xl text-center mt-4 dark:text-gray-300 dark:hover:text-gray-200 transition-colors duration-500">
             Save, send, and collect with ease.
@@ -51,7 +51,7 @@ const BrandLandingPage: NextPage = () => {
         <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-300/50 to-white dark:from-green-900/50 dark:to-[#0c0c0c] background-animate rounded-xl">
           <div>
             <div className="w-full bg-sky-400/10 rounded-t-xl px-2 relative">
-              <h1 className="text-4xl font-bold pt-2 pb-4">
+              <h1 className="text-green-500/60 dark:text-white text-4xl font-bold pt-2 pb-4">
                 Powerful and easy to use.
               </h1>
               <AiOutlineLeftCircle size={35} className="invisible md:visible absolute top-80 -left-8 text-green-400/50 hover:cursor-pointer hover:text-green-400" onClick={()=>handleScroll("left")}/>
