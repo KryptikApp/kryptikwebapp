@@ -21,7 +21,7 @@ const BrandLandingPage: NextPage = () => {
       <div className="min-h-[10vh]" />
       <div className="flex flex-col place-items-center">
         <div className="mx-auto text-center content-center pt-10 max-w-2xl">
-          <div className="p-2 bg-green-300/10 rounded-xl">
+          <div className="p-2 bg-green-100/10 dark:bg-green-900/10 rounded-xl">
             <h1 className="p-2 text-5xl font-semibold sans text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-800 to-gray-700 dark:from-white dark:to-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-colors transition duration-300 ease-in-out hover:scale-105 background-animate">
               Kryptik is a powerful digital wallet.
             </h1>
