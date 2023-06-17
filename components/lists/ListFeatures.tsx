@@ -7,10 +7,12 @@ import BrandLandingPage from "../landings/BrandLandingPage";
 import WalletHome from "../wallet/WalletHome";
 import { AiOutlineLeftCircle, AiOutlineRightCircle } from "react-icons/ai";
 import { useEffect, useState } from "react";
+import { set } from "lodash";
 
 const ListFeatures: NextComponentType = () => {
   // container width
-  const [featureWidth, setFeatureWidth] = useState(0);
+  const [featureWidth, setFeatureWidth] = useState(380);
+  const [loading, setLoading] = useState(true);
 
   function handleScroll(direction: "left" | "right") {
     const container = document.getElementById("featureContainer");
@@ -27,7 +29,7 @@ const ListFeatures: NextComponentType = () => {
     function updateSize() {
       const container = document.getElementById("featureContainer");
       if (!container) return;
-      console.log("window width changed");
+      setLoading(false);
       if (window.innerWidth < 800) {
         setFeatureWidth(container.offsetWidth);
       } else if (window.innerWidth < 900) {
@@ -65,7 +67,9 @@ const ListFeatures: NextComponentType = () => {
             className="relative flex flex-row min-h-[100px] py-4 space-x-2 overflow-x-auto snap-x px-2 no-scrollbar"
           >
             <div
-              className={`flex flex-col max-w-xl h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-sky-400 rounded-xl snap-center px-2 py-4`}
+              className={`${
+                loading && "invisible"
+              } flex flex-col max-w-xl h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-sky-400 rounded-xl snap-center px-2 py-4`}
               style={{ minWidth: featureWidth }}
             >
               <h4 className="text-3xl font-semibold mb-2">Multichain Magic</h4>
@@ -93,7 +97,9 @@ const ListFeatures: NextComponentType = () => {
             </div>
 
             <div
-              className="flex flex-col h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-green-400 rounded-xl snap-center px-2 py-4"
+              className={`${
+                loading && "invisible"
+              } flex flex-col h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-green-400 rounded-xl snap-center px-2 py-4`}
               style={{ minWidth: featureWidth }}
             >
               <h4 className="text-3xl font-semibold mb-2">Delightful Design</h4>
@@ -145,7 +151,9 @@ const ListFeatures: NextComponentType = () => {
               </div>
             </div>
             <div
-              className="flex flex-col h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-green-400 rounded-xl snap-center px-2 py-4"
+              className={`${
+                loading && "invisible"
+              } flex flex-col h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-green-400 rounded-xl snap-center px-2 py-4`}
               style={{ minWidth: featureWidth }}
             >
               <h4 className="text-3xl font-semibold mb-2">Open Source</h4>
