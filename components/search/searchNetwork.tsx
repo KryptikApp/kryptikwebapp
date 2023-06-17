@@ -52,6 +52,13 @@ const SearchNetwork: NextPage = () => {
     setShowNetworkModal(false);
   }
 
+  function handleSearchBarClose() {
+    console.log("close");
+    setQuery("");
+    setShowDarkener(false);
+    setSearchResults([]);
+  }
+
   const handleSelectedNetworkChange = function (
     newSelectedTokenAndNetwork: TokenAndNetwork
   ) {
@@ -114,7 +121,7 @@ const SearchNetwork: NextPage = () => {
 
       {/* screen darkener */}
       <div
-        onClick={() => setShowDarkener(false)}
+        onClick={() => handleSearchBarClose()}
         className={`${
           !showDarkener && "hidden"
         } modal fixed w-full h-full top-0 left-0 z-0 flex items-center justify-center overflow-y-auto`}
