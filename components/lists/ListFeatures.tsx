@@ -126,7 +126,9 @@ const ListFeatures: NextComponentType = () => {
             </div>
 
             <div
-              className="flex flex-col h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-sky-400 rounded-xl snap-center px-2 py-4"
+              className={`${
+                loading && "invisible"
+              }flex flex-col h-[500px] bg-gray-50/90 dark:bg-gray-900/40 border border-sky-400 rounded-xl snap-center px-2 py-4`}
               style={{ minWidth: featureWidth }}
             >
               <h4 className="text-3xl font-semibold mb-2">Lockdown Security</h4>
