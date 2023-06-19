@@ -11,7 +11,7 @@ const ListItemApp: NextPage<Props> = (props: Props) => {
   return (
     // show simple preview of app with name, description, tags, and image
     <a href={app.url} target="_blank" rel="noopener noreferrer">
-      <div className="flex flex-col justify-center w-full h-full bg-white rounded-lg shadow-md dark:bg-gray-800/10 py-1 border border-gray-400/10 hover:border-green-400/20 transform-color duration-300">
+      <div className="flex flex-col justify-center w-full h-full bg-white rounded-lg shadow-md dark:bg-gray-800/10 py-1 border border-gray-400/10 hover:border-green-400/20 transform-color duration-300 hover:bg-gray-200/30 dark:hover:bg-gray-700/30">
         <div className="w-full">
           <Image
             className="float-left pl-2"
@@ -22,7 +22,7 @@ const ListItemApp: NextPage<Props> = (props: Props) => {
           />
         </div>
         <div className="flex flex-col px-2 w-full">
-          <h1 className="text-lg font-semibold text-left text-gray-800 dark:text-white">
+          <h1 className="text-xl font-semibold text-left text-gray-800 dark:text-white">
             {app.name}
           </h1>
           <p className="text-left text-gray-500 dark:text-gray-400">

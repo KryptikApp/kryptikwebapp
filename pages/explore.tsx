@@ -21,8 +21,8 @@ const Explore: NextPage = () => {
       <div className="text-center max-w-2xl mx-auto content-center">
         <SearchNetwork />
       </div>
-      <div className="max-w-3xl mx-auto px-4 bg-gray-100/10 dark:bg-gray-700/10 my-8 rounded-xl hover:outline outline-w-1 dark:hover:outline-gray-800/40 hover:outline-gray-400/40">
-        <div className="max-w-3xl text-2xl">Top Apps</div>
+      <div className="max-w-3xl mx-auto py-2 px-1 bg-gray-200/10 dark:bg-gray-700/10 my-8 rounded-xl hover:outline outline-w-1 dark:hover:outline-gray-800/40 hover:outline-gray-400/40">
+        <div className="max-w-3xl text-2xl my-4">Top Apps</div>
         <ListApps apps={topApps} />
       </div>
       <div className="h-[4vh]">

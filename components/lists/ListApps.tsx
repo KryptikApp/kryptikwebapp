@@ -11,7 +11,7 @@ const ListApps: NextPage<Props> = (props: Props) => {
   const { apps } = { ...props };
   return (
     // show list of top apps
-    <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
       {apps.map((app) => (
         <ListItemApp app={app} key={app.name} />
       ))}
