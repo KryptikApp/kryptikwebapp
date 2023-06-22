@@ -718,7 +718,7 @@ const Send: NextPage = () => {
                   id="inline-to"
                 />
               </div>
-              {/* next button... to review */} */
+              {/* next button... to review */}
               <button
                 onClick={() => handleStartReview()}
                 className={`bg-transparent hover:bg-sky-400 text-sky-500 font-semibold hover:text-white w-full text-2xl py-2 px-20 ${
