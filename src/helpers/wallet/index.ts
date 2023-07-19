@@ -91,7 +91,13 @@ export async function connectKryptikWallet(
     remoteShareReturn = remoteShare;
     // access existing wallet from local storage vault
     console.log("Unlocking vault...");
-    let vaultSeedloop: HDSeedLoop | null = unlockVault(uid, remoteShare);
+    let vaultSeedloop: HDSeedLoop | null = null;
+    try {
+      // will fail if remote share and current share mismatch
+      vaultSeedloop = unlockVault(uid, remoteShare);
+    } catch (e) {
+      // pass for now
+    }
     console.log("vault unlocked!");
     // if there is already a seedloop available... use it!
     if (vaultSeedloop) {
