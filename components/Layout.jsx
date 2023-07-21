@@ -1,11 +1,9 @@
 import Head from "next/head";
-import { useKryptikThemeContext } from "./ThemeProvider";
 import Navbar from "./navbars/Navbar";
 import { Toaster } from "react-hot-toast";
 
 // TODO: Update to support dynamic headers
 export default function Layout({ children }) {
-  const { isDark, themeLoading } = useKryptikThemeContext();
   return (
     <>
       <Head>
