@@ -1,8 +1,6 @@
 import { NextPage } from "next";
-import { useContext, useState } from "react";
-import { INFTMetadata, ITraitType } from "../../src/parsers/nftEthereum";
+import { INFTMetadata } from "../../src/parsers/nftEthereum";
 import { useKryptikThemeContext } from "../ThemeProvider";
-import CardDivider from "./CardDivider";
 
 interface Props {
   nftMetaData: INFTMetadata;
