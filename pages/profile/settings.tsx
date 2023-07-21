@@ -161,11 +161,12 @@ const Settings: NextPage = () => {
           Logout
         </button>
         <br />
-        <Link href="../wallet/delete">
+        {/* TODO: ADD LOGIC FOR WHEN DELETING WALLET IS VALID */}
+        {/* <Link href="../wallet/delete">
           <p className="text-red-500 mb-4 text-sm hover:cursor-pointer">
             Delete Wallet
           </p>
-        </Link>
+        </Link> */}
         <Link href="../support/privacy">
           <p className="text-sky-500 text-sm hover:cursor-pointer">Privacy</p>
         </Link>
