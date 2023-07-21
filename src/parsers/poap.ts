@@ -1,6 +1,6 @@
 // poap parser adapted from rainbowme wallet
 import { get } from "lodash";
-import { INFTMetadata, ITraitType } from "./nftEthereum";
+import { INFTMetadata, ITrait } from "./nftEthereum";
 
 /**
  * @desc parse poaps
@@ -12,8 +12,9 @@ export const parsePoaps = function (data: any): INFTMetadata[] {
   const poaps = get(data, "data", null);
   let poapsToReturn: INFTMetadata[] = [];
   for (const poap of poaps) {
+    // TODO: CHECK IF SPAM
     let poapToAdd: INFTMetadata = {
-      animation_url: poap.event.image_url,
+      isSpam: false,
       asset_contract: {
         address: "0x22c1f6050e56d2876009903609a2cc3fef83b415",
         name: "POAPs",
@@ -31,15 +32,14 @@ export const parsePoaps = function (data: any): INFTMetadata[] {
       },
       description: poap.event.description,
       external_link: poap.event.event_url,
-      id: poap.event.id,
+      token_id: poap.event.id,
       image_url: poap.event.image_url,
-      image_preview_url: poap.event.image_url,
       isPoap: true,
       name: poap.event.name,
-      permalink: poap.event.event_url,
-      networkTicker: "eth",
+      networkTicker: "poap",
+      traits: [],
     };
-    let traitsToAdd: ITraitType[] = [];
+    let traitsToAdd: ITrait[] = [];
     if (poap.event.city) {
       traitsToAdd.push({ trait_type: "city", value: poap.event.city });
     }

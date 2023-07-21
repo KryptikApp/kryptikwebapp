@@ -52,7 +52,7 @@ export interface INFTCollectionData {
   wiki_url?: string;
 }
 
-export interface ITraitType {
+export interface ITrait {
   display_type?: string;
   max_value?: string;
   order?: any;
@@ -66,44 +66,51 @@ export interface MetaDataExtension {
 }
 
 export interface INFTMetadata {
-  animation_original_url?: string;
-  animation_url?: string;
-  asset_contract: INFTAssetContract;
-  background_color?: string;
-  collection: INFTCollectionData;
-  decimals?: null;
-  description?: string;
-  external_link?: string;
-  metaExtensions?: MetaDataExtension;
-  id?: number;
-  image_original_url?: string;
-  image_preview_url?: string;
-  image_thumbnail_url?: string;
+  isSpam: boolean;
   image_url: string;
-  is_nsfw?: boolean;
-  is_presale?: boolean;
-  isPoap: boolean;
-  last_sale?: string;
-  listing_date?: string;
-  name?: string;
+  name: string;
+  asset_contract: INFTAssetContract;
+  collection: INFTCollectionData;
+  traits: ITrait[];
   networkTicker: string;
-  num_sales?: number;
-  permalink?: string;
-  sell_orders?: string;
+  isPoap: boolean;
+  description?: string;
   token_id?: string;
-  token_metadata?: string;
-  top_bid?: number;
-  traits?: ITraitType[];
-  transfer_fee?: number;
-  transfer_fee_payment_token?: string;
+  metaExtensions?: MetaDataExtension;
+  external_link?: string;
 }
 
-export const parseEthNFTMetaData = function (assetData: any[]): INFTMetadata[] {
+// pase metadata returned by the alchemy api as described here https://docs.alchemy.com/reference/nft-api-quickstart
+export function parseEthNFTMetaData(assetData: any[]): INFTMetadata[] {
   let nftDataToReturn: INFTMetadata[] = [];
   for (const asset of assetData) {
-    let nftData = { ...asset };
-    nftData.networkTicker = "eth";
-    nftDataToReturn.push(nftData);
+    try {
+      let newNftData: INFTMetadata = {
+        isSpam: false,
+        image_url: asset.image?.cachedUrl,
+        name: asset.name,
+        asset_contract: {
+          address: asset.contract.address,
+        },
+        collection: {
+          name: asset.contract.name,
+          image_url: asset.contract.openSeaMetadata?.imageUrl,
+          description: asset.contract.openSeaMetadata?.description,
+        },
+        networkTicker: "eth",
+        isPoap: false,
+        description: asset.description,
+        token_id: asset.tokenId,
+        traits: asset.raw.metadata.attributes,
+        external_link: asset.raw?.metadata?.external_url,
+      };
+      // add to result
+      nftDataToReturn.push(newNftData);
+    } catch (e) {
+      console.log("Error while parsing nft data");
+      console.warn(e);
+      // pass for now
+    }
   }
   return nftDataToReturn;
-};
+}

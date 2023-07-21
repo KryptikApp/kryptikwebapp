@@ -2,7 +2,7 @@ import {
   INFTAssetContract,
   INFTCollectionData,
   INFTMetadata,
-  ITraitType,
+  ITrait,
 } from "./nftEthereum";
 
 export const parseSolNFTMetaData = function (assetData: any[]): INFTMetadata[] {
@@ -17,15 +17,17 @@ export const parseSolNFTMetaData = function (assetData: any[]): INFTMetadata[] {
         : 0,
       address: asset.mintAddress,
     };
-    let traits: ITraitType[] = [];
+    let traits: ITrait[] = [];
     for (const attribute of asset.attributes) {
-      let trait: ITraitType = {
+      let trait: ITrait = {
         trait_type: attribute.trait_type,
         value: attribute.value,
       };
       traits.push(trait);
     }
+    // TODO: CHECK IF SPAM
     let nftData: INFTMetadata = {
+      isSpam: false,
       image_url: asset.image,
       name: asset.name,
       asset_contract: assetContract,

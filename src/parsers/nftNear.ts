@@ -42,6 +42,7 @@ export const parseNearNFTMetaData = function (
     };
 
     let nftData: INFTMetadata = {
+      isSpam: false,
       image_url: imagePath,
       name: asset.token.metadata.title,
       description: asset.token.metadata.description,
@@ -50,6 +51,7 @@ export const parseNearNFTMetaData = function (
       token_id: asset.tokenId,
       collection: collection,
       asset_contract: assetContract,
+      traits: [],
     };
     if (asset.metaDataUrl) {
       let metaExtensions: MetaDataExtension = {

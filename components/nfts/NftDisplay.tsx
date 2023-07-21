@@ -1,6 +1,6 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { INFTMetadata, ITraitType } from "../../src/parsers/nftEthereum";
+import { INFTMetadata, ITrait } from "../../src/parsers/nftEthereum";
 import { defaultNetworkDb } from "../../src/services/models/network";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import Modal from "../modals/modal";
@@ -15,11 +15,11 @@ interface Props {
 }
 const NftDisplay: NextPage<Props> = (props) => {
   const { nftMetaData } = { ...props };
-  const cointainerId = `${nftMetaData.id}Container`;
+  const cointainerId = `${nftMetaData.name}Container`;
   const nftCardId = `${
     nftMetaData.name ? nftMetaData.name : nftMetaData.collection.name
   }Card`;
-  const modalId = `${nftMetaData.id}Modal`;
+  const modalId = `${nftMetaData.name}Modal`;
   const { isDark } = useKryptikThemeContext();
   const { kryptikService } = useKryptikAuthContext();
   const [showModal, setShowModal] = useState(false);
@@ -48,17 +48,13 @@ const NftDisplay: NextPage<Props> = (props) => {
   }
   return (
     <div id="" className="">
-      {nftMetaData.image_preview_url || nftMetaData.image_url ? (
+      {nftMetaData.image_url ? (
         <div
           className="hover:cursor-pointer transition ease-in-out hover:scale-110"
           onClick={() => setShowModal(true)}
         >
           <img
-            src={
-              nftMetaData.image_preview_url
-                ? nftMetaData.image_preview_url
-                : nftMetaData.image_url
-            }
+            src={nftMetaData.image_url}
             className="w-56 h-56 rounded-md drop-shadow-lg object-cover border border-gray-200 dark:border-gray-800"
           />
           <div className="flex">
@@ -94,9 +90,9 @@ const NftDisplay: NextPage<Props> = (props) => {
 
           {/* nft main image */}
           <div className="flex-1 opacity-100">
-            {nftMetaData.image_original_url || nftMetaData.image_url ? (
+            {nftMetaData.image_url ? (
               <img
-                src={nftMetaData.image_preview_url}
+                src={nftMetaData.image_url}
                 className="w-full h-fit min-h-[30rem] md:min-h-[25rem] rounded-lg drop-shadow-xl object-cover border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900"
                 placeholder="blur"
               />
@@ -208,7 +204,7 @@ const NftDisplay: NextPage<Props> = (props) => {
                       </h2>
                       <div className="flex flex-wrap">
                         {nftMetaData.traits.map(
-                          (trait: ITraitType, index: number) => (
+                          (trait: ITrait, index: number) => (
                             <div
                               className="hover:cursor-pointer transition ease-in-out hover:scale-110 hover:z-10 bg-gray-200 dark:bg-[#111112] border border-gray-300 w-fit my-1 max-w-[140px] px-1 mx-2 rounded drop-shadow-lg"
                               key={index}
