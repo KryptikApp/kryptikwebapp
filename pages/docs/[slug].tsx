@@ -44,7 +44,7 @@ export default function Post({ doc, recommendedDocs }: Props) {
         {router.isFallback ? (
           <h1 className="text-2xl text-black dark:text-white">Loading....</h1>
         ) : (
-          <div>
+          <div className="mt-12">
             <DocHeader
               title={doc.title}
               image={doc.image || undefined}
