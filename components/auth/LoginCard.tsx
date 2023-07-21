@@ -116,8 +116,11 @@ const LoginCard: NextPage = () => {
     const emailTaken: boolean = await isEmailTaken(email);
     try {
       setLoading(true);
+      // user must have email to initiate passkey flow
+      // we don't want people to claim an email they don't posses
       if (
-        (hasPasskey || !emailTaken) &&
+        hasPasskey &&
+        emailTaken &&
         supportsPasskeys &&
         browserSupportsPasskeys
       ) {
