@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 // kryptik imports
 import LoginCard from "../../components/auth/LoginCard";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
+import LoginCardWithOptions from "../../components/auth/LoginCardWithOptions";
 
 const CreateWallet: NextPage = () => {
   const { authUser } = useKryptikAuthContext();
@@ -15,7 +16,7 @@ const CreateWallet: NextPage = () => {
         {/* padding div for space between top and main elements */}
       </div>
       <div className="max-w-2xl mx-auto">
-        <LoginCard />
+        <LoginCardWithOptions />
       </div>
     </div>
   );
