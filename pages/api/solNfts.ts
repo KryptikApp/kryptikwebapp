@@ -15,6 +15,12 @@ export default async (req: NextApiRequest, res: NextApiResponse<Data>) => {
   if (!body.address) {
     console.warn("No address provided.");
   }
-  let dataToReturn = await listSolanaNftsByAddress(body.address);
+  const pageKey = body.pageKey;
+  const limit = body.limit;
+  let dataToReturn = await listSolanaNftsByAddress(
+    body.address,
+    limit,
+    pageKey
+  );
   res.status(200).json({ nftData: dataToReturn });
 };

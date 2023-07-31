@@ -1,16 +1,20 @@
 import { KryptikFetch } from "../../kryptikFetch";
 import { INFTMetadata } from "../../parsers/nftEthereum";
 import { parseSolNFTMetaData } from "../../parsers/nftSolana";
+import { NFTResponse } from "./ethereumApi";
 
 export const listSolanaNftsByAddress = async function (
-  address: string
+  address: string,
+  limit: number = 100,
+  pageKey?: string
 ): Promise<INFTMetadata[] | null> {
   console.log("Fetching solana data....");
   try {
+    const offfset = pageKey ? `&offset=${Number(pageKey) * limit}` : "";
+    const newLimit = `?limit=${limit}`;
     //add support for multiple pages
-    const url = `https://thingproxy.freeboard.io/fetch/https://api-mainnet.magiceden.dev/v2/wallets/${address}/tokens`;
+    const url = `https://api-mainnet.magiceden.dev/v2/wallets/${address}/tokens${newLimit}${offfset}`;
     const dataResponse = await KryptikFetch(url, {
-      headers: { "Access-Control-Allow-Origin": "*" },
       timeout: 10000, // 10 secs
     });
     if (!dataResponse || !dataResponse.data) return null;
@@ -28,17 +32,26 @@ export const listSolanaNftsByAddress = async function (
 // server wrapper for API call... to bypass browser cors issue
 
 export const fetchServerSolNfts = async function (
-  address: string
-): Promise<INFTMetadata[] | null> {
+  address: string,
+  limit: number = 100,
+  pageKey?: string
+): Promise<NFTResponse | null> {
   let dataResponse = await fetch("/api/solNfts", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ address }),
+    body: JSON.stringify({ address, limit, pageKey }),
   });
   if (dataResponse.status != 200) return null;
   let dataJson = await dataResponse.json();
   if (!dataJson.nftData) return null;
-  return dataJson.nftData;
+  let res: NFTResponse = {
+    nfts: dataJson.nftData as INFTMetadata[],
+    pageKey: null,
+  };
+  if (pageKey) {
+    res.pageKey = (Number(pageKey) + 1).toString();
+  }
+  return res;
 };

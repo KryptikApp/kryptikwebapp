@@ -33,7 +33,8 @@ export const parsePoaps = function (data: any): INFTMetadata[] {
       description: poap.event.description,
       external_link: poap.event.event_url,
       token_id: poap.event.id,
-      image_url: poap.event.image_url,
+      // request the small image
+      image_url: poap.event.image_url + "?size=small",
       isPoap: true,
       name: poap.event.name,
       networkTicker: "poap",

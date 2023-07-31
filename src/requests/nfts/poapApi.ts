@@ -2,11 +2,12 @@ import { env } from "process";
 import { KryptikFetch } from "../../kryptikFetch";
 import { INFTMetadata } from "../../parsers/nftEthereum";
 import { parsePoaps } from "../../parsers/poap";
+import { NFTResponse } from "./ethereumApi";
 
 /** Fetches poaps from poap api. Requires env, so we should only call this method on the server. */
 export const listPoapsByAddress = async function (
   address: string
-): Promise<INFTMetadata[] | null> {
+): Promise<NFTResponse | null> {
   try {
     // TODO: add api key
     const url = `https://api.poap.tech/actions/scan/${address}`;
@@ -17,7 +18,7 @@ export const listPoapsByAddress = async function (
       timeout: 10000, // 10 secs
     });
     // parse and return poap data
-    return parsePoaps(data);
+    return { nfts: parsePoaps(data), pageKey: null };
   } catch (error) {
     console.log("Error getting POAPs", error);
     return null;
@@ -27,7 +28,7 @@ export const listPoapsByAddress = async function (
 // server wrapper for API call... to bypass browser cors issue
 export const fetchServerPoaps = async function (
   address: string
-): Promise<INFTMetadata[] | null> {
+): Promise<NFTResponse | null> {
   let dataResponse = await fetch("/api/poaps", {
     method: "POST",
     headers: {
@@ -36,7 +37,10 @@ export const fetchServerPoaps = async function (
     body: JSON.stringify({ address }),
   });
   if (dataResponse.status != 200) return null;
-  let dataJson = await dataResponse.json();
-  if (!dataJson.nftData) return null;
-  return dataJson.nftData;
+  let dataJson = (await dataResponse.json()).nftData;
+  if (!dataJson) return null;
+  return {
+    nfts: dataJson.nfts as INFTMetadata[],
+    pageKey: dataJson.pageKey,
+  };
 };

@@ -8,11 +8,11 @@ import { INFTMetadata, parseEthNFTMetaData } from "../../parsers/nftEthereum";
  * @param pageKey Optional page key to fetch next page of nfts
  * @returns Formatted array of nft metadata
  */
-export const listNftsByAddress = async function (
+export const listEthNftsByAddress = async function (
   address: string,
   limit: number = 100,
   pageKey?: string
-): Promise<INFTMetadata[] | null> {
+): Promise<NFTResponse | null> {
   try {
     const apiKey: string = process.env.NEXT_PUBLIC_ALCHEMY_ETH_KEY || "";
     // add support for multiple pages
@@ -39,10 +39,19 @@ export const listNftsByAddress = async function (
       metaResponse.data.nfts
     );
     console.log("Parsed nft data");
-    return nftDataToReturn;
+    const res = {
+      nfts: nftDataToReturn,
+      pageKey: dataResponse.data.pageKey,
+    };
+    return res;
   } catch (e) {
     console.log("Error while fetching opensea data");
     console.warn(e);
     return null;
   }
+};
+
+export type NFTResponse = {
+  nfts: INFTMetadata[];
+  pageKey: string | null;
 };

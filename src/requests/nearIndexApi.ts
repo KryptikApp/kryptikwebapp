@@ -8,6 +8,7 @@ import {
   NearParseData,
   parseNearNFTMetaData,
 } from "../parsers/nftNear";
+import { NFTResponse } from "./nfts/ethereumApi";
 
 export const listNearAccountsByAddress = async function (
   address: string
@@ -57,7 +58,7 @@ export const getTokenMetaData = async function (refUrl: string) {
 export const listNearNftsByAddress = async function (
   address: string,
   nearProvider: Near
-): Promise<INFTMetadata[] | null> {
+): Promise<NFTResponse | null> {
   // first.. we get likelty nfts for address
   let likelyNfts = await listNearLikelyNfts(address);
   if (!likelyNfts) return null;
@@ -88,7 +89,7 @@ export const listNearNftsByAddress = async function (
     }
   }
   let parsedNfts = parseNearNFTMetaData(dataToParse);
-  return parsedNfts;
+  return { nfts: parsedNfts, pageKey: null };
 };
 
 export const getTokens = async function (
