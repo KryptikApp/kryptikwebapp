@@ -50,7 +50,7 @@ const EthExplorers: NextPage<Props> = (props) => {
 
           <div className="mx-2 my-1 transition ease-in-out hover:scale-105">
             <a
-              href={`https://etherscan.io/token/${nftMetaData.asset_contract.address}/a=?${nftMetaData.name}`}
+              href={`https://etherscan.io/token/${nftMetaData.asset_contract.address}`}
               target="_blank"
               rel="noopener noreferrer"
             >
