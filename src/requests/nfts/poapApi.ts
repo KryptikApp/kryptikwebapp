@@ -37,7 +37,7 @@ export const fetchServerPoaps = async function (
     body: JSON.stringify({ address }),
   });
   if (dataResponse.status != 200) return null;
-  let dataJson = (await dataResponse.json()).nftData;
+  let dataJson = await dataResponse.json();
   if (!dataJson) return null;
   return {
     nfts: dataJson.nfts as INFTMetadata[],
