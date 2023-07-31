@@ -1,4 +1,5 @@
 import { NextPage } from "next";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { INFTMetadata, ITrait } from "../../src/parsers/nftEthereum";
 import { defaultNetworkDb } from "../../src/services/models/network";
@@ -9,13 +10,13 @@ import CardDivider from "./CardDivider";
 import EthExplorers from "./EthExplorers";
 import NearExplorers from "./NearExplorers";
 import SolExplorers from "./SolExplorers";
+import { motion } from "framer-motion";
 
 interface Props {
   nftMetaData: INFTMetadata;
 }
 const NftDisplay: NextPage<Props> = (props) => {
   const { nftMetaData } = { ...props };
-  const cointainerId = `${nftMetaData.name}Container`;
   const nftCardId = `${
     nftMetaData.name ? nftMetaData.name : nftMetaData.collection.name
   }Card`;
@@ -26,6 +27,10 @@ const NftDisplay: NextPage<Props> = (props) => {
   const networkDb =
     kryptikService.getNetworkDbByTicker(nftMetaData.networkTicker) ||
     defaultNetworkDb;
+  const [srcImg, setSrcImg] = useState(
+    nftMetaData.isPoap ? "/nftPlatforms/logos/poap.svg" : networkDb.iconPath
+  );
+
   useEffect(() => {
     if (!document) return;
     const modal = document.getElementById(modalId);
@@ -49,25 +54,37 @@ const NftDisplay: NextPage<Props> = (props) => {
   return (
     <div id="" className="">
       {nftMetaData.image_url ? (
-        <div
-          className="hover:cursor-pointer transition ease-in-out hover:scale-110"
-          onClick={() => setShowModal(true)}
+        <motion.div
+          key={nftCardId + "motion"}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.4,
+            ease: [0.25, 0.25, 0, 1],
+            delay: 0.1,
+          }}
         >
-          <img
-            src={nftMetaData.image_url}
-            className="w-56 h-56 rounded-md drop-shadow-lg object-cover border border-gray-200 dark:border-gray-800"
-          />
-          <div className="flex">
-            <p className="my-2 text-sm max-w-[200px] text-gray-400 dark:text-gray-500 font-semibold truncate ...">
-              {nftMetaData.name
-                ? nftMetaData.name
-                : nftMetaData.collection.name}
-            </p>
-            <div className="flex-grow mt-3">
-              <img className="h-4 w-4 float-right" src={networkDb.iconPath} />
+          <div
+            className="hover:cursor-pointer transition ease-in-out hover:scale-110"
+            onClick={() => setShowModal(true)}
+          >
+            <img
+              src={nftMetaData.image_url}
+              className="w-56 h-56 rounded-md drop-shadow-lg object-cover border border-gray-200 dark:border-gray-800"
+            />
+
+            <div className="flex">
+              <p className="my-2 text-sm max-w-[200px] text-gray-400 dark:text-gray-500 font-semibold truncate ...">
+                {nftMetaData.name
+                  ? nftMetaData.name
+                  : nftMetaData.collection.name}
+              </p>
+              <div className="flex-grow mt-3">
+                <img className="h-4 w-4 float-right" src={srcImg} />
+              </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       ) : (
         <div
           className="transition ease-in-out hover:scale-110 hover:cursor-pointer"
@@ -97,7 +114,7 @@ const NftDisplay: NextPage<Props> = (props) => {
                 placeholder="blur"
               />
             ) : (
-              <div className="w-full min-h-[10rem] max-h-[20rem] pt-[3rem] rounded-md bg-gradient-to-r from-gray-100 to-white drop-shadow-lg dark:from-gray-900 dark:to-black text-lg dark:text-white text-center px-1 font-semibold overflow-y-auto no-scrollbar">
+              <div className="w-full min-h-[30rem] max-h-[25rem] pt-[5rem] rounded-md bg-gradient-to-r from-gray-100 to-white drop-shadow-lg dark:from-gray-900 dark:to-black text-lg dark:text-white text-center px-1 font-semibold overflow-y-auto no-scrollbar">
                 {nftMetaData.name}
               </div>
             )}
