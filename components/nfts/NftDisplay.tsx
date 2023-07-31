@@ -37,7 +37,6 @@ const NftDisplay: NextPage<Props> = (props) => {
     if (!modal) return;
     // close modal if you click area around the nft card
     modal.addEventListener("click", function (e) {
-      console.log("clicked!");
       if (showModal) setShowModal(false);
     });
     // if you click the nft card itself, don't close the card!
@@ -110,12 +109,16 @@ const NftDisplay: NextPage<Props> = (props) => {
             {nftMetaData.image_url ? (
               <img
                 src={nftMetaData.image_url}
-                className="w-full h-fit min-h-[30rem] md:min-h-[25rem] rounded-lg drop-shadow-xl object-cover border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900"
+                className="w-96 h-96 my-auto rounded-lg drop-shadow-xl object-cover border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900"
                 placeholder="blur"
               />
             ) : (
-              <div className="w-full min-h-[30rem] max-h-[25rem] pt-[5rem] rounded-md bg-gradient-to-r from-gray-100 to-white drop-shadow-lg dark:from-gray-900 dark:to-black text-lg dark:text-white text-center px-1 font-semibold overflow-y-auto no-scrollbar">
-                {nftMetaData.name}
+              <div className="w-96 h-96 pt-36 rounded-md bg-gradient-to-r from-gray-100 to-white drop-shadow-lg dark:from-gray-900 dark:to-black text-lg dark:text-white text-center px-1 font-semibold overflow-y-auto no-scrollbar">
+                <p>
+                  {nftMetaData.name
+                    ? nftMetaData.name
+                    : nftMetaData.collection.name}
+                </p>
               </div>
             )}
           </div>
