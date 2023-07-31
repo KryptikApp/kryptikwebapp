@@ -106,7 +106,7 @@ const SearchNetwork: NextPage = () => {
         </div>
 
         {searchresults.length != 0 && (
-          <div className="ml-[12%] relative z-10 max-h-80 my-2 rounded-xl px-2 py-2 bg-white text-slate-500 dark:bg-gray-700 dark:text-slate-200 divide-y divide-gray-200 dark:divide-gray-600 overflow-auto no-scrollbar">
+          <div className="absolute w-full max-w-[310px] ml-12 md:max-w-md lg:max-w-md lg:ml-12 z-10 max-h-80 my-2 rounded-xl px-2 py-2 bg-white text-slate-500 dark:bg-gray-700 dark:text-slate-200 divide-y divide-gray-200 dark:divide-gray-600 overflow-auto no-scrollbar">
             {searchresults.length != 0 &&
               searchresults.map(
                 (searchResult: ISearchResult, index: number) => {
