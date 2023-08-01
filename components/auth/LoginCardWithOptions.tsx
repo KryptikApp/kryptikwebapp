@@ -211,9 +211,12 @@ const LoginCardWithOptions: NextPage = () => {
                 handleStartPasskeyFlow();
               }}
             >
-              <div className="flex flex-col space-y-2">
+              <div className="flex flex-col space-y-2 relative">
                 <AiOutlineLogin size={30} className="self-center" />
                 <p className="text-xl self-center">Passkey</p>
+              </div>
+              <div className="ring-1 ring-green-500 bg-green-400/20 w-fit px-2 py-1 rounded-xl absolute ml-32">
+                <p className="text-xs text-center">Fast</p>
               </div>
             </AuthProviderCard>
           </div>
