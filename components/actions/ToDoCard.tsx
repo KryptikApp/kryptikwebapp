@@ -12,10 +12,19 @@ export default function ToDoCard() {
       setCurrentAction(openActions[0]);
     }
   }, [openActions]);
+
+  async function handleCompleteAction() {
+    if (!currentAction) return;
+    // complete
+    await removeOpenAction(currentAction);
+  }
   return (
     <div className="my-6 mx-auto">
-      {authUser && authUser != defaultUser && (
-        <div className="flex flex-col rounded-xl ring-2 ring-gray-500/20 w-full">
+      {openActions.length > 0 && (
+        <div
+          className="flex flex-col rounded-xl ring-2 ring-gray-500/20 w-full color-bg"
+          datat-primaryColor={"green"}
+        >
           <ProgressIndicator progressPercent={progressPercent} />
           <div className="px-4">
             <div className="my-4">
