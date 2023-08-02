@@ -2,24 +2,41 @@ import {
   startAuthentication,
   startRegistration,
 } from "@simplewebauthn/browser";
-import { KryptikFetch } from "../../kryptikFetch";
+import { IKryptikFetchResponse, KryptikFetch } from "../../kryptikFetch";
+import { UserId } from "../../models/user";
 
 /**
  * Makes request for passkeys by associated with user email.
  * @param email The email of the user.
  * @returns True if the user has passkeys.
  */
-export async function hasPasskeys(email: string): Promise<boolean> {
-  const params = {
-    email: email,
-  };
+export async function hasPasskeys(params: {
+  email?: string;
+  uid?: string;
+}): Promise<boolean> {
+  const { email, uid } = params;
+  let res: IKryptikFetchResponse | null = null;
   try {
-    // make a request to the api to get the passkeys count
-    const res = await KryptikFetch("/api/auth/passkey/all", {
-      method: "HEAD",
-      timeout: 8000,
-      headers: { "Content-Type": "application/json", email: email },
-    });
+    if (uid) {
+      console.log("uid provided");
+      // make a request to the api to get the passkeys count
+      res = await KryptikFetch("/api/auth/passkey/all", {
+        method: "HEAD",
+        timeout: 8000,
+        headers: { "Content-Type": "application/json", uid: uid },
+      });
+    } else {
+      console.log("no uid provided");
+      if (!email) throw new Error("No email or uid provided");
+      // make a request to the api to get the passkeys count
+      res = await KryptikFetch("/api/auth/passkey/all", {
+        method: "HEAD",
+        timeout: 8000,
+        headers: { "Content-Type": "application/json", email: email },
+      });
+    }
+    // ensure response was received
+    if (!res) throw new Error("No response from server");
     // check if the request was successful
     if (res.status != 200) {
       throw new Error("Unable to get passkeys count.");
@@ -55,13 +72,15 @@ export async function getAllPasskeys() {
 
 /**
  * Register a new passkey. Email must be provided if the user is not logged in.
- * @param email User email.
+ * @param id User id
  * @returns True if the passkey was registered.
  */
-export async function registerPasskey(email?: string) {
+export async function registerPasskey(id: UserId) {
+  const { email, uid } = id;
   // try to add new friend on server
-  const params = {
+  const reqParams = {
     email: email,
+    uid: uid,
   };
   try {
     const res = await KryptikFetch(
@@ -69,7 +88,7 @@ export async function registerPasskey(email?: string) {
       {
         method: "POST",
         timeout: 8000,
-        body: JSON.stringify(params),
+        body: JSON.stringify(reqParams),
         headers: { "Content-Type": "application/json" },
       }
     );
@@ -83,7 +102,9 @@ export async function registerPasskey(email?: string) {
       }
       throw new Error(e.message);
     }
-    const newBody = { ...attResp, email: email };
+    // uid from the server
+    const uid = res.data.user.id;
+    const newBody = { ...attResp, uid: uid };
     // send the registration credentials to the server
     const resRegistration = await KryptikFetch(
       "/api/auth/passkey/verifyRegistration",
@@ -108,13 +129,15 @@ export async function registerPasskey(email?: string) {
 
 /**
  * Authenticates the user using a passkey.
- * @param email User email.
+ * @param id User id
  * @returns True if the user was authenticated.
  */
-export async function authenticatePasskey(email: string) {
+export async function authenticatePasskey(id: UserId) {
+  const { email, uid } = id;
   try {
     const params = {
       email: email,
+      uid: uid,
     };
     const res = await KryptikFetch("/api/auth/passkey/createAuthOptions", {
       method: "POST",
@@ -133,8 +156,8 @@ export async function authenticatePasskey(email: string) {
       }
       throw new Error(e.message);
     }
-    // add the email to the response
-    const newBody = { ...attResp, email: email };
+    // add the id to the response
+    const newBody = { ...attResp, ...params };
     // send the authenticationn credentials to the server
     const resAuthentication = await KryptikFetch(
       "/api/auth/passkey/verifyAuth",
