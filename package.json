@@ -2,6 +2,7 @@
   "name": "kryptikwebapp",
   "version": "0.1.0",
   "private": true,
+  "postinstall": "npm run generate",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
