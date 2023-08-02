@@ -1,4 +1,4 @@
-// data model for cryptocurrency networks (blockchains) pulled from firebase
+// data model for cryptocurrency networks (blockchains)
 
 import { Network, NetworkFromTicker } from "hdseedloop";
 import { TokenAndNetwork, TokenDb } from "./token";
