@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import ReactCodeInput from "react-code-input";
-
+import { motion } from "framer-motion";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { useKryptikThemeContext } from "../ThemeProvider";
@@ -30,6 +30,7 @@ import { LocalAccount } from "../../src/helpers/auth/types";
 import { getLocalAccounts } from "../../src/helpers/auth";
 import { set } from "lodash";
 import { trimUid } from "../../src/helpers/utils/accountUtils";
+import { AnimatePresence } from "framer-motion";
 
 enum LoginType {
   email = 0,
@@ -57,6 +58,7 @@ const LoginCardWithOptions: NextPage = () => {
   function handleStatusUpdate(msg: string, progress?: number) {
     setLoadingMessage(msg);
   }
+  const [resetAccountLoading, setResetAccountLoading] = useState(false);
 
   useEffect(() => {
     // pull network ticker from route
@@ -159,8 +161,9 @@ const LoginCardWithOptions: NextPage = () => {
       // TODO: HANDLE CASE WHEN NO PASSKEYS AND NO EMAIL AVAILABLE ON LOCAL CLIENT
       // THIS WILL OCCUR WHEN USER REGISTERS WITH PASSKEY AND THEN TRIES TO LOGIN ON ANOTHER DEVICE
       // OR WHEN REGISTERING WITH PASSKEY AND FAILS
-      toast.error("Unable to login. Please contact support.");
+      toast.error("Unable to login.");
       handleBack();
+      setLoadingApproval(false);
     }
   }
 
@@ -219,6 +222,8 @@ const LoginCardWithOptions: NextPage = () => {
       setLoginStep(LoginFlow.SelectAccount);
     }
     setSentEmail(false);
+    setLoadingApproval(false);
+    setLoading(false);
     setCode("");
     setEmail("");
   }
@@ -233,11 +238,13 @@ const LoginCardWithOptions: NextPage = () => {
     const browserSupportsPasskeys = browserSupportsWebAuthn();
     if (account.passkeyEnabled && supportsPasskeys && browserSupportsPasskeys) {
       setLoginType(LoginType.passkey);
-      loginWithPasskey({ uid: account.uid, email: account.email }, true);
+      await loginWithPasskey({ uid: account.uid, email: account.email }, true);
+      setResetAccountLoading(!resetAccountLoading);
     } else {
       setLoginStep(LoginFlow.SetEmail);
       setLoginType(LoginType.email);
       if (account.email) setEmail(account.email);
+      setResetAccountLoading(!resetAccountLoading);
     }
   }
 
@@ -287,14 +294,22 @@ const LoginCardWithOptions: NextPage = () => {
               src="/kryptikBrand/kryptikEyez.png"
               className="rounded-full mx-auto"
               alt={"Kryptik Eyes"}
-              width={40}
-              height={40}
+              width={50}
+              height={50}
             />
-            <p className="text-gray-700 dark:text-gray-400 text-lg font-semibold mb-4 text-center">
+            <p className="text-gray-700 dark:text-gray-400 text-2xl font-semibold mb-6 text-center">
               Sign-in to Web3
             </p>
           </div>
-          <p className="text-gray-500 text-center">Loading Accounts...</p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <p className="text-center text-lg dark:text-gray-500 text-gray-400">
+              Loading Accounts...
+            </p>
+          </motion.div>
         </div>
       )}
       {loginStep == LoginFlow.Start && !loadingLocalAccounts && (
@@ -339,37 +354,48 @@ const LoginCardWithOptions: NextPage = () => {
       {loginStep == LoginFlow.SelectAccount &&
         hasLocalAccounts() &&
         localAccounts && (
-          <div className="">
-            <div className="max-w-md mx-auto mb-10">
-              <h1 className="text-2xl font-semibold">Choose an account</h1>
-              <p className="text-lg text-gray-500">to continue</p>
-            </div>
-            <div className="flex flex-col ring ring-2 ring-sky-400 rounded-lg max-w-md w-full mx-auto divide-y divide-gray-400/70 py-1 dark:text-gray-200 text-gray-700 font-semibold">
-              {localAccounts
-                .filter((a) => a.exists)
-                .map((account: LocalAccount) => {
-                  return (
-                    <LocalAccountOption
-                      account={account}
-                      clickHandler={handleAccountSelection}
-                      key={
-                        account.uid
-                          ? account.uid
-                          : account.email
-                          ? account.email
-                          : Math.random().toString()
-                      }
-                    />
-                  );
-                })}
-              <AccountOption clickHandler={handleClickCreateNew}>
-                <div className="flex flex-row space-x-2 text-green-500">
-                  <AiOutlinePlusCircle size={20} className="my-auto" />
-                  <p className="">Create New</p>
-                </div>
-              </AccountOption>
-            </div>
-          </div>
+          <AnimatePresence>
+            {/* animate in and out of view */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="max-w-md mx-auto mb-10">
+                <h1 className="text-2xl font-semibold text-left">
+                  Choose an account
+                </h1>
+                <p className="text-lg text-gray-500">to continue</p>
+              </div>
+              <div className="flex flex-col ring ring-2 ring-sky-400/40 hover:ring-sky-400 rounded-lg max-w-md w-full mx-auto divide-y divide-gray-400/70 py-1 dark:text-gray-200 text-gray-700 font-semibold transition-color duration-100">
+                {localAccounts
+                  .filter((a) => a.exists)
+                  .map((account: LocalAccount) => {
+                    return (
+                      <LocalAccountOption
+                        account={account}
+                        clickHandler={handleAccountSelection}
+                        reset={resetAccountLoading}
+                        key={
+                          account.uid
+                            ? account.uid
+                            : account.email
+                            ? account.email
+                            : Math.random().toString()
+                        }
+                      />
+                    );
+                  })}
+                <AccountOption clickHandler={handleClickCreateNew}>
+                  <div className="flex flex-row space-x-2 text-green-500">
+                    <AiOutlinePlusCircle size={20} className="my-auto" />
+                    <p className="">Create New</p>
+                  </div>
+                </AccountOption>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         )}
       {
         // passkey login
@@ -495,11 +521,23 @@ export default LoginCardWithOptions;
 function LocalAccountOption(params: {
   account: LocalAccount;
   clickHandler: (account: LocalAccount) => any;
+  reset: boolean;
 }) {
-  const { account, clickHandler } = params;
+  const { account, clickHandler, reset } = params;
+  const [loading, setLoading] = useState(false);
+  async function handleClick() {
+    setLoading(true);
+    await clickHandler(account);
+    setLoading(false);
+  }
+  useEffect(() => {
+    if (loading) {
+      setLoading(false);
+    }
+  }, [reset]);
   return (
-    <AccountOption clickHandler={() => clickHandler(account)}>
-      <div className="">
+    <AccountOption clickHandler={() => handleClick()}>
+      <div className="text-xl">
         {account.email
           ? account.email
           : account.uid
@@ -507,7 +545,32 @@ function LocalAccountOption(params: {
           : "Unknown"}
       </div>
       <div className="flex-grow">
-        <AiOutlineArrowRight className="text-right text-xl float-right my-auto group-hover:scale-x-150 transition duration-300 ease-in-out" />
+        {loading && (
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="float-right">
+                <LoadingSpinner />
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        )}
+        {!loading && (
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <AiOutlineArrowRight className="text-right text-xl float-right my-auto group-hover:scale-x-150 transition duration-300 ease-in-out" />
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
     </AccountOption>
   );
