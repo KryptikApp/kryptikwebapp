@@ -106,5 +106,6 @@ export const config = {
     "/api/auth/passkey/all",
     "/api/auth/passkey/verifyRegistration",
     "/api/actions/completed",
+    "/api/actions/markComplete",
   ],
 };
