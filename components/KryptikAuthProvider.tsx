@@ -39,7 +39,8 @@ interface IAuthContext {
   legacySignClient: LegacySignClient | null;
   updateLegacySignClient: (newClient: LegacySignClient | null) => any;
   openActions: WalletAction[];
-  removeOpenAction: (action: WalletAction) => void;
+  completedActions: WalletAction[];
+  removeOpenAction: (action: WalletAction) => Promise<boolean>;
 }
 
 const kryptikAuthContext = createContext<IAuthContext>({
@@ -63,7 +64,8 @@ const kryptikAuthContext = createContext<IAuthContext>({
   updateWalletStatus: (newStatus: WalletStatus) => {},
   updateWallet: (seedloop: HDSeedLoop) => {},
   openActions: [],
-  removeOpenAction: (action: WalletAction) => {},
+  completedActions: [],
+  removeOpenAction: async (action: WalletAction) => true,
 });
 
 export function KryptikAuthProvider(props: any) {
