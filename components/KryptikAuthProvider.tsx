@@ -3,7 +3,7 @@ import SignClient from "@walletconnect/sign-client";
 import LegacySignClient from "@walletconnect/client";
 
 import { defaultWallet } from "../src/models/defaultWallet";
-import { UserDB } from "../src/models/user";
+import { UserDB, UserId } from "../src/models/user";
 import { useKryptikAuth } from "../src/helpers/kryptikAuthHelper";
 import Web3Service from "../src/services/Web3Service";
 import { IWallet, WalletStatus } from "../src/models/KryptikWallet";
@@ -23,7 +23,7 @@ interface IAuthContext {
     isRefresh?: boolean
   ) => Promise<boolean>;
   signInWithPasskey: (
-    email: string,
+    id: UserId,
     hasPasskey: boolean,
     seed?: string
   ) => Promise<boolean>;
@@ -47,11 +47,7 @@ const kryptikAuthContext = createContext<IAuthContext>({
   loadingAuthUser: false,
   loadingWallet: false,
   signInWithToken: async (token: string, email: string, seed?: string) => true,
-  signInWithPasskey: async (
-    email: string,
-    hasPasskey: boolean,
-    seed?: string
-  ) => true,
+  signInWithPasskey: async (id: {}, hasPasskey: boolean, seed?: string) => true,
   updateCurrentUserKryptik: async (user: UserDB) => {},
   signClient: null,
   legacySignClient: null,
