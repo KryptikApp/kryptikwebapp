@@ -47,7 +47,6 @@ const WalletHome: NextPage = () => {
       </div>
 
       <div className="max-w-2xl mx-auto">
-        <ToDoCard />
         {progressionValid && <ListBalance />}
         {loadingWallet && (
           <div className="flex flex-row space-x-2 text-slate-900 dark:text-slate-100 font-semibold text-xl">
