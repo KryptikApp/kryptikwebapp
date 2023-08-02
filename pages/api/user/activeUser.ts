@@ -33,7 +33,7 @@ export default async function handler(
       name: user.Profile?.name || "",
       photoUrl: user.Profile?.avatarPath || undefined,
       isAdvanced: false,
-      email: user.email,
+      email: user?.email || undefined,
     };
     return res
       .status(200)
