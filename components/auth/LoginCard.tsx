@@ -84,7 +84,10 @@ const LoginCard: NextPage = () => {
     setLoadingApproval(true);
     handleStatusUpdate("Building wallet on device.");
     setLoading(false);
-    const approvedStatus: boolean = await signInWithPasskey(email, hasPasskey);
+    const approvedStatus: boolean = await signInWithPasskey(
+      { email },
+      hasPasskey
+    );
     if (approvedStatus) {
       toast.success("You are now logged in!");
       setLoadingApproval(false);
@@ -110,7 +113,7 @@ const LoginCard: NextPage = () => {
       toast.error("Please enter a valid email");
       return;
     }
-    const hasPasskey = await hasPasskeys(email);
+    const hasPasskey = await hasPasskeys({ email: email });
     const supportsPasskeys = await platformAuthenticatorIsAvailable();
     const browserSupportsPasskeys = browserSupportsWebAuthn();
     const emailTaken: boolean = await isEmailTaken(email);
