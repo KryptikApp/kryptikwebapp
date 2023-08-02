@@ -8,6 +8,7 @@ import {
   SyncSession,
   TempSyncKey,
   User,
+  WalletAction,
 } from "@prisma/client";
 import { add } from "date-fns";
 import { createAesKeyAndIv, IAesKey } from "../src/handlers/crypto";
@@ -270,6 +271,57 @@ export async function createOneTimeToken(userId: string) {
     },
   });
   return createdToken;
+}
+
+/**
+ * Get completed wallet actions by user id
+ * @param userId  unique id of the user
+ * @returns wallet actions that have been completed by the user
+ */
+export async function getCompletedActions(userId: string) {
+  // get completed wallet actions from user object
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      CompletedWalletActions: true,
+    },
+  });
+  const res: WalletAction[] = user?.CompletedWalletActions || [];
+  return res;
+}
+
+/**
+ * Get all wallet actions
+ */
+
+export async function getAllWalletActions(): Promise<WalletAction[]> {
+  const walletActions = await prisma.walletAction.findMany();
+  return walletActions;
+}
+
+/**
+ * Mark action as complete for user
+ * @param userId unique id of the user
+ * @param actionId unique id of the action
+ */
+export async function markActionCompleteForUser(
+  userId: string,
+  actionId: number
+) {
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      CompletedWalletActions: {
+        connect: {
+          id: actionId,
+        },
+      },
+    },
+  });
 }
 
 export async function findOrCreateUserByEmail(

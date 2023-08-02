@@ -8,6 +8,7 @@ import { useKryptikAuth } from "../src/helpers/kryptikAuthHelper";
 import Web3Service from "../src/services/Web3Service";
 import { IWallet, WalletStatus } from "../src/models/KryptikWallet";
 import HDSeedLoop from "hdseedloop";
+import { WalletAction } from "../src/helpers/actions/models";
 
 interface IAuthContext {
   kryptikService: Web3Service;
@@ -37,6 +38,8 @@ interface IAuthContext {
   signClient: SignClient | null;
   legacySignClient: LegacySignClient | null;
   updateLegacySignClient: (newClient: LegacySignClient | null) => any;
+  openActions: WalletAction[];
+  removeOpenAction: (action: WalletAction) => void;
 }
 
 const kryptikAuthContext = createContext<IAuthContext>({
@@ -59,6 +62,8 @@ const kryptikAuthContext = createContext<IAuthContext>({
   walletStatus: defaultWallet.status,
   updateWalletStatus: (newStatus: WalletStatus) => {},
   updateWallet: (seedloop: HDSeedLoop) => {},
+  openActions: [],
+  removeOpenAction: (action: WalletAction) => {},
 });
 
 export function KryptikAuthProvider(props: any) {

@@ -12,6 +12,7 @@ import LoadingSpinner from "../loadingSpinner";
 import Button from "../buttons/Button";
 import ActionBar from "./ActionBar";
 import UnlockWalletCard from "./UnlockWalletCard";
+import ToDoCard from "../actions/ToDoCard";
 
 const WalletHome: NextPage = () => {
   const { walletStatus, kryptikService, loadingWallet } =
@@ -46,6 +47,7 @@ const WalletHome: NextPage = () => {
       </div>
 
       <div className="max-w-2xl mx-auto">
+        <ToDoCard />
         {progressionValid && <ListBalance />}
         {loadingWallet && (
           <div className="flex flex-row space-x-2 text-slate-900 dark:text-slate-100 font-semibold text-xl">

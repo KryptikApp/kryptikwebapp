@@ -25,6 +25,9 @@ import {
   getCachedLegacySession,
 } from "../handlers/connect/utils";
 import { authenticatePasskey, registerPasskey } from "./auth/passkey";
+import { WalletAction } from "./actions/models";
+import { getCompletedActionsByUser, getOpenActions } from "./actions";
+import { getAllWalletActions } from "../../prisma/script";
 
 export function useKryptikAuth() {
   //create service
@@ -37,6 +40,7 @@ export function useKryptikAuth() {
   const [loadingAuthUser, setLoadingAuthUser] = useState<boolean>(false);
   const [loadingWallet, setLoadingWallet] = useState<boolean>(false);
   const [signClient, setSignClient] = useState<SignClient | null>(null);
+  const [openActions, setOpenActions] = useState<WalletAction[]>([]);
   const [legacySignClient, setLegacySignClient] =
     useState<LegacySignClient | null>(null);
   const [walletConnectInitialized, setWalletConnectInitialized] =
@@ -164,6 +168,14 @@ export function useKryptikAuth() {
         setLegacySignClient(newLegacySignClient);
       }
     }
+    try {
+      // get uncompleted user actions
+      const newOpenActions: WalletAction[] = await getOpenActions();
+      setOpenActions(newOpenActions);
+    } catch (e) {
+      console.warn("Unable to get open actions.");
+      console.error(e);
+    }
     refreshBalances(newWalletKryptik);
     // set data
     setKryptikWallet(newWalletKryptik);
@@ -172,6 +184,13 @@ export function useKryptikAuth() {
     setLoadingAuthUser(false);
     setLoadingWallet(false);
   };
+
+  function removeOpenAction(action: WalletAction) {
+    const newOpenActions = openActions.filter(
+      (a) => a.getId() !== action.getId()
+    );
+    setOpenActions(newOpenActions);
+  }
 
   function refreshBalances(wallet?: IWallet) {
     const walletToCheck: IWallet = wallet ? wallet : kryptikWallet;
@@ -332,5 +351,7 @@ export function useKryptikAuth() {
     legacySignClient,
     updateLegacySignClient,
     clear,
+    openActions,
+    removeOpenAction,
   };
 }

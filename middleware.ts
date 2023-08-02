@@ -105,5 +105,6 @@ export const config = {
     "/api/sync/:path*",
     "/api/auth/passkey/all",
     "/api/auth/passkey/verifyRegistration",
+    "/api/actions/completed",
   ],
 };
