@@ -1,4 +1,5 @@
 import { WalletAction as WalletActionDb } from "@prisma/client";
+import { getRandomAvatarPhoto } from "../auth";
 
 export type IActionParams = {
   action: WalletActionDb;
@@ -17,12 +18,14 @@ export class WalletAction {
   private title: string;
   private hexColor: string;
   private id: number;
+  private iconPath: string | null;
   constructor(params: IActionParams) {
     this.status = params.status;
     this.description = params.action.description;
     this.title = params.action.title;
     this.hexColor = params.action.hexColor;
     this.id = params.action.id;
+    this.iconPath = params.action.imgPath;
   }
   public isDone(): boolean {
     return this.status === ActionStatus.Done;
@@ -47,6 +50,9 @@ export class WalletAction {
   }
   public getId(): number {
     return this.id;
+  }
+  public getIcon(): string {
+    return this.iconPath || getRandomAvatarPhoto();
   }
 }
 
