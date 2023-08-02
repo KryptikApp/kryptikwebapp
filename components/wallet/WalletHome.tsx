@@ -40,10 +40,7 @@ const WalletHome: NextPage = () => {
 
   return (
     <div className="my-8">
-      <div className="flex flex-col lg:flex-row">
-        <div></div>
-      </div>
-      <div className="text-center max-w-2xl mx-auto content-center">
+      <div className="text-center max-w-2xl mx-auto content-center mt-8 md:mt-0">
         <HeaderProfile showBio={false} center={true} />
         <ActionBar active={progressionValid} />
       </div>
