@@ -26,7 +26,7 @@ export async function fetchAllActions(): Promise<WalletActionDb[]> {
   return res.data.actions;
 }
 
-export async function markActionComplete(actionId: string) {
+export async function markActionComplete(actionId: number) {
   // make request to api to get completed actions
   const res = await KryptikFetch(`/api/actions/markComplete`, {
     method: "POST",
@@ -36,19 +36,23 @@ export async function markActionComplete(actionId: string) {
     body: JSON.stringify({ actionId }),
   });
   // check if request was successful
-  if (!res.data || res.status !== 200 || !res.data.actions) {
-    return [];
+  if (!res.data || res.status !== 200 || !res.data.success) {
+    return false;
   }
-  return res.data.actions;
+  return true;
 }
 
-export async function getOpenActions(): Promise<WalletAction[]> {
-  const completeActions = await getCompletedActionsByUser();
-  const allActions = await fetchAllActions();
+export async function getActionsByCategory(
+  completeActions?: WalletActionDb[],
+  allActions?: WalletActionDb[]
+): Promise<{ open: WalletAction[]; complete: WalletAction[] }> {
+  let completeActionsToUse =
+    completeActions || (await getCompletedActionsByUser());
+  let allActionsToUse = allActions || (await fetchAllActions());
   // filter out completed actions
-  const openActions = allActions.filter((action) => {
+  const openActions = allActionsToUse.filter((action) => {
     // check if action is in completed actions
-    const actionInCompleted = completeActions.find(
+    const actionInCompleted = completeActionsToUse.find(
       (completeAction) => completeAction.id === action.id
     );
     // if action is not in completed actions, return true
@@ -62,5 +66,8 @@ export async function getOpenActions(): Promise<WalletAction[]> {
   const openActionsClass = openActions.map((action) => {
     return new WalletAction({ action, status: ActionStatus.Open });
   });
-  return openActionsClass;
+  const completeActionsClass = completeActionsToUse.map((action) => {
+    return new WalletAction({ action, status: ActionStatus.Done });
+  });
+  return { open: openActionsClass, complete: completeActionsClass };
 }
