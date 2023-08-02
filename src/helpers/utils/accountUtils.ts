@@ -107,3 +107,10 @@ export function getActiveNetworkAddress(
     }
   }
 }
+
+export function trimUid(uid: string): string {
+  // keep first four and last three characters
+  let firstFour = uid.slice(0, 4);
+  let lastThree = uid.slice(-3);
+  return `${firstFour}...${lastThree}`;
+}
