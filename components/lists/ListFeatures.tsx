@@ -47,7 +47,7 @@ const ListFeatures: NextComponentType = () => {
     <div className="graphPaper rounded-xl max-w-5xl mx-auto">
       <div className="bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-300/50 to-white dark:from-green-900/50 dark:to-[#0c0c0c] background-animate rounded-xl">
         <div>
-          <div className="w-full bg-sky-400/10 rounded-t-xl px-2 relative">
+          <div className="w-full bg-sky-200/30 dark:bg-sky-400/10 rounded-t-xl px-2 relative">
             <h1 className="text-green-500/60 dark:text-white text-3xl font-bold pt-2 pb-4">
               Powerful and easy to use.
             </h1>
