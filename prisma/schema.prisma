@@ -21,6 +21,19 @@ model User {
   syncSession SyncSession?
   Authenticator Authenticator[]
   AuthenticatorChallenge AuthenticatorChallenge?
+  // many to many
+  CompletedWalletActions WalletAction[]
+}
+
+// many users can own an action and an action can be owned by many users
+model WalletAction{
+  id         Int      @id @default(autoincrement())
+  title      String
+  description String
+  createdAt  DateTime @default(now())
+  hexColor   String
+  imgPath    String?
+  Users   User[]
 }
 
 model Authenticator {

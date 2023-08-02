@@ -25,6 +25,8 @@ import {
   getCachedLegacySession,
 } from "../handlers/connect/utils";
 import { authenticatePasskey, registerPasskey } from "./auth/passkey";
+import { WalletAction } from "./actions/models";
+import { getActionsByCategory, markActionComplete } from "./actions";
 
 export function useKryptikAuth() {
   //create service
@@ -37,6 +39,8 @@ export function useKryptikAuth() {
   const [loadingAuthUser, setLoadingAuthUser] = useState<boolean>(false);
   const [loadingWallet, setLoadingWallet] = useState<boolean>(false);
   const [signClient, setSignClient] = useState<SignClient | null>(null);
+  const [openActions, setOpenActions] = useState<WalletAction[]>([]);
+  const [completedActions, setCompletedActions] = useState<WalletAction[]>([]);
   const [legacySignClient, setLegacySignClient] =
     useState<LegacySignClient | null>(null);
   const [walletConnectInitialized, setWalletConnectInitialized] =
@@ -164,6 +168,15 @@ export function useKryptikAuth() {
         setLegacySignClient(newLegacySignClient);
       }
     }
+    try {
+      // get uncompleted user actions
+      const actionsByCategory = await getActionsByCategory();
+      setOpenActions(actionsByCategory.open);
+      setCompletedActions(actionsByCategory.complete);
+    } catch (e) {
+      console.warn("Unable to get open actions.");
+      console.error(e);
+    }
     refreshBalances(newWalletKryptik);
     // set data
     setKryptikWallet(newWalletKryptik);
@@ -172,6 +185,24 @@ export function useKryptikAuth() {
     setLoadingAuthUser(false);
     setLoadingWallet(false);
   };
+
+  async function removeOpenAction(action: WalletAction) {
+    try {
+      const res = await markActionComplete(action.getId());
+      if (!res) throw new Error("Unable to mark action complete");
+      const newOpenActions = openActions.filter(
+        (a) => a.getId() !== action.getId()
+      );
+      setOpenActions(newOpenActions);
+      action.markDone();
+      const newCompletedActions = completedActions.concat(action);
+      setCompletedActions(newCompletedActions);
+      toast.success("Action complete!");
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   function refreshBalances(wallet?: IWallet) {
     const walletToCheck: IWallet = wallet ? wallet : kryptikWallet;
@@ -332,5 +363,8 @@ export function useKryptikAuth() {
     legacySignClient,
     updateLegacySignClient,
     clear,
+    openActions,
+    completedActions,
+    removeOpenAction,
   };
 }

@@ -46,7 +46,7 @@ const Menu: NextPage<Props> = (props) => {
   }, []);
 
   return (
-    <nav className="py-2 md:py-4 mb-4 px-2">
+    <nav className="py-2 md:py-4 mb-8 px-2">
       <div
         className={`md:px-4 fixed mx-auto md:flex md:items-center top-0 py-2 dark:bg-[#0c0c0c]/90 -mx-4 px-4 z-20 w-full`}
       >

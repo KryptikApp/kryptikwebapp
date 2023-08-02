@@ -12,6 +12,7 @@ import LoadingSpinner from "../loadingSpinner";
 import Button from "../buttons/Button";
 import ActionBar from "./ActionBar";
 import UnlockWalletCard from "./UnlockWalletCard";
+import ToDoCard from "../actions/ToDoCard";
 
 const WalletHome: NextPage = () => {
   const { walletStatus, kryptikService, loadingWallet } =
