@@ -29,9 +29,6 @@ export default async function handler(
           .json({ msg: "Uid must be provided.", email: null });
       }
       const user = await findUserById(uid);
-      console.log(uid);
-      console.log(user);
-      console.log("------");
       if (!user) {
         return res.status(400).json({ msg: "User not found.", email: null });
       }
