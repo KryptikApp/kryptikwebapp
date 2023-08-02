@@ -27,11 +27,33 @@ export default async function handler(
     if (req.method === "HEAD") {
       // get email from body
       const email = req.headers["email"];
-      if (!email || typeof email != "string") {
-        return res.status(400).json({ msg: "No email provided." });
+      const uid = req.headers["uid"];
+      // validate headers
+      if (email && typeof email != "string") {
+        return res.status(400).json({ msg: "Email must be a string." });
       }
+      if (uid && typeof uid != "string") {
+        return res.status(400).json({ msg: "Uid must be a string." });
+      }
+      // ensure at least one identifier is provided
+      if (!email && !uid) {
+        return res
+          .status(400)
+          .json({
+            msg: "No identifier available. Email or uid must be provided.",
+          });
+      }
+      let user: User | null = null;
       // find user
-      const user: User | null = await findUserByEmail(email);
+      if (uid) {
+        user = await findUserById(uid);
+      } else if (email) {
+        user = await findUserByEmail(email);
+      } else {
+        throw new Error(
+          "No identifier available. Email or uid must be provided."
+        );
+      }
       if (!user) {
         return res.status(200).setHeader("Passkeys-Count", 0).end();
       }
