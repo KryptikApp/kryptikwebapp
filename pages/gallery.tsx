@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState, useRef } from "react";
 import GalleryProfile from "../components/GalleryProfile";
 import { debounce } from "lodash";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { useKryptikAuthContext } from "../components/KryptikAuthProvider";
 import NftDisplay from "../components/nfts/NftDisplay";
@@ -472,11 +473,20 @@ const Gallery: NextPage = () => {
           )}
           {/* notification when loading more nfts */}
           {loadingMoreOnScroll && (
-            <div className="fixed bottom-0 max-w-sm p-2 text-center bg-gray-600/30 dark:bg-gray-400/30">
-              <p className="text-md text-center font-semibold text-slate-700 dark:text-slate-200 inline">
-                Loading more...
-              </p>
-            </div>
+            <AnimatePresence>
+              <motion.div
+                initial={{ y: -50 }}
+                animate={{ y: 0 }}
+                exit={{ y: -50 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="fixed bottom-0 max-w-sm p-2 text-center bg-gray-600/30 dark:bg-gray-400/30 rounded-tr-md rounded-tl-md">
+                  <p className="text-md text-center font-semibold text-slate-700 dark:text-slate-200 inline">
+                    Loading more...
+                  </p>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           )}
         </div>
       </div>
