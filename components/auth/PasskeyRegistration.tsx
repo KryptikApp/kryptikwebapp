@@ -1,6 +1,5 @@
 import { registerPasskey } from "../../src/helpers/auth/passkey";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
-import Button from "../buttons/Button";
 import { useState } from "react";
 
 // params for component are passed in as props
@@ -20,7 +19,7 @@ export default function PassKeyRegistration(props: Props) {
       return;
     }
     setLoadingRegistration(true);
-    const success = await registerPasskey(authUser.email);
+    const success = await registerPasskey({ email: authUser?.email });
     setLoadingRegistration(false);
     if (success) {
       onSuccess();
@@ -32,7 +31,7 @@ export default function PassKeyRegistration(props: Props) {
   return (
     <div className="">
       <p
-        className="text-xl text-sky-400 hover:text-sky-500 hover:font-bold transition-colors duration-300 hover:cursor-pointer"
+        className="text-xl text-sky-400 hover:text-sky-500 hover:font-semibold transition-colors duration-300 hover:cursor-pointer w-fit"
         onClick={addPasskey}
       >
         Add New Key

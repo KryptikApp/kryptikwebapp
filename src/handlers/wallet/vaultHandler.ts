@@ -97,6 +97,29 @@ export function fetchVault(vaultName: string): string | null {
   return vaultString;
 }
 
+/**
+ * @returns Array of all vault names in local storage
+ */
+export function getAllVaultNames(): string[] {
+  let vaults: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    let key: string | null = localStorage.key(i);
+    if (key != null && key.startsWith("wallet|")) {
+      vaults.push(key);
+    }
+  }
+  return vaults;
+}
+
+/**
+ * Parses uid from vault name
+ * @param vaultName Name of vault to parse
+ * @returns uid of vault
+ */
+export function getUidFromVaultName(vaultName: string): string {
+  return vaultName.split("|")[1];
+}
+
 export const unlockVault = function (
   uid: string,
   remoteShare: string,
@@ -171,7 +194,7 @@ export const deleteVault = function (uid: string) {
 /**Updates vault name from email to id based */
 export function updateVaultName(user: UserDB) {
   // only run if legacy vault name version with email
-  if (vaultExists(user.email)) {
+  if (user.email && vaultExists(user.email)) {
     const oldVaultName = createVaultName(user.email);
     const vaultContents: string | null = fetchVault(oldVaultName);
     if (!vaultContents) return;

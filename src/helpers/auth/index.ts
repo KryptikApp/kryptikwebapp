@@ -1,7 +1,15 @@
-import { deleteVault } from "../../handlers/wallet/vaultHandler";
+import { get } from "lodash";
+import {
+  deleteVault,
+  getAllVaultNames,
+  getUidFromVaultName,
+} from "../../handlers/wallet/vaultHandler";
 import { KryptikFetch } from "../../kryptikFetch";
 import { UserDB } from "../../models/user";
-import { getActiveUser } from "../user";
+import { getActiveUser, getEmailFromUid } from "../user";
+import { LocalAccount } from "./types";
+import { hasPasskeys } from "./passkey";
+import { isValidEmailAddress } from "../resolvers/kryptikResolver";
 
 export async function handleApprove(
   email: string,
@@ -124,5 +132,45 @@ export async function handleRefreshTokens() {
     }
   } catch (e) {
     // console.warn("Unable to refresh auth token. May need to log in again.");
+  }
+}
+
+export async function getLocalAccounts(): Promise<LocalAccount[]> {
+  try {
+    const res: LocalAccount[] = [];
+    // get local account from local storage
+    const vaultNames = getAllVaultNames();
+    // parse uid for all vaults
+    const localUids: string[] = vaultNames.map((vaultName) => {
+      const uid = getUidFromVaultName(vaultName);
+      return uid;
+    });
+    // check whether user has passkey enabled
+    for (const uid of localUids) {
+      const enabled = await hasPasskeys({ uid: uid });
+      const newAccount: LocalAccount = {
+        uid: uid,
+        passkeyEnabled: enabled,
+        exists: true,
+      };
+      // uid may be email for legacy accounts
+      if (!isValidEmailAddress(uid)) {
+        const resEmail = await getEmailFromUid(uid);
+        if (resEmail.email) {
+          newAccount.email = resEmail.email;
+        }
+        if (!resEmail.exists) {
+          newAccount.exists = false;
+        }
+      } else {
+        newAccount.email = uid;
+      }
+
+      res.push(newAccount);
+    }
+    return res;
+  } catch (e) {
+    console.warn("Unable to get local accounts. Returning empty array.");
+    return [];
   }
 }

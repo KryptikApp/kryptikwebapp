@@ -2,6 +2,10 @@
 
 export function timeElapsedString(startDate: Date, endDate: Date) {
   const numDaysElapsed = getDaysElapsed(startDate, endDate);
+  const numHoursElapsed = getHoursElapsed(startDate, endDate);
+  if (numHoursElapsed < 24) {
+    return `Today`;
+  }
   const daysInAWeek = 7;
   const daysInAMonth = 31;
   const daysInaYear = 365;
@@ -46,4 +50,11 @@ export function getDaysElapsed(startDate: Date, endDate: Date): number {
   const timeDiff = endDate.getTime() - startDate.getTime();
   const daysElapsed = Math.round(timeDiff / (1000 * 3600 * 24));
   return daysElapsed;
+}
+
+// get rounded hours elapsed between two dates
+export function getHoursElapsed(startDate: Date, endDate: Date): number {
+  const timeDiff = endDate.getTime() - startDate.getTime();
+  const hoursElapsed = Math.round(timeDiff / (1000 * 3600));
+  return hoursElapsed;
 }

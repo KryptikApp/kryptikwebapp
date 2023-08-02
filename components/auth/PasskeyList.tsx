@@ -48,7 +48,7 @@ export default function PassKeyList(props: Props) {
       <p className="text-md text-slate-500">
         Passkeys associated with your account.
       </p>
-      <div className="flex flex-col">
+      <div className="flex flex-col divide-y divide-gray-500/30">
         {/* passkeys available */}
         {passkeys != null &&
           !loading &&
@@ -57,7 +57,7 @@ export default function PassKeyList(props: Props) {
             return (
               <div
                 key={passkey.credentialID}
-                className="flex flex-row rounded-xl py-1 transition-transform duration-300 bg-gray-50/20 dark:bg-gray-900/20 hover:brightness-80 dark:hover:brightness-150"
+                className="flex flex-row py-1 transition-transform duration-300 bg-gray-50/20 dark:bg-gray-900/20 hover:brightness-80 dark:hover:brightness-150"
               >
                 <p className="text-xl dark:text-gray-200 text-gray-700">
                   {passkey.name}

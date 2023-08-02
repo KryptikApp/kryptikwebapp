@@ -33,7 +33,7 @@ const NavbarProduction: NextPage = () => {
     <Menu>
       {authUser && (
         <MenuItem>
-          <div className="ml-2 md:ml-0 md:mr-2">
+          <div className="ml-2 md:ml-0 md:mr-2 mt-1 text-gray-400">
             {hideBalances ? (
               <RiEyeCloseLine
                 className="dark:text-white hover:cursor-pointer hover:animate-pulse"

@@ -8,6 +8,7 @@ import {
   findCurrentChallenge,
   findUserByEmail,
   findUserById,
+  getUserFromRequest,
   saveAuthenticator,
 } from "../../../../prisma/script";
 import { Authenticator, User } from "@prisma/client";
@@ -34,10 +35,8 @@ export default async function handler(
   console.log("Verify registration request body", req.body);
   try {
     const body = req.body;
-    const email = body.email;
-    let user: User | null = null;
+    let user: User | null = await getUserFromRequest(req);
 
-    user = await findUserByEmail(email);
     if (user) {
       const createdTime = new Date(user.createdAt);
       const currentTime = new Date();
@@ -48,6 +47,7 @@ export default async function handler(
         user = null;
         const verifiedResult = await authenticateApiRequest(req);
         if (!verifiedResult.verified || !verifiedResult.payload) {
+          console.log("Unable to verify requestttt.");
           throw new Error("Unable to verify request.");
         }
         // get user id from header
@@ -135,6 +135,7 @@ export default async function handler(
       verified: verified,
     });
   } catch (e: any) {
+    console.log("Error verifying registration response", e);
     return res.status(400).send({ msg: "Unable to verify passkey." });
   }
 }

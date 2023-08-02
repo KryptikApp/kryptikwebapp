@@ -23,7 +23,7 @@ export default function PassKeyAuth(props: Props) {
       return;
     }
     setLoadingRegistration(true);
-    const approved = await authenticatePasskey(authUser.email);
+    const approved = await authenticatePasskey({ email: authUser?.email });
     setLoadingRegistration(false);
     if (approved) {
       onSuccess();

@@ -8,8 +8,7 @@ import { User } from "@prisma/client";
 import {
   findAuthenticatorsByUserId,
   saveCurrentChallenge,
-  findUserById,
-  findUserByEmail,
+  getUserFromRequest,
 } from "../../../../prisma/script";
 
 type Data = any;
@@ -20,14 +19,7 @@ export default async function handler(
 ) {
   try {
     const body = req.body;
-    const email = body.email;
-    if (!email || typeof email != "string") {
-      throw new Error(
-        "No email available or email was of the wrong type (expected string)."
-      );
-    }
-    // find user
-    const user: User | null = await findUserByEmail(email);
+    const user: User | null = await getUserFromRequest(req);
     if (!user) {
       throw new Error("Unable to find user with email.");
     }

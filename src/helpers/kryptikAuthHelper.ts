@@ -11,7 +11,7 @@ import ModalStore from "../handlers/store/ModalStore";
 import { updateVaultName } from "../handlers/wallet/vaultHandler";
 import { defaultWallet } from "../models/defaultWallet";
 import { IWallet, WalletStatus } from "../models/KryptikWallet";
-import { UserDB } from "../models/user";
+import { UserDB, UserId } from "../models/user";
 import { NetworkDb } from "../services/models/network";
 import Web3Service from "../services/Web3Service";
 import { handleApprove, handleRefreshTokens, logout } from "./auth";
@@ -81,15 +81,20 @@ export function useKryptikAuth() {
   }
 
   async function signInWithPasskey(
-    email: string,
+    id: UserId,
     hasPasskey: boolean,
     seed?: string
   ) {
+    if (!id.email && !id.uid) {
+      console.warn("No email or uid provided");
+    }
     let success: boolean = false;
     if (hasPasskey) {
-      success = await authenticatePasskey(email);
+      console.log("Authenticating passkey...");
+      success = await authenticatePasskey(id);
     } else {
-      success = await registerPasskey(email);
+      console.log("Registering passkey...");
+      success = await registerPasskey(id);
     }
     setLoadingAuthUser(true);
     const user: UserDB | null = await getActiveUser();

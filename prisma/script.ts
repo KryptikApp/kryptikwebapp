@@ -13,6 +13,7 @@ import { add } from "date-fns";
 import { createAesKeyAndIv, IAesKey } from "../src/handlers/crypto";
 import hashToken from "../src/helpers/auth/hashtoken";
 import { generateCode } from "../src/helpers/auth/jwt";
+import { NextApiRequest } from "next";
 
 const prisma = new PrismaClient();
 
@@ -88,7 +89,7 @@ export async function findCurrentChallenge(
 export function findUserById(id: string) {
   return prisma.user.findUnique({
     where: {
-      id,
+      id: id,
     },
     include: {
       Profile: true,
@@ -137,6 +138,15 @@ export async function validateUserOneTimeCode(id: string, code: string) {
 export function createUserByEmail(email: string) {
   return prisma.user.create({
     data: { email: email },
+  });
+}
+
+/**
+ * Create new blank user
+ */
+export function createNewUser() {
+  return prisma.user.create({
+    data: {},
   });
 }
 
@@ -385,4 +395,34 @@ export function validateSyncKey(key: TempSyncKey) {
     return true;
   }
   return false;
+}
+
+export async function getUserFromRequest(
+  req: NextApiRequest
+): Promise<User | null> {
+  const body = req.body;
+  // get email from body
+  const email = body.email;
+  const uid = body.uid;
+  // validate headers
+  if (email && typeof email != "string") {
+    throw new Error("Email must be a string.");
+  }
+  if (uid && typeof uid != "string") {
+    throw new Error("Uid must be a string.");
+  }
+  // ensure at least one identifier is provided
+  if (!email && !uid) {
+    throw new Error("No identifier available. Email or uid must be provided.");
+  }
+  let user: User | null = null;
+  // find user
+  if (uid) {
+    user = await findUserById(uid);
+  } else if (email) {
+    user = await findUserByEmail(email);
+  } else {
+    throw new Error("No identifier available. Email or uid must be provided.");
+  }
+  return user;
 }

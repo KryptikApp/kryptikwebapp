@@ -11,6 +11,8 @@ import {
   findUserById,
   findUserByEmail,
   createUserByEmail,
+  getUserFromRequest,
+  createNewUser,
 } from "../../../../prisma/script";
 import { rpID, rpName } from "../../../../src/constants/passkeyConstants";
 import { authenticateApiRequest } from "../../../../middleware";
@@ -23,15 +25,16 @@ export default async function handler(
 ) {
   try {
     const body = req.body;
-    const email = body.email;
     let user: User | null = null;
-    if (email && typeof email == "string") {
-      // find user by email
-      user = await findUserByEmail(email);
+    // try to get user from requets body
+    try {
+      user = await getUserFromRequest(req);
+    } catch (e) {
+      // pass for now
+    }
+    if (!user) {
       // if no user found, create new user
-      if (!user) {
-        user = await createUserByEmail(email);
-      }
+      user = await createNewUser();
     }
     // find user by userId, if not already found
     if (!user) {
@@ -44,7 +47,7 @@ export default async function handler(
       user = await findUserById(userId);
     }
     if (!user) {
-      throw new Error("Unable to find or create new user.");
+      throw new Error("Unable to find user.");
     }
 
     const userAuthenticators = await findAuthenticatorsByUserId(user.id);
@@ -55,7 +58,7 @@ export default async function handler(
       rpName,
       rpID,
       userID: user.id,
-      userName: user.email,
+      userName: user.email ? user.email : user.id,
       // Don't prompt users for additional information about the authenticator
       // (Recommended for smoother UX)
       attestationType: "direct",

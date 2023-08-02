@@ -1,6 +1,6 @@
 export interface UserDB {
   uid: string;
-  email: string;
+  email?: string;
   name?: string;
   bio?: string;
   photoUrl?: string;
@@ -9,7 +9,7 @@ export interface UserDB {
 
 export interface UserTemp {
   uid: string;
-  email: string;
+  email?: string;
   name?: string;
   bio?: string;
   photoUrl?: string;
@@ -31,3 +31,8 @@ export interface UserExtraData {
   remoteShare: string;
   bio: string;
 }
+
+export type UserId = {
+  uid?: string;
+  email?: string;
+};
