@@ -7,6 +7,8 @@ import {
   AiFillUpCircle,
 } from "react-icons/ai";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
+import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
 interface Props {
   active: boolean;
@@ -23,15 +25,38 @@ const ActionBar: NextPage<Props> = (props) => {
   const { walletStatus, kryptikService } = useKryptikAuthContext();
   const router = useRouter();
   const { active } = { ...props };
+  const [hasBalance, setHasBalance] = useState(false);
+
+  useEffect(() => {
+    console.log("Balances changed. Updating action bar.");
+    const newBal = kryptikService.kryptikBalances.getTotalBalance();
+    if (newBal > 0) {
+      setHasBalance(true);
+    } else {
+      setHasBalance(false);
+    }
+  }, [kryptikService.kryptikBalances.getTotalBalance()]);
 
   function actionHandler(action: ActionEnum) {
     if (!active) return;
     switch (action) {
       case ActionEnum.Swap: {
+        if (!hasBalance) {
+          toast("You don't have any assets to swap.", {
+            icon: "👻",
+          });
+          return;
+        }
         router.push("../wallet/swap");
         break;
       }
       case ActionEnum.Send: {
+        if (!hasBalance) {
+          toast("You don't have any assets to send.", {
+            icon: "👻",
+          });
+          return;
+        }
         router.push("../wallet/send");
         break;
       }
