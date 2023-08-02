@@ -75,7 +75,7 @@ const ListItemBalance: NextPage<Props> = (props) => {
       {amount != null && amountFiat != null && (
         <li
           key={`${htmlKey}`}
-          className="py-3 sm:py-4 hover:cursor-pointer rounded hover:gray-100 hover:bg-gray-100/40 hover:dark:bg-[#141414] color-bg"
+          className="py-3 sm:py-4 hover:cursor-pointer rounded hover:gray-100 hover:bg-gray-100/40 hover:dark:bg-[#141414]"
           onClick={() => handleOnClick()}
           data-primaryColor={
             tokenAndNetwork.tokenData?.tokenDb.hexColor
