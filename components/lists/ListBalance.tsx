@@ -15,10 +15,16 @@ import { WalletStatus } from "../../src/models/KryptikWallet";
 import AvailableNetworks from "../networks/AvailableNetworks";
 import BuyEth from "../BuyEth";
 import { PubSub } from "pubsub-ts";
+import ToDoList from "../actions/ToDoList";
 
 const ListBalance: NextPage = () => {
-  const { kryptikService, kryptikWallet, refreshBalances } =
-    useKryptikAuthContext();
+  const {
+    kryptikService,
+    kryptikWallet,
+    refreshBalances,
+    openActions,
+    removeOpenAction,
+  } = useKryptikAuthContext();
   const [balanceHolder, setBalanceHolder] = useState(
     kryptikService.kryptikBalances
   );
@@ -99,6 +105,10 @@ const ListBalance: NextPage = () => {
     refreshBalances();
   };
 
+  function handleClickGetStarted() {
+    router.push("/wallet/guide");
+  }
+
   useEffect(() => {
     // if (kryptikService.serviceState != ServiceState.started) {
     //   router.push("/");
@@ -122,13 +132,25 @@ const ListBalance: NextPage = () => {
     setAddedSubscriber(true);
   }, []);
 
+  async function handlePaidAction() {
+    if (isFetchedBalances && totalBalance > 0) {
+      // find open action get paid
+      const action = openActions.find(
+        (action) => action.getTitle() == "Get Paid"
+      );
+      if (action) {
+        await removeOpenAction(action);
+      }
+    }
+  }
   useEffect(() => {
     // pass for now
+    handlePaidAction();
   }, [isFetchedBalances]);
 
   return (
     <div>
-      <div className="pt-4 pb-4 border rounded rounded-xl border-gray-500 dark:border-gray-300 dark:bg-[#030709]">
+      <div className="pt-4 pb-4 border rounded rounded-xl border-gray-500 dark:border-gray-300 dark:bg-[#030709]/50">
         <div>
           <div className="flex flex-row px-3 py-2">
             <div className="">
@@ -220,27 +242,16 @@ const ListBalance: NextPage = () => {
             }
           </ul>
         ) : tokenAndBalances.length == 0 ? (
-          <div className="max-w-full m-2 py-2 px-4 bg-gray-300 dark:bg-gray-800 rounded">
-            <div className="flex flex-row">
-              <div className="my-auto">
-                <AvailableNetworks />
-              </div>
-              <div className="ml-2 text-left">
-                <h1 className="text-xl text-left text-slate-900 dark:text-slate-100 font-bold">
-                  Deposit Tokens
-                </h1>
-                <p className=" text-slate-500 dark:text-slate-400">
-                  You'll need tokens to use your wallet!
-                </p>
-              </div>
-            </div>
-            <div className="flex flex-row my-4">
-              <div className="flex-grow">
-                <div className="float-right">
-                  <BuyEth />
-                </div>
-              </div>
-            </div>
+          <div className="px-4 flex flex-col space-y-2">
+            <p className="text-xl text-gray-500 dark:text-gray-400">
+              You don't have any tokens in your wallet.
+            </p>
+            <p
+              className="text-sky-400 text-xl hover:cursor-pointer font-semibold w-fit"
+              onClick={handleClickGetStarted}
+            >
+              Get Started
+            </p>
           </div>
         ) : (
           <div>
@@ -266,3 +277,30 @@ const ListBalance: NextPage = () => {
 };
 
 export default ListBalance;
+
+function BuyCryptoCard() {
+  return (
+    <div className="max-w-full m-2 py-2 px-4 bg-gray-300 dark:bg-gray-800 rounded">
+      <div className="flex flex-row">
+        <div className="my-auto">
+          <AvailableNetworks />
+        </div>
+        <div className="ml-2 text-left">
+          <h1 className="text-xl text-left text-slate-900 dark:text-slate-100 font-bold">
+            Deposit Tokens
+          </h1>
+          <p className=" text-slate-500 dark:text-slate-400">
+            You'll need tokens to use your wallet!
+          </p>
+        </div>
+      </div>
+      <div className="flex flex-row my-4">
+        <div className="flex-grow">
+          <div className="float-right">
+            <BuyEth />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

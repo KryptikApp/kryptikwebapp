@@ -17,7 +17,8 @@ import { ColorEnum } from "../../src/helpers/utils";
 // connect wallet to external application
 const Connect: NextPage = () => {
   const [uri, setUri] = useState<string>("");
-  const { signClient, updateLegacySignClient } = useKryptikAuthContext();
+  const { signClient, updateLegacySignClient, openActions, removeOpenAction } =
+    useKryptikAuthContext();
   const [loading, setLoading] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const { isDark } = useKryptikThemeContext();
@@ -35,8 +36,8 @@ const Connect: NextPage = () => {
       toast.error("Please enter a valid uri.");
       return;
     }
+    let isError = false;
     try {
-      console.log("HEREEEE!");
       // initiate pair request
       const { version } = parseUri(uri);
       // Route the provided URI to the v1 SignClient if URI version indicates it, else use v2.
@@ -51,6 +52,17 @@ const Connect: NextPage = () => {
     } catch (e) {
       console.warn(e);
       toast.error("Unable to pair.");
+      isError = true;
+    }
+    console.log("Checking actions...");
+    // check if connect app is an open action for user
+    const connectAppAction = openActions.find((action) =>
+      action.getTitle().includes("Connect App")
+    );
+    if (connectAppAction && !isError) {
+      console.log("Completing connect app action...");
+      // complete connect app action
+      await removeOpenAction(connectAppAction);
     }
   };
   function onShowScanner() {

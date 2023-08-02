@@ -26,8 +26,7 @@ import {
 } from "../handlers/connect/utils";
 import { authenticatePasskey, registerPasskey } from "./auth/passkey";
 import { WalletAction } from "./actions/models";
-import { getCompletedActionsByUser, getOpenActions } from "./actions";
-import { getAllWalletActions } from "../../prisma/script";
+import { getActionsByCategory, markActionComplete } from "./actions";
 
 export function useKryptikAuth() {
   //create service
@@ -41,6 +40,7 @@ export function useKryptikAuth() {
   const [loadingWallet, setLoadingWallet] = useState<boolean>(false);
   const [signClient, setSignClient] = useState<SignClient | null>(null);
   const [openActions, setOpenActions] = useState<WalletAction[]>([]);
+  const [completedActions, setCompletedActions] = useState<WalletAction[]>([]);
   const [legacySignClient, setLegacySignClient] =
     useState<LegacySignClient | null>(null);
   const [walletConnectInitialized, setWalletConnectInitialized] =
@@ -170,8 +170,9 @@ export function useKryptikAuth() {
     }
     try {
       // get uncompleted user actions
-      const newOpenActions: WalletAction[] = await getOpenActions();
-      setOpenActions(newOpenActions);
+      const actionsByCategory = await getActionsByCategory();
+      setOpenActions(actionsByCategory.open);
+      setCompletedActions(actionsByCategory.complete);
     } catch (e) {
       console.warn("Unable to get open actions.");
       console.error(e);
@@ -185,11 +186,22 @@ export function useKryptikAuth() {
     setLoadingWallet(false);
   };
 
-  function removeOpenAction(action: WalletAction) {
-    const newOpenActions = openActions.filter(
-      (a) => a.getId() !== action.getId()
-    );
-    setOpenActions(newOpenActions);
+  async function removeOpenAction(action: WalletAction) {
+    try {
+      const res = await markActionComplete(action.getId());
+      if (!res) throw new Error("Unable to mark action complete");
+      const newOpenActions = openActions.filter(
+        (a) => a.getId() !== action.getId()
+      );
+      setOpenActions(newOpenActions);
+      action.markDone();
+      const newCompletedActions = completedActions.concat(action);
+      setCompletedActions(newCompletedActions);
+      toast.success("Action complete!");
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   function refreshBalances(wallet?: IWallet) {
@@ -352,6 +364,7 @@ export function useKryptikAuth() {
     updateLegacySignClient,
     clear,
     openActions,
+    completedActions,
     removeOpenAction,
   };
 }
