@@ -237,6 +237,7 @@ const LoginCardWithOptions: NextPage = () => {
     } else {
       setLoginStep(LoginFlow.SetEmail);
       setLoginType(LoginType.email);
+      if (account.email) setEmail(account.email);
     }
   }
 
@@ -422,6 +423,8 @@ const LoginCardWithOptions: NextPage = () => {
                     placeholder="Enter your email"
                     required
                     onChange={(e) => handleEmailChange(e.target.value)}
+                    value={email}
+                    autoFocus
                   />
                   <button
                     onClick={() => handleEmailLogin()}
