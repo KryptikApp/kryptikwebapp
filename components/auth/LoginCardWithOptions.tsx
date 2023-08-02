@@ -75,7 +75,7 @@ const LoginCardWithOptions: NextPage = () => {
     console.log("Done getting local accounts.");
     setLoadingLocalAccounts(false);
     console.log("Local accounts: ", newAccounts);
-    if (newAccounts.length > 0) {
+    if (newAccounts.filter((a) => a.exists).length > 0) {
       setLoginStep(LoginFlow.SelectAccount);
     } else {
       setLoginStep(LoginFlow.Start);
