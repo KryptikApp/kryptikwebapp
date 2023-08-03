@@ -51,7 +51,6 @@ const NavbarProduction: NextPage = () => {
         </MenuItem>
       )}
 
-      <a href="#"></a>
       {authUser && (
         <MenuItem>
           <Link href="../profile/security">
@@ -78,41 +77,27 @@ const NavbarProduction: NextPage = () => {
         </Link>
       </MenuItem>
 
-      {authUser ? (
-        <MenuItem>
-          <Link href="../gallery">
-            <span
-              className={`p-2 lg:px-4 md:mx-2 text-green-400 md:text-center border border-transparent rounded hover:text-white hover:cursor-pointer hover:bg-sky-400 dark:hover:text-black transition-colors duration-300 ${
-                router.pathname == "/gallery" ? "font-bold" : ""
-              }`}
-            >
-              Collect
-            </span>
-          </Link>
-        </MenuItem>
-      ) : (
-        <MenuItem>
-          <Link href="../explore">
-            <span
-              className={`p-2 lg:px-4 md:mx-2 text-green-400 md:text-center border border-transparent rounded hover:text-white hover:cursor-pointer hover:bg-sky-400 dark:hover:text-black transition-colors duration-300 ${
-                router.pathname == "/explore" ? "font-bold" : ""
-              }`}
-            >
-              Explore
-            </span>
-          </Link>
-        </MenuItem>
-      )}
+      <MenuItem>
+        <Link href="../explore">
+          <span
+            className={`p-2 lg:px-4 md:mx-2 text-green-400 md:text-center border border-transparent rounded hover:text-white hover:cursor-pointer hover:bg-sky-400 dark:hover:text-black transition-colors duration-300 ${
+              router.pathname == "/explore" ? "font-bold" : ""
+            }`}
+          >
+            Explore
+          </span>
+        </Link>
+      </MenuItem>
 
       {/* show disconnect button if connected and vise versa */}
       {authUser ? (
         walletStatus == WalletStatus.Connected ? (
           <MenuItem>
-            <Link href="../explore">
+            <Link href="../wallet">
               <span
                 className={`p-2 lg:px-4 md:mx-2 text-green-400 md:text-center md:border md:border-solid border-gray-300 dark:border-gray-600 dark:hover:border-sky-200 rounded hover:bg-green-400 hover:cursor-pointer hover:text-white transition-colors duration-300 mt-1 md:mt-0 md:ml-1`}
               >
-                Explore{" "}
+                Wallet{" "}
                 <img
                   src={getUserPhotoPath(authUser)}
                   alt="Profile Image"

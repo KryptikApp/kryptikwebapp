@@ -3,6 +3,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import PairingCard from "../../components/connect/PairingCard";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
+import Divider from "../../components/Divider";
 
 export default function PairingsPage() {
   const { signClient } = useKryptikAuthContext();
@@ -23,11 +24,15 @@ export default function PairingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl dark:text-white mt-8">
+    <div className="mx-auto max-w-2xl dark:text-white">
+      <div className="h-[2rem]">
+        {/* padding div for space between top and main elements */}
+      </div>
       <p className="text-4xl text-black dark:text-white font-bold">Pairings</p>
       <p className="text-lg text-slate-700 dark:text-slate-200">
         Review apps you have connected with in the past.
       </p>
+      <Divider />
       {pairings.length != 0 && (
         <div className="flex flex-col space-y-2 my-6">
           {pairings.map((pairing) => {

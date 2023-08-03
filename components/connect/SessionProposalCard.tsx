@@ -12,8 +12,14 @@ import AppDetails from "./AppDetails";
 import ConnectionCard from "./ConnectionCard";
 
 const SessionProposalCard: NextPage<IConnectCardProps> = (props) => {
-  const { signClient, legacySignClient, kryptikWallet, kryptikService } =
-    useKryptikAuthContext();
+  const {
+    signClient,
+    legacySignClient,
+    kryptikWallet,
+    kryptikService,
+    openActions,
+    removeOpenAction,
+  } = useKryptikAuthContext();
   const { onRequestClose } = { ...props };
   const [isLegacy, setIsLegacy] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -134,6 +140,16 @@ const SessionProposalCard: NextPage<IConnectCardProps> = (props) => {
         toast.error("No proposal to approve.");
       }
       toast.success("App connected.");
+      console.log("Checking actions...");
+      // check if connect app is an open action for user
+      const connectAppAction = openActions.find((action) =>
+        action.getTitle().includes("Connect App")
+      );
+      if (connectAppAction) {
+        console.log("Completing connect app action...");
+        // complete connect app action
+        await removeOpenAction(connectAppAction);
+      }
     } catch (e) {
       toast.error("Unable to approve connection.");
     }

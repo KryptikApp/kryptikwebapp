@@ -41,6 +41,9 @@ const WalletHome: NextPage = () => {
 
   return (
     <div className="my-8">
+      <div className="h-[2rem]">
+        {/* padding div for space between top and main elements */}
+      </div>
       <div className="text-center max-w-2xl mx-auto content-center mt-8 md:mt-0">
         <HeaderProfile showBio={false} center={true} />
         <ActionBar active={progressionValid} />
