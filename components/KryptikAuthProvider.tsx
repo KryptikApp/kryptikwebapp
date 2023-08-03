@@ -40,8 +40,10 @@ interface IAuthContext {
   updateLegacySignClient: (newClient: LegacySignClient | null) => any;
   openActions: WalletAction[];
   completedActions: WalletAction[];
-  removeOpenAction: (action: WalletAction) => Promise<boolean>;
+  removeOpenAction: IRemoveOpenAction;
 }
+
+export type IRemoveOpenAction = (action: WalletAction) => Promise<boolean>;
 
 const kryptikAuthContext = createContext<IAuthContext>({
   kryptikService: new Web3Service(),
