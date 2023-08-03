@@ -6,6 +6,7 @@ import { handleApprove } from "../../src/helpers/auth";
 import { toast } from "react-hot-toast";
 import { AiFillCheckCircle } from "react-icons/ai";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function ToDoList() {
   const router = useRouter();
@@ -45,7 +46,17 @@ export default function ToDoList() {
   return (
     <div className="my-6 mx-auto">
       {openActions.length == 0 && (
-        <p>No wallet actions to complete at this time!</p>
+        <div>
+          <p>No wallet actions to complete at this time!</p>
+          <p>
+            <Link
+              href="/wallet"
+              className="font-semibold text-sky-400 hover:font-bold"
+            >
+              Go To Wallet
+            </Link>
+          </p>
+        </div>
       )}
       {openActions.length > 0 && (
         <div className="flex flex-col space-y-6">
