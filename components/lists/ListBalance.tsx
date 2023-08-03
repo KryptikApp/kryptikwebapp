@@ -1,7 +1,10 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
 
-import { useKryptikAuthContext } from "../KryptikAuthProvider";
+import {
+  IRemoveOpenAction,
+  useKryptikAuthContext,
+} from "../KryptikAuthProvider";
 import ListItemBalance from "./ListItemBalance";
 import Divider from "../Divider";
 import ListItemLoading from "./ListItemLoading";
@@ -132,20 +135,20 @@ const ListBalance: NextPage = () => {
     setAddedSubscriber(true);
   }, []);
 
-  async function handlePaidAction() {
+  async function handlePaidAction(removeFn: IRemoveOpenAction) {
     if (isFetchedBalances && totalBalance > 0) {
       // find open action get paid
       const action = openActions.find(
         (action) => action.getTitle() == "Get Paid"
       );
       if (action) {
-        await removeOpenAction(action);
+        await removeFn(action);
       }
     }
   }
   useEffect(() => {
     // pass for now
-    handlePaidAction();
+    handlePaidAction(removeOpenAction);
   }, [isFetchedBalances]);
 
   return (
