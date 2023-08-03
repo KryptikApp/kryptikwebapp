@@ -54,16 +54,6 @@ const Connect: NextPage = () => {
       toast.error("Unable to pair.");
       isError = true;
     }
-    console.log("Checking actions...");
-    // check if connect app is an open action for user
-    const connectAppAction = openActions.find((action) =>
-      action.getTitle().includes("Connect App")
-    );
-    if (connectAppAction && !isError) {
-      console.log("Completing connect app action...");
-      // complete connect app action
-      await removeOpenAction(connectAppAction);
-    }
   };
   function onShowScanner() {
     setShowScanner(true);
