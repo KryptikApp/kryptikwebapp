@@ -127,7 +127,7 @@ function ToDoItem(params: {
             className="w-8 h-8 rounded-lg my-auto"
           />
           <div className="flex flex-col">
-            <h1 className="text-2xl font-semibold text-black dark:text-white">
+            <h1 className="text-2xl text-left font-semibold text-black dark:text-white">
               {action.getTitle()}
             </h1>
             <p className="text-md text-gray-700 dark:text-gray-200">
