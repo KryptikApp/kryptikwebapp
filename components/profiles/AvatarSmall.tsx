@@ -3,7 +3,7 @@ import { NextPage } from "next";
 interface Props {
   photoPath: string;
 }
-export default function (props: Props) {
+export default function AvatarSmall(props: Props) {
   const { photoPath } = props;
   return (
     <div className="">
