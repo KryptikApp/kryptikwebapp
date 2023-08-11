@@ -2,7 +2,6 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-import HeaderProfile from "../../components/HeaderProfile";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import ListBalance from "../../components/lists/ListBalance";
 import { ColorEnum } from "../../src/helpers/utils";
@@ -12,7 +11,7 @@ import LoadingSpinner from "../loadingSpinner";
 import Button from "../buttons/Button";
 import ActionBar from "./ActionBar";
 import UnlockWalletCard from "./UnlockWalletCard";
-import ToDoCard from "../actions/ToDoCard";
+import HeaderProfile from "../profiles/HeaderProfile";
 
 const WalletHome: NextPage = () => {
   const { walletStatus, kryptikService, loadingWallet } =

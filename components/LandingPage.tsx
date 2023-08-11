@@ -29,9 +29,6 @@ const LandingPage: NextPage = () => {
           </div>
         )}
       </div>
-      <div className="h-[10rem]">
-        {/* padding div for space between top and main elements */}
-      </div>
     </div>
   );
 };

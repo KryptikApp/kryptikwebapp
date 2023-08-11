@@ -40,6 +40,7 @@ export default function NavbarDevDocs() {
 
   return (
     <nav className="">
+      {/* navbar button */}
       <button
         id="nav-icon"
         onClick={() => setShowMenu(!showMenu)}

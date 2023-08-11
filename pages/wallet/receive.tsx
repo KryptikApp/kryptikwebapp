@@ -243,9 +243,6 @@ const Recieve: NextPage = () => {
           )}
         </div>
       </div>
-      <div className="h-[12rem]">
-        {/* padding div for space between bottom and main elements */}
-      </div>
     </div>
   );
 };
