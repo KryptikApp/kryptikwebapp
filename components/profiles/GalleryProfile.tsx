@@ -1,17 +1,17 @@
 import { Network, truncateAddress } from "hdseedloop";
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
-import { getRandomAvatarPhoto, getUserPhotoPath } from "../src/helpers/auth";
+import { getRandomAvatarPhoto, getUserPhotoPath } from "../../src/helpers/auth";
 import {
   defaultResolvedAccount,
   IAccountResolverParams,
   IResolvedAccount,
   resolveAccount,
-} from "../src/helpers/resolvers/accountResolver";
-import { networkFromNetworkDb } from "../src/helpers/utils/networkUtils";
-import { defaultNetworkDb, NetworkDb } from "../src/services/models/network";
-import { KryptikProvider } from "../src/services/models/provider";
-import { useKryptikAuthContext } from "./KryptikAuthProvider";
+} from "../../src/helpers/resolvers/accountResolver";
+import { networkFromNetworkDb } from "../../src/helpers/utils/networkUtils";
+import { defaultNetworkDb, NetworkDb } from "../../src/services/models/network";
+import { KryptikProvider } from "../../src/services/models/provider";
+import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import toast from "react-hot-toast";
 interface Props {
   account?: string;

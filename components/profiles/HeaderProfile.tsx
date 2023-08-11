@@ -1,10 +1,10 @@
 import { NextPage } from "next";
-import { getUserPhotoPath } from "../src/helpers/auth";
 
-import { defaultUser } from "../src/models/user";
-import AvatarMain from "./AvatarMain";
-import { useKryptikAuthContext } from "./KryptikAuthProvider";
 import ProfileName from "./ProfileName";
+import { getUserPhotoPath } from "../../src/helpers/auth";
+import { defaultUser } from "../../src/models/user";
+import AvatarMain from "../AvatarMain";
+import { useKryptikAuthContext } from "../KryptikAuthProvider";
 
 interface Props {
   center: boolean;
@@ -35,12 +35,12 @@ const HeaderProfile: NextPage<Props> = (props) => {
           </div>
         </div>
       ) : (
-        <div className="flex px-4 pt-12">
+        <div className="flex flex-col space-y-2 px-4 pt-12">
           <AvatarMain
             photoPath={getUserPhotoPath(authUser ? authUser : defaultUser)}
           />
           <div className="w-9/12 flex items-center">
-            <div className="ml-2 w-10/12 flex flex-col leading-none items-start">
+            <div className="ml-2 w-10/12 flex flex-col leading-none items-start text-2xl">
               <div>
                 <ProfileName />
               </div>
