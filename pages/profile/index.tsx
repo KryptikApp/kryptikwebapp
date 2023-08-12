@@ -4,8 +4,8 @@ import toast, { Toaster } from "react-hot-toast";
 
 import Divider from "../../components/Divider";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
-import HeaderProfile from "../../components/HeaderProfile";
 import NavProfile from "../../components/navbars/NavProfile";
+import HeaderProfile from "../../components/profiles/HeaderProfile";
 
 const Profile: NextPage = () => {
   const { authUser, updateCurrentUserKryptik } = useKryptikAuthContext();
