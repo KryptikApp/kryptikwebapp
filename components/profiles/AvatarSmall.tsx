@@ -13,7 +13,7 @@ export default function AvatarSmall(props: Props) {
         <img
           src={photoPath}
           alt="Profile Image"
-          className="object-cover w-12 h-12 rounded-lg transition ease-in-out delay-100 transform hover:-translate-y-1"
+          className="object-cover w-8 h-8 md:w-12 md:h-12 rounded-lg transition ease-in-out delay-100 transform hover:-translate-y-1"
         />
       )}
     </div>
