@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getUserPhotoPath } from "../../src/helpers/auth";
 import { defaultUser } from "../../src/models/user";
 import { ServiceState } from "../../src/services/types";
@@ -10,9 +11,11 @@ export function SidebarProfile() {
   return (
     <div className="flex flex-row space-x-2">
       <div className="my-auto">
-        <AvatarSmall
-          photoPath={getUserPhotoPath(authUser ? authUser : defaultUser)}
-        />
+        <Link href="/">
+          <AvatarSmall
+            photoPath={getUserPhotoPath(authUser ? authUser : defaultUser)}
+          />
+        </Link>
       </div>
 
       <div className="flex flex-col text-lg">
