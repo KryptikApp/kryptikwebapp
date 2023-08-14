@@ -1,24 +1,27 @@
 import Head from "next/head";
-import Navbar from "./navbars/Navbar";
 import { Toaster } from "react-hot-toast";
 import { useKryptikThemeContext } from "./ThemeProvider";
-import NavbarSideActions from "./navbars/NavBarSideActions";
 import { useKryptikAuthContext } from "./KryptikAuthProvider";
 import { isClientUserValid } from "../src/helpers/auth";
 import { useEffect, useState } from "react";
 import NavbarUnknownVisitor from "./navbars/NavbarUnknownVisitor";
 import NavbarUser from "./navbars/NavbarUser";
+import SidebarUser from "./navbars/sidebar/SidebarUser";
+import { useRouter } from "next/router";
+import NavProfile from "./navbars/NavProfile";
 
 // TODO: Update to support dynamic headers
 export default function Layout({ children }) {
   const { isDark } = useKryptikThemeContext();
   const { authUser, loadingAuthUser } = useKryptikAuthContext();
-  const [clientUserValid, setClientUserValid] = useState(true);
+  const [clientUserValid, setClientUserValid] = useState(false);
   useEffect(() => {
-    if (!loadingAuthUser && isClientUserValid(authUser)) {
+    if (loadingAuthUser || isClientUserValid(authUser)) {
       setClientUserValid(true);
+      return;
     }
-  }, [authUser]);
+    setClientUserValid(false);
+  }, [authUser, loadingAuthUser]);
   return (
     <>
       <Head>
@@ -54,20 +57,33 @@ export default function Layout({ children }) {
 }
 
 function LayoutUser({ children }) {
+  const [showProfileNav, setShowProfileNav] = useState(false);
+  const router = useRouter();
+  useEffect(() => {
+    if (router.pathname.includes("/profile")) {
+      setShowProfileNav(true);
+      return;
+    }
+    setShowProfileNav(false);
+  }, [router.pathname]);
   return (
     <body>
-      <div className="w-full h-20 fixed">
-        <NavbarUser />
-      </div>
-      <div className="h-20" />
-      <div className="flex flex-col px-4 md:flex-row md:px-2 md:divide-x-2 divide-gray-200 dark:divide-gray-800">
-        <NavbarSideActions />
-        <div>
-          <div className="flex-grow">{children}</div>
-          <div className="h-[7rem] md:h-0">
-            {/* padding div for space between top and main elements */}
+      <div className="relative">
+        <SidebarUser />
+
+        <div className="flex flex-col px-4 md:flex-row md:px-0">
+          {/* side padding */}
+          <div className="md:w-60 shrink-0" />
+          <div className="flex-grow flex flex-col max-w-6xl mx-auto w-full relative">
+            <NavbarUser />
+            <div className="h-20" />
+            <div className="">{children}</div>
+            <div className="h-[7rem] md:h-0">
+              {/* padding div for space between top and main elements */}
+            </div>
           </div>
         </div>
+        {showProfileNav && <NavProfile />}
       </div>
     </body>
   );
@@ -79,8 +95,8 @@ function LayoutUnknownGuest({ children }) {
       <div className="w-full h-20 fixed z-20">
         <NavbarUnknownVisitor />
       </div>
-      <div className="h-20" />
       <div className="flex flex-col px-4 md:px-2">
+        <div className="h-20" />
         <div className="flex-grow">{children}</div>
       </div>
     </body>
