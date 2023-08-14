@@ -38,7 +38,7 @@ export default function Modal(props: Props) {
         aria-hidden={isOpen ? "false" : "true"}
         className={`${
           !isOpen && "hidden"
-        } modal fixed w-full h-full top-0 left-0 z-50 flex items-center justify-center overflow-y-auto`}
+        } modal fixed w-full h-full top-0 left-0 z-50 flex items-center justify-center overflow-y-auto backdrop-blur-xl`}
         style={{
           backgroundColor: `${
             dark ? "rgba(0, 0, 0, 0.9)" : "rgba(0, 0, 0, 0.9)"
