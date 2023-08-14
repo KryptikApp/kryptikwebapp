@@ -184,7 +184,7 @@ export function isClientUserValid(user: UserDB): boolean {
   if (!user) {
     return false;
   }
-  if (!user.uid) {
+  if (!user.uid || user.uid == "") {
     return false;
   }
   return true;
