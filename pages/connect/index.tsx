@@ -60,7 +60,7 @@ const Connect: NextPage = () => {
   }
   return (
     <div>
-      <div className="max-w-md border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-lg mt-20 hover:border-sky-400 dark:hover:border-sky-400 transition-colors duration-150">
+      <div className="max-w-md border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-lg hover:border-sky-400 dark:hover:border-sky-400 transition-colors duration-150">
         <div>
           <p className="text-xl font-semibold dark:text-white">Connect App</p>
           <Divider />
