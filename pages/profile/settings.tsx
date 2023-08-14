@@ -6,7 +6,6 @@ import toast, { Toaster } from "react-hot-toast";
 import Divider from "../../components/Divider";
 import { useKryptikThemeContext } from "../../components/ThemeProvider";
 import Link from "next/link";
-import NavProfile from "../../components/navbars/NavProfile";
 import PassKeyRegistration from "../../components/auth/PasskeyRegistration";
 import PassKeyList from "../../components/auth/PasskeyList";
 
@@ -180,7 +179,6 @@ const Settings: NextPage = () => {
       <div className="h-[7rem]">
         {/* padding div for space between top and main elements */}
       </div>
-      <NavProfile />
     </div>
   );
 };
