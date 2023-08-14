@@ -1,13 +1,7 @@
-import { NextComponentType, NextPage } from "next";
+import { NextComponentType } from "next";
 import Image from "next/image";
-import { useRouter } from "next/router";
-import { defaultUser } from "../../src/models/user";
-import { useKryptikAuthContext } from "../KryptikAuthProvider";
-import BrandLandingPage from "../landings/BrandLandingPage";
-import WalletHome from "../wallet/WalletHome";
 import { AiOutlineLeftCircle, AiOutlineRightCircle } from "react-icons/ai";
 import { useEffect, useState } from "react";
-import { set } from "lodash";
 
 const ListFeatures: NextComponentType = () => {
   // container width

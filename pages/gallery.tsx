@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState, useRef } from "react";
-import GalleryProfile from "../components/GalleryProfile";
+import GalleryProfile from "../components/profiles/GalleryProfile";
 import { debounce } from "lodash";
 import { AnimatePresence, motion } from "framer-motion";
 

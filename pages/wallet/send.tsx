@@ -1228,9 +1228,6 @@ const Send: NextPage = () => {
             </div>
           </div>
         )}
-        <div className="h-[7rem]">
-          {/* padding div for space between top and main elements */}
-        </div>
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import type { NextPage } from "next";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
-import { RiQrCodeFill } from "react-icons/ri";
+import { RiQrCodeLine } from "react-icons/ri";
 import Button from "../../components/buttons/Button";
 import Divider from "../../components/Divider";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
@@ -60,7 +60,7 @@ const Connect: NextPage = () => {
   }
   return (
     <div>
-      <div className="max-w-md border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-lg mt-20 hover:border-sky-400 dark:hover:border-sky-400 transition-colors duration-150">
+      <div className="max-w-md border border-gray-400 dark:border-gray-500 pt-10 pb-20 mx-auto my-auto px-4 rounded rounded-lg hover:border-sky-400 dark:hover:border-sky-400 transition-colors duration-150">
         <div>
           <p className="text-xl font-semibold dark:text-white">Connect App</p>
           <Divider />
@@ -69,20 +69,31 @@ const Connect: NextPage = () => {
         <KryptikScanner show={showScanner} onScan={handleConnect} />
 
         {!showScanner && (
-          <div className="flex flex-col space-y-2 py-14 mx-auto border border-gray-400 dark:border-gray-500 w-[340px] h-[280px] rounded rounded-lg">
-            <RiQrCodeFill
-              size={100}
-              className="text-gray-500 dark:text-gray-400 mx-auto"
-            />
-            <div className="mx-auto">
-              <Button
-                color={ColorEnum.blue}
-                text={"Scan QR Code"}
-                clickHandler={onShowScanner}
+          <div className="flex flex-col space-y-2 py-14 mx-auto bg-gray-500/10 w-full h-[400px] rounded rounded-lg">
+            <div className="my-auto mx-auto">
+              <RiQrCodeLine
+                size={100}
+                className="text-gray-400 dark:text-gray-600 mx-auto"
               />
+              <div className="mx-auto">
+                <Button
+                  color={ColorEnum.blue}
+                  text={"Scan QR Code"}
+                  clickHandler={onShowScanner}
+                />
+              </div>
             </div>
           </div>
         )}
+        {showScanner && (
+          <p
+            className="text-red-500 hover:cursor-pointer"
+            onClick={() => setShowScanner(false)}
+          >
+            Stop
+          </p>
+        )}
+
         <div className="mx-auto flex flex-col space-y-2 mt-4">
           <p className="text-md text-gray-300 dark:text-gray-600 text-center">
             or enter uri
@@ -110,7 +121,7 @@ const Connect: NextPage = () => {
       <div className="max-w-md border border-gray-400 dark:border-gray-500 py-2 px-2 mx-auto my-auto px-4 rounded rounded-lg mt-20 text-slate-700 dark:text-slate-200 text-lg">
         <p>Review your connections.</p>
         <Link
-          className="w-full text-center text-sky-400 hover:text-sky-500 font-semibold"
+          className="w-full text-center text-sky-400 hover:text-sky-500"
           href="../connect/pairings"
         >
           View Pairings

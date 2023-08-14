@@ -17,7 +17,7 @@ const BrandLandingPage: NextPage = () => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full pb-20">
       <div className="min-h-[10vh]" />
       <div className="flex flex-col place-items-center">
         <div className="mx-auto text-center content-center pt-10 max-w-2xl">
@@ -41,8 +41,8 @@ const BrandLandingPage: NextPage = () => {
         </div>
       </div>
       <ListFeatures />
-      <div className="max-w-5xl mx-auto my-10">
-        <div className="mb-10">
+      <div className="max-w-5xl mx-auto mt-10">
+        <div className="">
           <h1 className="text-3xl text-left font-bold sans mb-4">
             Kryptik Supporters
           </h1>
@@ -50,7 +50,7 @@ const BrandLandingPage: NextPage = () => {
             Kryptik has been made possible by the generous support of the
             following organizations.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 bg-gray-300/20 rounded-xl my-4 hover:bg-gray-300/30 transition-colors duration-300">
+          <div className="grid grid-cols-2 md:grid-cols-4 bg-gray-300/20 rounded-xl mt-4 hover:bg-gray-300/30 transition-colors duration-300">
             <Image
               src="/supporters/cmu.webp"
               alt="ECMU"

@@ -4,8 +4,7 @@ import toast, { Toaster } from "react-hot-toast";
 
 import Divider from "../../components/Divider";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
-import HeaderProfile from "../../components/HeaderProfile";
-import NavProfile from "../../components/navbars/NavProfile";
+import HeaderProfile from "../../components/profiles/HeaderProfile";
 
 const Profile: NextPage = () => {
   const { authUser, updateCurrentUserKryptik } = useKryptikAuthContext();
@@ -116,7 +115,6 @@ const Profile: NextPage = () => {
       <div className="h-[7rem]">
         {/* padding div for space between top and main elements */}
       </div>
-      <NavProfile />
     </div>
   );
 };

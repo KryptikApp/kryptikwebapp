@@ -2,7 +2,6 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
-import HeaderProfile from "../../components/HeaderProfile";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import ListBalance from "../../components/lists/ListBalance";
 import { ColorEnum } from "../../src/helpers/utils";
@@ -12,7 +11,7 @@ import LoadingSpinner from "../loadingSpinner";
 import Button from "../buttons/Button";
 import ActionBar from "./ActionBar";
 import UnlockWalletCard from "./UnlockWalletCard";
-import ToDoCard from "../actions/ToDoCard";
+import HeaderProfile from "../profiles/HeaderProfile";
 
 const WalletHome: NextPage = () => {
   const { walletStatus, kryptikService, loadingWallet } =
@@ -40,16 +39,16 @@ const WalletHome: NextPage = () => {
   }, [walletStatus]);
 
   return (
-    <div className="my-8">
+    <div className="max-w-2xl mx-auto">
       <div className="h-[2rem]">
         {/* padding div for space between top and main elements */}
       </div>
-      <div className="text-center max-w-2xl mx-auto content-center mt-8 md:mt-0">
+      <div className="text-center w-full content-center mt-8 md:mt-0">
         <HeaderProfile showBio={false} center={true} />
         <ActionBar active={progressionValid} />
       </div>
 
-      <div className="max-w-2xl mx-auto">
+      <div className="w-full">
         {progressionValid && <ListBalance />}
         {loadingWallet && (
           <div className="flex flex-row space-x-2 text-slate-900 dark:text-slate-100 font-semibold text-xl">

@@ -50,7 +50,7 @@ const Security: NextPage = () => {
   };
 
   return (
-    <div>
+    <div className="relative">
       <div className="h-[2rem]">
         {/* padding div for space between top and main elements */}
       </div>
@@ -142,7 +142,6 @@ const Security: NextPage = () => {
       <div className="h-[7rem]">
         {/* padding div for space between top and main elements */}
       </div>
-      <NavProfile />
     </div>
   );
 };

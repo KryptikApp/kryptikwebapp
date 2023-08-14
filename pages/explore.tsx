@@ -7,10 +7,6 @@ import { topApps } from "../src/explore/apps/topApps";
 const Explore: NextPage = () => {
   return (
     <div className="">
-      <div className="h-[4vh]">
-        {/* padding div for space between top and main elements */}
-      </div>
-
       <div className="max-w-3xl mx-auto text-left border-b border-green-400/30 mb-8 py-2 p-4">
         <h1 className="text-left text-3xl font-semibold">Explore</h1>
         <p className="text-xl text-gray-600 dark:text-gray-300">

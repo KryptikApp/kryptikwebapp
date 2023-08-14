@@ -2,11 +2,9 @@ import type { NextPage } from "next";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
-import toast, { Toaster } from "react-hot-toast";
 import Divider from "../../components/Divider";
-import { defaultWallet } from "../../src/models/defaultWallet";
-import NavProfile from "../../components/navbars/NavProfile";
 import { removeUserAndWallet } from "../../src/helpers/auth";
+import toast from "react-hot-toast";
 
 const DeleteWallet: NextPage = () => {
   const { authUser, loadingAuthUser, signInWithToken, signOut } =
@@ -66,7 +64,6 @@ const DeleteWallet: NextPage = () => {
       <div className="h-[7rem]">
         {/* padding div for space between top and main elements */}
       </div>
-      <NavProfile />
     </div>
   );
 };

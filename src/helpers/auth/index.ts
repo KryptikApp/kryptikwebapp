@@ -174,3 +174,18 @@ export async function getLocalAccounts(): Promise<LocalAccount[]> {
     return [];
   }
 }
+
+/**
+ * Checks whether the user object on the client is valid. Returns true if valid.
+ *
+ * @note This function says nothing about whether the user is authenticated with the backend or not.
+ */
+export function isClientUserValid(user: UserDB): boolean {
+  if (!user) {
+    return false;
+  }
+  if (!user.uid || user.uid == "") {
+    return false;
+  }
+  return true;
+}

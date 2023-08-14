@@ -5,7 +5,6 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { updateVaultSeedloop } from "../../src/handlers/wallet/vaultHandler";
 import { getRemoteShare } from "../../src/helpers/shares";
 import { WalletStatus } from "../../src/models/KryptikWallet";
-import { UserExtraData } from "../../src/models/user";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
 
 const LockWalletCard: NextPage = () => {

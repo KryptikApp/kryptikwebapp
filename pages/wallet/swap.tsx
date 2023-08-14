@@ -1365,15 +1365,7 @@ const Swap: NextPage = () => {
               </div>
             )}
           </div>
-
-          <div className="md:hidden min-h-[4rem] dark:text-white">
-            {/* padding div for space between top and main elements */}
-          </div>
         </div>
-      </div>
-
-      <div className="h-[6vh]">
-        {/* padding div for space between bottom and main elements */}
       </div>
     </div>
   );
