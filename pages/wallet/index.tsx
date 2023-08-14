@@ -6,6 +6,7 @@ import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 import WalletHome from "../../components/wallet/WalletHome";
 import { defaultUser } from "../../src/models/user";
+import AccountsCard from "../../components/wallet/AccountsCard";
 
 const Wallet: NextPage = () => {
   const { walletStatus, authUser } = useKryptikAuthContext();
@@ -15,17 +16,9 @@ const Wallet: NextPage = () => {
     if (walletStatus != WalletStatus.Connected) router.push("/");
   }, []);
 
-  const handleStartAddName = function () {
-    router.push("../wallet/createName");
-  };
-
   return (
     <div>
-      {authUser && authUser != defaultUser ? (
-        <WalletHome />
-      ) : (
-        <p className="dark:text-white">Waiting for wallet to load...</p>
-      )}
+      <AccountsCard />
     </div>
   );
 };
