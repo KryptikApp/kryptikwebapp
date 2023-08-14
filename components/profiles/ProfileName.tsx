@@ -28,6 +28,7 @@ const ProfileName: NextPage<Props> = (props) => {
     loadingWallet,
     loadingAuthUser,
     walletStatus,
+    authUser,
   } = useKryptikAuthContext();
   const [loadingResolvedAccount, setLoadingResolvedAccount] = useState(true);
   const [resolvedAccount, setResolvedAccount] = useState(
@@ -102,7 +103,7 @@ const ProfileName: NextPage<Props> = (props) => {
     if (kryptikService.serviceState != ServiceState.started) return;
     if (kryptikService.NetworkDbs.length == 0) return;
     fetchAccountName();
-  }, [kryptikService.serviceState, kryptikService.NetworkDbs]);
+  }, [kryptikService.serviceState, authUser]);
   return (
     <div>
       <div>
