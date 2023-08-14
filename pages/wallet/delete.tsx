@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useKryptikAuthContext } from "../../components/KryptikAuthProvider";
 import Divider from "../../components/Divider";
 import { removeUserAndWallet } from "../../src/helpers/auth";
+import toast from "react-hot-toast";
 
 const DeleteWallet: NextPage = () => {
   const { authUser, loadingAuthUser, signInWithToken, signOut } =
