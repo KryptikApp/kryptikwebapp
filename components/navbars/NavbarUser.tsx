@@ -96,7 +96,7 @@ export default function NavbarUser() {
           onClick={() => setShowMenu(false)}
           className={`${
             !showMenu ? "hidden" : showMenuStyles
-          } flex-col md:flex px-8 md:pt-6 text-black dark:text-white z-20`}
+          } flex-col md:flex px-8 md:pt-6 text-black dark:text-white z-20 w-[90%]`}
         >
           <MenuItem>
             <SidebarProfile />
