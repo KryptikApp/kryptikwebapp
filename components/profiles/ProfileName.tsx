@@ -14,7 +14,7 @@ import { defaultNetworkDb } from "../../src/services/models/network";
 import { KryptikProvider } from "../../src/services/models/provider";
 import { ServiceState } from "../../src/services/types";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
-import LoadingSpinner from "../loadingSpinner";
+import { isClientUserValid } from "../../src/helpers/auth";
 
 interface Props {
   account?: string;
@@ -102,8 +102,9 @@ const ProfileName: NextPage<Props> = (props) => {
   useEffect(() => {
     if (kryptikService.serviceState != ServiceState.started) return;
     if (kryptikService.NetworkDbs.length == 0) return;
+    if (loadingAuthUser || !isClientUserValid(authUser)) return;
     fetchAccountName();
-  }, [kryptikService.serviceState, authUser]);
+  }, [loadingAuthUser, authUser]);
   return (
     <div>
       <div>
