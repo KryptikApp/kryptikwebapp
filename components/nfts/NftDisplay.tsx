@@ -99,17 +99,13 @@ const NftDisplay: NextPage<Props> = (props) => {
       )}
       <Modal isOpen={showModal} onRequestClose={handleModalClose} dark={isDark}>
         {/* flex with card and image */}
-        <div className="flex flex-col md:flex-row">
-          <div className="md:hidden min-h-[2rem] dark:text-white">
-            {/* padding div for space between top and main elements */}
-          </div>
-
+        <div className="flex flex-col md:flex-row h-full py-8">
           {/* nft main image */}
           <div className="flex-1 opacity-100">
             {nftMetaData.image_url ? (
               <img
                 src={nftMetaData.image_url}
-                className="w-96 h-96 my-auto rounded-lg drop-shadow-xl object-cover border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900"
+                className="w-96 h-96 max-w-96 max-h-96 md:my-auto rounded-lg drop-shadow-xl object-cover border border-gray-200 dark:border-gray-800 bg-gray-100 dark:bg-gray-900"
                 placeholder="blur"
               />
             ) : (
