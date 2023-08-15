@@ -180,7 +180,7 @@ export async function getLocalAccounts(): Promise<LocalAccount[]> {
  *
  * @note This function says nothing about whether the user is authenticated with the backend or not.
  */
-export function isClientUserValid(user: UserDB): boolean {
+export function isClientUserValid(user: UserDB | null): boolean {
   if (!user) {
     return false;
   }
