@@ -38,17 +38,12 @@ export default function Modal(props: Props) {
         aria-hidden={isOpen ? "false" : "true"}
         className={`${
           !isOpen && "hidden"
-        } modal fixed w-full h-full top-0 left-0 z-50 flex items-center justify-center overflow-y-auto backdrop-blur-xl`}
-        style={{
-          backgroundColor: `${
-            dark ? "rgba(0, 0, 0, 0.9)" : "rgba(0, 0, 0, 0.9)"
-          }`,
-        }}
+        } modal fixed w-full h-full top-0 left-0 z-50 flex items-center justify-center overflow-y-auto backdrop-blur-xl bg-black/70`}
       >
         {/* top right fixed close button  */}
         <button
           type="button"
-          className="text-gray-400 z-10  rounded-full text-sm p-1.5 ml-auto fixed top-4 right-5 items-center bg-sky-400/20 dark:bg-white dark:text-black transition ease-in-out hover:scale-110 border"
+          className="text-gray-400 z-10  rounded-full text-sm p-1.5 ml-auto fixed top-4 right-5 items-center bg-white/90 dark:bg-white dark:text-black transition ease-in-out hover:scale-110 border"
           onClick={() => onRequestClose()}
         >
           <svg
