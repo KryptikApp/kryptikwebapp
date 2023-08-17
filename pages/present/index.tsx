@@ -89,7 +89,7 @@ export default function Home() {
     <div
       className={`h-[100vh] text-xl w-full`}
       style={{
-        background: `radial-gradient(farthest-corner at 40px 40px, ${defaultBgColor} 50%, ${primaryBgColor} 100%)`,
+        background: `radial-gradient(farthest-corner at 40px 40px, ${defaultBgColor} 80%, ${primaryBgColor} 100%)`,
       }}
     >
       <VertcialPadding />
