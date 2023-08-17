@@ -4,6 +4,7 @@ import { set } from "lodash";
 import Image from "next/image";
 import ListFeatures from "../../components/lists/ListFeatures";
 import { AnimatePresence, motion } from "framer-motion";
+import { useKryptikThemeContext } from "../../components/ThemeProvider";
 
 enum Slide {
   Title = 0,
@@ -17,6 +18,7 @@ enum Slide {
 export default function Home() {
   const [slide, setSlide] = useState<Slide>(Slide.Title);
   const [primaryBgColor, setPrimaryBgColor] = useState<string>("white");
+  const { isDark } = useKryptikThemeContext();
   const [lastKeyboardEvent, setLastKeyboardEvent] =
     useState<KeyboardEvent | null>();
   function nextSlide() {
@@ -85,7 +87,9 @@ export default function Home() {
     <div
       className={`h-[100vh] text-xl w-full`}
       style={{
-        background: `radial-gradient(farthest-corner at 40px 40px, white 50%, ${primaryBgColor} 100%)`,
+        background: `radial-gradient(farthest-corner at 40px 40px, ${
+          isDark ? "black" : "white"
+        } 50%, ${primaryBgColor} 100%)`,
       }}
     >
       <VertcialPadding />
