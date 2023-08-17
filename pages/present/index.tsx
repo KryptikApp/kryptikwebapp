@@ -17,8 +17,10 @@ enum Slide {
 
 export default function Home() {
   const [slide, setSlide] = useState<Slide>(Slide.Title);
-  const [primaryBgColor, setPrimaryBgColor] = useState<string>("white");
   const { isDark } = useKryptikThemeContext();
+  const defaultBgColor = isDark ? "black" : "white";
+  const [primaryBgColor, setPrimaryBgColor] = useState<string>(defaultBgColor);
+
   const [lastKeyboardEvent, setLastKeyboardEvent] =
     useState<KeyboardEvent | null>();
   function nextSlide() {
@@ -43,7 +45,7 @@ export default function Home() {
     switch (slide) {
       case Slide.Title:
         // sky blue
-        setPrimaryBgColor("white");
+        setPrimaryBgColor(defaultBgColor);
         break;
       case Slide.Problem:
         setPrimaryBgColor("#e66465");
@@ -60,7 +62,7 @@ export default function Home() {
         setPrimaryBgColor("#56ccf2");
         break;
       case Slide.Action:
-        setPrimaryBgColor("white");
+        setPrimaryBgColor(defaultBgColor);
         break;
     }
   }
@@ -87,9 +89,7 @@ export default function Home() {
     <div
       className={`h-[100vh] text-xl w-full`}
       style={{
-        background: `radial-gradient(farthest-corner at 40px 40px, ${
-          isDark ? "black" : "white"
-        } 50%, ${primaryBgColor} 100%)`,
+        background: `radial-gradient(farthest-corner at 40px 40px, ${defaultBgColor} 50%, ${primaryBgColor} 100%)`,
       }}
     >
       <VertcialPadding />
