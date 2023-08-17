@@ -1,8 +1,4 @@
-import {
-  ColorEnum,
-  createColorString,
-  defaultColor,
-} from "../../src/helpers/utils";
+import { ColorEnum } from "../../src/helpers/utils";
 import Button from "./Button";
 
 type Props = {

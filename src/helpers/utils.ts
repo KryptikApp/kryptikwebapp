@@ -100,23 +100,37 @@ export enum ColorEnum {
   red = 0,
   green = 1,
   blue = 2,
+  yellow = 3,
 }
 
-export function createColorString(color: ColorEnum): string {
+export function createColorString(color: ColorEnum, opacity?: number): string {
+  let colorString = "";
   switch (color) {
     case ColorEnum.blue: {
-      return "sky-400";
+      colorString = "#38bdf8";
+      break;
     }
     case ColorEnum.green: {
-      return "green-500";
+      colorString = "#22c55e";
+      break;
     }
     case ColorEnum.red: {
-      return "red-500";
+      colorString = "#ef4444";
+      break;
+    }
+    case ColorEnum.yellow: {
+      colorString = "#fbbf24";
+      break;
     }
     default: {
-      return "sky-400";
+      colorString = "#38bdf8";
+      break;
     }
   }
+  if (opacity) {
+    colorString = `${colorString}/${opacity}`;
+  }
+  return colorString;
 }
 
 export const defaultColor = ColorEnum.blue;
