@@ -180,7 +180,9 @@ function ProblemCard() {
       <div className="flex flex-col space-y-2 mb-4">
         <div className="rounded-md ring-2 ring-red-500 w-fit">
           <div className="rounded-tr-md rounded-tl-md px-2 py-1 bg-white">
-            <h1 className="text-left text-xl font-semibold">Ex: Swap USDC</h1>
+            <h1 className="text-left text-xl font-semibold dark:text-black">
+              Ex: Swap USDC
+            </h1>
           </div>
           {/* list of problems */}
           <ol className="list-decimal list-inside text-2xl dark:text-gray-200 text-gray-700 px-2 bg-red-400/70 pb-2">
