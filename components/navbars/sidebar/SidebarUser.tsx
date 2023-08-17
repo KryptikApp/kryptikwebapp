@@ -6,6 +6,7 @@ import { useKryptikAuthContext } from "../../KryptikAuthProvider";
 import { MenuItem } from "../../menu/menu";
 import { SidebarProfile } from "../../profiles/SidebarProfile";
 import ActionBar from "../../wallet/ActionBar";
+import Link from "next/link";
 
 export default function SidebarUser() {
   const { walletStatus, kryptikService, authUser } = useKryptikAuthContext();
@@ -37,16 +38,24 @@ export default function SidebarUser() {
         </MenuItem>
       </div>
       <div className="absolute bottom-5 pl-12">
-        <div className="flex flex-row space-x-2">
-          <p className="text-xl font-bold text-gray-500">Kryptik</p>
-          <div className="flex-grow my-auto">
-            <Image
-              src="/kryptikBrand/kryptikEyez.png"
-              width={30}
-              height={30}
-              alt="logo"
-              className=""
-            />
+        <div className="flex flex-col space-y-2">
+          <Link href="/profile/settings">
+            <p className="font-semibold text-gray-400 dark:text-gray-500 text-center w-fit hover:cursor-point hover:text-green-400 transition-colors duration-200">
+              Settings
+            </p>
+          </Link>
+          <hr />
+          <div className="flex flex-row space-x-2">
+            <p className="text-xl font-bold text-gray-500">Kryptik</p>
+            <div className="flex-grow my-auto">
+              <Image
+                src="/kryptikBrand/kryptikEyez.png"
+                width={30}
+                height={30}
+                alt="logo"
+                className=""
+              />
+            </div>
           </div>
         </div>
       </div>
