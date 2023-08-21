@@ -13,10 +13,6 @@ type Props = {
 const Menu: NextPage<Props> = (props) => {
   const [isMenuMobile, setMenuMobile] = useState(false);
   const { authUser, walletStatus } = useKryptikAuthContext();
-  const [windowSize, setWindowSize] = useState({
-    width: 0,
-    height: 0,
-  });
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   const { children } = { ...props };
@@ -29,11 +25,6 @@ const Menu: NextPage<Props> = (props) => {
   useEffect(() => {
     // Handler to call on window resize
     function handleResize() {
-      // Set window width/height to state
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
       if (window.innerWidth < 778) {
         setIsSmallScreen(true);
       } else {
