@@ -100,6 +100,7 @@ export const config = {
     "/wallet/createName",
     "/wallet/delete",
     "/profile/:path*",
+    "/earn",
     "/wallet",
     "/sync/:path*",
     "/api/sync/:path*",
