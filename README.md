@@ -1,3 +1,7 @@
+# The Web3 Super App
+
+Kryptik provides a single interface for your most important online interactions. Swap, send, and save across 10+ blockchains with the Kryptik web wallet.
+
 ## About
 
 Key pairs can do wonderful things, but existing wallets like Metamask confine their magic to a single blockchain.
@@ -5,7 +9,7 @@ The Kryptik wallet is built to break through the borders of Ethereum and streaml
 
 <img src="https://www.kryptik.app/kryptikBrand/kryptik%20balance%20screen.svg" alt="Wallet Page screenshot" width="250">
 
-## Developing
+## Development
 
 Note: these steps will help you run a local version of the Kryptik wallet, which is useful for testing changes to the app.
 
