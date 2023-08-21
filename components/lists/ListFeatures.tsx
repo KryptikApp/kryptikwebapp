@@ -4,18 +4,44 @@ import { AiOutlineLeftCircle, AiOutlineRightCircle } from "react-icons/ai";
 import { useEffect, useState } from "react";
 
 const ListFeatures: NextComponentType = () => {
+  // max steps in either direction on large screens
+  // TODO: update if ad/remove feature slides
+  const maxStepsRight = 1;
+  const maxStepsLeft = -1;
   // container width
   const [featureWidth, setFeatureWidth] = useState(380);
   const [loading, setLoading] = useState(true);
-
+  const [canGoLeft, setCanGoLeft] = useState(false);
+  const [canGoRight, setCanGoRight] = useState(true);
+  const [stepCount, setStepCount] = useState(0);
   function handleScroll(direction: "left" | "right") {
     const container = document.getElementById("featureContainer");
     if (!container) return;
+    const isLeft = direction === "left";
     // scroll horizontal with smooth behavior
     container.scrollBy({
-      left: direction === "left" ? -400 : 400,
+      left: isLeft ? -400 : 400,
       behavior: "smooth",
     });
+    let newCount = 0;
+    if (isLeft && stepCount != maxStepsLeft) {
+      newCount = stepCount - 1;
+      setStepCount(newCount);
+    }
+    if (!isLeft && stepCount != maxStepsRight) {
+      newCount = stepCount + 1;
+      setStepCount(newCount);
+    }
+    if (newCount > maxStepsLeft) {
+      setCanGoLeft(true);
+    } else {
+      setCanGoLeft(false);
+    }
+    if (newCount < maxStepsRight) {
+      setCanGoRight(true);
+    } else {
+      setCanGoRight(false);
+    }
   }
   // update feature width when window resizes
   useEffect(() => {
@@ -46,13 +72,21 @@ const ListFeatures: NextComponentType = () => {
               Powerful and easy to use.
             </h1>
             <AiOutlineLeftCircle
-              size={35}
-              className="invisible lg:visible absolute top-80 left-0 lg:-left-8 text-green-400/50 hover:cursor-pointer hover:text-green-400"
+              size={40}
+              className={`invisible lg:visible absolute top-80 left-0 lg:-left-8 text-green-400/50  ${
+                canGoLeft
+                  ? "hover:cursor-pointer hover:text-green-400"
+                  : "grayscale"
+              }`}
               onClick={() => handleScroll("left")}
             />
             <AiOutlineRightCircle
-              size={35}
-              className="invisible lg:visible absolute top-80 right-0 lg:-right-8 text-green-400/50  hover:cursor-pointer hover:text-green-400"
+              size={40}
+              className={`invisible lg:visible absolute top-80 right-0 lg:-right-8 text-green-400/50 ${
+                canGoRight
+                  ? "hover:cursor-pointer hover:text-green-400"
+                  : "grayscale"
+              }`}
               onClick={() => handleScroll("right")}
             />
           </div>
