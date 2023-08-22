@@ -270,7 +270,12 @@ function FeaturesCard() {
             <div className="list-disc list-inside text-2xl dark:text-gray-200 text-gray-700 pb-2 px-2">
               <li>Pay Friends</li>
               <li>Exchange Assets</li>
-              <li>Earn Interest</li>
+              <li>
+                Earn Interest{" "}
+                <span className="px-2 bg-purple-400/20 py-1 rounded-md text-sm">
+                  (coming soon)
+                </span>
+              </li>
               <li>Bridge Tokens</li>
             </div>
           </div>
