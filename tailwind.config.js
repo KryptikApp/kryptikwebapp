@@ -18,6 +18,21 @@ module.exports = {
       },
     },
     extend: {
+      // scale x to 100 and back to 0 in an infinite loop
+      keyframes: {
+        "scale-x-loop": {
+          "0%, 100%": { transform: "scaleX(1) " },
+          "50%": { transform: "scaleX(0)" },
+        },
+        wiggle: {
+          "0%, 100%": { transform: "rotate(-3deg)" },
+          "50%": { transform: "rotate(3deg)" },
+        },
+      },
+      animation: {
+        "scale-x-loop": "scale-x-loop 7s ease-in-out infinite",
+        wiggle: "wiggle 1s ease-in-out infinite",
+      },
       typography: {
         quoteless: {
           css: {
