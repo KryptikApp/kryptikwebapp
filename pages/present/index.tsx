@@ -1,8 +1,6 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ColorEnum, createColorString } from "../../src/helpers/utils";
-import { set } from "lodash";
 import Image from "next/image";
-import ListFeatures from "../../components/lists/ListFeatures";
 import { AnimatePresence, motion } from "framer-motion";
 import { useKryptikThemeContext } from "../../components/ThemeProvider";
 
