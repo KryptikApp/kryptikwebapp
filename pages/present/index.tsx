@@ -11,8 +11,10 @@ enum Slide {
   Team = 1,
   Problem = 2,
   Solution = 3,
-  Advantages = 4,
-  Action = 5,
+  Features = 4,
+  Demo = 5,
+  Advantages = 6,
+  Action = 7,
 }
 
 export default function Home() {
@@ -58,6 +60,13 @@ export default function Home() {
         // nice yellow
         setPrimaryBgColor("#f7d06b");
         break;
+      case Slide.Features:
+        const newColor = createColorString(ColorEnum.purple);
+        setPrimaryBgColor(newColor);
+        break;
+      case Slide.Demo:
+        setPrimaryBgColor(defaultBgColor);
+        break;
       case Slide.Advantages:
         setPrimaryBgColor("#56ccf2");
         break;
@@ -87,9 +96,9 @@ export default function Home() {
 
   return (
     <div
-      className={`h-[100vh] text-xl w-full`}
+      className={`h-[100vh] text-xl w-full mx-2`}
       style={{
-        background: `radial-gradient(farthest-corner at 40px 40px, ${defaultBgColor} 80%, ${primaryBgColor} 100%)`,
+        background: `radial-gradient(farthest-corner at 100px 100px, ${defaultBgColor} 60%, ${primaryBgColor} 100%)`,
       }}
     >
       <VertcialPadding />
@@ -97,6 +106,8 @@ export default function Home() {
       {slide == Slide.Problem && <ProblemCard />}
       {slide == Slide.Team && <TeamCard />}
       {slide == Slide.Solution && <SolutionCard />}
+      {slide == Slide.Features && <FeaturesCard />}
+      {slide == Slide.Demo && <DemoCard />}
       {slide == Slide.Advantages && <AdvantagesCard />}
       {slide == Slide.Action && <ActionCard />}
     </div>
@@ -112,10 +123,24 @@ function VertcialPadding(params: { size?: number }) {
 function TitleCard() {
   return (
     <SlideContainer>
-      <VertcialPadding size={20} />
-      <h1 className="text-7xl font-bold text-center">
-        Kryptik is a powerful digital wallet
-      </h1>
+      <VertcialPadding size={15} />
+      <div className="flex flex-col space-y-2">
+        <div className="flex flex-row space-x-2 mx-auto w-fit rounded-xl border border-gray-500 ">
+          <Image
+            src="/kryptikBrand/kryptikKGradient.png"
+            alt="kryptik logo"
+            width={30}
+            height={30}
+            className="object-contain rounded-full ml-2 "
+          />
+          <div className=" font-semibold text-2xl bg-red-400 py-2 px-4 rounded-tr-xl rounded-br-xl bg-sky-400/60 relative z-1">
+            <span className="z-20">Kryptik</span>
+            <div className="w-full backdrop-hue-rotate-15 h-full absolute top-0 left-0 rounded-tr-xl rounded-br-xl animate-scale-x-loop origin-left" />
+          </div>
+        </div>
+
+        <h1 className="text-7xl font-bold text-center">The Web3 Super App</h1>
+      </div>
     </SlideContainer>
   );
 }
@@ -172,35 +197,108 @@ function ProblemCard() {
   return (
     <SlideContainer>
       <SlideTitle
-        title="Web3 has a complexity problem"
+        title="Web3 is Too Complex"
         subtitle="User experience is fragmented and confusing"
         category="Problem"
         categoryColor={ColorEnum.red}
       />
-      <div className="flex flex-col space-y-2 mb-4">
-        <div className="rounded-md ring-2 ring-red-500 w-fit">
-          <div className="rounded-tr-md rounded-tl-md px-2 py-1 bg-white">
-            <h1 className="text-left text-xl font-semibold dark:text-black">
-              Ex: Swap USDC
-            </h1>
+      <div className="flex flex-col md:flex-row space-x-0 md:space-x-4 space-y-4 md:space-y-0">
+        <p className="text-gray-700 dark:text-gray-200 text-2xl">
+          Too many steps. Too many protocols.
+        </p>
+        <div className="flex flex-col space-y-2 mb-4">
+          <div className="rounded-md ring-2 ring-red-500 w-fit">
+            <div className="rounded-tr-md rounded-tl-md px-2 py-1 bg-white">
+              <h1 className="text-left text-xl font-semibold dark:text-black">
+                Ex: Swap USDC
+              </h1>
+            </div>
+            {/* list of problems */}
+            <ol className="list-decimal list-inside text-2xl dark:text-gray-100 text-gray-900 px-2 bg-gradient-to-r from-orange-400 to-red-400 pb-2">
+              <li>Download Wallet</li>
+              <li>Save seedphrase</li>
+              <li>Create Exchange Account</li>
+              <li>Buy ETH</li>
+              <li>Transfer ETH to wallet</li>
+              <li>Connect to Uniswap</li>
+              <li>Confirm Connection</li>
+              <li>Approve Transaction</li>
+              <li>Swap ETH for USDC</li>
+            </ol>
           </div>
-          {/* list of problems */}
-          <ol className="list-decimal list-inside text-2xl dark:text-gray-200 text-gray-700 px-2 bg-red-400/70 pb-2">
-            <li>Download Wallet</li>
-            <li>Save seedphrase</li>
-            <li>Create Exchange Account</li>
-            <li>Buy ETH</li>
-            <li>Transfer ETH to wallet</li>
-            <li>Connect to Uniswap</li>
-            <li>Confirm Connection</li>
-            <li>Approve Transaction</li>
-            <li>Swap ETH for USDC</li>
-          </ol>
         </div>
       </div>
-      <div>
-        <p className="text-gray-700 dark:text-gray-200 text-3xl">
-          Too many steps. Too many protocols.
+
+      <div></div>
+    </SlideContainer>
+  );
+}
+
+function FeaturesCard() {
+  return (
+    <SlideContainer>
+      <SlideTitle
+        title="The App You Never Need to Leave"
+        subtitle=""
+        category="Features"
+        categoryColor={ColorEnum.purple}
+      />
+      <div className="flex flex-col md:flex-row space-x-0 md:space-x-4 space-y-4 md:space-y-0">
+        <p className="text-gray-700 dark:text-gray-200 text-2xl">
+          Send, save, and swap from a single interface.
+        </p>
+        <div className="w-full border border-gray-500 flex flex-row bg-gray-500/10 rounded-xl">
+          <div className="w-1/2 bg-sky-400/10 ">
+            <p className="w-full rounded-tl-xl bg-purple-500/50 text-center">
+              Identity
+            </p>
+            <div className="list-disc list-inside text-2xl dark:text-gray-200 text-gray-700 pb-2 px-2">
+              <li>Integrated ENS</li>
+              <li>NFT Profiles</li>
+              <li>
+                Chat{" "}
+                <span className="px-2 bg-purple-400/20 py-1 rounded-md text-sm">
+                  (coming soon)
+                </span>
+              </li>
+            </div>
+          </div>
+          <div className="w-1/2 bg-green-500/10">
+            <p className="w-full rounded-tr-xl bg-purple-500/50 text-center">
+              Finance
+            </p>
+            <div className="list-disc list-inside text-2xl dark:text-gray-200 text-gray-700 pb-2 px-2">
+              <li>Pay Friends</li>
+              <li>Exchange Assets</li>
+              <li>Earn Interest</li>
+              <li>Bridge Tokens</li>
+            </div>
+          </div>
+        </div>
+      </div>
+    </SlideContainer>
+  );
+}
+
+function DemoCard() {
+  return (
+    <SlideContainer>
+      <SlideTitle
+        title="Onboarding Demo"
+        category="Demo"
+        categoryColor={ColorEnum.green}
+      />
+      <div className="flex flex-col space-y-2">
+        <Image
+          src="/demos/login flow passkey.gif"
+          alt="Kryptik onboarding demo"
+          className="mx-auto object-contain rounded-xl"
+          width={500}
+          height={500}
+        />
+        <p className="text-gray-500 text-2xl text-center">
+          Users can create a new account in{" "}
+          <span className="font-bold">under five seconds</span>.
         </p>
       </div>
     </SlideContainer>
@@ -217,10 +315,10 @@ function AdvantagesCard() {
         categoryColor={ColorEnum.blue}
       />
       <div className="list-disc list-inside text-2xl dark:text-gray-200 text-gray-700 pb-2">
-        <li>Fast release Times</li>
+        <li>Fast release times</li>
         <li>Multichain support</li>
         <li>Login from any device</li>
-        <li>Integrated Apps</li>
+        <li>Integrated apps</li>
         <li>Open source</li>
       </div>
     </SlideContainer>
@@ -236,48 +334,47 @@ function TeamCard() {
         category="Team"
         categoryColor={ColorEnum.yellow}
       />
-      <div className="flex flex-row space-x-4 mb-4 rounded-lg bg-gray-400/10 px-2 py-2">
+      <div className="flex flex-col space-y-4 mb-4 rounded-lg bg-gray-400/10 px-2 py-2">
         {/* contributor 1 */}
-        <div className="flex flex-col space-y-4 w-1/2">
-          <Image
-            src="/contributors/jett.png"
-            alt="Jett Hays photo"
-            width={150}
-            height={150}
-            className="rounded-full ring-sky-400 ring-2 object-cover"
-          />
-          <div className="text-2xl">
-            <h1 className="text-left font-semibold">Jett Hays</h1>
-            {/* list of attributes */}
-            <ul className="list-disc list-inside dark:text-gray-200 text-gray-700">
-              <li>Carnegie Mellon Senior</li>
-              <li>President of the CMU Blockchain Club</li>
-            </ul>
+        <div className="flex flex-row space-x-2">
+          <div className="flex flex-row -space-x-2 hover:space-x-2 transition duration-1000">
+            <Image
+              src="/contributors/jett.png"
+              alt="Jett photo"
+              width={100}
+              height={100}
+              className="rounded-full ring-sky-400 ring-1 object-cover"
+            />
+            <Image
+              src="/contributors/jj.png"
+              alt="JJ photo"
+              width={100}
+              height={100}
+              className="rounded-full ring-yellow-400 ring-1 object-cover"
+            />
+            <Image
+              src="/contributors/marlonEdwards.png"
+              alt="Marlon Edwards photo"
+              width={100}
+              height={100}
+              className="rounded-full ring-purple-400 ring-1 object-cover"
+            />
+            <Image
+              src="/contributors/alexRasskin.jpeg"
+              alt="Alex rasskin photo"
+              width={100}
+              height={100}
+              className="rounded-full ring-red-400 ring-1 object-cover"
+            />
           </div>
+          <p className="text-gray-500 font-semibold my-auto">+2</p>
         </div>
-        {/* contributor 2 */}
-        <div className="flex flex-col space-y-4 w-1/2 items-center">
-          <Image
-            src="/contributors/jj.png"
-            alt="JJ Brar photo"
-            width={150}
-            height={150}
-            className="rounded-full ring-sky-400 ring-2 object-cover"
-          />
-          <div className="text-2xl">
-            <h1 className="text-left font-semibold">JJ Brar</h1>
-            {/* list of attributes */}
-            <ul className="list-disc list-inside dark:text-gray-200 text-gray-700">
-              <li>Berkeley Senior</li>
-              <li>Amazon SWE</li>
-            </ul>
-          </div>
-        </div>
+        <p className="text-2xl">
+          We are builders and designers from{" "}
+          <span className="font-bold text-red-500">Carnegie Mellon</span> and{" "}
+          <span className="font-bold text-yellow-500">UC Berkeley</span>.
+        </p>
       </div>
-      {/* <p className="w-fit rounded-md bg-gray-500/10 px-2 py-2 mt-8">
-        We are laser-focused on building high-quality software expressed through
-        intuitive design
-      </p> */}
     </SlideContainer>
   );
 }
@@ -286,6 +383,7 @@ function SlideContainer(params: { children: any }) {
   const { children } = params;
   return (
     <div className="max-w-3xl mx-auto">
+      <VertcialPadding size={5} />
       <AnimatePresence>
         <motion.div
           initial={{ opacity: 0, x: 20 }}
