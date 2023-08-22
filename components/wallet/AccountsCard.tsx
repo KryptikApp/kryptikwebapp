@@ -155,7 +155,7 @@ function BalanceView() {
       <Divider />
       <div className="">
         <div
-          className={`relative overflow-y-auto max-h-[45vh] min-h-45vh h-[45vh] no-scrollbar bg-gradient-to-b from-gray-100 dark:to-sky-500/40 dark:from-gray-900 dark:to-gray-400/40 mx-2 rounded-lg`}
+          className={`relative overflow-y-auto max-h-[45vh] min-h-45vh h-[45vh] no-scrollbar bg-gradient-to-b from-gray-200/20 to-gray-100/20 dark:from-gray-800/20 dark:to-gray-900/20 mx-2 rounded-lg`}
         >
           {progressionValid && <ListBalance fullHeight={true} />}
           {loadingWallet && (
