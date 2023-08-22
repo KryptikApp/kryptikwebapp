@@ -317,8 +317,7 @@ function AdvantagesCard() {
       <div className="list-disc list-inside text-2xl dark:text-gray-200 text-gray-700 pb-2">
         <li>Fast release times</li>
         <li>Multichain support</li>
-        <li>Login from any device</li>
-        <li>Integrated apps</li>
+        <li>Integrated apps (Uniswap, 0x, Megic Eden, etc.)</li>
         <li>Open source</li>
       </div>
     </SlideContainer>
