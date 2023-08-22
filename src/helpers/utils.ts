@@ -101,6 +101,7 @@ export enum ColorEnum {
   green = 1,
   blue = 2,
   yellow = 3,
+  purple = 4,
 }
 
 export function createColorString(color: ColorEnum, opacity?: number): string {
@@ -120,6 +121,10 @@ export function createColorString(color: ColorEnum, opacity?: number): string {
     }
     case ColorEnum.yellow: {
       colorString = "#fbbf24";
+      break;
+    }
+    case ColorEnum.purple: {
+      colorString = "#8b5cf6";
       break;
     }
     default: {
