@@ -74,11 +74,15 @@ const AccountsCard: NextPage = () => {
 export default AccountsCard;
 
 function AddressView() {
-  const { kryptikService, loadingWallet, walletStatus } =
+  const { kryptikService, loadingWallet, walletStatus, authUser } =
     useKryptikAuthContext();
   const [networksToShow, setNetworksToShow] = useState<NetworkDb[]>([]);
   useEffect(() => {
-    let newNetworks: NetworkDb[] = kryptikService.getAllNetworkDbs();
+    let newNetworks: NetworkDb[] = kryptikService.getAllNetworkDbs(true);
+    // only show testnets to advanced users
+    newNetworks = newNetworks.filter(
+      (n) => !n.isTestnet || (n.isTestnet && authUser?.isAdvanced)
+    );
     setNetworksToShow(newNetworks);
   }, [loadingWallet]);
   return (
