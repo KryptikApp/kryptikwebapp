@@ -255,15 +255,11 @@ class Web3Service extends BaseService implements IWeb3Service {
   }
 
   // helper functions!!
-  async getKryptikProviderForNetworkDb(
-    networkDb: NetworkDb
-  ): Promise<KryptikProvider> {
+  getKryptikProviderForNetworkDb(networkDb: NetworkDb): KryptikProvider {
     return this.getKryptikProviderFromTicker(networkDb.ticker);
   }
 
-  private async getKryptikProviderFromTicker(
-    ticker: string
-  ): Promise<KryptikProvider> {
+  private getKryptikProviderFromTicker(ticker: string): KryptikProvider {
     // try to get existing provider (set on construction)... else, make provider and add to dict.
     if (this.networkProviders[ticker] != null)
       return this.networkProviders[ticker];

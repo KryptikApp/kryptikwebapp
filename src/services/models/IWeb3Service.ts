@@ -24,9 +24,7 @@ export interface IWeb3Service {
     onlySupported?: boolean
   ): Promise<NetworkDb[]>;
   getAllNetworkDbs(onlySupported?: boolean): NetworkDb[];
-  getKryptikProviderForNetworkDb(
-    networkDb: NetworkDb
-  ): Promise<KryptikProvider>;
+  getKryptikProviderForNetworkDb(networkDb: NetworkDb): KryptikProvider;
   getNetworkDbByTicker: GetNetworkDbByTicker;
   getNetworkDbByBlockchainId: GetNetworkDbByTicker;
   getTokenAndNetworkFromTickers(
