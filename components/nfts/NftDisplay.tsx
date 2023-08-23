@@ -1,5 +1,4 @@
 import { NextPage } from "next";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { INFTMetadata, ITrait } from "../../src/parsers/nftEthereum";
 import { defaultNetworkDb } from "../../src/services/models/network";
