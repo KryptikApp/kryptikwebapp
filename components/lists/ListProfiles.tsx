@@ -13,7 +13,7 @@ export default function ListProfiles() {
   const [failed, setFailed] = useState(false);
 
   async function getProfiles() {
-    const maxRetries = 25;
+    const maxRetries = 20;
     let retryCount = 0;
     while (retryCount < maxRetries) {
       try {
@@ -37,7 +37,7 @@ export default function ListProfiles() {
 
   useEffect(() => {
     console.log("Running effect");
-    if (kryptikService.NetworkDbs.length == 0) return;
+    if (topProfiles && topProfiles.length > 0) return;
     if (kryptikService.serviceState != ServiceState.started) {
       kryptikService.StartSevice();
       return;

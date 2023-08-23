@@ -332,6 +332,7 @@ export function useKryptikAuth() {
   }
 
   useEffect(() => {
+    kryptikService.StartSevice();
     // add auth web worker
     authWorker.current = new Worker(new URL("/authWorker.ts", import.meta.url));
     // authWorker.current.onmessage = (event: MessageEvent<boolean>) => {
