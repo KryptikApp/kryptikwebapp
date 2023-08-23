@@ -3,6 +3,8 @@ import type { NextPage } from "next";
 import SearchNetwork from "../components/search/searchNetwork";
 import ListApps from "../components/lists/ListApps";
 import { topApps } from "../src/explore/apps/topApps";
+import { topProfiles } from "../src/explore/profiles/topProfiles";
+import ListProfiles from "../components/lists/ListProfiles";
 
 const Explore: NextPage = () => {
   return (
@@ -17,10 +19,15 @@ const Explore: NextPage = () => {
       <div className="text-center max-w-2xl mx-auto content-center">
         <SearchNetwork />
       </div>
+      <div className="max-w-3xl mx-auto py-2 px-1 my-8">
+        <div className="max-w-3xl text-lg my-4 font-gray-500">Top Profiles</div>
+        <ListProfiles />
+      </div>
       <div className="max-w-3xl mx-auto py-2 px-1 bg-gray-200/10 dark:bg-gray-700/10 my-8 rounded-xl hover:ring-2 ring-1 dark:ring-gray-800/40 ring-gray-400/40">
         <div className="max-w-3xl text-2xl my-4">Top Apps</div>
         <ListApps apps={topApps} />
       </div>
+
       <div className="h-[4vh]">
         {/* padding div for space between bottom and main elements */}
       </div>
