@@ -1,5 +1,4 @@
 import { NetworkFamily } from "hdseedloop";
-import { defaultWallet } from "../../models/defaultWallet";
 import { NetworkDb } from "../../services/models/network";
 import { KryptikProvider } from "../../services/models/provider";
 import { networkFromNetworkDb } from "../utils/networkUtils";
@@ -19,6 +18,7 @@ export interface IResolvedAccount {
   isResolved: boolean;
   avatarPath?: string;
   names?: string[];
+  networkTicker?: string;
 }
 
 export const defaultResolvedAccount: IResolvedAccount = {

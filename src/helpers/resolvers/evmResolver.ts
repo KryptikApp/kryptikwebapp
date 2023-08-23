@@ -4,63 +4,28 @@ import { StaticJsonRpcProvider } from "@ethersproject/providers";
 import { defaultNetworkDb } from "../../services/models/network";
 import { networkFromNetworkDb } from "../utils/networkUtils";
 import { IAccountResolverParams, IResolvedAccount } from "./accountResolver";
+import { KryptikFetch } from "../../kryptikFetch";
 
 export const resolveEVMAccount = async function (
   params: IAccountResolverParams
 ): Promise<IResolvedAccount | null> {
   const { account, kryptikProvider, networkDB } = params;
-  let network: Network = networkFromNetworkDb(networkDB);
-  if (!kryptikProvider.ethProvider) return null;
-  if (network.networkFamily != NetworkFamily.EVM) return null;
-  let evmProvider = kryptikProvider.ethProvider;
-  let address: string | null = null;
-  let avatarPath: string | null = null;
-  let name: string | null = null;
-  // default ENS is ethereum... other chains are text records
-  if (networkDB.ticker.toLowerCase() == "eth") {
-    address = await evmProvider.resolveName(account);
-    avatarPath = await evmProvider.getAvatar(account);
-  }
-  // else{
-  //     // get eth provider, for default ENS service
-  //     evmProvider = new StaticJsonRpcProvider(defaultNetworkDb.provider, {name:"homestead", chainId:1});
-  //     let resolver= await evmProvider.getResolver(account);
-  //     if(resolver){
-  //         address = await resolver.getAddress(networkDB.chainId);
-  //         avatarPath = await evmProvider.getAvatar(account);
-  //     }
-  // }
-  // if account resolves then account is an ENS name...
-  // check if address is a valid EVM address and set
-  // otherwise... no ens name set for account, check if account is valid address
-  // if so.. set as address
-  if (
-    address &&
-    address.toLowerCase() != account.toLowerCase() &&
-    isValidEVMAddress(address)
-  ) {
-    address = address;
-    name = account;
-  } else {
-    if (isValidEVMAddress(account)) {
-      address = account;
-      // try reverse lookup
-      //may fail on chains that aren't eth
-      // TODO: LOOKUP W/ ETH PROVIDER?
-      try {
-        name = await evmProvider.lookupAddress(account);
-      } catch (e) {
-        // will hit if no name
-      }
-    } else {
-      return null;
-    }
-  }
+  const reqURL = `/api/resolve`;
+  const body = {
+    account: account,
+  };
+  const res = await KryptikFetch(reqURL, {
+    body: JSON.stringify(body),
+    method: "POST",
+  });
+  if (res.status != 200) return null;
+  console.log(res);
+  const data = await res.data;
   let resolvedAccount: IResolvedAccount = {
-    address: address,
+    address: data.address,
     isResolved: true,
-    avatarPath: avatarPath ? avatarPath : undefined,
-    names: name ? [name] : undefined,
+    avatarPath: data.avatarPath ? data.avatarPath : undefined,
+    names: data.names ? data.names : undefined,
   };
   return resolvedAccount;
 };
