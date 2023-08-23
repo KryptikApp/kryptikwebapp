@@ -32,7 +32,6 @@ export default function Home() {
     setSlide((prev) => prev - 1);
   }
   function keypadHandler(event: KeyboardEvent) {
-    console.log(event);
     if (event.defaultPrevented) {
       return;
     }
@@ -131,9 +130,11 @@ function TitleCard() {
             height={30}
             className="object-contain rounded-full ml-2 "
           />
-          <div className=" font-semibold text-2xl bg-red-400 py-2 px-4 rounded-tr-xl rounded-br-xl bg-sky-400/60 relative z-1">
-            <span className="z-20">Kryptik</span>
-            <div className="w-full backdrop-hue-rotate-15 h-full absolute top-0 left-0 rounded-tr-xl rounded-br-xl animate-scale-x-loop origin-left" />
+          <div className="font-semibold text-2xl bg-red-400 py-2 px-4 rounded-tr-xl rounded-br-xl bg-gradient-to-r from-sky-400 to-sky-300 relative z-10 w-[100px] h-12">
+            <span className="absolute z-20 top-2 left-2 dark:text-gray-100 text-gray-900">
+              Kryptik
+            </span>
+            <div className="w-full bg-gradient-to-r from-green-500 to-green-400 h-full absolute top-0 left-0 rounded-tr-xl rounded-br-xl animate-scale-x-loop origin-left z-1" />
           </div>
         </div>
 
