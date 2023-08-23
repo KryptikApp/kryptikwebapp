@@ -12,7 +12,7 @@ export default function ListProfiles() {
   const { kryptikService } = useKryptikAuthContext();
 
   async function getProfiles() {
-    const maxRetries = 5;
+    const maxRetries = 20;
     let retryCount = 0;
     while (retryCount < maxRetries) {
       try {
@@ -22,8 +22,8 @@ export default function ListProfiles() {
         return;
       } catch (e) {
         console.warn("retrying");
-        // wait .5 second
-        await new Promise((r) => setTimeout(r, 500));
+        // wait .25 second
+        await new Promise((r) => setTimeout(r, 250));
         retryCount++;
       }
     }
