@@ -22,7 +22,7 @@ export function SidebarProfile() {
         <ProfileName />
         {kryptikService.serviceState == ServiceState.started && (
           <p className="text-gray-500 dark:text-gray-400">
-            ${kryptikService.kryptikBalances.getTotalBalance()}
+            ${kryptikService.kryptikBalances.getTotalBalance().toFixed(2)}
           </p>
         )}
       </div>
