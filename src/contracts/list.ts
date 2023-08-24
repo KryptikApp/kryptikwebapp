@@ -1,9 +1,4 @@
-import {
-  CURVE_META,
-  ENS_META,
-  LIDO_META,
-  UNISWAP_META,
-} from "../explore/apps/topApps";
+import { ENS_META, LIDO_META, UNISWAP_META } from "../explore/apps/topApps";
 import { IContract } from "./types";
 
 export const CONTRACT_LIST: IContract[] = [

@@ -44,6 +44,22 @@ export const ZAPPER_META = {
   tags: ["dashboard"],
 };
 
+export const CURVE_META = {
+  name: "Curve",
+  description: "Exchange stablecoins",
+  url: "https://curve.fi/",
+  icon: "/apps/curve.webp",
+  tags: ["exchange"],
+};
+
+export const LIDO_META = {
+  name: "Lido",
+  description: "Stake ETH and earn staking rewards",
+  url: "https://lido.fi/",
+  icon: "/apps/lido.webp",
+  tags: ["staking"],
+};
+
 export const topApps: Web3App[] = [
   UNISWAP_META,
   POOLTOGETHER_META,
@@ -51,4 +67,6 @@ export const topApps: Web3App[] = [
   ENS_META,
   AAVE_META,
   ZAPPER_META,
+  CURVE_META,
+  LIDO_META,
 ];
