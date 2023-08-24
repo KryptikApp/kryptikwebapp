@@ -146,6 +146,7 @@ const Gallery: NextPage = () => {
     let nftData: FetchNftResponse = await fetchNFTs(fetchProps);
     setNftList(nftData);
     setIsNFTFetched(true);
+    let newNetworkDB: NetworkDb | null = null;
     if (routerParams) {
       switch (routerParams.networkTicker) {
         case "eth":
@@ -157,8 +158,18 @@ const Gallery: NextPage = () => {
           let solNftList = nftData.sol ? nftData.sol.nfts : [];
           setActiveCategoryNftList(solNftList);
           setActiveCategory(ActiveCategory.sol);
+          newNetworkDB = kryptikService.getNetworkDbByTicker("sol");
+          // if unable to get selected network db... return
+          // TODO: UPDATE NETWORKDB ERROR HANDLER
+          if (!newNetworkDB) return;
+          setactiveNetworkDb(newNetworkDB);
           break;
         case "near":
+          newNetworkDB = kryptikService.getNetworkDbByTicker("near");
+          // if unable to get selected network db... return
+          // TODO: UPDATE NETWORKDB ERROR HANDLER
+          if (!newNetworkDB) return;
+          setactiveNetworkDb(newNetworkDB);
           let nearNftList = nftData.near ? nftData.near.nfts : [];
           setActiveCategoryNftList(nearNftList);
           setActiveCategory(ActiveCategory.near);
@@ -309,7 +320,7 @@ const Gallery: NextPage = () => {
       }
     }
 
-    // get eth nfts
+    // get sol nfts
     let nftData = await fetchServerSolNfts(
       address,
       MAX_NFTS_PER_VIEW,
