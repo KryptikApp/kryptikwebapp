@@ -56,7 +56,7 @@ export const LIDO_META = {
   name: "Lido",
   description: "Stake ETH and earn staking rewards",
   url: "https://lido.fi/",
-  icon: "/apps/lido.webp",
+  icon: "/apps/lido.png",
   tags: ["staking"],
 };
 
