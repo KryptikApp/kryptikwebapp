@@ -593,7 +593,7 @@ const Swap: NextPage = () => {
 
   return (
     <div className="dark:text-white">
-      <div className="h-[20vh]">
+      <div className="h-[5vh]">
         {/* padding div for space between bottom and main elements */}
       </div>
       <div className="max-w-2xl mx-auto px-4 md:px-0 min-h-[100vh]">
