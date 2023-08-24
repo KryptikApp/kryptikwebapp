@@ -38,9 +38,9 @@ model WalletAction{
 
 model AppContract{
   // identifiers
-  id         Int      @id @default(autoincrement())
+  id         Int     @id @default(autoincrement())
   createdAt DateTime @default(now())
-  address    String
+  address    String  @unique
   networkId  Int
   // meta
   name       String
