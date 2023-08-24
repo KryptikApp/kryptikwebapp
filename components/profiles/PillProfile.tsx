@@ -46,10 +46,16 @@ export default function PillProfile(params: { account: IResolvedAccount }) {
   });
 
   function clickHandler() {
+    const addyToUse =
+      account.address != ""
+        ? account.address
+        : account.names
+        ? account.names[0]
+        : "";
     router.push({
       pathname: "../gallery",
       query: {
-        account: account.address,
+        account: addyToUse,
         networkTicker: networkDb?.ticker,
         name: account.names ? account.names[0] : undefined,
       },
