@@ -77,6 +77,7 @@ export async function fetchNFTs(props: FetchNftProps) {
         nftResponse.near = nearNfts;
       }
     } catch (e) {
+      console.error(e);
       console.warn(`Error: Unable to fetch NEAR nfts for ${nearAddress}`);
     }
   }
