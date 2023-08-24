@@ -25,6 +25,11 @@ export async function getAllFormattedContracts() {
   const allContracts = await getAllAppContracts();
   // convert to ICOntract
   const contracts: IContract[] = [];
+  // sort by number of tx in last hour
+  allContracts.sort((a, b) => {
+    return b.totalTransactionsLastHour - a.totalTransactionsLastHour;
+  });
+  // convert to IContract
   for (const contract of allContracts) {
     contracts.push(contractFromDb(contract));
   }
