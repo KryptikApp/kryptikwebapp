@@ -53,6 +53,8 @@ export const topProfiles: IResolvedAccount[] = [
 ];
 
 export async function loadTopProfiles(ks: Web3Service) {
+  // randomize top profiles
+  topProfiles.sort(() => Math.random() - 0.5);
   // run parallel request to resolve all top profiles
   const res = await Promise.all(
     topProfiles.map((p) => {
