@@ -64,7 +64,7 @@ export default function PillProfile(params: { account: IResolvedAccount }) {
 
   return (
     <div
-      className="flex flex-row rounded-md bg-gray-500/10 hover:brightness-105 hover:ring-[1px] ring-sky-400 hover:cursor-pointer relative"
+      className="flex flex-row rounded-md bg-gradient-to-r from-gray-500/10 to-gray-300/20 background-animate hover:brightness-105 hover:brightness-105 hover:cursor-pointer relative transitioncolors duration-300 hover:scale-105"
       onClick={() => clickHandler()}
     >
       {networkDb && (
@@ -95,7 +95,7 @@ export default function PillProfile(params: { account: IResolvedAccount }) {
 
 export function PillProfileLoading() {
   return (
-    <div className="flex flex-row rounded-full bg-gray-500/10">
+    <div className="flex flex-row rounded-full bg-gray-500/10 background-animate">
       <div className="w-12 h-12 rounded-full bg-gray-500/50 animate-pulse"></div>
       <div className="px-2 my-auto w-16"></div>
     </div>

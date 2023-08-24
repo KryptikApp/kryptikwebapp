@@ -1,4 +1,9 @@
-import { ENS_META, UNISWAP_META } from "../explore/apps/topApps";
+import {
+  CURVE_META,
+  ENS_META,
+  LIDO_META,
+  UNISWAP_META,
+} from "../explore/apps/topApps";
 import { IContract } from "./types";
 
 export const CONTRACT_LIST: IContract[] = [
@@ -13,5 +18,11 @@ export const CONTRACT_LIST: IContract[] = [
     address: "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
     networkTicker: "eth",
     appMetaData: ENS_META,
+  },
+  // lido contract
+  {
+    address: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+    networkTicker: "eth",
+    appMetaData: LIDO_META,
   },
 ];

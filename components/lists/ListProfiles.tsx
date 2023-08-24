@@ -36,7 +36,6 @@ export default function ListProfiles() {
   const loadingQuantity = 6;
 
   useEffect(() => {
-    console.log("Running effect");
     if (topProfiles && topProfiles.length > 0) return;
     if (kryptikService.serviceState != ServiceState.started) {
       kryptikService.StartSevice();

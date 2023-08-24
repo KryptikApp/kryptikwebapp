@@ -21,6 +21,7 @@ export default async function handler(
     const allContracts = await getAllFormattedContracts();
     const currBlock = await ethProvider.getBlockNumber();
     const startBlock = currBlock - ETH_NUM_BLOCKS_PER_HOUR;
+    // TODO: matic provider and block ranges
     for (const contract of allContracts) {
       const apiURL = `${ETHERSCAN_API_URL}?module=account&action=txlist&address=${contract.address}&page=1&offset=300&startblock=${startBlock}&endblock=${currBlock}&sort=desc&apikey=${apiKey}`;
       const response = await KryptikFetch(apiURL, {});
