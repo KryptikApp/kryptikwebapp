@@ -30,7 +30,7 @@ const SolExplorers: NextPage<Props> = (props) => {
             </a>
           </div>
 
-          <div className="mx-2 my-1 transition ease-in-out hover:scale-105">
+          {/* <div className="mx-2 my-1 transition ease-in-out hover:scale-105">
             <a
               href={`https://opensea.io/assets/solana/${nftMetaData.asset_contract.address}`}
               target="_blank"
@@ -46,7 +46,7 @@ const SolExplorers: NextPage<Props> = (props) => {
                 </span>
               </div>
             </a>
-          </div>
+          </div> */}
 
           <div className="mx-2 my-1 transition ease-in-out hover:scale-105">
             <a
