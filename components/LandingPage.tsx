@@ -4,7 +4,6 @@ import { useRouter } from "next/router";
 import { useKryptikAuthContext } from "../components/KryptikAuthProvider";
 import { defaultUser } from "../src/models/user";
 import BrandLandingPage from "./landings/BrandLandingPage";
-import WalletHome from "./wallet/WalletHome";
 import AccountsCard from "./wallet/AccountsCard";
 
 const LandingPage: NextPage = () => {
