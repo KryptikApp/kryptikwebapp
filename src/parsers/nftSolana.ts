@@ -28,7 +28,9 @@ export const parseSolNFTMetaData = function (assetData: any[]): INFTMetadata[] {
     // TODO: CHECK IF SPAM
     let nftData: INFTMetadata = {
       isSpam: false,
-      image_url: asset.image,
+      image_url:
+        "https://img-cdn.magiceden.dev/rs:fill:400:400:0:0/plain/" +
+        asset.image,
       name: asset.name,
       asset_contract: assetContract,
       collection: collection,
