@@ -218,21 +218,27 @@ const NftDisplay: NextPage<Props> = (props) => {
                         Attributes
                       </h2>
                       <div className="flex flex-wrap">
-                        {nftMetaData.traits.map(
-                          (trait: ITrait, index: number) => (
-                            <div
-                              className="hover:cursor-pointer transition ease-in-out hover:scale-110 hover:z-10 bg-gray-200 dark:bg-[#111112] border border-gray-300 w-fit my-1 max-w-[140px] px-1 mx-2 rounded drop-shadow-lg"
-                              key={index}
-                            >
-                              <p className="text-sm text-gray-400 dark:text-slate-300 font-bold">
-                                {trait.trait_type}
-                              </p>
-                              <p className="text-sm text-gray-400 dark:text-slate-300 truncate ...">
-                                {trait.value}
-                              </p>
-                            </div>
-                          )
-                        )}
+                        {/* remove traits with object type */}
+                        {nftMetaData.traits &&
+                          nftMetaData.traits.length > 0 &&
+                          nftMetaData.traits
+                            .filter((trait: ITrait) => {
+                              return trait.value !== Object(trait.value);
+                            })
+                            .map((trait: ITrait, index: number) => (
+                              <div
+                                className="hover:cursor-pointer transition ease-in-out hover:scale-110 hover:z-10 bg-gray-200 dark:bg-[#111112] border border-gray-300 w-fit my-1 max-w-[140px] px-1 mx-2 rounded drop-shadow-lg"
+                                key={index}
+                              >
+                                <p className="text-sm text-gray-400 dark:text-slate-300 font-bold">
+                                  {trait.trait_type}
+                                </p>
+                                {/* TODO: display trait based on type */}
+                                <p className="text-sm text-gray-400 dark:text-slate-300 truncate ...">
+                                  {trait.value}
+                                </p>
+                              </div>
+                            ))}
                       </div>
                     </div>
                   )}
