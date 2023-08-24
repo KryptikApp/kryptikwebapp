@@ -1,7 +1,8 @@
 import {
+  AppContract,
   Authenticator,
   AuthenticatorChallenge,
-  BlockchainAccount,
+  NetworkDb,
   OneTimeToken,
   Price,
   PrismaClient,
@@ -15,6 +16,7 @@ import { createAesKeyAndIv, IAesKey } from "../src/handlers/crypto";
 import hashToken from "../src/helpers/auth/hashtoken";
 import { generateCode } from "../src/helpers/auth/jwt";
 import { NextApiRequest } from "next";
+import { IContract } from "../src/contracts/types";
 
 const prisma = new PrismaClient();
 
@@ -477,4 +479,94 @@ export async function getUserFromRequest(
     throw new Error("No identifier available. Email or uid must be provided.");
   }
   return user;
+}
+
+export async function AddAppContractsToDb(contracts: IContract[]) {
+  for (const contract of contracts) {
+    try {
+      const nw = await prisma.networkDb.findUnique({
+        where: { ticker: contract.networkTicker },
+      });
+      if (!nw) {
+        console.warn(
+          "Unable to find network db for contract: " + contract.address
+        );
+        continue;
+      }
+      await prisma.appContract.upsert({
+        where: { address: contract.address },
+        create: {
+          address: contract.address,
+          networkId: nw.id,
+          description: contract.appMetaData.description,
+          name: contract.appMetaData.name,
+          icon: contract.appMetaData.icon,
+          url: contract.appMetaData.url,
+          tags: contract.appMetaData.tags,
+          lastBlockChecked: 0,
+          totalTransactionsLastHour: 0,
+        },
+        update: {
+          address: contract.address,
+          networkId: nw.id,
+          description: contract.appMetaData.description,
+          name: contract.appMetaData.name,
+          icon: contract.appMetaData.icon,
+          url: contract.appMetaData.url,
+          tags: contract.appMetaData.tags,
+        },
+      });
+    } catch (e) {
+      // if fail to upsert one price.. keep trying with rest
+      continue;
+    }
+  }
+}
+
+export async function getAllAppContracts(): Promise<
+  (AppContract & { NetworkDb: NetworkDb })[]
+> {
+  const contracts = await prisma.appContract.findMany({
+    include: {
+      NetworkDb: true,
+    },
+  });
+  return contracts;
+}
+
+export async function updateAllAppContracts(
+  contracts: IContract[]
+): Promise<void> {
+  for (const contract of contracts) {
+    try {
+      const nw = await prisma.networkDb.findUnique({
+        where: { ticker: contract.networkTicker },
+      });
+      if (!nw) {
+        console.warn(
+          "Unable to find network db for contract: " + contract.address
+        );
+        continue;
+      }
+      await prisma.appContract.update({
+        where: { address: contract.address },
+        data: {
+          address: contract.address,
+          networkId: nw.id,
+          description: contract.appMetaData.description,
+          name: contract.appMetaData.name,
+          icon: contract.appMetaData.icon,
+          url: contract.appMetaData.url,
+          tags: contract.appMetaData.tags,
+          lastBlockChecked: contract.stats?.lastBlockChecked,
+          totalTransactionsLastHour:
+            contract.stats?.totalTransactionsLastHour || 0,
+          updatedAt: new Date(contract.stats?.updatedAt || Date.now()),
+        },
+      });
+    } catch (e) {
+      // if fail to upsert one price.. keep trying with rest
+      continue;
+    }
+  }
 }
