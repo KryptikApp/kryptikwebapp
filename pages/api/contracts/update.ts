@@ -22,19 +22,13 @@ export default async function handler(
     const currBlock = await ethProvider.getBlockNumber();
     const startBlock = currBlock - ETH_NUM_BLOCKS_PER_HOUR;
     for (const contract of allContracts) {
-      const apiURL = `${ETHERSCAN_API_URL}?module=account
-   &action=
-   &contractaddress=${contract.address}
-   &page=1
-   &offset=300
-   &startblock=${startBlock}
-   &endblock=${currBlock}
-   &sort=desc
-   &apikey=${apiKey}`;
+      const apiURL = `${ETHERSCAN_API_URL}?module=account&action=txlist&address=${contract.address}&page=1&offset=300&startblock=${startBlock}&endblock=${currBlock}&sort=desc&apikey=${apiKey}`;
       const response = await KryptikFetch(apiURL, {});
       const data = await response.data.result;
-      console.log("Etherscan data:");
-      console.log(data);
+      // check if data is string and includes error
+      if (typeof data === "string" && data.includes("Error")) {
+        throw new Error(data);
+      }
       let txCount = 0;
       for (const tx of data) {
         txCount++;
