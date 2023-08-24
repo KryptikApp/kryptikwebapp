@@ -36,6 +36,26 @@ model WalletAction{
   Users   User[]
 }
 
+model AppContract{
+  // identifiers
+  id         Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  address    String
+  networkId  Int
+  // meta
+  name       String
+  tags       String[]
+  description String
+  icon      String
+  url       String
+  // ststa
+  totalTransactionsLastHour Int
+  lastBlockChecked Int
+  updatedAt DateTime @updatedAt
+  // relations
+  NetworkDb  NetworkDb @relation(fields: [networkId], references: [id], onDelete: Cascade)
+}
+
 model Authenticator {
   // SQL: Encode to base64url then store as `TEXT`. Index this column
   credentialID  String @id @unique
@@ -141,6 +161,7 @@ model NetworkDb {
   isTestnet         Boolean?
   networkFamilyName String
   TokenContract     TokenContract[]
+  AppContract       AppContract[]
 }
 
 model TokenDb {
