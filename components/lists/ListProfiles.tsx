@@ -17,7 +17,7 @@ export default function ListProfiles() {
     let retryCount = 0;
     while (retryCount < maxRetries) {
       try {
-        console.log("loading top profiles...");
+        console.log("Loading top profiles...");
         const newTopAccounts = await loadTopProfiles(kryptikService);
         setTopProfiles(newTopAccounts);
         setFailed(false);
@@ -42,7 +42,6 @@ export default function ListProfiles() {
       kryptikService.StartSevice();
       return;
     }
-    console.log(kryptikService);
     getProfiles();
   }, [kryptikService.serviceState, kryptikService.NetworkDbs]);
   return (

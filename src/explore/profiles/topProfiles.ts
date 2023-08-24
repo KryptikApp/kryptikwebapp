@@ -76,6 +76,5 @@ export async function loadTopProfiles(ks: Web3Service) {
   );
   // filter out nulls
   const resolvedAccounts = res.filter((r) => r !== null) as IResolvedAccount[];
-  console.log("resolvedAccounts", resolvedAccounts);
   return resolvedAccounts;
 }

@@ -11,7 +11,6 @@ export default async function handler(
     const account = body.account;
     const reqURL = `https://api.ensideas.com/ens/resolve/${account}`;
     const result = await KryptikFetch(reqURL, {});
-    console.log(res);
     const data = await result.data;
     let resolvedAccount: IResolvedAccount = {
       address: data.address,
