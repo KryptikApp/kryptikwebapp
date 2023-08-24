@@ -50,6 +50,7 @@ export default function ListProfiles() {
       {topProfiles &&
         topProfiles.map((p, _) => <PillProfile account={p} key={_} />)}
       {!topProfiles &&
+        !failed &&
         Array(loadingQuantity)
           .fill(0)
           .map((_) => <PillProfileLoading key={_} />)}
