@@ -33,8 +33,14 @@ export const fetch0xSwapOptions = async function (
     if (slippagePercentage) {
       url.concat(`&slippagePercentage=${slippagePercentage}`);
     }
+    // add api key
+    const headers = {
+      "0x-api-key": `${process.env.NEXT_PUBLIC_ZEROX_API_KEY}`,
+    };
+
     const dataResponse = await KryptikFetch(url, {
       timeout: 10000, // 10 secs
+      headers: headers,
     });
     if (!dataResponse || !dataResponse.data) return null;
     // parse api response and return
