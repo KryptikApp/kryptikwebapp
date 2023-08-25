@@ -77,6 +77,11 @@ export default function Page({ notFound, paymentLink }: Props) {
   }
   return (
     <div>
+      {notFound && (
+        <p className="mt-12 text-gray-500 font-semibold">
+          This payment link is a ghost 👻
+        </p>
+      )}
       {paymentLink && !authUser && !loadingAuthUser && (
         <div
           className={`w-[100vw] md:w-[102vw] h-32 md:h-64 bg-green-500 -mx-4`}

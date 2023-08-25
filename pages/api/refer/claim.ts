@@ -14,7 +14,6 @@ import {
   defaultKryptikProvider,
   defaultMaticProvider,
 } from "../../../src/services/models/provider";
-import { add } from "lodash";
 
 type Data = {
   msg?: string;
