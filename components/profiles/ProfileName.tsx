@@ -112,7 +112,7 @@ const ProfileName: NextPage<Props> = (props) => {
 
         {!loadingResolvedAccount && (
           <h1
-            className="text-lg font-semibold dark:text-gray-100 text-gray-900 inline hover:cursor-pointer hover:text-sky-500 dark:hover:text-sky-500"
+            className="font-semibold dark:text-gray-100 text-gray-900 inline hover:cursor-pointer hover:text-sky-500 dark:hover:text-sky-500"
             onClick={handleClickAddy}
           >
             {nameToDisplay}
