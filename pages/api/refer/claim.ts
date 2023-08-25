@@ -65,6 +65,8 @@ export default async function handler(
       provider = defaultMaticProvider;
     }
     const network: Network = defaultNetworks.eth;
+    const sendAddress = newWallet.seedLoop.getAddresses(network)[0];
+
     const buildParams: CreateTransferTransactionParameters = {
       tokenAndNetwork: {
         baseNetworkDb: networkDb,
@@ -72,7 +74,7 @@ export default async function handler(
       amountCrypto: paymentLink.amountPerClaim.toString(),
       kryptikProvider: provider,
       toAddress: address,
-      fromAddress: newWallet.seedLoop.getAddresses(network)[0],
+      fromAddress: sendAddress,
       tokenPriceUsd: paymentLink.amountPerClaimUsd / paymentLink.amountPerClaim,
       errorHandler: function (
         message: string,
@@ -90,7 +92,7 @@ export default async function handler(
     }
     const result = await newTx.SignAndSend({
       kryptikWallet: newWallet,
-      sendAccount: address,
+      sendAccount: sendAddress,
       kryptikProvider: provider,
     });
     console.log(result);
