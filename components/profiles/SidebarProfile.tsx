@@ -5,9 +5,16 @@ import { ServiceState } from "../../src/services/types";
 import { useKryptikAuthContext } from "../KryptikAuthProvider";
 import AvatarSmall from "./AvatarSmall";
 import ProfileName from "./ProfileName";
+import { useEffect, useState } from "react";
 
 export function SidebarProfile() {
   const { authUser, kryptikService } = useKryptikAuthContext();
+  const [totalBalance, setTotalBalance] = useState(0);
+  useEffect(() => {
+    if (kryptikService.serviceState == ServiceState.started) {
+      setTotalBalance(kryptikService.kryptikBalances.getTotalBalance());
+    }
+  }, [kryptikService.kryptikBalances.getLastUpdateTimestamp()]);
   return (
     <div className="flex flex-row space-x-2">
       <div className="my-auto">
@@ -19,10 +26,13 @@ export function SidebarProfile() {
       </div>
 
       <div className="flex flex-col text-lg">
-        <ProfileName />
+        <div className="text-sm">
+          <ProfileName />
+        </div>
+
         {kryptikService.serviceState == ServiceState.started && (
           <p className="text-gray-500 dark:text-gray-400">
-            ${kryptikService.kryptikBalances.getTotalBalance().toFixed(2)}
+            ${totalBalance.toFixed(2)}
           </p>
         )}
       </div>
