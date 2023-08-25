@@ -74,6 +74,28 @@ export const defaultNetworkDb: NetworkDb = {
   zeroXSwapUrl: "https://api.0x.org/",
 };
 
+export const defaultBaseNetworkDb: NetworkDb = {
+  about:
+    "Base is built as an Ethereum L2, using Optimism rollup technology. Coinbase is a major contributor to the project.",
+  blockchainId: "eip155:8453",
+  blockExplorerURL: "https://basescan.org/",
+  chainId: 8453,
+  coingeckoId: "ethereum",
+  decimals: 18,
+  fullName: "Base",
+  hexColor: "#0066ff",
+  iconPath:
+    "https://assets.coingecko.com/asset_platforms/images/131/small/base.jpeg?1684806195",
+  isSupported: true,
+  networkFamilyName: "evm",
+  ticker: "eth(base)",
+  whitePaperPath: "https://docs.base.org/",
+  id: 8453,
+  isTestnet: false,
+  zeroXSwapUrl: "https://base.api.0x.org/",
+  provider: "https://rpc.ankr.com/base",
+};
+
 // refer to blockchain assets repo for up to date uniswap token data
 const defaultUniswapTokenData: TokenDb = {
   name: "Uniswap",

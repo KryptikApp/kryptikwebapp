@@ -8,3 +8,6 @@ export const ETH_NUM_BLOCKS_PER_HOUR: number = 298;
 
 // assuming 2s block time and around 40k blocks per day
 export const MATIC_NUM_BLOCKS_PER_HOUR: number = 1666;
+
+// assuming 2s block time and around 40k blocks per day
+export const BASE_NUM_BLOCKS_PER_HOUR: number = 1666;
