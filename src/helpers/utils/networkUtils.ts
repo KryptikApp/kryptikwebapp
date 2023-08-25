@@ -43,9 +43,18 @@ export const isNetworkOptimism = function (network: NetworkDb): boolean {
   return network.ticker.toLowerCase() == "eth(optimism)";
 };
 
+export function isNetworkBase(network: NetworkDb): boolean {
+  return network.ticker.toLowerCase() == "eth(base)";
+}
+
 // true if supports type 2 tx., false otherwise
 export const isEVMTxTypeTwo = function (network: NetworkDb): boolean {
-  if (isNetworkArbitrum(network) || isNetworkOptimism(network)) return false;
+  if (
+    isNetworkArbitrum(network) ||
+    isNetworkOptimism(network) ||
+    isNetworkBase(network)
+  )
+    return false;
   return true;
 };
 

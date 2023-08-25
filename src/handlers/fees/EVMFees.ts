@@ -110,7 +110,7 @@ export async function getTransactionFeeDataEVM(params: FeeDataEvmParameters) {
   let transactionFeeData: TransactionFeeData =
     evmFeeDataFromLimits(EVMGasLimitsParams);
   // optimism layer two solution has unique gas cost calculation
-  if (networkDb.ticker == "eth(optimism)") {
+  if (networkDb.ticker == "eth(optimism)" || networkDb.ticker == "eth(base)") {
     try {
       let optismismProvider = asL2Provider(ethNetworkProvider);
       let optimismTotalGasCost: number = (
