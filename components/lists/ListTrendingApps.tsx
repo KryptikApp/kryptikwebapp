@@ -138,8 +138,13 @@ function LoadingCard() {
 
 function getTagline(contract: IContract) {
   if (!contract.stats) return contract.appMetaData.description;
-  if (contract.appMetaData.name.includes("name service")) {
+  if (contract.appMetaData.name.toLowerCase().includes("name service")) {
     return `Registered ${contract.stats.totalTransactionsLastHour} name${
+      contract.stats.totalTransactionsLastHour != 1 ? "s" : ""
+    } in the last hour.`;
+  }
+  if (contract.appMetaData.name.toLowerCase().includes("swap")) {
+    return `Swapped ${contract.stats.totalTransactionsLastHour} time${
       contract.stats.totalTransactionsLastHour != 1 ? "s" : ""
     } in the last hour.`;
   }
