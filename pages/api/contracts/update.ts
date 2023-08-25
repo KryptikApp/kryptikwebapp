@@ -27,9 +27,9 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   try {
-    const apiKey = process.env.ETHERSCAN_API_KEY;
-    const apiKeyMatic = process.env.POLYGONSCAN_API_KEY;
-    const apiKeyBase = process.env.BASESCAN_API_KEY;
+    const apiKey = process.env.ETHERSCAN_API_KEY || "";
+    const apiKeyMatic = process.env.POLYGONSCAN_API_KEY || "";
+    const apiKeyBase = process.env.BASESCAN_API_KEY || "";
     // eth
     const ethProvider = defaultKryptikProvider.ethProvider;
     if (!ethProvider) throw new Error("No ethProvider found.");
@@ -46,31 +46,46 @@ export default async function handler(
     if (!baseProvider) throw new Error("No baseProvider found.");
     const currBlockBase = await baseProvider.getBlockNumber();
     const startBlockBase = currBlockBase - BASE_NUM_BLOCKS_PER_HOUR;
-
+    const offset = 1000;
     // TODO: matic provider and block ranges
     for (const contract of allContracts) {
       let endBlockToUse = 0;
       let startBlockToUse = 0;
       let apiUrl = "";
+      let page = 1;
+      let apiKeyToUse = "";
+      let baseDomain = "";
       if (contract.networkTicker.toLowerCase() === "eth") {
-        apiUrl = `${ETHERSCAN_API_URL}?module=account&action=txlist&address=${contract.address}&page=1&offset=300&startblock=${startBlock}&endblock=${currBlock}&sort=desc&apikey=${apiKey}`;
+        baseDomain = ETHERSCAN_API_URL;
+        apiKeyToUse = apiKey;
         endBlockToUse = currBlock;
         startBlockToUse = startBlock;
       } else if (contract.networkTicker.toLowerCase() === "matic") {
-        apiUrl = `${POLYGON_SCAN_API_URL}?module=account&action=txlist&address=${contract.address}&page=1&offset=300&startblock=${startBlockMatic}&endblock=${currBlockMatic}&sort=desc&apikey=${apiKeyMatic}`;
+        baseDomain = POLYGON_SCAN_API_URL;
+        apiKeyToUse = apiKeyMatic;
         endBlockToUse = currBlockMatic;
         startBlockToUse = startBlockMatic;
-      } else if (contract.networkTicker.toLowerCase() === "base") {
-        apiUrl = `${BASE_SCAN_API_URL}?module=account&action=txlist&address=${contract.address}&page=1&offset=300&startblock=${startBlockBase}&endblock=${currBlockBase}&sort=desc&apikey=${apiKeyBase}`;
+      } else if (contract.networkTicker.toLowerCase() === "eth(base)") {
+        baseDomain = BASE_SCAN_API_URL;
+        apiKeyToUse = apiKeyBase;
         endBlockToUse = currBlockBase;
         startBlockToUse = startBlockBase;
       } else {
         throw new Error("Invalid network ticker.");
       }
+      apiUrl = `${baseDomain}?module=account&action=txlist&address=${contract.address}&page=${page}&offset=${offset}&startblock=${startBlockToUse}&endblock=${endBlockToUse}&sort=desc&apikey=${apiKeyToUse}`;
       const response = await KryptikFetch(apiUrl, {});
-      console.log(contract.networkTicker);
-      console.log("update fetch response:", response);
-      const data = await response.data.result;
+      let data = response.data.result;
+      // request more data if we have more than 1000 txs
+      // TODO: add support for more than two pages
+      while (data.length >= offset * page) {
+        console.log("Requesting more data...");
+        page++;
+        apiUrl = `${baseDomain}?module=account&action=txlist&address=${contract.address}&page=${page}&offset=${offset}&startblock=${startBlockToUse}&endblock=${endBlockToUse}&sort=desc&apikey=${apiKeyToUse}`;
+        const response = await KryptikFetch(apiUrl, {});
+        const moreData = response.data.result;
+        data = data.concat(moreData);
+      }
       // check if data is string and includes error
       if (typeof data === "string" && data.includes("Error")) {
         throw new Error(data);
