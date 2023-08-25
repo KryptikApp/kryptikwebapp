@@ -181,7 +181,8 @@ export default function Page({ notFound, paymentLink }: Props) {
         )}
         {status == PaymentLinkStatus.failure && (
           <div className="mt-4">
-            <h1 className="font-semibold text-center text-2xl">{failureMsg}</h1>
+            <h1 className="text-left text-5xl text-red-500">Claim Failed</h1>
+            <h1 className="text-center text-2xl">{failureMsg}</h1>
           </div>
         )}
       </div>
