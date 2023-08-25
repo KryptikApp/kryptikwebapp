@@ -56,6 +56,23 @@ model AppContract{
   NetworkDb  NetworkDb @relation(fields: [networkId], references: [id], onDelete: Cascade)
 }
 
+model PaymentLink{
+  id        Int     @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  done      Boolean @default(false)
+  backgroundImagePath String @default("")
+  tokenImagePath String @default("")
+  amountPerClaim Float
+  amountPerClaimUsd Float @default(0)
+  networkTicker String
+  title String
+  description String @default("")
+  maxClaims Int
+  claimCount Int @default(0)
+  blockList String[]
+}
+
 model Authenticator {
   // SQL: Encode to base64url then store as `TEXT`. Index this column
   credentialID  String @id @unique

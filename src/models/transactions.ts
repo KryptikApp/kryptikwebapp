@@ -156,6 +156,7 @@ export class KryptikTransaction {
     switch (currProvider.network.networkFamily) {
       case NetworkFamily.EVM: {
         if (!this.txData.evmTx) {
+          console.warn("No EVM transaction data provided.");
           return null;
         }
         txSignParams.evmParams = {

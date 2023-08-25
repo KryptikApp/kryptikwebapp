@@ -4,6 +4,7 @@ import {
   AuthenticatorChallenge,
   NetworkDb,
   OneTimeToken,
+  PaymentLink,
   Price,
   PrismaClient,
   SyncSession,
@@ -481,6 +482,10 @@ export async function getUserFromRequest(
   return user;
 }
 
+export async function getNetworkDbByTicker(ticker: string) {
+  return prisma.networkDb.findUnique({ where: { ticker: ticker } });
+}
+
 export async function AddAppContractsToDb(contracts: IContract[]) {
   for (const contract of contracts) {
     try {
@@ -568,5 +573,62 @@ export async function updateAllAppContracts(
       // if fail to upsert one price.. keep trying with rest
       continue;
     }
+  }
+}
+
+export async function getPaymentLinkById(id: number) {
+  return prisma.paymentLink.findUnique({
+    where: {
+      id: id,
+    },
+  });
+}
+
+export async function getAllPaymentLinks(): Promise<PaymentLink[]> {
+  return prisma.paymentLink.findMany({});
+}
+
+export async function claimPaymentLink(id: number, address: string) {
+  try {
+    const paymentLink = await getPaymentLinkById(id);
+    if (!paymentLink) {
+      console.log("Payment link not found");
+      return {
+        success: false,
+        paymentLink: null,
+      };
+    }
+
+    if (paymentLink.blockList.includes(address.toLowerCase())) {
+      console.log("Address is blocked");
+      return {
+        success: false,
+        paymentLink: null,
+      };
+    }
+
+    const newClaimCount = paymentLink.claimCount + 1;
+    const newPaymentLink = {
+      ...paymentLink,
+      claimCount: paymentLink.claimCount + 1,
+      blockList: [...paymentLink.blockList, address.toLowerCase()],
+      done: newClaimCount == paymentLink.maxClaims,
+    };
+    await prisma.paymentLink.update({
+      where: {
+        id: id,
+      },
+      data: newPaymentLink,
+    });
+    return {
+      paymentLink: paymentLink,
+      success: true,
+    };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      paymentLink: null,
+    };
   }
 }
