@@ -68,6 +68,14 @@ export const LENS_META = {
   tags: ["social"],
 };
 
+export const FRIEND_TECH_META = {
+  name: "Friend Tech",
+  description: "Invest in your friends",
+  url: "https://friend.tech/",
+  icon: "/apps/friendTech.png",
+  tags: ["social"],
+};
+
 export const topApps: Web3App[] = [
   UNISWAP_META,
   POOLTOGETHER_META,
