@@ -1,9 +1,6 @@
 import type { NextPage } from "next";
 
 import SearchNetwork from "../components/search/searchNetwork";
-import ListApps from "../components/lists/ListApps";
-import { topApps } from "../src/explore/apps/topApps";
-import { topProfiles } from "../src/explore/profiles/topProfiles";
 import ListProfiles from "../components/lists/ListProfiles";
 import ListTrendingApps from "../components/lists/ListTrendingApps";
 

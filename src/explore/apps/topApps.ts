@@ -60,6 +60,14 @@ export const LIDO_META = {
   tags: ["staking"],
 };
 
+export const LENS_META = {
+  name: "Lens",
+  description: "Decentralized social network",
+  url: "https://lens.xyz/",
+  icon: "/apps/lens.png",
+  tags: ["social"],
+};
+
 export const topApps: Web3App[] = [
   UNISWAP_META,
   POOLTOGETHER_META,

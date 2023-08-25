@@ -27,6 +27,28 @@ export type NetworkDbTemp = {
   tokens: TokenDb[];
 };
 
+export const defaultMaticNetworkDb: NetworkDb = {
+  about:
+    "Polygon is a secondary scaling solution for the Ethereum blockchain. MATIC is an Ethereum token that powers the Polygon network.",
+  blockchainId: "eip155:137",
+  blockExplorerURL: "https://polygonscan.com/",
+  chainId: 966,
+  coingeckoId: "matic-network",
+  decimals: 18,
+  fullName: "Polygon",
+  hexColor: "#A020F0",
+  iconPath:
+    "https://firebasestorage.googleapis.com/v0/b/kryptikapp-50542.appspot.com/o/matic.png?alt=media&token=6e042b07-2476-442b-b207-c1562f64bf5d",
+  isSupported: true,
+  networkFamilyName: "evm",
+  ticker: "matic",
+  whitePaperPath: "https://polygon.technology/lightpaper-polygon.pdf",
+  zeroXSwapUrl: "https://polygon.api.0x.org/",
+  id: 966,
+  isTestnet: false,
+  provider: "https://rpc-mainnet.maticvigil.com/",
+};
+
 export const defaultNetworkDb: NetworkDb = {
   // TODO: ENSURE PLACEHOLDER ID ISN'T PROBLEMATIC
   id: 3,

@@ -1,4 +1,9 @@
-import { ENS_META, LIDO_META, UNISWAP_META } from "../explore/apps/topApps";
+import {
+  ENS_META,
+  LENS_META,
+  LIDO_META,
+  UNISWAP_META,
+} from "../explore/apps/topApps";
 import { IContract } from "./types";
 
 export const CONTRACT_LIST: IContract[] = [
@@ -19,5 +24,11 @@ export const CONTRACT_LIST: IContract[] = [
     address: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
     networkTicker: "eth",
     appMetaData: LIDO_META,
+  },
+  // lens contract
+  {
+    address: "0xDb46d1Dc155634FbC732f92E853b10B288AD5a1d",
+    networkTicker: "matic",
+    appMetaData: LENS_META,
   },
 ];

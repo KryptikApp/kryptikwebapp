@@ -6,7 +6,7 @@ import { Near } from "near-api-js";
 import { NearConfig } from "near-api-js/lib/near";
 import { getNetworkChainId } from "../../helpers/assets";
 import { networkFromNetworkDb } from "../../helpers/utils/networkUtils";
-import { defaultNetworkDb, NetworkDb } from "./network";
+import { defaultMaticNetworkDb, defaultNetworkDb, NetworkDb } from "./network";
 import { Algodv2 } from "algosdk";
 import AlgodClient from "algosdk/dist/types/client/v2/algod/algod";
 
@@ -63,4 +63,9 @@ export class KryptikProvider {
 export const defaultKryptikProvider = new KryptikProvider(
   defaultNetworkDb.provider,
   defaultNetworkDb
+);
+
+export const defaultMaticProvider = new KryptikProvider(
+  defaultMaticNetworkDb.provider,
+  defaultMaticNetworkDb
 );
