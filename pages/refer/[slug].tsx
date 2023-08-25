@@ -106,7 +106,7 @@ export default function Page({ notFound, paymentLink }: Props) {
             <div className="absolute top-12 right-3">
               <div className="px-2 py-1 bg-gray-500/10 rounded-md float-right">
                 {paymentLink.claimCount}/{paymentLink.maxClaims}{" "}
-                <span className="text-sm text-gray-400 dark:text-gray-700">
+                <span className="text-sm text-gray-400 dark:text-gray-500">
                   claimed
                 </span>
               </div>
