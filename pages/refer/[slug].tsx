@@ -172,7 +172,7 @@ export default function Page({ notFound, paymentLink }: Props) {
                 You claimed ${paymentLink.amountPerClaimUsd}
               </p>
               <p className="text-2xl mt-3 mb-6 text-gray-900 dark:text-gray-100">
-                Your tokens are on the way. this usually takes around 30
+                Your tokens are on the way. This usually takes around 30
                 seconds.
               </p>
               <button
