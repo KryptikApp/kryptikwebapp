@@ -33,5 +33,6 @@ export function convertPaymentLinkType(toConvert: any): IPaymentLink {
     description: toConvert.description,
     backgroundImagePath: toConvert.backgroundImagePath,
     tokenImagePath: toConvert.tokenImagePath,
+    name: toConvert.name,
   };
 }

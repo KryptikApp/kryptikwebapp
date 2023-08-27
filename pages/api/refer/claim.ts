@@ -26,7 +26,7 @@ export default async function handler(
 ) {
   const body = req.body;
 
-  const claimCode: number = body.claimCode;
+  const claimCode: string = body.claimCode;
   let address: string = body.address;
   if (!claimCode || !address) {
     res.status(400).json({ msg: "Invalid request" });
@@ -63,6 +63,9 @@ export default async function handler(
     }
     if (networkDb.ticker == "matic") {
       provider = defaultMaticProvider;
+    }
+    if (networkDb.ticker == "eth") {
+      provider = defaultKryptikProvider;
     }
     const network: Network = defaultNetworks.eth;
     const sendAddress = newWallet.seedLoop.getAddresses(network)[0];

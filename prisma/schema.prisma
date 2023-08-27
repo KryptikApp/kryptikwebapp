@@ -58,6 +58,7 @@ model AppContract{
 
 model PaymentLink{
   id        Int     @id @default(autoincrement())
+  name      String @default(uuid()) @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   done      Boolean @default(false)
