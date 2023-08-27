@@ -15,6 +15,7 @@ export type IPaymentLink = {
   description: string;
   backgroundImagePath: string;
   tokenImagePath: string;
+  name: string;
 };
 
 export function convertPaymentLinkType(toConvert: any): IPaymentLink {
