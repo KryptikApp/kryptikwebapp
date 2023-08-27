@@ -1,7 +1,11 @@
 import { useRouter } from "next/router";
 import { PaymentLink } from "@prisma/client";
 import Image from "next/image";
-import { getAllPaymentLinks, getPaymentLinkById } from "../../prisma/script";
+import {
+  getAllPaymentLinks,
+  getPaymentLinkById,
+  getPaymentLinkByName,
+} from "../../prisma/script";
 import {
   IPaymentLink,
   convertPaymentLinkType,
@@ -53,7 +57,7 @@ export default function Page({ notFound, paymentLink }: Props) {
         claimCode: paymentLink?.id,
         address: kryptikWallet.seedLoop.getAddresses(network)[0],
       };
-      console.log("posting cliam request");
+      console.log("posting claim request");
       const result = await KryptikFetch(`/api/refer/claim`, {
         method: "POST",
         body: JSON.stringify(body),
@@ -64,7 +68,7 @@ export default function Page({ notFound, paymentLink }: Props) {
         setStatus(PaymentLinkStatus.claimed);
         return;
       } else {
-        setFailureMsg(result.data.msg);
+        setFailureMsg("Unable to claim payment. All tokens have been claimed.");
         throw new Error(result.data);
       }
       setLoading(false);
@@ -108,6 +112,13 @@ export default function Page({ notFound, paymentLink }: Props) {
                 className="object-cover w-12 h-12 rounded-md mx-2 my-auto"
               />
             )}
+            {/* {paymentLink.done && (
+              <div className="absolute top-0 left-0 w-full h-full rounded-md bg-purple-400/90 z-10">
+                <p className="text-center mt-12 font-semibold text-xl">
+                  This payment has already been claimed 👋🏼.
+                </p>
+              </div>
+            )} */}
             <div className="absolute top-12 right-3">
               <div className="px-2 py-1 bg-gray-500/10 rounded-md float-right">
                 {paymentLink.claimCount}/{paymentLink.maxClaims}{" "}
@@ -129,7 +140,7 @@ export default function Page({ notFound, paymentLink }: Props) {
                 src={paymentLink.tokenImagePath}
                 width={20}
                 height={20}
-                className="object-cover rounded-full mx"
+                className="object-cover w-8 h-8 rounded-full"
               />
             </div>
             {!authUser && (
@@ -205,16 +216,7 @@ type Params = {
 
 export async function getStaticProps({ params }: Params) {
   const { slug } = { ...params };
-  const body = {
-    id: slug,
-  };
-  const idAsNumber = parseInt(slug);
-  if (isNaN(idAsNumber)) {
-    return {
-      notFound: true,
-    };
-  }
-  const paymentLink: PaymentLink | null = await getPaymentLinkById(idAsNumber);
+  const paymentLink: PaymentLink | null = await getPaymentLinkByName(slug);
 
   if (!paymentLink) {
     return {
@@ -234,7 +236,7 @@ export async function getStaticPaths() {
   const paths = paymentLinks.map((paymentLink) => {
     return {
       params: {
-        slug: paymentLink.id.toString(),
+        slug: paymentLink.name,
       },
     };
   });

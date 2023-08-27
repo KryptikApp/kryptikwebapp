@@ -584,13 +584,21 @@ export async function getPaymentLinkById(id: number) {
   });
 }
 
+export async function getPaymentLinkByName(name: string) {
+  return prisma.paymentLink.findUnique({
+    where: {
+      name: name,
+    },
+  });
+}
+
 export async function getAllPaymentLinks(): Promise<PaymentLink[]> {
   return prisma.paymentLink.findMany({});
 }
 
-export async function claimPaymentLink(id: number, address: string) {
+export async function claimPaymentLink(name: string, address: string) {
   try {
-    const paymentLink = await getPaymentLinkById(id);
+    const paymentLink = await getPaymentLinkByName(name);
     if (!paymentLink) {
       console.log("Payment link not found");
       return {
@@ -607,6 +615,14 @@ export async function claimPaymentLink(id: number, address: string) {
       };
     }
 
+    if (paymentLink.done) {
+      console.log("Claiming is done.");
+      return {
+        success: false,
+        paymentLink: null,
+      };
+    }
+
     const newClaimCount = paymentLink.claimCount + 1;
     const newPaymentLink = {
       ...paymentLink,
@@ -616,7 +632,7 @@ export async function claimPaymentLink(id: number, address: string) {
     };
     await prisma.paymentLink.update({
       where: {
-        id: id,
+        name: name,
       },
       data: newPaymentLink,
     });

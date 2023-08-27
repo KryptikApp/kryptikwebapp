@@ -1,6 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import { createShare, getPaymentLinkById } from "../../../prisma/script";
+import {
+  createShare,
+  getPaymentLinkById,
+  getPaymentLinkByName,
+} from "../../../prisma/script";
 import { PaymentLink } from "@prisma/client";
 
 type Data = {
@@ -13,18 +17,13 @@ export default async function handler(
   res: NextApiResponse<Data>
 ) {
   const body = req.body;
-  const id: string = body.id;
-  if (!id) {
+  const name: string = body.name;
+  if (!name) {
     res.status(400).json({ msg: "Invalid request" });
     return;
   }
   try {
-    const idAsNumber = parseInt(id);
-    if (isNaN(idAsNumber)) {
-      res.status(400).json({ msg: "Invalid request" });
-      return;
-    }
-    const newPaymentLink = await getPaymentLinkById(idAsNumber);
+    const newPaymentLink = await getPaymentLinkByName(name);
     if (!newPaymentLink) {
       res
         .status(400)
@@ -33,7 +32,7 @@ export default async function handler(
     }
     res
       .status(200)
-      .json({ msg: "Payment link created", paymentLink: newPaymentLink });
+      .json({ msg: "Payment link retrieved.", paymentLink: newPaymentLink });
   } catch (e) {
     console.error(e);
     res.status(500).json({ msg: "Unable to get payment link." });
