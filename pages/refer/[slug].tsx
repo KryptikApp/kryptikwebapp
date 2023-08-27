@@ -54,7 +54,7 @@ export default function Page({ notFound, paymentLink }: Props) {
       // TODO: remove eth assumption
       const network = defaultNetworks.eth;
       const body = {
-        claimCode: paymentLink?.id,
+        claimCode: paymentLink?.name,
         address: kryptikWallet.seedLoop.getAddresses(network)[0],
       };
       console.log("posting claim request");
