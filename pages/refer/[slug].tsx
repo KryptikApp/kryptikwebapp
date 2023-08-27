@@ -140,7 +140,7 @@ export default function Page({ notFound, paymentLink }: Props) {
                 src={paymentLink.tokenImagePath}
                 width={20}
                 height={20}
-                className="object-cover"
+                className="object-cover w-8 h-8 rounded-full"
               />
             </div>
             {!authUser && (
