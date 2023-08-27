@@ -68,7 +68,7 @@ export default function Page({ notFound, paymentLink }: Props) {
         setStatus(PaymentLinkStatus.claimed);
         return;
       } else {
-        setFailureMsg(result.data.msg);
+        setFailureMsg("Unable to claim payment. All tokens have been claimed.");
         throw new Error(result.data);
       }
       setLoading(false);
@@ -112,13 +112,13 @@ export default function Page({ notFound, paymentLink }: Props) {
                 className="object-cover w-12 h-12 rounded-md mx-2 my-auto"
               />
             )}
-            {paymentLink.done && (
+            {/* {paymentLink.done && (
               <div className="absolute top-0 left-0 w-full h-full rounded-md bg-purple-400/90 z-10">
                 <p className="text-center mt-12 font-semibold text-xl">
                   This payment has already been claimed 👋🏼.
                 </p>
               </div>
-            )}
+            )} */}
             <div className="absolute top-12 right-3">
               <div className="px-2 py-1 bg-gray-500/10 rounded-md float-right">
                 {paymentLink.claimCount}/{paymentLink.maxClaims}{" "}
@@ -140,7 +140,7 @@ export default function Page({ notFound, paymentLink }: Props) {
                 src={paymentLink.tokenImagePath}
                 width={20}
                 height={20}
-                className="object-cover rounded-full mx"
+                className="object-cover"
               />
             </div>
             {!authUser && (
