@@ -17,6 +17,7 @@ import { useState } from "react";
 import LoadingSpinner from "../../components/loadingSpinner";
 import { KryptikFetch } from "../../src/kryptikFetch";
 import { TransactionPublishedData } from "../../src/services/models/transaction";
+import Link from "next/link";
 
 type Props = {
   paymentLink?: IPaymentLink;
@@ -102,70 +103,97 @@ export default function Page({ notFound, paymentLink }: Props) {
         {notFound && (
           <p className="text-red-500">This payment link is invalid.</p>
         )}
+
         {paymentLink && status == PaymentLinkStatus.unclaimed && (
-          <div className="mt-4">
-            {authUser && (
-              <img
-                src={paymentLink.backgroundImagePath}
-                width={20}
-                height={20}
-                className="object-cover w-12 h-12 rounded-md mx-2 my-auto"
-              />
-            )}
-            {/* {paymentLink.done && (
-              <div className="absolute top-0 left-0 w-full h-full rounded-md bg-purple-400/90 z-10">
-                <p className="text-center mt-12 font-semibold text-xl">
-                  This payment has already been claimed 👋🏼.
+          <div>
+            <div className="mt-4">
+              {authUser && (
+                <img
+                  src={paymentLink.backgroundImagePath}
+                  width={20}
+                  height={20}
+                  className="object-cover w-12 h-12 rounded-md mx-2 my-auto"
+                />
+              )}
+              <div className="absolute top-12 right-3">
+                <div className="px-2 py-1 bg-gray-500/10 rounded-md float-right">
+                  {paymentLink.claimCount}/{paymentLink.maxClaims}{" "}
+                  <span className="text-sm text-gray-400 dark:text-gray-500">
+                    claimed
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-row">
+                <h1 className="font-semibold text-left text-5xl">
+                  {paymentLink?.title}
+                </h1>
+              </div>
+              <div className="flex flex-row space-x-2 my-2 text-xl">
+                <p className="font-semibold text-green-400">
+                  Claim ${paymentLink.amountPerClaimUsd}
                 </p>
+                <img
+                  src={paymentLink.tokenImagePath}
+                  width={20}
+                  height={20}
+                  className="object-cover w-8 h-8 rounded-full"
+                />
               </div>
-            )} */}
-            <div className="absolute top-12 right-3">
-              <div className="px-2 py-1 bg-gray-500/10 rounded-md float-right">
-                {paymentLink.claimCount}/{paymentLink.maxClaims}{" "}
-                <span className="text-sm text-gray-400 dark:text-gray-500">
-                  claimed
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-row">
-              <h1 className="font-semibold text-left text-5xl">
-                {paymentLink?.title}
-              </h1>
-            </div>
-            <div className="flex flex-row space-x-2 my-2 text-xl">
-              <p className="font-semibold text-green-400">
-                Claim ${paymentLink.amountPerClaimUsd}
-              </p>
-              <img
-                src={paymentLink.tokenImagePath}
-                width={20}
-                height={20}
-                className="object-cover w-8 h-8 rounded-full"
-              />
-            </div>
-            {!authUser && (
-              <p className="text-gray-400">
-                You may be asked to login, before claiming your tokens.
-              </p>
-            )}
-            {/* claim button */}
-            {paymentLink.description != "" && (
-              <p className="text-2xl mt-3 mb-6 text-gray-900 dark:text-gray-100">
-                {paymentLink.description}
-              </p>
-            )}
-            <button
-              onClick={() => handleClaim()}
-              className="bg-transparent my-2 w-full hover:bg-green-400 text-green-400 text-xl font-semibold hover:cursor-pointer hover:text-white py-3 px-8 border border-green-400 hover:border-transparent rounded-md animate-colors duration-300 relative"
-            >
-              Claim
-              {loading && (
-                <div className="absolute top-2 right-4">
-                  <LoadingSpinner />
+              {!authUser && (
+                <p className="text-gray-400">
+                  You may be asked to login, before claiming your tokens.
+                </p>
+              )}
+              {/* claim button */}
+              {paymentLink.description != "" && (
+                <p className="text-2xl mt-3 mb-6 text-gray-900 dark:text-gray-100">
+                  {paymentLink.description}
+                </p>
+              )}
+              {!paymentLink.done && (
+                <button
+                  onClick={() => handleClaim()}
+                  className="bg-transparent my-2 w-full hover:bg-green-400 text-green-400 text-xl font-semibold hover:cursor-pointer hover:text-white py-3 px-8 border border-green-400 hover:border-transparent rounded-md animate-colors duration-300 relative"
+                >
+                  Claim
+                  {loading && (
+                    <div className="absolute top-2 right-4">
+                      <LoadingSpinner />
+                    </div>
+                  )}
+                </button>
+              )}
+              {paymentLink.done && (
+                <div className="">
+                  <button
+                    onClick={() =>
+                      toast("This payment has already been claimed.", {
+                        position: "bottom-center",
+                        icon: "👻",
+                        style: {
+                          borderColor: "yellow",
+                        },
+                      })
+                    }
+                    className="bg-gray-500/10 my-2 w-full hover:brightness-95 text-gray-400 text-xl font-semibold hover:cursor-pointer py-3 px-8 border border-gray-400 hover:border-transparent rounded-md animate-colors duration-300"
+                  >
+                    Claim
+                  </button>
+                  <p className="text-gray-500 text-center max-w-md mx-auto">
+                    This payment has already been claimed by{" "}
+                    {paymentLink.maxClaims} people.
+                  </p>
+                  <div className="mx-auto max-w-md text-center">
+                    <Link
+                      href="/explore"
+                      className="hover:cursor-pointer text-green-400 font-semibold"
+                    >
+                      Explore Instead
+                    </Link>
+                  </div>
                 </div>
               )}
-            </button>
-            <button />
+            </div>
           </div>
         )}
         {loading && (
