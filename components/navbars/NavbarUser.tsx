@@ -84,8 +84,8 @@ export default function NavbarUser() {
           <span className="bg-gray-500 dark:bg-gray-400"></span>
         </button>
         <div className="flex-grow">
-          <div className="flex flex-row space-x-2 float-right">
-            <ProfileName />
+          <div className="flex flex-row space-x-2 float-right text-sm">
+            <ProfileName isSmallText={true} />
             <AvatarSmall
               photoPath={getUserPhotoPath(authUser ? authUser : defaultUser)}
             />

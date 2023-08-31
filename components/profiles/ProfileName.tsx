@@ -18,10 +18,11 @@ import { isClientUserValid } from "../../src/helpers/auth";
 
 interface Props {
   account?: string;
+  isSmallText?: boolean;
 }
 
 const ProfileName: NextPage<Props> = (props) => {
-  const accountPassedIn = props.account;
+  const { isSmallText, account } = { ...props };
   const {
     kryptikWallet,
     kryptikService,
@@ -40,12 +41,12 @@ const ProfileName: NextPage<Props> = (props) => {
     setLoadingResolvedAccount(true);
     let provider: KryptikProvider =
       await kryptikService.getKryptikProviderForNetworkDb(defaultNetworkDb);
-    console.log(`account name with: ${accountPassedIn}`);
+    console.log(`account name with: ${account}`);
     // note default networkdb should be eth
     let newResolvedAccount: IResolvedAccount | null = null;
-    if (accountPassedIn) {
+    if (account) {
       let resolverParams: IAccountResolverParams = {
-        account: accountPassedIn,
+        account: account,
         kryptikProvider: provider,
         networkDB: defaultNetworkDb,
       };
@@ -63,7 +64,7 @@ const ProfileName: NextPage<Props> = (props) => {
     //   authUser &&
     //   authUser.name &&
     //   !newResolvedAccount.names &&
-    //   !accountPassedIn
+    //   !account
     // ) {
     //   setNameToDisplay(authUser.name);
     // } else {
@@ -107,21 +108,21 @@ const ProfileName: NextPage<Props> = (props) => {
   }, [loadingAuthUser, authUser]);
   return (
     <div>
-      <div>
-        {/* uncomment below for skeleton loader in name position */}
+      {/* uncomment below for skeleton loader in name position */}
 
-        {!loadingResolvedAccount && (
-          <h1
-            className="font-semibold dark:text-gray-100 text-gray-900 inline hover:cursor-pointer hover:text-sky-500 dark:hover:text-sky-500"
-            onClick={handleClickAddy}
-          >
-            {nameToDisplay}
-          </h1>
-        )}
-        {loadingResolvedAccount && (
-          <div className="w-20 h-4 bg-gray-400 animate-pulse rounded mx-auto"></div>
-        )}
-      </div>
+      {!loadingResolvedAccount && (
+        <h1
+          className={`font-semibold dark:text-gray-100 text-gray-900 inline hover:cursor-pointer hover:text-sky-500 dark:hover:text-sky-500 ${
+            isSmallText && "text-lg"
+          }`}
+          onClick={handleClickAddy}
+        >
+          {nameToDisplay}
+        </h1>
+      )}
+      {loadingResolvedAccount && (
+        <div className="w-20 h-4 bg-gray-400 animate-pulse rounded mx-auto"></div>
+      )}
     </div>
   );
 };
