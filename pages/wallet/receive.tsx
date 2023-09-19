@@ -15,7 +15,6 @@ import { useRouter } from "next/router";
 import { ServiceState } from "../../src/services/types";
 import { WalletStatus } from "../../src/models/KryptikWallet";
 import Link from "next/link";
-import Script from "next/script";
 
 const Recieve: NextPage = () => {
   const {
@@ -142,11 +141,7 @@ const Recieve: NextPage = () => {
 
   return (
     <div>
-      <div className="h-[5rem]">
-        {/* padding div for space between top and main elements */}
-      </div>
-
-      <div className="max-w-md mx-auto content-center dark:text-white">
+      <div className="max-w-md mx-auto dark:text-white">
         <div className="rounded-lg border border-sky-300 hover:border-sky-400 py-10 ">
           <h1 className="text-center text-3xl font-bold lg:mb-2 dark:text-white">
             Recieve
@@ -242,6 +237,9 @@ const Recieve: NextPage = () => {
             </div>
           )}
         </div>
+      </div>
+      <div className="h-[4vh]">
+        {/* padding div for space between top and main elements */}
       </div>
     </div>
   );
