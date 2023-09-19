@@ -26,8 +26,8 @@ export function SidebarProfile() {
       </div>
 
       <div className="flex flex-col text-lg">
-        <div className="text-sm">
-          <ProfileName />
+        <div className="">
+          <ProfileName isSmallText={true} />
         </div>
 
         {kryptikService.serviceState == ServiceState.started && (
