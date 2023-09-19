@@ -3,10 +3,19 @@ import type { NextPage } from "next";
 import SearchNetwork from "../components/search/searchNetwork";
 import ListProfiles from "../components/lists/ListProfiles";
 import ListTrendingApps from "../components/lists/ListTrendingApps";
+import Head from "next/head";
 
 const Explore: NextPage = () => {
   return (
     <div className="">
+      {/* add page metadata */}
+      <Head>
+        <title>Explore | Kryptik</title>
+        <meta
+          name="description"
+          content="Explore trending profiles and apps across the Web3 ecosystem."
+        />
+      </Head>
       <div className="max-w-3xl mx-auto text-left border-b border-green-400/30 mb-8 py-2 p-4">
         <h1 className="text-left text-3xl font-semibold">Explore</h1>
         <p className="text-xl text-gray-600 dark:text-gray-300">
